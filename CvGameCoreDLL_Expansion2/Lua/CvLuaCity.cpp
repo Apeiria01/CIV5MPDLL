@@ -608,7 +608,10 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 #if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
 	Method(GetGreatPersonPointFromReligion);
 #endif
-
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	Method(IsEnableCrops);
+	Method(IsEnableArmee);
+#endif
 	Method(GetFocusType);
 	Method(SetFocusType);
 
@@ -3560,7 +3563,18 @@ int CvLuaCity::lChangeRazingTurns(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvCity::ChangeRazingTurns);
 }
-
+//int IsEnableCrops();
+int CvLuaCity::lIsEnableCrops(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvCity::IsEnableCrops);
+}
+//------------------------------------------------------------------------------
+//int IsEnableArmee();
+int CvLuaCity::lIsEnableArmee(lua_State* L)
+{
+	return BasicLuaMethod(L, &CvCity::IsEnableArmee);
+}
+//------------------------------------------------------------------------------
 //int IsOccupied();
 int CvLuaCity::lIsOccupied(lua_State* L)
 {

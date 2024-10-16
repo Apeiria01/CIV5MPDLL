@@ -676,7 +676,10 @@ public:
 #endif
 
 	bool CanAirlift() const;
-
+#if defined(MOD_NUCLEAR_WINTER_FOR_SP)
+	bool IsEnableCrops() const;
+	bool IsEnableArmee() const;
+#endif
 	int GetMaxAirUnits() const;
 	void ChangeMaxAirUnits(int iChange);
 
@@ -1552,6 +1555,10 @@ protected:
 	FAutoVariable<bool, CvCity> m_bOccupied;
 	FAutoVariable<bool, CvCity> m_bPuppet;
 	bool m_bIgnoreCityForHappiness;
+#if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
+	bool m_bEnableCrops;
+	bool m_bEnableArmee;
+#endif
 	FAutoVariable<bool, CvCity> m_bEverCapital;
 	FAutoVariable<bool, CvCity> m_bIndustrialRouteToCapital;
 	FAutoVariable<bool, CvCity> m_bFeatureSurrounded;
