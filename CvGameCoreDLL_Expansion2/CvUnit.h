@@ -806,6 +806,8 @@ public:
 	int GetRangeSuppressModifier() const;
 	void ChangeRangeSuppressModifier(int iValue);
 	int GetRangeSuppressModifier(const CvUnit* pOtherUnit) const;
+	int GetPromotionMaintenanceCost() const;
+	void ChangePromotionMaintenanceCost(int iValue);
 	int GetInterceptionCombatModifier() const;
 	void ChangeInterceptionCombatModifier(int iValue);
 	int GetInterceptionDefenseDamageModifier() const;
@@ -2206,6 +2208,7 @@ protected:
 	FAutoVariable<int, CvUnit> m_iAdjacentModifier;
 	FAutoVariable<int, CvUnit> m_iRangedAttackModifier;
 	FAutoVariable<int, CvUnit> m_iRangeSuppressModifier;
+	FAutoVariable<int, CvUnit> m_iPromotionMaintenanceCost;
 	FAutoVariable<int, CvUnit> m_iInterceptionCombatModifier;
 	FAutoVariable<int, CvUnit> m_iInterceptionDefenseDamageModifier;
 	FAutoVariable<int, CvUnit> m_iAirSweepCombatModifier;
