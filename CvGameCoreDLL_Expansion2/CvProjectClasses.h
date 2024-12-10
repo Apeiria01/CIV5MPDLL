@@ -62,6 +62,7 @@ public:
 	int* GetYieldChangeArray() const;
 	int GetYieldModifier(int i) const;;
 	int* GetYieldModifierArray() const;
+	int* GetPolicyNeededArray() const;
 
 protected:
 	int m_iVictoryPrereq;
@@ -95,6 +96,7 @@ protected:
 
 	int* m_piYieldChange;
 	int* m_piYieldModifier;
+	int* m_piPolicyNeeded;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

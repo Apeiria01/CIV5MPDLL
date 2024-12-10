@@ -274,3 +274,8 @@ ALTER TABLE GameSpeeds ADD FreePromotion TEXT DEFAULT NULL REFERENCES UnitPromot
 ALTER TABLE UnitPromotions ADD COLUMN 'RangeSuppressModifier' INTEGER DEFAULT 0;
 ALTER TABLE Projects ADD COLUMN 'FreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
 ALTER TABLE UnitPromotions ADD COLUMN 'MaintenanceCost' INTEGER DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS Project_PolicyNeeded (
+    `ProjectType` TEXT DEFAULT '' references Projects(Type),
+    `PolicyType` TEXT DEFAULT '' references Policies(Type)
+);

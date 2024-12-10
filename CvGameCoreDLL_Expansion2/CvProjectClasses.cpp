@@ -21,7 +21,8 @@ CvProjectEntry::CvProjectEntry(void):
 	m_piFlavorValue(NULL),
 
 	m_piYieldChange(NULL),
-	m_piYieldModifier(NULL)
+	m_piYieldModifier(NULL),
+	m_piPolicyNeeded(NULL)
 {
 }
 //------------------------------------------------------------------------------
@@ -34,6 +35,7 @@ CvProjectEntry::~CvProjectEntry(void)
 	SAFE_DELETE_ARRAY(m_piFlavorValue);
 	SAFE_DELETE_ARRAY(m_piYieldChange);
 	SAFE_DELETE_ARRAY(m_piYieldModifier);
+	SAFE_DELETE_ARRAY(m_piPolicyNeeded);
 }
 //------------------------------------------------------------------------------
 bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
@@ -78,7 +80,7 @@ bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility
 	//Arrays
 	const char* szProjectType = GetType();
 	kUtility.PopulateArrayByValue(m_piResourceQuantityRequirements, "Resources", "Project_ResourceQuantityRequirements", "ResourceType", "ProjectType", szProjectType, "Quantity");
-
+	kUtility.PopulateArrayByExistence(m_piPolicyNeeded, "Policies", "Project_PolicyNeeded", "PolicyType", "ProjectType", szProjectType);
 	//Victory Thresholds
 	{
 		const int iNumVictories = kUtility.MaxRows("Victories");
@@ -348,6 +350,11 @@ int* CvProjectEntry::GetYieldModifierArray() const
 	return m_piYieldModifier;
 }
 
+/// Array of yield modifiers
+int* CvProjectEntry::GetPolicyNeededArray() const
+{
+	return m_piPolicyNeeded;
+}
 //=====================================
 // CvProjectXMLEntries
 //=====================================

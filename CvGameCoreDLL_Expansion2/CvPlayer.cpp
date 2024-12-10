@@ -8937,6 +8937,27 @@ bool CvPlayer::canCreate(ProjectTypes eProject, bool bContinue, bool bTestVisibl
 		}
 	}
 
+	// Policy requirement?
+	int* pPolicyNeededArray = pProjectInfo.GetPolicyNeededArray();  
+	if (pPolicyNeededArray != NULL)  
+	{  
+		for (int i = 0; pPolicyNeededArray[i] != NO_POLICY; i++)  
+		{  
+			if (pPolicyNeededArray[i] >= 0 && pPolicyNeededArray[i] < GC.getNumPolicyInfos())  
+			{  
+				PolicyTypes ePolicy = (PolicyTypes)pPolicyNeededArray[i];  
+				if (!GetPlayerPolicies()->HasPolicy(ePolicy) || GetPlayerPolicies()->IsPolicyBlocked(ePolicy))  
+				{  
+					return false;  
+				}  
+			}  
+			else  
+			{  
+				return false;  
+			}  
+		} 
+	}
+
 	// Requires a particular victory condition to be enabled?
 	if(pProjectInfo.GetVictoryPrereq() != NO_VICTORY)
 	{
