@@ -5677,6 +5677,7 @@ CvPlot* CvAIOperationNukeAttack::FindBestTarget()
 						int iThisCityValue = pLoopCity->getPopulation();
 						iThisCityValue -= pLoopCity->getDamage() / 5; // No point nuking a city that is already trashed unless it is good city
 
+						bool bCityIsRadiated = false;  
 						// check to see if there is anything good or bad in the radius that we should account for
 						iBlastRadius = GC.getNUKE_BLAST_RADIUS()+ pLoopUnit->GetExtraNukeBlastRadius();
 
@@ -5755,6 +5756,11 @@ CvPlot* CvAIOperationNukeAttack::FindBestTarget()
 											}
 										}
 									}
+									if (pLoopPlot->getFeatureType() == FEATURE_FALLOUT)  
+									{  
+										bCityIsRadiated = true;  
+										break;  
+									} 
 								}
 							}
 						}
@@ -5762,8 +5768,17 @@ CvPlot* CvAIOperationNukeAttack::FindBestTarget()
 						// if this is the capital
 						if(pLoopCity->isCapital())
 						{
-							iThisCityValue *= 2;
+							if (ownerPlayer.GetDiplomacyAI()->GetNumTimesNuked(pLoopCity->getOwner()) == 0 || pLoopUnit->GetNukeDamageLevel() < 3)  
+							{  
+								iThisCityValue *= 2;  
+							}
 						}
+						
+						// if this is radiated
+						if (bCityIsRadiated)  
+						{  
+							iThisCityValue = iThisCityValue/2;  
+						} 
 
 						if(iThisCityValue > iBestCity)
 						{
