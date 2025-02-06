@@ -607,7 +607,7 @@
 			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from local Population</Text>
 		</Row>
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_RELOGION_POPULATION">
-			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Religion Population</Text>
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from num of Religions</Text>
 		</Row>
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TOTAL_POPULATION">
 			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Total Population</Text>

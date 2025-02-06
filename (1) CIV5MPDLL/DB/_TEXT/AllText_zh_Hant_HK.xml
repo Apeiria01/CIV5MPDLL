@@ -609,7 +609,7 @@
 			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} 來自人口</Text>
 		</Row>
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_RELOGION_POPULATION">
-			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} 來自宗教人口</Text>
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} 來自宗教數量</Text>
 		</Row>
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TOTAL_POPULATION">
 			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} 來自全國人口</Text>
