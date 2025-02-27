@@ -4862,15 +4862,12 @@ void CvCity::addProductionExperience(CvUnit* pUnit, bool bConscript)
 			}
 		}
 	}
-	if(GetCityReligions()->IsSecondaryReligionActive())
+	BeliefTypes eBelief = GetCityReligions()->GetSecondaryReligionPantheonBelief();
+	if(eBelief != NO_BELIEF)
 	{
-		BeliefTypes eBelief = GetCityReligions()->GetSecondaryReligionPantheonBelief();
-		if(eBelief != NO_BELIEF)
-		{
-			const CvBeliefEntry* pkBelief = GC.GetGameBeliefs()->GetEntry(eBelief);
-			int iPromotion = pkBelief->GetFollowingCityFreePromotion();
-			if(iPromotion != NO_PROMOTION) vCityFreePromotions.insert(iPromotion);
-		}
+		const CvBeliefEntry* pkBelief = GC.GetGameBeliefs()->GetEntry(eBelief);
+		int iPromotion = pkBelief->GetFollowingCityFreePromotion();
+		if(iPromotion != NO_PROMOTION) vCityFreePromotions.insert(iPromotion);
 	}
 	for(int iI = 0; iI < GC.getNumPromotionInfos(); iI++)
 	{
@@ -9686,10 +9683,7 @@ void CvCity::setPopulation(int iNewValue, bool bReassignPop /* = true */)
 			if (MOD_BELIEF_NEW_EFFECT_FOR_SP && !IsResistance())
 			{
 				doRelogionInstantYield(GetCityReligions()->GetReligiousMajority());
-				if(GetCityReligions()->IsSecondaryReligionActive())
-				{
-					doBeliefInstantYield(GetCityReligions()->GetSecondaryReligionPantheonBelief());
-				}
+				doBeliefInstantYield(GetCityReligions()->GetSecondaryReligionPantheonBelief());
 			}
 #endif
 		}

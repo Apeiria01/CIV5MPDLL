@@ -7451,7 +7451,7 @@ bool CvUnit::IsCanBeEstablishedCorps() const
 {
 	return 
 		m_iCannotBeEstablishedCorps <= 0
-		&& IsCombatUnit() && canMove()
+		&& IsCombatUnit()
 		&& m_pUnitInfo->GetDomainType() == DOMAIN_LAND && !isEmbarked()
 		&& !m_pUnitInfo->IsCannotBeEstablishedCorps();
 }
