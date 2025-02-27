@@ -601,6 +601,7 @@ private:
 	int ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot);
 	int ScoreBeliefAtCity(CvBeliefEntry* pEntry, CvCity* pCity);
 	int ScoreBeliefForPlayer(CvBeliefEntry* pEntry);
+	int BeliefExtraScore(CvBeliefEntry* pEntry);
 
 	int ScoreCityForMissionary(CvCity* pCity, UnitHandle pUnit);
 	int ScoreCityForInquisitor(CvCity* pCity, UnitHandle pUnit);

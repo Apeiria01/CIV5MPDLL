@@ -151,6 +151,7 @@ public:
 	int GetLakePlotYieldChange(int i) const;
 	int GetRiverPlotYieldChange(int i) const;
 #endif
+	int GetExtraFlavorValue(int i) const;
 	int GetResourceHappiness(int i) const;
 	int GetYieldChangeAnySpecialist(int i) const;
 	int GetYieldChangeTradeRoute(int i) const;
@@ -285,6 +286,7 @@ protected:
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int** m_ppiPlotYieldChange;
 #endif
+	int* m_piExtraFlavorValue;
 
 	int* m_piResourceHappiness;
 	int* m_piYieldChangeAnySpecialist;

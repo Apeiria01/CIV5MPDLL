@@ -135,6 +135,7 @@ CvBeliefEntry::CvBeliefEntry() :
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	m_ppiPlotYieldChange(NULL),
 #endif
+	m_piExtraFlavorValue(NULL),
 
 	m_piResourceHappiness(NULL),
 	m_piYieldChangeAnySpecialist(NULL),
@@ -151,6 +152,7 @@ CvBeliefEntry::CvBeliefEntry() :
 /// Destructor
 CvBeliefEntry::~CvBeliefEntry()
 {
+	SAFE_DELETE_ARRAY(m_piExtraFlavorValue);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiFeatureYieldChange);
@@ -910,6 +912,14 @@ int CvBeliefEntry::GetMaxYieldModifierPerFollower(int i) const
 	return m_piMaxYieldModifierPerFollower ? m_piMaxYieldModifierPerFollower[i] : -1;
 }
 
+/// Find value of extra flavors associated with this belief
+int CvBeliefEntry::GetExtraFlavorValue(int i) const
+{
+	CvAssertMsg(i < GC.getNumFlavorTypes(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piExtraFlavorValue ? m_piExtraFlavorValue[i] : 0;
+}
+
 /// Can we buy units of this era with faith?
 bool CvBeliefEntry::IsFaithUnitPurchaseEra(int i) const
 {
@@ -1050,6 +1060,8 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	kUtility.PopulateArrayByValue(m_piCityYieldPerOtherReligion, "Yields", "Belief_CityYieldPerOtherReligion", "YieldType", "BeliefType", szBeliefType, "Yield");
 	kUtility.PopulateArrayByValue(m_piYieldPerOtherReligionFollower, "Yields", "Belief_YieldPerOtherReligionFollower", "YieldType", "BeliefType", szBeliefType, "Yield");
 #endif
+	kUtility.SetFlavors(m_piExtraFlavorValue, "Belief_ExtraFlavors", "BeliefType",szBeliefType);
+
 	kUtility.PopulateArrayByExistence(m_pbFaithPurchaseUnitEraEnabled, "Eras", "Belief_EraFaithUnitPurchase", "EraType", "BeliefType", szBeliefType);
 	kUtility.PopulateArrayByExistence(m_pbBuildingClassEnabled, "BuildingClasses", "Belief_BuildingClassFaithPurchase", "BuildingClassType", "BeliefType", szBeliefType);
 

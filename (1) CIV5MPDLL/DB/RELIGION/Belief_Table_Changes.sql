@@ -61,3 +61,11 @@ CREATE TABLE Belief_RiverPlotYieldChanges (
 ALTER TABLE Beliefs ADD COLUMN 'CuttingBonusModifier' INTEGER DEFAULT 0;
 ALTER TABLE Beliefs ADD COLUMN 'FounderFreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
 ALTER TABLE Beliefs ADD COLUMN 'FollowingCityFreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
+
+--Per 250 will add about 1 AI-judge score if leader's this flavor is 6
+--common  AI-popular beliefs` score about 100-200,common no-AI-choose beliefs` score about 20-40
+CREATE TABLE Belief_ExtraFlavors (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    FlavorType TEXT REFERENCES Flavors(Type),
+    Flavor INTEGER DEFAULT 0 NOT NULL
+);

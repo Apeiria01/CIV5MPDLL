@@ -6221,7 +6221,12 @@ int CvReligionAI::ScoreBelief(CvBeliefEntry* pEntry)
 	}
 
 	// Add in player-level value
-	iRtnValue += ScoreBeliefForPlayer(pEntry);
+	int iScoreAtPlayer = ScoreBeliefForPlayer(pEntry);
+	iRtnValue += iScoreAtPlayer;
+
+	// Add extra flavors
+	int iExtraScore = BeliefExtraScore(pEntry);
+	iRtnValue += iExtraScore;
 
 	// Divide by 2 if a Pantheon belief (to deemphasize these to Byzantine bonus belief)
 	if (pEntry->IsPantheonBelief())
@@ -6563,7 +6568,7 @@ int CvReligionAI::ScoreBeliefForPlayer(CvBeliefEntry* pEntry)
 	int iFlavorScience = pFlavorManager->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_SCIENCE"));
 	int iFlavorDiplomacy = pFlavorManager->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_DIPLOMACY"));
 	int iFlavorExpansion = pFlavorManager->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_EXPANSION"));
-	int iFlavorReligon = pFlavorManager->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_RELIGION"));
+	int iFlavorReligion = pFlavorManager->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_RELIGION"));
 	int iFlavorEspionage = pFlavorManager->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_ESPIONAGE"));
 
 	int iNumEnhancedReligions = pGameReligions->GetNumReligionsEnhanced();
@@ -6632,8 +6637,8 @@ int CvReligionAI::ScoreBeliefForPlayer(CvBeliefEntry* pEntry)
 	}
 
 #if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
-	iRtnValue += pEntry->GetCityExtraMissionarySpreads() * iFlavorReligon;
-	iRtnValue += pEntry->GetHolyCityPressureModifier() / 10 * iFlavorReligon;
+	iRtnValue += pEntry->GetCityExtraMissionarySpreads() * iFlavorReligion;
+	iRtnValue += pEntry->GetHolyCityPressureModifier() / 10 * iFlavorReligion;
 	iRtnValue += pEntry->GetHolyCityUnitExperence() * (iFlavorDefense + iFlavorOffense) / 2;
 	iRtnValue += pEntry->GetLandmarksTourismPercent() * iFlavorCulture;
 #endif
@@ -6836,6 +6841,32 @@ int CvReligionAI::ScoreBeliefForPlayer(CvBeliefEntry* pEntry)
 		iRtnValue += (pEntry->GetExtraSpies() * iFlavorEspionage / 5);
 	}
 	return iRtnValue;
+}
+
+// Add extra flavors
+int CvReligionAI::BeliefExtraScore(CvBeliefEntry* pEntry)
+{
+	int iTotalExtraFlavorValue = 0;
+	CvFlavorManager* pFlavorManager = m_pPlayer->GetFlavorManager();
+	for(int i = 0; i < GC.getNumFlavorTypes(); i++)
+	{
+		FlavorTypes eFlavor = (FlavorTypes)i;
+		int iExtraFlavorValue = 0;
+		
+		iExtraFlavorValue = pEntry->GetExtraFlavorValue(eFlavor);
+		if(iExtraFlavorValue == 0)
+		{
+			continue;
+		}
+		int iFlavorValue = 0;
+		iFlavorValue = pFlavorManager->GetPersonalityIndividualFlavor(eFlavor);
+		if(iFlavorValue == 0)
+		{
+			continue;
+		}
+		iTotalExtraFlavorValue += (iExtraFlavorValue * iFlavorValue)/100;
+	}
+	return iTotalExtraFlavorValue;
 }
 
 /// AI's evaluation of this city as a target for a missionary
