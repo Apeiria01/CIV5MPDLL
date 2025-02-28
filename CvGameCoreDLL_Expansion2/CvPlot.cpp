@@ -11124,6 +11124,8 @@ bool CvPlot::changeBuildProgress(BuildTypes eBuild, int iChange, PlayerTypes ePl
 					if(iProduction > 0)
 					{
 						pCity->changeFeatureProduction(iProduction);
+						pCity->DoCuttingInstantYield();
+						pCity->DoCuttingInstantYieldModifier(iProduction);
 						if(pCity->getOwner() == GC.getGame().getActivePlayer())
 						{
 							strBuffer = GetLocalizedText("TXT_KEY_MISC_CLEARING_FEATURE_RESOURCE", GC.getFeatureInfo(getFeatureType())->GetTextKey(), iProduction, pCity->getNameKey());

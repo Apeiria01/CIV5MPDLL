@@ -942,6 +942,8 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 			iProduction /= 100;
 
 			changeFeatureProduction(iProduction);
+			DoCuttingInstantYield();
+			DoCuttingInstantYieldModifier(iProduction);
 			CUSTOMLOG("Founding of %s on a forest created %d initial production", getName().GetCString(), iProduction);
 
 			if (getOwner() == GC.getGame().getActivePlayer()) {
@@ -977,6 +979,8 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 			iProduction /= 100;
 
 			changeFeatureProduction(iProduction);
+			DoCuttingInstantYield();
+			DoCuttingInstantYieldModifier(iProduction);
 			CUSTOMLOG("Founding of %s on a jungle created %d initial production", getName().GetCString(), iProduction);
 
 			if (getOwner() == GC.getGame().getActivePlayer()) {
@@ -11314,6 +11318,96 @@ int CvCity::GetCuttingBonusModifier() const
 		}
 	}
 	return iCuttingBonusModifier;
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::DoCuttingInstantYieldModifier(int iProduction) 
+{
+	ReligionTypes eMajority = GetCityReligions()->GetReligiousMajority();
+	int iCuttingInstantYieldModifier = 0;
+
+	if(eMajority == NO_RELIGION) return;
+
+	const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eMajority, getOwner());
+
+	if(!pReligion) return;
+
+	BeliefTypes eSecondaryPantheon = GetCityReligions()->GetSecondaryReligionPantheonBelief();
+	
+	std::ostringstream yieldDetailsStream;
+	for (int iYieldLoop = 0; iYieldLoop < NUM_YIELD_TYPES; iYieldLoop++)
+	{
+		YieldTypes iYieldType = (YieldTypes)iYieldLoop;
+		CvYieldInfo* pYieldInfo = GC.getYieldInfo(iYieldType);
+		iCuttingInstantYieldModifier = pReligion->m_Beliefs.GetCuttingInstantYieldModifier(iYieldType);
+		if (eSecondaryPantheon != NO_BELIEF)
+		{
+			iCuttingInstantYieldModifier += GC.GetGameBeliefs()->GetEntry(eSecondaryPantheon)->GetCuttingInstantYieldModifier(iYieldType);
+		}
+		if(iCuttingInstantYieldModifier <= 0)continue;
+
+		iCuttingInstantYieldModifier = (iCuttingInstantYieldModifier * iProduction)/100;
+		doInstantYield((YieldTypes)iYieldLoop, iCuttingInstantYieldModifier);
+		if (!yieldDetailsStream.str().empty())
+		{
+			yieldDetailsStream << ", ";
+		}
+		yieldDetailsStream << pYieldInfo->getColorString() 
+                            << "+" << iCuttingInstantYieldModifier 
+                            << "[ENDCOLOR]" 
+                            << pYieldInfo->getIconString();
+	}
+	if(getOwner() == GC.getGame().getActivePlayer())
+	{
+		std::string yieldDetails = yieldDetailsStream.str(); 
+		CvString strBuffer = GetLocalizedText("TXT_KEY_BELIEF_CUTTING_NONUS") + " " + yieldDetails;
+		GC.GetEngineUserInterface()->AddCityMessage(0,GetIDInfo(),getOwner(), false, GC.getEVENT_MESSAGE_TIME(), strBuffer);
+	}
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::DoCuttingInstantYield() 
+{
+	ReligionTypes eMajority = GetCityReligions()->GetReligiousMajority();
+	int iCuttingInstantYield = 0;
+
+	if(eMajority == NO_RELIGION) return;
+
+	const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eMajority, getOwner());
+
+	if(!pReligion) return;
+
+	BeliefTypes eSecondaryPantheon = GetCityReligions()->GetSecondaryReligionPantheonBelief();
+	std::ostringstream yieldDetailsStream;
+	for (int iYieldLoop = 0; iYieldLoop < NUM_YIELD_TYPES; iYieldLoop++)
+	{
+		YieldTypes iYieldType = (YieldTypes)iYieldLoop;
+		CvYieldInfo* pYieldInfo = GC.getYieldInfo(iYieldType);
+		iCuttingInstantYield = pReligion->m_Beliefs.GetCuttingInstantYield(iYieldType);
+		if (eSecondaryPantheon != NO_BELIEF)
+		{
+			iCuttingInstantYield += GC.GetGameBeliefs()->GetEntry(eSecondaryPantheon)->GetCuttingInstantYield(iYieldType);
+		}
+		if(iCuttingInstantYield <= 0)continue;
+
+		iCuttingInstantYield *= GC.getGame().getGameSpeedInfo().getFaithPercent();
+		iCuttingInstantYield /= 100;
+		doInstantYield((YieldTypes)iYieldLoop, iCuttingInstantYield);
+		if (!yieldDetailsStream.str().empty())
+		{
+			yieldDetailsStream << ", ";
+		}
+		yieldDetailsStream << pYieldInfo->getColorString() 
+                            << "+" << iCuttingInstantYield 
+                            << "[ENDCOLOR]" 
+                            << pYieldInfo->getIconString();
+	}
+	if(getOwner() == GC.getGame().getActivePlayer())
+	{
+		std::string yieldDetails = yieldDetailsStream.str(); 
+		CvString strBuffer = GetLocalizedText("TXT_KEY_BELIEF_CUTTING_NONUS") + " " + yieldDetails;
+		GC.GetEngineUserInterface()->AddCityMessage(0,GetIDInfo(),getOwner(), false, GC.getEVENT_MESSAGE_TIME(), strBuffer);
+	}
 }
 //	--------------------------------------------------------------------------------
 int CvCity::getMaxFoodKeptPercent() const

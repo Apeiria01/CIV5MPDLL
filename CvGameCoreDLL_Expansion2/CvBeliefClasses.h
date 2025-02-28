@@ -98,6 +98,8 @@ public:
 	int GetHolyCityYieldPerNativeFollowers(int i) const;
 	int GetCityYieldPerOtherReligion(int i) const;
 	int GetYieldPerOtherReligionFollower(int i) const;
+	int GetCuttingInstantYieldModifier(int i) const;
+	int GetCuttingInstantYield(int i) const;
 #endif
 	int GetResourceQuantityModifier(int i) const;
 	int GetImprovementYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
@@ -257,6 +259,8 @@ protected:
 	int* m_piHolyCityYieldPerNativeFollowers;
 	int* m_piCityYieldPerOtherReligion;
 	int* m_piYieldPerOtherReligionFollower;
+	int* m_piCuttingInstantYieldModifier;
+	int* m_piCuttingInstantYield;
 #endif
 	int* m_piResourceQuantityModifiers;
 	int** m_ppiImprovementYieldChanges;
@@ -548,6 +552,8 @@ public:
 	int GetHolyCityYieldPerNativeFollowers(YieldTypes eYield) const;
 	int GetCityYieldPerOtherReligion(YieldTypes eYield) const;
 	int GetYieldPerOtherReligionFollower(YieldTypes eYield) const;
+	int GetCuttingInstantYieldModifier(YieldTypes eYield) const;
+	int GetCuttingInstantYield(YieldTypes eYield) const;
 #endif
 	int GetResourceQuantityModifier(ResourceTypes eResource) const;
 	int GetImprovementYieldChange(ImprovementTypes eImprovement, YieldTypes eYield) const;
