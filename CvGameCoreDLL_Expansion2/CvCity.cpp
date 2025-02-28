@@ -13104,6 +13104,8 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 		iTempMod = 0;
 		if (iReligionYieldMaxFollowers > 0)
 		{
+			int iReligionYieldFollowersTimes100 = pReligion->m_Beliefs.GetYieldModifierPerFollowerTimes100(eIndex) + 100;
+			iFollowers = iFollowers * iReligionYieldFollowersTimes100 / 100;
 			// From religion belief
 			iTempMod = min(iFollowers, iReligionYieldMaxFollowers);
 		}

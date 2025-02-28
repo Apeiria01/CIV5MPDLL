@@ -80,3 +80,9 @@ CREATE TABLE Belief_CuttingInstantYield (
     YieldType TEXT REFERENCES Yields(Type),
     Yield INTEGER DEFAULT 0
 );
+--Need define Belief_MaxYieldModifierPerFollower before use this, Actual value = 100 + Modifier
+CREATE TABLE Belief_YieldModifierPerFollowerTimes100 (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    YieldType TEXT REFERENCES Yields(Type),
+    Modifier INTEGER DEFAULT 0
+);

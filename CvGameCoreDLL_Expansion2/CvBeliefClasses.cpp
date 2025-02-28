@@ -146,6 +146,7 @@ CvBeliefEntry::CvBeliefEntry() :
 	m_piYieldChangeWorldWonder(NULL),
 	m_piYieldModifierNaturalWonder(NULL),
 	m_piMaxYieldModifierPerFollower(NULL),
+	m_piYieldModifierPerFollowerTimes100(NULL),
 	m_pbFaithPurchaseUnitEraEnabled(NULL),
 	m_pbBuildingClassEnabled(NULL)
 {
@@ -923,6 +924,12 @@ int CvBeliefEntry::GetMaxYieldModifierPerFollower(int i) const
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_piMaxYieldModifierPerFollower ? m_piMaxYieldModifierPerFollower[i] : -1;
 }
+int CvBeliefEntry::GetYieldModifierPerFollowerTimes100(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldModifierPerFollowerTimes100 ? m_piYieldModifierPerFollowerTimes100[i] : -1;
+}
 
 /// Find value of extra flavors associated with this belief
 int CvBeliefEntry::GetExtraFlavorValue(int i) const
@@ -1058,6 +1065,7 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	kUtility.PopulateArrayByValue(m_piTerrainCityFoodConsumption, "Terrains", "Belief_TerrainCityFoodConsumption", "TerrainType", "BeliefType", szBeliefType, "Modifier");
 #endif
 	kUtility.PopulateArrayByValue(m_piMaxYieldModifierPerFollower, "Yields", "Belief_MaxYieldModifierPerFollower", "YieldType", "BeliefType", szBeliefType, "Max");
+	kUtility.PopulateArrayByValue(m_piYieldModifierPerFollowerTimes100, "Yields", "Belief_YieldModifierPerFollowerTimes100", "YieldType", "BeliefType", szBeliefType, "Modifier");
 	kUtility.PopulateArrayByValue(m_piResourceHappiness, "Resources", "Belief_ResourceHappiness", "ResourceType", "BeliefType", szBeliefType, "HappinessChange");
 	kUtility.PopulateArrayByValue(m_piResourceQuantityModifiers, "Resources", "Belief_ResourceQuantityModifiers", "ResourceType", "BeliefType", szBeliefType, "ResourceQuantityModifier");
 	kUtility.PopulateArrayByValue(m_paiBuildingClassHappiness, "BuildingClasses", "Belief_BuildingClassHappiness", "BuildingClassType", "BeliefType", szBeliefType, "Happiness");
@@ -2549,6 +2557,18 @@ int CvReligionBeliefs::GetMaxYieldModifierPerFollower(YieldTypes eYieldType) con
 	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
 	{
 		rtnValue += pBeliefs->GetEntry(*i)->GetMaxYieldModifierPerFollower(eYieldType);
+	}
+
+	return rtnValue;
+}
+int CvReligionBeliefs::GetYieldModifierPerFollowerTimes100(YieldTypes eYieldType) const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+	int rtnValue = 0;
+
+	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
+	{
+		rtnValue += pBeliefs->GetEntry(*i)->GetYieldModifierPerFollowerTimes100(eYieldType);
 	}
 
 	return rtnValue;

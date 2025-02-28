@@ -6543,6 +6543,12 @@ int CvReligionAI::ScoreBeliefAtCity(CvBeliefEntry* pEntry, CvCity* pCity)
 			iTempValue /= 2;
 			iRtnValue += iTempValue;
 		}
+		if (pEntry->GetYieldModifierPerFollowerTimes100(iI) != 0)
+		{
+			iTempValue = pEntry->GetYieldModifierPerFollowerTimes100(iI);
+			iTempValue /= 25;
+			iRtnValue += iTempValue;
+		}
 	}
 
 	return iRtnValue;

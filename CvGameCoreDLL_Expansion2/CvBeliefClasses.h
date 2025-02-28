@@ -161,6 +161,7 @@ public:
 	int GetYieldChangeWorldWonder(int i) const;
 	int GetYieldModifierNaturalWonder(int i) const;
 	int GetMaxYieldModifierPerFollower(int i) const;
+	int GetYieldModifierPerFollowerTimes100(int i) const;
 	bool IsFaithUnitPurchaseEra(int i) const;
 	bool IsBuildingClassEnabled(int i) const;
 
@@ -299,6 +300,7 @@ protected:
 	int* m_piYieldChangeWorldWonder;
 	int* m_piYieldModifierNaturalWonder;
 	int* m_piMaxYieldModifierPerFollower;
+	int* m_piYieldModifierPerFollowerTimes100;
 	bool* m_pbFaithPurchaseUnitEraEnabled;
     bool* m_pbBuildingClassEnabled;
 
@@ -597,6 +599,7 @@ public:
 	int GetYieldChangeWorldWonder(YieldTypes eYieldType) const;
 	int GetYieldModifierNaturalWonder(YieldTypes eYieldType) const;
 	int GetMaxYieldModifierPerFollower(YieldTypes eYieldType) const;
+	int GetYieldModifierPerFollowerTimes100(YieldTypes eYieldType) const;
 
 	bool IsBuildingClassEnabled(BuildingClassTypes eType) const;
 	bool IsFaithBuyingEnabled(EraTypes eEra) const;
