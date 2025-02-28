@@ -665,6 +665,7 @@ public:
 	int GetReligionExtraMissionarySpreads(ReligionTypes eReligion);
 	int GetBeliefExtraMissionarySpreads(BeliefTypes eBelief);
 	int GetCuttingBonusModifier() const;
+	void DoCuttingExtraInstantYield(int iBaseYield);
 #endif	
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
 #if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)

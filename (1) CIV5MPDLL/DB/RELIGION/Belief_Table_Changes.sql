@@ -69,3 +69,14 @@ CREATE TABLE Belief_ExtraFlavors (
     FlavorType TEXT REFERENCES Flavors(Type),
     Flavor INTEGER DEFAULT 0 NOT NULL
 );
+--Yield = Modifier * cutting-production
+CREATE TABLE Belief_CuttingInstantYieldModifier (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    YieldType TEXT REFERENCES Yields(Type),
+    Modifier INTEGER DEFAULT 0
+);
+CREATE TABLE Belief_CuttingInstantYield (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    YieldType TEXT REFERENCES Yields(Type),
+    Yield INTEGER DEFAULT 0
+);

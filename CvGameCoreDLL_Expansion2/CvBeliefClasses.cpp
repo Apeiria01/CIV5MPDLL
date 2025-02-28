@@ -106,6 +106,8 @@ CvBeliefEntry::CvBeliefEntry() :
 	m_piHolyCityYieldPerNativeFollowers(NULL),
 	m_piCityYieldPerOtherReligion(NULL),
 	m_piYieldPerOtherReligionFollower(NULL),
+	m_piCuttingInstantYieldModifier(NULL),
+	m_piCuttingInstantYield(NULL),
 #endif
 	m_piResourceQuantityModifiers(NULL),
 	m_ppiImprovementYieldChanges(NULL),
@@ -536,6 +538,16 @@ int CvBeliefEntry::GetCityYieldPerOtherReligion(int i) const
 int CvBeliefEntry::GetYieldPerOtherReligionFollower(int i) const
 {
 	return m_piYieldPerOtherReligionFollower ? m_piYieldPerOtherReligionFollower[i] : 0;
+}
+
+int CvBeliefEntry::GetCuttingInstantYieldModifier(int i) const
+{
+	return m_piCuttingInstantYieldModifier ? m_piCuttingInstantYieldModifier[i] : 0;
+}
+
+int CvBeliefEntry::GetCuttingInstantYield(int i) const
+{
+	return m_piCuttingInstantYield ? m_piCuttingInstantYield[i] : 0;
 }
 #endif
 
@@ -1059,6 +1071,8 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	kUtility.PopulateArrayByValue(m_piHolyCityYieldPerNativeFollowers, "Yields", "Belief_HolyCityYieldPerNativeFollowers", "YieldType", "BeliefType", szBeliefType, "PerNativeFollowers");
 	kUtility.PopulateArrayByValue(m_piCityYieldPerOtherReligion, "Yields", "Belief_CityYieldPerOtherReligion", "YieldType", "BeliefType", szBeliefType, "Yield");
 	kUtility.PopulateArrayByValue(m_piYieldPerOtherReligionFollower, "Yields", "Belief_YieldPerOtherReligionFollower", "YieldType", "BeliefType", szBeliefType, "Yield");
+	kUtility.PopulateArrayByValue(m_piCuttingInstantYieldModifier, "Yields", "Belief_CuttingInstantYieldModifier", "YieldType", "BeliefType", szBeliefType, "Modifier");
+	kUtility.PopulateArrayByValue(m_piCuttingInstantYield, "Yields", "Belief_CuttingInstantYield", "YieldType", "BeliefType", szBeliefType, "Yield");
 #endif
 	kUtility.SetFlavors(m_piExtraFlavorValue, "Belief_ExtraFlavors", "BeliefType",szBeliefType);
 
@@ -2007,6 +2021,32 @@ int CvReligionBeliefs::GetYieldPerOtherReligionFollower(YieldTypes eYield) const
 	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
 	{
 		rtnValue += pBeliefs->GetEntry(*i)->GetYieldPerOtherReligionFollower(eYield);
+	}
+
+	return rtnValue;
+}
+
+int CvReligionBeliefs::GetCuttingInstantYieldModifier(YieldTypes eYield) const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+	int rtnValue = 0;
+
+	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
+	{
+		rtnValue += pBeliefs->GetEntry(*i)->GetCuttingInstantYieldModifier(eYield);
+	}
+
+	return rtnValue;
+}
+
+int CvReligionBeliefs::GetCuttingInstantYield(YieldTypes eYield) const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+	int rtnValue = 0;
+
+	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
+	{
+		rtnValue += pBeliefs->GetEntry(*i)->GetCuttingInstantYield(eYield);
 	}
 
 	return rtnValue;

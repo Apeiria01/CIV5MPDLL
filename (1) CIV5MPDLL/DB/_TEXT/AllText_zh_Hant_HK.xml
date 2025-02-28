@@ -815,5 +815,8 @@
 		<Row Tag="TXT_KEY_DIPLO_CAPTURED_RELIGION">
 			<Text>[COLOR_NEGATIVE_TEXT]你與他們爭奪宗教正統。[ENDCOLOR]</Text>
 		</Row>
+		<Row Tag="TXT_KEY_BELIEF_CUTTING_NONUS">
+			<Text>宗教信條為{1_CityName}帶來了額外獎勵: {2_BonusStr}。</Text>
+		</Row>
 	</Language_zh_Hant_HK>
 </GameData>

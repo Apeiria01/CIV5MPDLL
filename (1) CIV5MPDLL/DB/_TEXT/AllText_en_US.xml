@@ -818,6 +818,9 @@
 		<Row Tag="TXT_KEY_DIPLO_CAPTURED_RELIGION">
 			<Text>[COLOR_NEGATIVE_TEXT]You are competing with them for Religious orthodoxy.[ENDCOLOR]</Text>
 		</Row>
+		<Row Tag="TXT_KEY_BELIEF_CUTTING_NONUS">
+			<Text>Religion Beliefs bring {1_CityName} extra bonus: {2_BonusStr}.</Text>
+		</Row>
 	</Language_en_US>
 
 </GameData>

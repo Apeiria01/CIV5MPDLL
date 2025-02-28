@@ -948,6 +948,7 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 				CvString strBuffer = GetLocalizedText("TXT_KEY_MISC_CLEARING_FEATURE_RESOURCE", GC.getFeatureInfo(eFeature)->GetTextKey(), iProduction, getNameKey());
 				GC.GetEngineUserInterface()->AddCityMessage(0, GetIDInfo(), getOwner(), false, GC.getEVENT_MESSAGE_TIME(), strBuffer);
 			}
+			DoCuttingExtraInstantYield(iProduction);
 		}
 	}
 #endif
@@ -983,6 +984,7 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 				CvString strBuffer = GetLocalizedText("TXT_KEY_MISC_CLEARING_FEATURE_RESOURCE", GC.getFeatureInfo(eFeature)->GetTextKey(), iProduction, getNameKey());
 				GC.GetEngineUserInterface()->AddCityMessage(0, GetIDInfo(), getOwner(), false, GC.getEVENT_MESSAGE_TIME(), strBuffer);
 			}
+			DoCuttingExtraInstantYield(iProduction);
 		}
 	}
 #endif
@@ -11314,6 +11316,52 @@ int CvCity::GetCuttingBonusModifier() const
 		}
 	}
 	return iCuttingBonusModifier;
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::DoCuttingExtraInstantYield(int iBaseYield) 
+{
+	ReligionTypes eMajority = GetCityReligions()->GetReligiousMajority();
+	if(eMajority == NO_RELIGION) return;
+
+	const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eMajority, getOwner());
+	if(!pReligion) return;
+
+	CvBeliefEntry* pSecondPantheon = nullptr;
+	BeliefTypes eSecondaryPantheon = GetCityReligions()->GetSecondaryReligionPantheonBelief();
+	if (eSecondaryPantheon != NO_BELIEF)
+	{
+		pSecondPantheon = GC.GetGameBeliefs()->GetEntry(eSecondaryPantheon);
+	}
+	std::ostringstream yieldDetailsTip;
+	bool bShowTip = (getOwner() == GC.getGame().getActivePlayer());
+	for (int iYieldLoop = 0; iYieldLoop < NUM_YIELD_TYPES; iYieldLoop++)
+	{
+		YieldTypes eYieldType = (YieldTypes)iYieldLoop;
+		CvYieldInfo* pYieldInfo = GC.getYieldInfo(eYieldType);
+		int iExtraInstantModifier = pReligion->m_Beliefs.GetCuttingInstantYieldModifier(eYieldType);
+		if (pSecondPantheon) iExtraInstantModifier += pSecondPantheon->GetCuttingInstantYieldModifier(eYieldType);
+
+		int iExtraInstantYield = pReligion->m_Beliefs.GetCuttingInstantYield(eYieldType);
+		if (pSecondPantheon) iExtraInstantYield += pSecondPantheon->GetCuttingInstantYield(eYieldType);
+
+		if (iExtraInstantYield <= 0 && iExtraInstantModifier <= 0) continue;
+
+		iExtraInstantYield += (iExtraInstantModifier * iBaseYield) / 100;
+		doInstantYield(eYieldType, iExtraInstantYield);
+
+		if (!bShowTip) continue;
+		if (!yieldDetailsTip.str().empty()) yieldDetailsTip << ", ";
+		yieldDetailsTip << pYieldInfo->getColorString()
+                        << "+" << iExtraInstantYield
+                        << "[ENDCOLOR]" 
+                        << pYieldInfo->getIconString();
+	}
+	if(!yieldDetailsTip.str().empty())
+	{
+		CvString strBuffer = GetLocalizedText("TXT_KEY_BELIEF_CUTTING_NONUS", getNameKey(), yieldDetailsTip.str().c_str());
+		GC.GetEngineUserInterface()->AddCityMessage(0,GetIDInfo(),getOwner(), false, GC.getEVENT_MESSAGE_TIME(), strBuffer);
+	}
 }
 //	--------------------------------------------------------------------------------
 int CvCity::getMaxFoodKeptPercent() const
