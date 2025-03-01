@@ -1884,7 +1884,7 @@ bool CvNotifications::IsNotificationExpired(int iIndex)
 	{
 		CvGame& kGame(GC.getGame());
 		CvGameReligions* pkReligions(kGame.GetGameReligions());
-		if (pkReligions->GetNumReligionsStillToFound() <= 0)
+		if (pkReligions->GetNumReligionsStillToFound() <= 0 && !GET_PLAYER(m_ePlayer).GetPlayerTraits()->IsAlwaysReligion())
 			return true;	// None left, dismiss the notification
 
 		return pkReligions->HasCreatedReligion(m_ePlayer);

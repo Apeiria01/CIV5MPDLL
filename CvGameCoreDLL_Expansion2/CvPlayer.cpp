@@ -7009,6 +7009,8 @@ bool CvPlayer::canReceiveGoody(CvPlot* pPlot, GoodyTypes eGoody, CvUnit* pUnit) 
 		{
 			return false;
 		}
+		if (GC.getGame().GetGameReligions()->GetNumReligionsStillToFound() <= 0 && !GetPlayerTraits()->IsAlwaysReligion())
+			return false;
 		else
 		{
 			return (GetReligions()->HasCreatedPantheon() && !GetReligions()->HasCreatedReligion());

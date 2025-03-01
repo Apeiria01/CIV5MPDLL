@@ -18,6 +18,7 @@
 #include "cvStopWatch.h"
 
 #include "LintFree.h"
+#include "CustomMods.h"
  
 //======================================================================================================
 //					CvReligionEntry
@@ -399,6 +400,11 @@ void CvGameReligions::SpreadReligionToOneCity(CvCity* pCity)
 	}
 }
 
+EraTypes CvGameReligions::GetFaithPurchaseGreatPeopleEra(CvPlayer* pPlayer)
+{
+	EraTypes eGPEra = /*INDUSTRIAL*/ (EraTypes)GD_INT_GET(RELIGION_GP_FAITH_PURCHASE_ERA);
+	return eGPEra;
+}
 /// Religious activities at the start of a player's turn
 void CvGameReligions::DoPlayerTurn(CvPlayer& kPlayer)
 {
@@ -527,7 +533,8 @@ void CvGameReligions::DoPlayerTurn(CvPlayer& kPlayer)
 	switch (kPlayer.GetFaithPurchaseType())
 	{
 	case FAITH_PURCHASE_SAVE_PROPHET:
-		if (eReligion <= RELIGION_PANTHEON && GetNumReligionsStillToFound() <= 0)
+		if ((eReligion <= RELIGION_PANTHEON && GetNumReligionsStillToFound() <= 0 && !kPlayer.GetPlayerTraits()->IsAlwaysReligion()) ||
+			kPlayer.GetCurrentEra() >= GetFaithPurchaseGreatPeopleEra(&kPlayer))
 		{
 #if defined(MOD_BUGFIX_UNITCLASS_NOT_UNIT)
 			UnitTypes eProphetType = kPlayer.GetSpecificUnitType("UNITCLASS_PROPHET", true);
@@ -1236,7 +1243,7 @@ void CvGameReligions::FoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion
 /// Can the supplied religion be created?
 CvGameReligions::FOUNDING_RESULT CvGameReligions::CanFoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion, const char* szCustomName, BeliefTypes eBelief1, BeliefTypes eBelief2, BeliefTypes eBelief3, BeliefTypes eBelief4, CvCity* pkHolyCity)
 {
-	if(GetNumReligionsStillToFound() <= 0)
+	if(GetNumReligionsStillToFound() <= 0 && !GET_PLAYER(ePlayer).GetPlayerTraits()->IsAlwaysReligion())
 		return FOUNDING_NO_RELIGIONS_AVAILABLE;
 
 	if(ePlayer == NO_PLAYER)
@@ -1298,7 +1305,17 @@ CvGameReligions::FOUNDING_RESULT CvGameReligions::CanFoundReligion(PlayerTypes e
 					{
 						BeliefTypes eDestBelief = kReligion.m_Beliefs.GetBelief(iDestBelief);
 						if(eDestBelief != NO_BELIEF && eDestBelief == eSrcBelief)
-							return FOUNDING_BELIEF_IN_USE;
+						{
+							CvBeliefEntry* pBelief = GC.getBeliefInfo(eDestBelief);
+							if(pBelief && pBelief->IsFounderBelief() && !kPlayer.GetPlayerTraits()->IsAlwaysReligion())
+							{
+								return FOUNDING_BELIEF_IN_USE;
+							}
+							if(pBelief && pBelief->IsFollowerBelief() && !kPlayer.GetPlayerTraits()->IsAlwaysReligion())
+							{
+								return FOUNDING_BELIEF_IN_USE;
+							}
+						}
 					}
 				}
 			}
@@ -1508,9 +1525,21 @@ CvGameReligions::FOUNDING_RESULT CvGameReligions::CanEnhanceReligion(PlayerTypes
 	{
 #if defined(MOD_TRAITS_ANY_BELIEF)
 		if(eBelief1 != NO_BELIEF && IsInSomeReligion(eBelief1, ePlayer))
-			return FOUNDING_BELIEF_IN_USE;
+		{
+			CvBeliefEntry* pBelief = GC.getBeliefInfo(eBelief1);
+			if (pBelief && (pBelief->IsEnhancerBelief() || pBelief->IsFollowerBelief()) && !GET_PLAYER(ePlayer).GetPlayerTraits()->IsAlwaysReligion())
+			{
+				return FOUNDING_BELIEF_IN_USE;
+			}
+		}
 		if(eBelief2 != NO_BELIEF && IsInSomeReligion(eBelief2, ePlayer))
-			return FOUNDING_BELIEF_IN_USE;
+		{
+			CvBeliefEntry* pBelief = GC.getBeliefInfo(eBelief2);
+			if (pBelief && (pBelief->IsEnhancerBelief() || pBelief->IsFollowerBelief()) && !GET_PLAYER(ePlayer).GetPlayerTraits()->IsAlwaysReligion())
+			{
+				return FOUNDING_BELIEF_IN_USE;
+			}
+		}
 #else
 		if(eBelief1 != NO_BELIEF && IsInSomeReligion(eBelief1))
 			return FOUNDING_BELIEF_IN_USE;
@@ -1719,7 +1748,7 @@ bool CvGameReligions::IsInSomeReligion(BeliefTypes eBelief) const
 				} else if (bAnyBelief) {
 					// In the religion of someone else, but I can have any belief, so I can have it as well
 					continue;
-				} else if (GET_PLAYER(it->m_eFounder).GetPlayerTraits()->IsAnyBelief()) {
+				} else if (GET_PLAYER(it->m_eFounder).GetPlayerTraits()->IsAnyBelief() && !GET_PLAYER(it->m_eFounder).GetPlayerTraits()->IsAlwaysReligion()) {
 					// In a religion of someone who can have any belief, so I can have it as well
 					continue;
 				}
@@ -2087,11 +2116,27 @@ int CvGameReligions::GetNumReligionsEnhanced() const
 
 /// Number of religions that still can be founded on this size map
 #if defined(MOD_RELIGION_LOCAL_RELIGIONS)
-int CvGameReligions::GetNumReligionsStillToFound(bool bIgnoreLocal) const
+int CvGameReligions::GetNumReligionsStillToFound(bool bIgnoreLocal, PlayerTypes ePlayer) const
 #else
-int CvGameReligions::GetNumReligionsStillToFound() const
+int CvGameReligions::GetNumReligionsStillToFound(PlayerTypes ePlayer) const
 #endif
 {
+    if (ePlayer != NO_PLAYER)
+    {
+        if (GET_PLAYER(ePlayer).GetPlayerTraits()->IsAlwaysReligion() && 
+            GET_PLAYER(ePlayer).GetReligions()->GetStateReligion() <= RELIGION_PANTHEON)
+        {
+#if defined(MOD_RELIGION_LOCAL_RELIGIONS)
+            int iRemaining = GC.getMap().getWorldInfo().getMaxActiveReligions() - GetNumReligionsFounded(bIgnoreLocal);
+#else
+            int iRemaining = GC.getMap().getWorldInfo().getMaxActiveReligions() - GetNumReligionsFounded();
+#endif
+            if (iRemaining == 0)
+            {
+                return 1; 
+            }
+        }
+    }
 #if defined(MOD_RELIGION_LOCAL_RELIGIONS)
 	return (GC.getMap().getWorldInfo().getMaxActiveReligions() - GetNumReligionsFounded(bIgnoreLocal));
 #else
@@ -2668,7 +2713,7 @@ bool CvGameReligions::CheckSpawnGreatProphet(CvPlayer& kPlayer)
 	}
 
 	// If player hasn't founded a religion yet, drop out of this if all religions have been founded
-	else if(GetNumReligionsStillToFound() <= 0)
+	else if(GetNumReligionsStillToFound() <= 0 && !kPlayer.GetPlayerTraits()->IsAlwaysReligion())
 	{
 		return false;
 	}
@@ -2886,6 +2931,7 @@ CvPlayerReligions::CvPlayerReligions(void):
 	m_iFaithAtLastNotify(0),
 #endif
 	m_iNumFreeProphetsSpawned(0),
+	m_eStateReligion(NO_RELIGION),
 	m_iNumProphetsSpawned(0),
 	m_bFoundingReligion(false)
 {
@@ -2920,6 +2966,7 @@ void CvPlayerReligions::Reset()
 #if defined(MOD_RELIGION_RECURRING_PURCHASE_NOTIFIY)
 	m_iFaithAtLastNotify = 0;
 #endif
+    m_eStateReligion = NO_RELIGION;
 }
 
 /// Serialization read
@@ -2930,6 +2977,7 @@ void CvPlayerReligions::Read(FDataStream& kStream)
 	kStream >> uiVersion;
 	MOD_SERIALIZE_INIT_READ(kStream);
 	MOD_SERIALIZE_READ(61, kStream, m_iNumFreeProphetsSpawned, 0);
+	kStream >> m_eStateReligion;
 	kStream >> m_iNumProphetsSpawned;
 	kStream >> m_bFoundingReligion;
 #if defined(MOD_RELIGION_RECURRING_PURCHASE_NOTIFIY)
@@ -2945,6 +2993,7 @@ void CvPlayerReligions::Write(FDataStream& kStream)
 	kStream << uiVersion;
 	MOD_SERIALIZE_INIT_WRITE(kStream);
 	MOD_SERIALIZE_WRITE(kStream, m_iNumFreeProphetsSpawned);
+	kStream << m_eStateReligion;
 	kStream << m_iNumProphetsSpawned;
 	kStream << m_bFoundingReligion;
 #if defined(MOD_RELIGION_RECURRING_PURCHASE_NOTIFIY)
@@ -3708,6 +3757,14 @@ int CvCityReligions::GetTotalPressure()
 	return iTotalPressure;
 }
 
+/// What is our state religion?
+ReligionTypes CvPlayerReligions::GetStateReligion(bool bIncludePantheon) const
+{
+	if (!bIncludePantheon && m_eStateReligion == RELIGION_PANTHEON)
+		return NO_RELIGION;
+
+	return m_eStateReligion;
+}
 /// Pressure exerted by one religion
 int CvCityReligions::GetPressure(ReligionTypes eReligion)
 {

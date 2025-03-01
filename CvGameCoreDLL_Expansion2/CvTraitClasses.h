@@ -187,6 +187,7 @@ public:
 	bool IsFaithFromUnimprovedForest() const;
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	bool IsAnyBelief() const;
+	bool IsAlwaysReligion() const;
 #endif
 	bool IsGoldenAgeOnWar() const;
 	bool IsNoResistance() const;
@@ -474,6 +475,7 @@ protected:
 	bool m_bGoodyUnitUpgradeFirst;
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	bool m_bAnyBelief;
+	bool m_bAlwaysReligion;
 #endif
 	bool m_bGoldenAgeOnWar;
 	bool m_bNoResistance;
@@ -1122,6 +1124,10 @@ public:
 	{
 		return m_bAnyBelief;
 	};
+	bool IsAlwaysReligion() const
+	{
+		return m_bAlwaysReligion;
+	};
 #endif
 	bool IsGoldenAgeOnWar() const
 	{
@@ -1532,6 +1538,7 @@ private:
 	bool m_bFaithFromUnimprovedForest = false;
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	bool m_bAnyBelief;
+	bool m_bAlwaysReligion;
 #endif
 	bool m_bGoldenAgeOnWar = false;
 	bool m_bNoResistance = false;

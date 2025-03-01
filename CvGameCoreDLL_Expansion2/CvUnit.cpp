@@ -10505,7 +10505,7 @@ bool CvUnit::CanFoundReligion(const CvPlot* pPlot) const
 		return false;
 	}
 
-	if(pReligions->GetNumReligionsStillToFound() <= 0)
+	if(pReligions->GetNumReligionsStillToFound() <= 0 && !GET_PLAYER(getOwner()).GetPlayerTraits()->IsAlwaysReligion())
 	{
 		return false;
 	}

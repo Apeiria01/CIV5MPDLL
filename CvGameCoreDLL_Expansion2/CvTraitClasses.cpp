@@ -165,6 +165,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_bGoodyUnitUpgradeFirst(false),
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	m_bAnyBelief(false),
+	m_bAlwaysReligion(false),
 #endif
 	m_bBonusReligiousBelief(false),
 	m_bAbleToAnnexCityStates(false),
@@ -912,6 +913,10 @@ bool CvTraitEntry::IsFaithFromUnimprovedForest() const
 bool CvTraitEntry::IsAnyBelief() const
 {
 	return m_bAnyBelief;
+}
+bool CvTraitEntry::IsAlwaysReligion() const
+{
+	return m_bAlwaysReligion;
 }
 #endif
 
@@ -1826,6 +1831,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	if (MOD_TRAITS_ANY_BELIEF) {
 		m_bAnyBelief = kResults.GetBool("AnyBelief");
+		m_bAlwaysReligion = kResults.GetBool("AlwaysReligion");
 	}
 #endif
 	m_bBonusReligiousBelief = kResults.GetBool("BonusReligiousBelief");
@@ -2774,6 +2780,10 @@ void CvPlayerTraits::InitPlayerTraits()
 			{
 				m_bAnyBelief = true;
 			}
+			if(trait->IsAlwaysReligion())
+			{
+				m_bAlwaysReligion = true;
+			}
 #endif
 			if(trait->IsBonusReligiousBelief())
 			{
@@ -3255,6 +3265,7 @@ void CvPlayerTraits::Reset()
 	m_bGoodyUnitUpgradeFirst = false;
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	m_bAnyBelief = false;
+	m_bAlwaysReligion = false;
 #endif
 	m_bBonusReligiousBelief = false;
 	m_bAbleToAnnexCityStates = false;
@@ -4168,7 +4179,7 @@ void CvPlayerTraits::ChooseMayaBoost()
 		// Don't have a religion and they can still be founded?
 		else
 		{
-			if(pReligions->GetNumReligionsStillToFound() > 0)
+			if(pReligions->GetNumReligionsStillToFound() > 0 || IsAlwaysReligion())
 			{
 				eDesiredGreatPerson = ePossibleGreatPerson;
 			}
@@ -4762,6 +4773,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	MOD_SERIALIZE_READ(46, kStream, m_bAnyBelief, false);
+	MOD_SERIALIZE_READ(47, kStream, m_bAlwaysReligion, false);
 #endif
 	kStream >> m_bGoldenAgeOnWar;
 	kStream >> m_bNoResistance;
@@ -5169,6 +5181,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_bFaithFromUnimprovedForest;
 #if defined(MOD_TRAITS_ANY_BELIEF)
 	MOD_SERIALIZE_WRITE(kStream, m_bAnyBelief);
+	MOD_SERIALIZE_WRITE(kStream, m_bAlwaysReligion);
 #endif
 	kStream << m_bGoldenAgeOnWar;
 	kStream << m_bNoResistance;
