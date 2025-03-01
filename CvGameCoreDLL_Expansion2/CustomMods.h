@@ -1381,6 +1381,29 @@ enum BattleTypeTypes
 #define MOD_SERIALIZE_WRITE_HASH(stream, member, type, size) __noop
 #endif
 
+#define SERIALIZE_READ_UNORDERED_MAP(stream, map) \
+{ \
+	int iLen = 0; \
+	kStream >> iLen; \
+	map.clear(); \
+	for (int i = 0; i < iLen; i++) \
+	{ \
+		decltype(map)::key_type key = 0; \
+		decltype(map)::mapped_type value = 0; \
+		kStream >> key; \
+		kStream >> value; \
+		map[key] = value; \
+	} \
+}
+#define SERIALIZE_WRITE_UNORDERED_MAP(stream, map) \
+{ \
+	stream << map.size(); \
+	for (auto iter = map.begin(); iter != map.end(); iter++) \
+	{ \
+		stream << (int) iter->first; \
+		stream << (int) iter->second; \
+	} \
+}
 
 // Custom database table name and columns
 #define MOD_DB_TABLE "CustomModOptions"

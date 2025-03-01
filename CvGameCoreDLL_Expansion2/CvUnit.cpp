@@ -555,7 +555,7 @@ CvUnit::CvUnit() :
 	, m_yieldFromBarbarianKills("CvUnit::m_yieldFromBarbarianKills", m_syncArchive/*, true*/)
 #endif
 	, m_extraUnitCombatModifier("CvUnit::m_extraUnitCombatModifier", m_syncArchive/*, true*/)
-	, m_unitClassModifier("CvUnit::m_unitClassModifier", m_syncArchive/*, true*/)
+	, m_unitClassModifier()
 	, m_iCombatModPerAdjacentUnitCombatModifier("CvUnit::m_iCombatModPerAdjacentUnitCombatModifier", m_syncArchive/*, true*/)
 	, m_iCombatModPerAdjacentUnitCombatAttackMod("CvUnit::m_iCombatModPerAdjacentUnitCombatAttackMod", m_syncArchive/*, true*/)
     , m_iCombatModPerAdjacentUnitCombatDefenseMod("CvUnit::m_iCombatModPerAdjacentUnitCombatDefenseMod", m_syncArchive/*, true*/)
@@ -1757,18 +1757,6 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 			m_iCombatModPerAdjacentUnitCombatDefenseMod.setAt(i, 0);
 		}
 
-		m_unitClassModifier.clear();
-		m_unitClassModifier.resize(GC.getNumUnitClassInfos());
-		for(int i = 0; i < GC.getNumUnitClassInfos(); i++)
-		{
-			CvUnitClassInfo* pkUnitClassInfo = GC.getUnitClassInfo((UnitClassTypes)i);
-			if(!pkUnitClassInfo)
-			{
-				continue;
-			}
-
-			m_unitClassModifier.setAt(i,0);
-		}
 
 		// Migrated in from CvSelectionGroup
 		m_iMissionAIX = INVALID_PLOT_COORD;
@@ -25877,7 +25865,9 @@ int CvUnit::getUnitClassModifier(UnitClassTypes eIndex) const
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
-	return m_unitClassModifier[eIndex];
+	auto it = m_unitClassModifier.find(eIndex);
+	if (it != m_unitClassModifier.end()) return  it->second;
+	else return 0;
 }
 
 
@@ -25887,7 +25877,11 @@ void CvUnit::changeUnitClassModifier(UnitClassTypes eIndex, int iChange)
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
-	m_unitClassModifier.setAt(eIndex, m_unitClassModifier[eIndex] + iChange);
+	m_unitClassModifier[eIndex] += iChange;
+	if (m_unitClassModifier[eIndex] == 0)
+	{
+		m_unitClassModifier.erase(eIndex);
+	}
 }
 
 
@@ -27058,6 +27052,8 @@ void CvUnit::read(FDataStream& kStream)
 		m_iNumGoodyHutsPopped = 0;
 	}
 
+	SERIALIZE_READ_UNORDERED_MAP(kStream, m_unitClassModifier);
+
 	kStream >> m_bIgnoreDangerWakeup;
 
 	kStream >> m_iEmbarkedAllWaterCount;
@@ -27476,6 +27472,8 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iEverSelectedCount;
 	kStream << m_iMapLayer;
 	kStream << m_iNumGoodyHutsPopped;
+
+	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_unitClassModifier);
 
 	// slewis - move to autovariable when saves are broken
 	kStream << m_bIgnoreDangerWakeup;

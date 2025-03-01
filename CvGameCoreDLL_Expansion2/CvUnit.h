@@ -2491,7 +2491,7 @@ protected:
 	FAutoVariable<std::vector<int>, CvUnit> m_yieldFromBarbarianKills;
 #endif
 	FAutoVariable<std::vector<int>, CvUnit> m_extraUnitCombatModifier;
-	FAutoVariable<std::vector<int>, CvUnit> m_unitClassModifier;
+	std::tr1::unordered_map<int, int> m_unitClassModifier;
 
 	int m_iMissionTimer;
 	FAutoVariable<int, CvUnit> m_iMissionAIX;
