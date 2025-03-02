@@ -1172,6 +1172,7 @@ public:
 	int getFeatureObsoleteTech(int i) const;
 	bool isFeatureRemoveOnly(int i) const;
 #endif
+	bool isResourceRemove(int i) const;
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
 
@@ -1206,6 +1207,7 @@ protected:
 	int* m_paiFeatureObsoleteTech;
 	bool* m_pabFeatureRemoveOnly;
 #endif
+	bool* m_pabResourceRemove;
 
 private:
 	CvBuildInfo(const CvBuildInfo&);

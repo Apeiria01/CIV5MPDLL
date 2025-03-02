@@ -556,6 +556,7 @@ CvUnit::CvUnit() :
 #endif
 	, m_extraUnitCombatModifier("CvUnit::m_extraUnitCombatModifier", m_syncArchive/*, true*/)
 	, m_unitClassModifier()
+	, m_piGetPromotionBuilds()
 	, m_iCombatModPerAdjacentUnitCombatModifier("CvUnit::m_iCombatModPerAdjacentUnitCombatModifier", m_syncArchive/*, true*/)
 	, m_iCombatModPerAdjacentUnitCombatAttackMod("CvUnit::m_iCombatModPerAdjacentUnitCombatAttackMod", m_syncArchive/*, true*/)
     , m_iCombatModPerAdjacentUnitCombatDefenseMod("CvUnit::m_iCombatModPerAdjacentUnitCombatDefenseMod", m_syncArchive/*, true*/)
@@ -1845,6 +1846,8 @@ void CvUnit::uninitInfos()
 #endif
 	m_extraUnitCombatModifier.clear();
 	m_unitClassModifier.clear();
+	m_piGetPromotionBuilds.clear();
+
 	m_aiNumTimesAttackedThisTurn.clear();
 	m_iCombatModPerAdjacentUnitCombatModifier.clear();
 	m_iCombatModPerAdjacentUnitCombatAttackMod.clear();
@@ -6678,6 +6681,26 @@ int CvUnit::GetMoveLfetAttackMod() const
 	return m_iMoveLfetAttackMod;
 }
 
+void CvUnit::ChangePromotionBuilds(BuildTypes eIndex,int iChange)
+{
+	CvAssertMsg(eIndex < GC.getNumBuildInfos(), "Index out of bounds");
+	CvAssertMsg(eIndex > -1, "Index out of bounds");
+	m_piGetPromotionBuilds[eIndex] += iChange;
+	if (m_piGetPromotionBuilds[eIndex] == 0)
+	{
+		m_piGetPromotionBuilds.erase(eIndex);
+	}
+}
+
+/// what improvements can this unit build from its promotions
+bool CvUnit::IsPromotionBuilds(BuildTypes eIndex) const
+{
+	CvAssertMsg(i < GC.getNumBuildInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	auto it = m_piGetPromotionBuilds.find(eIndex);
+	if (it != m_piGetPromotionBuilds.end()) return it->second > 0;
+	else return false;
+}
 
 //	--------------------------------------------------------------------------------
 void CvUnit::ChangeMoveUsedAttackMod(int iValue)
@@ -12676,8 +12699,7 @@ bool CvUnit::canBuild(const CvPlot* pPlot, BuildTypes eBuild, bool bTestVisible,
 	VALIDATE_OBJECT
 	CvAssertMsg(eBuild < GC.getNumBuildInfos() && eBuild >= 0, "Index out of bounds");
 
-
-	if(!(m_pUnitInfo->GetBuilds(eBuild)))
+	if(!(m_pUnitInfo->GetBuilds(eBuild)) && !IsPromotionBuilds(eBuild)) 
 	{
 		return false;
 	}
@@ -12838,14 +12860,14 @@ bool CvUnit::build(BuildTypes eBuild)
 		iWorkRateFactor = 2;
 #else
 		// wipe out all build progress also
-		bFinished = pPlot->changeBuildProgress(eBuild, workRate(false), getOwner());
+		bFinished = pPlot->changeBuildProgress(eBuild, workRate(false, eBuild), getOwner());
 #endif
 	}
 
 #if defined(MOD_BUGFIX_MINOR)
-	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false) * iWorkRateFactor, getOwner());
+	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false, eBuild) * iWorkRateFactor, getOwner());
 #else
-	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false), getOwner());
+	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false, eBuild), getOwner());
 #endif
 
 #if defined(MOD_EVENTS_PLOT)
@@ -14312,7 +14334,7 @@ BuildTypes CvUnit::getBuildType() const
 
 
 //	--------------------------------------------------------------------------------
-int CvUnit::workRate(bool bMax, BuildTypes /*eBuild*/) const
+int CvUnit::workRate(bool bMax, BuildTypes eBuild) const
 {
 	VALIDATE_OBJECT
 	int iRate;
@@ -14326,6 +14348,10 @@ int CvUnit::workRate(bool bMax, BuildTypes /*eBuild*/) const
 	}
 
 	iRate = m_pUnitInfo->GetWorkRate();
+	if(IsPromotionBuilds(eBuild) && !(m_pUnitInfo->GetBuilds(eBuild)))
+	{
+		iRate = 100;
+	}
 
 #if defined(MOD_ROG_CORE)
 	int Modifiers = 0;
@@ -26834,6 +26860,14 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeHeavyChargeCollateralPercent(iChange * thisPromotion.GetHeavyChargeCollateralPercent());
 
 		ChangeOutsideFriendlyLandsInflictDamageChange(iChange * thisPromotion.GetOutsideFriendlyLandsInflictDamageChange());
+		if(thisPromotion.IsIncludeBuild())
+		{
+			for(int i = 0; i < GC.getNumBuildInfos(); i++)
+			{
+				if (!thisPromotion.GetBuildType(i)) continue;
+				ChangePromotionBuilds((BuildTypes)i, iChange);
+			}
+		}
 
 #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
@@ -27043,6 +27077,7 @@ void CvUnit::read(FDataStream& kStream)
 	}
 
 	SERIALIZE_READ_UNORDERED_MAP(kStream, m_unitClassModifier);
+	SERIALIZE_READ_UNORDERED_MAP(kStream, m_piGetPromotionBuilds);
 
 	kStream >> m_bIgnoreDangerWakeup;
 
@@ -27465,6 +27500,7 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iNumGoodyHutsPopped;
 
 	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_unitClassModifier);
+	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_piGetPromotionBuilds);
 
 	// slewis - move to autovariable when saves are broken
 	kStream << m_bIgnoreDangerWakeup;

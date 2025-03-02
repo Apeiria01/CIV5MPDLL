@@ -82,6 +82,7 @@ CvUnitEntry::CvUnitEntry(void) :
 #endif
 	m_iTrainPopulationConsume(0),
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy(0),
+	m_bNoAggressive(false),
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	m_bNoTroops(false),
@@ -353,6 +354,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 #endif
 	m_iTrainPopulationConsume = kResults.GetInt("TrainPopulationConsume");
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy = kResults.GetInt("NoSpreadTurnPopModifierAfterRemovingHeresy");
+	m_bNoAggressive = kResults.GetBool("NoAggressive");
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	m_bNoTroops = kResults.GetBool("NoTroopConsume");
@@ -908,6 +910,11 @@ int CvUnitEntry::GetTrainPopulationConsume() const
 int CvUnitEntry::GetNoSpreadTurnPopModifierAfterRemovingHeresy() const
 {
 	return m_iNoSpreadTurnPopModifierAfterRemovingHeresy;
+}
+
+bool CvUnitEntry::IsNoAggressive() const
+{
+	return m_bNoAggressive;
 }
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)

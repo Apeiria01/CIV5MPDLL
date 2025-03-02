@@ -98,6 +98,7 @@ public:
 #endif
 	int GetTrainPopulationConsume() const;
 	int GetNoSpreadTurnPopModifierAfterRemovingHeresy() const;
+	bool IsNoAggressive() const;
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	bool IsNoTroops() const;
@@ -297,6 +298,7 @@ private:
 #endif
 	int m_iTrainPopulationConsume;
 	int m_iNoSpreadTurnPopModifierAfterRemovingHeresy;
+	bool m_bNoAggressive;
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	bool m_bNoTroops;

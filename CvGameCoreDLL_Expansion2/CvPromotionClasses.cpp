@@ -203,6 +203,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iAuraPromotionRangeAIBonus(0),
 	m_bAuraPromotionNoSelf(false),
 #endif
+	m_bIncludeBuild(false),
 #if defined(MOD_PROMOTION_NEW_EFFECT_FOR_SP)
 	m_iMeleeAttackModifier(0),
 	m_iCaptureEmenyExtraMax(0),
@@ -364,6 +365,7 @@ CvPromotionEntry::CvPromotionEntry():
 
 
 	m_pbUnitType(NULL),
+	m_pbBuildType(NULL),
 
 
 
@@ -415,6 +417,7 @@ CvPromotionEntry::~CvPromotionEntry(void)
 	SAFE_DELETE_ARRAY(m_pbCivilianUnitType);
 
 	SAFE_DELETE_ARRAY(m_pbUnitType);
+	SAFE_DELETE_ARRAY(m_pbBuildType);
 
 
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
@@ -940,6 +943,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	DEBUG_VARIABLE(iNumDomains);
 	const int iNumUnitCombatClasses = kUtility.MaxRows("UnitCombatInfos");
 	const int iNumUnitTypes = kUtility.MaxRows("Units");
+	const int iNumBuildTypes = kUtility.MaxRows("Builds");
 	const int iNumUnitPromotions = kUtility.MaxRows("UnitPromotions");
 
 	const char* szPromotionType = GetType();
@@ -1425,6 +1429,32 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			CvAssert(iUnit < iNumUnitTypes);
 
 			m_pbUnitType[iUnit] = true;
+		}
+
+		pResults->Reset();
+	}
+	//Promotion_Builds
+	{
+		kUtility.InitializeArray(m_pbBuildType, iNumBuildTypes, false);
+
+		std::string sqlKey = "m_pbBuildType";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == NULL) {
+			const char* szSQL = 
+				"SELECT Builds.ID FROM Promotion_Builds INNER JOIN Builds ON Builds.Type = BuildType WHERE PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step()) {
+			const int iBuild= (UnitTypes)pResults->GetInt(0);
+			CvAssert(iBuild < iNumBuildTypes);
+			m_pbBuildType[iBuild] = true;
+			m_bIncludeBuild = true;
 		}
 
 		pResults->Reset();
@@ -3612,6 +3642,26 @@ bool CvPromotionEntry::GetUnitType(int i) const
 	}
 
 	return false;
+}
+
+/// Returns the  build type that this promotion is available for
+bool CvPromotionEntry::GetBuildType(int i) const
+{
+	CvAssertMsg(i < GC.getNumBuildInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+
+	if (i > -1 && i < GC.getNumBuildInfos() && m_pbBuildType)
+	{
+		bool bresult = m_pbBuildType[i];
+		return bresult;
+	}
+
+	return false;
+}
+
+bool CvPromotionEntry::IsIncludeBuild() const
+{
+	return m_bIncludeBuild;
 }
 
 
