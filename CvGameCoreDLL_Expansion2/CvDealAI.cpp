@@ -20,6 +20,39 @@
 #include "LintFree.h"
 
 //======================================================================================================
+// Static function: Use a stepwise step function integral to calculate the modified value of resources.
+// For example: AI had 230 Iron exported, and in this deal, it will trade 340 Iron (Iron exported will be 570 if successful).
+// The modification is calculated as: (250 - 230) * 5 + (550 - 250) * (6 + 11) / 2 + (570 - 550) * 12 = 1530
+// In the original game, 340 Iron is worth 510, but SP_SMART_AI_DEAL changes it to 2890.
+int calculateModifiedValueFromResource(int iNumExported, int iNumThisDeal) {
+    const static int step_size = 50;
+    const static int start_value = 1;
+
+    const int interval_Exported = iNumExported / step_size;
+	const int iNumInclude = iNumExported + iNumThisDeal;
+    const int interval_Include = iNumInclude / step_size;
+
+    if (interval_Exported == interval_Include) {
+        return iNumThisDeal * (start_value + interval_Exported);
+    }
+
+    int head_value = ((interval_Exported + 1) * step_size - iNumExported) * (start_value + interval_Exported);
+    int tail_value = (iNumInclude - interval_Include * step_size) * (start_value + interval_Include);
+
+    int middle_value = 0;
+    if (interval_Include > interval_Exported + 1) {
+        int middle_start_value = start_value + interval_Exported + 1;
+        int middle_end_value = start_value + interval_Include - 1;
+
+        int average_value2 = middle_start_value + middle_end_value;
+
+        int middle_length = (interval_Include - interval_Exported - 1) * step_size;
+        middle_value = average_value2 * middle_length / 2;
+    }
+
+    return head_value + middle_value + tail_value;
+}
+//======================================================================================================
 //					CvDealAI
 //======================================================================================================
 CvDealAI::CvDealAI()
@@ -1278,12 +1311,27 @@ int CvDealAI::GetResourceValue(ResourceTypes eResource, int iResourceQuantity, i
 		}
 		if(!GET_TEAM(GetPlayer()->getTeam()).IsResourceObsolete(eResource))
 		{
-			iItemValue += (iResourceQuantity * iNumTurns * 150 / 100);	// Ex: 5 Iron for 30 turns * 2 = value of 300
-			// for SP, Protecting AI from tricksy humans
-			if(MOD_SP_SMART_AI_DEAL && iResourceQuantity == 1)
+			if(MOD_SP_SMART_AI_DEAL)
 			{
-				int iExtraValue = bFromMe ? iNumTurns * 50 : iNumTurns * -50;
-				iItemValue += iExtraValue / 100;
+				// SP_SMART_AI_DEAL: when humans buy resources in large quantities, we set prices
+				if(bFromMe && GET_PLAYER(eOtherPlayer).isHuman())
+				{
+					iItemValue += (calculateModifiedValueFromResource(GetPlayer()->getResourceExport(eResource), iResourceQuantity) * iNumTurns * 150 / 100);
+				}
+				else
+				{
+					iItemValue += (iResourceQuantity * iNumTurns * 150 / 100);
+				}
+				// for SP, Protecting AI from tricksy humans
+				if(iResourceQuantity == 1)
+				{
+					int iExtraValue = bFromMe ? iNumTurns * 50 : iNumTurns * -50;
+					iItemValue += iExtraValue / 100;
+				}
+			}
+			else
+			{
+				iItemValue += (iResourceQuantity * iNumTurns * 150 / 100);	// Ex: 5 Iron for 30 turns * 2 = value of 300
 			}
 		}
 		else
