@@ -90,6 +90,7 @@ public:
 	// Public data
 	ReligionTypes m_eReligion;
 	PlayerTypes m_eFounder;
+	PlayerTypes m_eOriginalFounder;
 	int m_iHolyCityX;
 	int m_iHolyCityY;
 	int m_iTurnFounded;
@@ -600,6 +601,7 @@ private:
 	int ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot);
 	int ScoreBeliefAtCity(CvBeliefEntry* pEntry, CvCity* pCity);
 	int ScoreBeliefForPlayer(CvBeliefEntry* pEntry);
+	int BeliefExtraScore(CvBeliefEntry* pEntry);
 
 	int ScoreCityForMissionary(CvCity* pCity, UnitHandle pUnit);
 	int ScoreCityForInquisitor(CvCity* pCity, UnitHandle pUnit);

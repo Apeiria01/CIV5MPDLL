@@ -148,6 +148,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_eFreeBuilding(NO_BUILDING),
 	m_eFreeBuildingOnConquest(NO_BUILDING),
 	m_bTrainedAll(false),
+	m_bCanConquerUC(false),
 	m_bFightWellDamaged(false),
 	m_bBuyOwnedTiles(false),
 	m_bMoveFriendlyWoodsAsRoad(false),
@@ -157,6 +158,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_bEmbarkedToLandFlatCost(false),
 	m_bNoHillsImprovementMaintenance(false),
 	m_bTechBoostFromCapitalScienceBuildings(false),
+	m_bArtistGoldenAgeTechBoost(false),
 	m_bStaysAliveZeroCities(false),
 	m_bFaithFromUnimprovedForest(false),
 	m_bWLKDCityNoResearchCost(false),
@@ -841,6 +843,11 @@ bool CvTraitEntry::IsTrainedAll() const
 	return m_bTrainedAll;
 }
 
+bool CvTraitEntry::IsCanConquerUC() const
+{
+	return m_bCanConquerUC;
+}
+
 /// Accessor:: does this civ move units through forest as if it is road?
 bool CvTraitEntry::IsMoveFriendlyWoodsAsRoad() const
 {
@@ -883,6 +890,11 @@ bool CvTraitEntry::IsTechBoostFromCapitalScienceBuildings() const
 	return m_bTechBoostFromCapitalScienceBuildings;
 }
 
+/// Check if the player has the trait of getting science output when an artist is consumed
+bool CvTraitEntry::IsArtistGoldenAgeTechBoost() const
+{
+	return m_bArtistGoldenAgeTechBoost;
+}
 /// Accessor:: does this civ still exist with zero cities?
 bool CvTraitEntry::IsStaysAliveZeroCities() const
 {
@@ -1787,6 +1799,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 		m_eFreeBuildingOnConquest = (BuildingTypes)GC.getInfoTypeForString(szTextVal, true);
 	}
 	m_bTrainedAll = kResults.GetBool("TrainedAll");
+	m_bCanConquerUC = kResults.GetBool("CanConquerUC");
 	m_bFightWellDamaged = kResults.GetBool("FightWellDamaged");
 	m_bBuyOwnedTiles = kResults.GetBool("BuyOwnedTiles");
 	m_bMoveFriendlyWoodsAsRoad = kResults.GetBool("MoveFriendlyWoodsAsRoad");
@@ -1796,6 +1809,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_bEmbarkedToLandFlatCost = kResults.GetBool("EmbarkedToLandFlatCost");
 	m_bNoHillsImprovementMaintenance = kResults.GetBool("NoHillsImprovementMaintenance");
 	m_bTechBoostFromCapitalScienceBuildings = kResults.GetBool("TechBoostFromCapitalScienceBuildings");
+	m_bArtistGoldenAgeTechBoost = kResults.GetBool("ArtistGoldenAgeTechBoost");
 	m_bStaysAliveZeroCities = kResults.GetBool("StaysAliveZeroCities");
 	m_bFaithFromUnimprovedForest = kResults.GetBool("FaithFromUnimprovedForest");
 
@@ -2697,6 +2711,10 @@ void CvPlayerTraits::InitPlayerTraits()
 			{
 				m_bTrainedAll = true;
 			}
+			if (trait->IsCanConquerUC())
+			{
+				m_bCanConquerUC = true;
+			}
 
 			if(trait->IsFightWellDamaged())
 			{
@@ -2733,6 +2751,10 @@ void CvPlayerTraits::InitPlayerTraits()
 			if(trait->IsTechBoostFromCapitalScienceBuildings())
 			{
 				m_bTechBoostFromCapitalScienceBuildings = true;
+			}
+			if(trait->IsArtistGoldenAgeTechBoost())
+			{
+				m_bArtistGoldenAgeTechBoost = true;
 			}
 			if(trait->IsStaysAliveZeroCities())
 			{
@@ -3216,6 +3238,7 @@ void CvPlayerTraits::Reset()
 	m_iTradeRouteSeaGoldBonus = 0;
 #endif
 	m_bTrainedAll = false;
+	m_bCanConquerUC = false;
 	m_bFightWellDamaged = false;
 	m_bBuyOwnedTiles = false;
 	m_bMoveFriendlyWoodsAsRoad = false;
@@ -3225,6 +3248,7 @@ void CvPlayerTraits::Reset()
 	m_bEmbarkedToLandFlatCost = false;
 	m_bNoHillsImprovementMaintenance = false;
 	m_bTechBoostFromCapitalScienceBuildings = false;
+	m_bArtistGoldenAgeTechBoost = false;
 	m_bStaysAliveZeroCities = false;
 	m_bFaithFromUnimprovedForest = false;
 	m_bWLKDCityNoResearchCost = false;
@@ -4716,6 +4740,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	MOD_SERIALIZE_READ(52, kStream, m_iSeaTradeRouteRangeBonus, 0);
 #endif
 	kStream >> m_bTrainedAll;
+	kStream >> m_bCanConquerUC;
 	kStream >> m_bFightWellDamaged;
 	kStream >> m_bBuyOwnedTiles;
 	kStream >> m_bMoveFriendlyWoodsAsRoad;
@@ -4730,6 +4755,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_bNoHillsImprovementMaintenance;
 
 	kStream >> m_bTechBoostFromCapitalScienceBuildings;
+	kStream >> m_bArtistGoldenAgeTechBoost;
 	kStream >> m_bStaysAliveZeroCities;
 
 	kStream >> m_bFaithFromUnimprovedForest;
@@ -5128,6 +5154,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	MOD_SERIALIZE_WRITE(kStream, m_iSeaTradeRouteRangeBonus);
 #endif
 	kStream << m_bTrainedAll;
+	kStream << m_bCanConquerUC;
 	kStream << m_bFightWellDamaged;
 	kStream << m_bBuyOwnedTiles;
 	kStream << m_bMoveFriendlyWoodsAsRoad;
@@ -5137,6 +5164,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_bEmbarkedToLandFlatCost;
 	kStream << m_bNoHillsImprovementMaintenance;
 	kStream << m_bTechBoostFromCapitalScienceBuildings;
+	kStream << m_bArtistGoldenAgeTechBoost;
 	kStream << m_bStaysAliveZeroCities;
 	kStream << m_bFaithFromUnimprovedForest;
 #if defined(MOD_TRAITS_ANY_BELIEF)

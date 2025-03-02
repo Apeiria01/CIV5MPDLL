@@ -796,6 +796,31 @@
 		<Row Tag="TXT_KEY_PRODMOD_WONDER_TRAIT">
 			<Text>[NEWLINE][ICON_BULLET]Trait Modifier for Wonders: {1_Num}%</Text>
 		</Row>
+
+		<Replace Tag="TXT_KEY_HOLY_CITY_REGAINED">
+			<Text>[ICON_RELIGION] Holy City Regained!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_REGAINED_TT">
+			<Text>{1_LeaderName} has regained the [ICON_RELIGION][COLOR_POSITIVE_TEXT]Holy City[ENDCOLOR] of {2_ReligionName}: {3_HolyCity}, and will become the leader of this religion again next Turn!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED">
+			<Text>[ICON_RELIGION] Holy City Occupied!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_TT">
+			<Text>{1_LeaderName} has occupied the [ICON_RELIGION][COLOR_POSITIVE_TEXT]Holy City[ENDCOLOR] of {2_ReligionName}: {3_HolyCity}. After City's [ICON_RESISTANCE] Resistance, if the number of followers of {2_ReligionName} in this civilization exceeds half of the total followers of {2_ReligionName}, and more than 3/4 of the cities follow {2_ReligionName}, they will become the leader of {2_ReligionName} in the new Turn!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_ALTER">
+			<Text>New Religion leader!</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_ALTER_TT">
+			<Text>{1_LeaderName} has claimed the [ICON_RELIGION][COLOR_POSITIVE_TEXT]Holy City[ENDCOLOR] of {2_ReligionName}: {3_HolyCity}, and become the Religion leader of {2_ReligionName}!</Text>
+		</Replace>
+		<Row Tag="TXT_KEY_DIPLO_CAPTURED_RELIGION">
+			<Text>[COLOR_NEGATIVE_TEXT]You are competing with them for Religious orthodoxy.[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_BELIEF_CUTTING_NONUS">
+			<Text>Religion Beliefs bring {1_CityName} extra bonus: {2_BonusStr}.</Text>
+		</Row>
 	</Language_en_US>
 
 </GameData>

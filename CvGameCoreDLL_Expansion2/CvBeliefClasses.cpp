@@ -67,6 +67,8 @@ CvBeliefEntry::CvBeliefEntry() :
 	m_piGreatPersonPoints(NULL),
 	m_piTerrainCityFoodConsumption(NULL),
 	m_iFreePromotionForProphet(NO_PROMOTION),
+	m_iFounderFreePromotion(NO_PROMOTION),
+	m_iFollowingCityFreePromotion(NO_PROMOTION),
 	m_iLandmarksTourismPercent(0),
 	m_iHolyCityUnitExperence(0),
 	m_iHolyCityPressureModifier(0),
@@ -104,6 +106,8 @@ CvBeliefEntry::CvBeliefEntry() :
 	m_piHolyCityYieldPerNativeFollowers(NULL),
 	m_piCityYieldPerOtherReligion(NULL),
 	m_piYieldPerOtherReligionFollower(NULL),
+	m_piCuttingInstantYieldModifier(NULL),
+	m_piCuttingInstantYield(NULL),
 #endif
 	m_piResourceQuantityModifiers(NULL),
 	m_ppiImprovementYieldChanges(NULL),
@@ -133,6 +137,7 @@ CvBeliefEntry::CvBeliefEntry() :
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	m_ppiPlotYieldChange(NULL),
 #endif
+	m_piExtraFlavorValue(NULL),
 
 	m_piResourceHappiness(NULL),
 	m_piYieldChangeAnySpecialist(NULL),
@@ -141,6 +146,7 @@ CvBeliefEntry::CvBeliefEntry() :
 	m_piYieldChangeWorldWonder(NULL),
 	m_piYieldModifierNaturalWonder(NULL),
 	m_piMaxYieldModifierPerFollower(NULL),
+	m_piYieldModifierPerFollowerTimes100(NULL),
 	m_pbFaithPurchaseUnitEraEnabled(NULL),
 	m_pbBuildingClassEnabled(NULL)
 {
@@ -149,6 +155,7 @@ CvBeliefEntry::CvBeliefEntry() :
 /// Destructor
 CvBeliefEntry::~CvBeliefEntry()
 {
+	SAFE_DELETE_ARRAY(m_piExtraFlavorValue);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiFeatureYieldChange);
@@ -533,6 +540,16 @@ int CvBeliefEntry::GetYieldPerOtherReligionFollower(int i) const
 {
 	return m_piYieldPerOtherReligionFollower ? m_piYieldPerOtherReligionFollower[i] : 0;
 }
+
+int CvBeliefEntry::GetCuttingInstantYieldModifier(int i) const
+{
+	return m_piCuttingInstantYieldModifier ? m_piCuttingInstantYieldModifier[i] : 0;
+}
+
+int CvBeliefEntry::GetCuttingInstantYield(int i) const
+{
+	return m_piCuttingInstantYield ? m_piCuttingInstantYield[i] : 0;
+}
 #endif
 
 /// Accessor:: Additional quantity of a specific resource
@@ -780,6 +797,16 @@ int CvBeliefEntry::GetFreePromotionForProphet() const
 {
 	return m_iFreePromotionForProphet;
 }
+//Extra Free Promotion For Founder
+int CvBeliefEntry::GetFounderFreePromotion() const
+{
+	return m_iFounderFreePromotion;
+}
+//Extra Free Promotion For Following City
+int CvBeliefEntry::GetFollowingCityFreePromotion() const
+{
+	return m_iFollowingCityFreePromotion;
+}
 //Extra Landmarks Tourism Percent
 int CvBeliefEntry::GetLandmarksTourismPercent() const
 {
@@ -897,6 +924,20 @@ int CvBeliefEntry::GetMaxYieldModifierPerFollower(int i) const
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_piMaxYieldModifierPerFollower ? m_piMaxYieldModifierPerFollower[i] : -1;
 }
+int CvBeliefEntry::GetYieldModifierPerFollowerTimes100(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldModifierPerFollowerTimes100 ? m_piYieldModifierPerFollowerTimes100[i] : -1;
+}
+
+/// Find value of extra flavors associated with this belief
+int CvBeliefEntry::GetExtraFlavorValue(int i) const
+{
+	CvAssertMsg(i < GC.getNumFlavorTypes(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piExtraFlavorValue ? m_piExtraFlavorValue[i] : 0;
+}
 
 /// Can we buy units of this era with faith?
 bool CvBeliefEntry::IsFaithUnitPurchaseEra(int i) const
@@ -999,6 +1040,10 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 #if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
 	szTextVal						  = kResults.GetText("FreePromotionForProphet");
 	m_iFreePromotionForProphet 		  = GC.getInfoTypeForString(szTextVal, true);
+	szTextVal						  = kResults.GetText("FounderFreePromotion");
+	m_iFounderFreePromotion 		  = GC.getInfoTypeForString(szTextVal, true);
+	szTextVal						  = kResults.GetText("FollowingCityFreePromotion");
+	m_iFollowingCityFreePromotion	  = GC.getInfoTypeForString(szTextVal, true);
 #endif
 
 	//Arrays
@@ -1020,6 +1065,7 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	kUtility.PopulateArrayByValue(m_piTerrainCityFoodConsumption, "Terrains", "Belief_TerrainCityFoodConsumption", "TerrainType", "BeliefType", szBeliefType, "Modifier");
 #endif
 	kUtility.PopulateArrayByValue(m_piMaxYieldModifierPerFollower, "Yields", "Belief_MaxYieldModifierPerFollower", "YieldType", "BeliefType", szBeliefType, "Max");
+	kUtility.PopulateArrayByValue(m_piYieldModifierPerFollowerTimes100, "Yields", "Belief_YieldModifierPerFollowerTimes100", "YieldType", "BeliefType", szBeliefType, "Modifier");
 	kUtility.PopulateArrayByValue(m_piResourceHappiness, "Resources", "Belief_ResourceHappiness", "ResourceType", "BeliefType", szBeliefType, "HappinessChange");
 	kUtility.PopulateArrayByValue(m_piResourceQuantityModifiers, "Resources", "Belief_ResourceQuantityModifiers", "ResourceType", "BeliefType", szBeliefType, "ResourceQuantityModifier");
 	kUtility.PopulateArrayByValue(m_paiBuildingClassHappiness, "BuildingClasses", "Belief_BuildingClassHappiness", "BuildingClassType", "BeliefType", szBeliefType, "Happiness");
@@ -1033,7 +1079,11 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	kUtility.PopulateArrayByValue(m_piHolyCityYieldPerNativeFollowers, "Yields", "Belief_HolyCityYieldPerNativeFollowers", "YieldType", "BeliefType", szBeliefType, "PerNativeFollowers");
 	kUtility.PopulateArrayByValue(m_piCityYieldPerOtherReligion, "Yields", "Belief_CityYieldPerOtherReligion", "YieldType", "BeliefType", szBeliefType, "Yield");
 	kUtility.PopulateArrayByValue(m_piYieldPerOtherReligionFollower, "Yields", "Belief_YieldPerOtherReligionFollower", "YieldType", "BeliefType", szBeliefType, "Yield");
+	kUtility.PopulateArrayByValue(m_piCuttingInstantYieldModifier, "Yields", "Belief_CuttingInstantYieldModifier", "YieldType", "BeliefType", szBeliefType, "Modifier");
+	kUtility.PopulateArrayByValue(m_piCuttingInstantYield, "Yields", "Belief_CuttingInstantYield", "YieldType", "BeliefType", szBeliefType, "Yield");
 #endif
+	kUtility.SetFlavors(m_piExtraFlavorValue, "Belief_ExtraFlavors", "BeliefType",szBeliefType);
+
 	kUtility.PopulateArrayByExistence(m_pbFaithPurchaseUnitEraEnabled, "Eras", "Belief_EraFaithUnitPurchase", "EraType", "BeliefType", szBeliefType);
 	kUtility.PopulateArrayByExistence(m_pbBuildingClassEnabled, "BuildingClasses", "Belief_BuildingClassFaithPurchase", "BuildingClassType", "BeliefType", szBeliefType);
 
@@ -1444,6 +1494,8 @@ CvReligionBeliefs::CvReligionBeliefs(const CvReligionBeliefs& source)
 	m_iExtraSpies = source.m_iExtraSpies;
 	m_bGreatPersonPoints = source.m_bGreatPersonPoints;
 	m_vFreePromotionForProphet = source.m_vFreePromotionForProphet;
+	m_iFounderFreePromotion = source.m_iFounderFreePromotion;
+	m_vFollowingCityFreePromotion = source.m_vFollowingCityFreePromotion;
 	m_iLandmarksTourismPercent = source.m_iLandmarksTourismPercent;
 	m_iHolyCityUnitExperence = source.m_iHolyCityUnitExperence;
 	m_iHolyCityPressureModifier = source.m_iHolyCityPressureModifier;
@@ -1512,6 +1564,8 @@ void CvReligionBeliefs::Reset()
 	m_iExtraSpies = 0;
 	m_bGreatPersonPoints = false;
 	m_vFreePromotionForProphet.clear();
+	m_iFounderFreePromotion = NO_PROMOTION;
+	m_vFollowingCityFreePromotion.clear();
 	m_iLandmarksTourismPercent = 0;
 	m_iHolyCityUnitExperence = 0;
 	m_iHolyCityPressureModifier = 0;
@@ -1579,33 +1633,18 @@ void CvReligionBeliefs::AddBelief(BeliefTypes eBelief, PlayerTypes ePlayer)
 	m_iFaithBuildingTourism += belief->GetFaithBuildingTourism();
 
 #if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
-	//Attention !!! in CanFoundReligion(), ePlayer is NO_PLAYER(to avoid adding Repeated value)
-	if(belief->GetGoldenAgeModifier() && ePlayer != NO_PLAYER)
-	{
-		m_iGoldenAgeModifier += belief->GetGoldenAgeModifier();
-		GET_PLAYER(ePlayer).changeGoldenAgeModifier(belief->GetGoldenAgeModifier());
-	}
-
-	if (belief->GetExtraSpies() > 0 && ePlayer != NO_PLAYER)
-	{
-		m_iExtraSpies += belief->GetExtraSpies();
-		CvPlayerEspionage* pEspionage = GET_PLAYER(ePlayer).GetEspionage();
-		CvAssertMsg(pEspionage, "pEspionage is null! What's up with that?!");
-		if (pEspionage)
-		{
-			int iNumSpies = belief->GetExtraSpies();
-
-			for (int i = 0; i < iNumSpies; i++)
-			{
-				pEspionage->CreateSpy();
-			}
-		}
-	}
+	m_iGoldenAgeModifier += belief->GetGoldenAgeModifier();
+	m_iExtraSpies += belief->GetExtraSpies();
+	// The actual effect is added in the CvPlayer::processBelief
 	
 	m_bGreatPersonPoints = m_bGreatPersonPoints || belief->IsGreatPersonPointsCapital() || belief->IsGreatPersonPointsPerCity() || belief->IsGreatPersonPointsHolyCity();	
 	if(belief->GetFreePromotionForProphet() != NO_PROMOTION)
 	{
 		m_vFreePromotionForProphet.push_back(belief->GetFreePromotionForProphet());
+	}
+	if(belief->GetFollowingCityFreePromotion() != NO_PROMOTION)
+	{
+		m_vFollowingCityFreePromotion.insert(belief->GetFollowingCityFreePromotion());
 	}
 	m_iLandmarksTourismPercent += belief->GetLandmarksTourismPercent();
 	m_iHolyCityUnitExperence += belief->GetHolyCityUnitExperence();
@@ -1635,6 +1674,9 @@ void CvReligionBeliefs::AddBelief(BeliefTypes eBelief, PlayerTypes ePlayer)
 	}
 
 	m_ReligionBeliefs.push_back((int)eBelief);
+
+	//Attention !!! in CanFoundReligion(), ePlayer is NO_PLAYER(to avoid adding Repeated value)
+	if(ePlayer != NO_PLAYER) GET_PLAYER(ePlayer).processBelief(eBelief, 1, true);
 }
 
 /// Does this religion possess a specific belief?
@@ -1987,6 +2029,32 @@ int CvReligionBeliefs::GetYieldPerOtherReligionFollower(YieldTypes eYield) const
 	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
 	{
 		rtnValue += pBeliefs->GetEntry(*i)->GetYieldPerOtherReligionFollower(eYield);
+	}
+
+	return rtnValue;
+}
+
+int CvReligionBeliefs::GetCuttingInstantYieldModifier(YieldTypes eYield) const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+	int rtnValue = 0;
+
+	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
+	{
+		rtnValue += pBeliefs->GetEntry(*i)->GetCuttingInstantYieldModifier(eYield);
+	}
+
+	return rtnValue;
+}
+
+int CvReligionBeliefs::GetCuttingInstantYield(YieldTypes eYield) const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+	int rtnValue = 0;
+
+	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
+	{
+		rtnValue += pBeliefs->GetEntry(*i)->GetCuttingInstantYield(eYield);
 	}
 
 	return rtnValue;
@@ -2493,6 +2561,18 @@ int CvReligionBeliefs::GetMaxYieldModifierPerFollower(YieldTypes eYieldType) con
 
 	return rtnValue;
 }
+int CvReligionBeliefs::GetYieldModifierPerFollowerTimes100(YieldTypes eYieldType) const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
+	int rtnValue = 0;
+
+	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
+	{
+		rtnValue += pBeliefs->GetEntry(*i)->GetYieldModifierPerFollowerTimes100(eYieldType);
+	}
+
+	return rtnValue;
+}
 
 /// Does this belief allow a building to be constructed?
 bool CvReligionBeliefs::IsBuildingClassEnabled(BuildingClassTypes eType) const
@@ -2592,6 +2672,8 @@ void CvReligionBeliefs::Read(FDataStream& kStream)
 	kStream >> m_iExtraSpies;
 	kStream >> m_bGreatPersonPoints;
 	kStream >> m_vFreePromotionForProphet;
+	kStream >> m_iFounderFreePromotion;
+	kStream >> m_vFollowingCityFreePromotion;
 	kStream >> m_iLandmarksTourismPercent;
 	kStream >> m_iHolyCityUnitExperence;
 	kStream >> m_iHolyCityPressureModifier;
@@ -2656,6 +2738,8 @@ void CvReligionBeliefs::Write(FDataStream& kStream) const
 	kStream << m_iExtraSpies;
 	kStream << m_bGreatPersonPoints;
 	kStream << m_vFreePromotionForProphet;
+	kStream << m_iFounderFreePromotion;
+	kStream << m_vFollowingCityFreePromotion;
 	kStream << m_iLandmarksTourismPercent;
 	kStream << m_iHolyCityUnitExperence;
 	kStream << m_iHolyCityPressureModifier;

@@ -98,6 +98,8 @@ public:
 	int GetHolyCityYieldPerNativeFollowers(int i) const;
 	int GetCityYieldPerOtherReligion(int i) const;
 	int GetYieldPerOtherReligionFollower(int i) const;
+	int GetCuttingInstantYieldModifier(int i) const;
+	int GetCuttingInstantYield(int i) const;
 #endif
 	int GetResourceQuantityModifier(int i) const;
 	int GetImprovementYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
@@ -137,6 +139,8 @@ public:
 	int GetGreatPersonPoints(int i, bool bCapital, bool bHolyCity) const;
 	int GetTerrainCityFoodConsumption(int i) const;
 	int GetFreePromotionForProphet() const;
+	int GetFounderFreePromotion() const;
+	int GetFollowingCityFreePromotion() const;
 	int GetLandmarksTourismPercent() const;
 	int GetHolyCityUnitExperence() const;
 	int GetHolyCityPressureModifier() const;
@@ -149,6 +153,7 @@ public:
 	int GetLakePlotYieldChange(int i) const;
 	int GetRiverPlotYieldChange(int i) const;
 #endif
+	int GetExtraFlavorValue(int i) const;
 	int GetResourceHappiness(int i) const;
 	int GetYieldChangeAnySpecialist(int i) const;
 	int GetYieldChangeTradeRoute(int i) const;
@@ -156,6 +161,7 @@ public:
 	int GetYieldChangeWorldWonder(int i) const;
 	int GetYieldModifierNaturalWonder(int i) const;
 	int GetMaxYieldModifierPerFollower(int i) const;
+	int GetYieldModifierPerFollowerTimes100(int i) const;
 	bool IsFaithUnitPurchaseEra(int i) const;
 	bool IsBuildingClassEnabled(int i) const;
 
@@ -212,6 +218,8 @@ protected:
 	int* m_piGreatPersonPoints;
 	int* m_piTerrainCityFoodConsumption;
 	int m_iFreePromotionForProphet;
+	int m_iFounderFreePromotion;
+	int m_iFollowingCityFreePromotion;
 	int m_iLandmarksTourismPercent;
 	int m_iHolyCityUnitExperence;
 	int m_iHolyCityPressureModifier;
@@ -252,6 +260,8 @@ protected:
 	int* m_piHolyCityYieldPerNativeFollowers;
 	int* m_piCityYieldPerOtherReligion;
 	int* m_piYieldPerOtherReligionFollower;
+	int* m_piCuttingInstantYieldModifier;
+	int* m_piCuttingInstantYield;
 #endif
 	int* m_piResourceQuantityModifiers;
 	int** m_ppiImprovementYieldChanges;
@@ -281,6 +291,7 @@ protected:
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 	int** m_ppiPlotYieldChange;
 #endif
+	int* m_piExtraFlavorValue;
 
 	int* m_piResourceHappiness;
 	int* m_piYieldChangeAnySpecialist;
@@ -289,6 +300,7 @@ protected:
 	int* m_piYieldChangeWorldWonder;
 	int* m_piYieldModifierNaturalWonder;
 	int* m_piMaxYieldModifierPerFollower;
+	int* m_piYieldModifierPerFollowerTimes100;
 	bool* m_pbFaithPurchaseUnitEraEnabled;
     bool* m_pbBuildingClassEnabled;
 
@@ -463,6 +475,14 @@ public:
 	{
 		return m_vFreePromotionForProphet;
 	}
+	int GetFounderFreePromotion() const
+	{
+		return m_iFounderFreePromotion;
+	}
+	const std::tr1::unordered_set<int>& GetFollowingCityFreePromotion() const
+	{
+		return m_vFollowingCityFreePromotion;
+	}
 	int GetLandmarksTourismPercent() const
 	{
 		return m_iLandmarksTourismPercent;
@@ -534,6 +554,8 @@ public:
 	int GetHolyCityYieldPerNativeFollowers(YieldTypes eYield) const;
 	int GetCityYieldPerOtherReligion(YieldTypes eYield) const;
 	int GetYieldPerOtherReligionFollower(YieldTypes eYield) const;
+	int GetCuttingInstantYieldModifier(YieldTypes eYield) const;
+	int GetCuttingInstantYield(YieldTypes eYield) const;
 #endif
 	int GetResourceQuantityModifier(ResourceTypes eResource) const;
 	int GetImprovementYieldChange(ImprovementTypes eImprovement, YieldTypes eYield) const;
@@ -577,6 +599,7 @@ public:
 	int GetYieldChangeWorldWonder(YieldTypes eYieldType) const;
 	int GetYieldModifierNaturalWonder(YieldTypes eYieldType) const;
 	int GetMaxYieldModifierPerFollower(YieldTypes eYieldType) const;
+	int GetYieldModifierPerFollowerTimes100(YieldTypes eYieldType) const;
 
 	bool IsBuildingClassEnabled(BuildingClassTypes eType) const;
 	bool IsFaithBuyingEnabled(EraTypes eEra) const;
@@ -618,6 +641,8 @@ private:
 	int m_iExtraSpies;
 	bool m_bGreatPersonPoints;
 	std::vector<int> m_vFreePromotionForProphet;
+	int m_iFounderFreePromotion;
+	std::tr1::unordered_set<int> m_vFollowingCityFreePromotion;
 	int m_iLandmarksTourismPercent;
 	int m_iHolyCityUnitExperence;
 	int m_iHolyCityPressureModifier;

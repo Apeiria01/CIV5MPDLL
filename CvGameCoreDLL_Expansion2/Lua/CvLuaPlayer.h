@@ -577,6 +577,9 @@ protected:
 	LUAAPIEXTN(IsMajorCiv, bool);
 	LUAAPIEXTN(GetCivBuilding, int);
 	LUAAPIEXTN(GetCivUnit, int);
+	LUAAPIEXTN(GetCivBuildingWithDefault, int);
+	LUAAPIEXTN(GetCivUnitWithDefault, int);
+	LUAAPIEXTN(GetCivUnitNowTech, int);
 #endif
 	static int lIsMinorCiv(lua_State* L);
 	static int lGetMinorCivType(lua_State* L);

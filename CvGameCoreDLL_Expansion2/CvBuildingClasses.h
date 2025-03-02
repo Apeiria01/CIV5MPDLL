@@ -597,6 +597,9 @@ public:
 
 	int GetTradeRouteFromTheCityYields(YieldTypes eYieldTypes) const;
 
+	bool IsCapitalOnly() const;
+	bool IsOriginalCapitalOnly() const;
+
 private:
 	int m_iBuildingClassType;
 	const CvBuildingClassInfo* m_pkBuildingClassInfo;
@@ -1019,6 +1022,9 @@ private:
 
 	int m_iGlobalGrowthFoodNeededModifier = 0;
 	int m_iSecondCapitalsExtraScore = 0;
+
+	bool m_bCapitalOnly;
+	bool m_bOriginalCapitalOnly;
 
 	std::tr1::array<int, YieldTypes::NUM_YIELD_TYPES> m_aTradeRouteFromTheCityYields;
 };

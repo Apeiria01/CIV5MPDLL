@@ -430,28 +430,28 @@ CvUnit::CvUnit() :
 #endif
 
 #if defined(MOD_ROG_CORE)
-		, m_aiNumTimesAttackedThisTurn("CvUnit::m_aiNumTimesAttackedThisTurn", m_syncArchive/*, true*/)
-		, m_iOriginCity()
-		, m_iMoveLfetAttackMod(0)
-		, m_iMoveUsedAttackMod(0)
-		, m_iGoldenAgeMod(0)
-		, m_iAntiHigherPopMod(0)
-		, m_iRangedSupportFireMod(0)
-		, m_iBarbCombatBonus(0)
-		, m_iDamageAoEFortified(0)
-		, m_iCanMoraleBreak(0)
-		, m_iIgnoreDamageChance(0)
-		, m_iWorkRateMod(0)
-		, m_iTurnDamage(0)
-		, m_iTurnDamagePercent(0)
-		, m_iNearbyEnemyDamage(0)
-		, m_iAdjacentEnemySapMovement(0)
-		, m_iAdjacentSapExperience(0)
-		, m_iAdjacentFriendlySapMovement(0)
-		, m_iPillageReplenishMoves(0)
-		, m_iPillageReplenishHealth(0)
-		, m_iAOEDamageOnKill(0)
-		, m_iAOEDamageOnPillage(0)
+	, m_aiNumTimesAttackedThisTurn()
+	, m_iOriginCity()
+	, m_iMoveLfetAttackMod(0)
+	, m_iMoveUsedAttackMod(0)
+	, m_iGoldenAgeMod(0)
+	, m_iAntiHigherPopMod(0)
+	, m_iRangedSupportFireMod(0)
+	, m_iBarbCombatBonus(0)
+	, m_iDamageAoEFortified(0)
+	, m_iCanMoraleBreak(0)
+	, m_iIgnoreDamageChance(0)
+	, m_iWorkRateMod(0)
+	, m_iTurnDamage(0)
+	, m_iTurnDamagePercent(0)
+	, m_iNearbyEnemyDamage(0)
+	, m_iAdjacentEnemySapMovement(0)
+	, m_iAdjacentSapExperience(0)
+	, m_iAdjacentFriendlySapMovement(0)
+	, m_iPillageReplenishMoves(0)
+	, m_iPillageReplenishHealth(0)
+	, m_iAOEDamageOnKill(0)
+	, m_iAOEDamageOnPillage(0)
 #endif
 
 	, m_iCannotBeCapturedCount(0)
@@ -555,7 +555,7 @@ CvUnit::CvUnit() :
 	, m_yieldFromBarbarianKills("CvUnit::m_yieldFromBarbarianKills", m_syncArchive/*, true*/)
 #endif
 	, m_extraUnitCombatModifier("CvUnit::m_extraUnitCombatModifier", m_syncArchive/*, true*/)
-	, m_unitClassModifier("CvUnit::m_unitClassModifier", m_syncArchive/*, true*/)
+	, m_unitClassModifier()
 	, m_iCombatModPerAdjacentUnitCombatModifier("CvUnit::m_iCombatModPerAdjacentUnitCombatModifier", m_syncArchive/*, true*/)
 	, m_iCombatModPerAdjacentUnitCombatAttackMod("CvUnit::m_iCombatModPerAdjacentUnitCombatAttackMod", m_syncArchive/*, true*/)
     , m_iCombatModPerAdjacentUnitCombatDefenseMod("CvUnit::m_iCombatModPerAdjacentUnitCombatDefenseMod", m_syncArchive/*, true*/)
@@ -1719,9 +1719,6 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		}
 
 #if defined(MOD_API_UNIFIED_YIELDS)
-		m_aiNumTimesAttackedThisTurn.clear();
-		m_aiNumTimesAttackedThisTurn.resize(REALLY_MAX_PLAYERS);
-
 		m_yieldFromKills.clear();
 		m_yieldFromBarbarianKills.clear();
 		
@@ -1732,11 +1729,6 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		{
 			m_yieldFromKills.setAt(i,0);
 			m_yieldFromBarbarianKills.setAt(i,0);
-		}
-
-		for (int iI = 0; iI < REALLY_MAX_PLAYERS; iI++)
-		{
-			m_aiNumTimesAttackedThisTurn.setAt(iI, 0);
 		}
 #endif
 
@@ -1757,18 +1749,6 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 			m_iCombatModPerAdjacentUnitCombatDefenseMod.setAt(i, 0);
 		}
 
-		m_unitClassModifier.clear();
-		m_unitClassModifier.resize(GC.getNumUnitClassInfos());
-		for(int i = 0; i < GC.getNumUnitClassInfos(); i++)
-		{
-			CvUnitClassInfo* pkUnitClassInfo = GC.getUnitClassInfo((UnitClassTypes)i);
-			if(!pkUnitClassInfo)
-			{
-				continue;
-			}
-
-			m_unitClassModifier.setAt(i,0);
-		}
 
 		// Migrated in from CvSelectionGroup
 		m_iMissionAIX = INVALID_PLOT_COORD;
@@ -1865,6 +1845,7 @@ void CvUnit::uninitInfos()
 #endif
 	m_extraUnitCombatModifier.clear();
 	m_unitClassModifier.clear();
+	m_aiNumTimesAttackedThisTurn.clear();
 	m_iCombatModPerAdjacentUnitCombatModifier.clear();
 	m_iCombatModPerAdjacentUnitCombatAttackMod.clear();
 	m_iCombatModPerAdjacentUnitCombatDefenseMod.clear();
@@ -2868,10 +2849,7 @@ void CvUnit::doTurn()
 	ChangeNumTimesDoFallBackThisTurn(-1 * GetNumTimesDoFallBackThisTurn());
 	ChangeNumTimesBeFallBackThisTurn(-1 * GetNumTimesBeFallBackThisTurn());
 
-	for (int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		ChangeNumTimesAttackedThisTurn((PlayerTypes)iPlayerLoop, (-1 * GetNumTimesAttackedThisTurn((PlayerTypes)iPlayerLoop)));
-	}
+	ClearNumTimesAttackedThisTurn();
 
 	int turndamage = GetTurnDamage()+ (GetMaxHitPoints() * GetTurnDamagePercent());
 	if (0 != turndamage)
@@ -7451,7 +7429,7 @@ bool CvUnit::IsCanBeEstablishedCorps() const
 {
 	return 
 		m_iCannotBeEstablishedCorps <= 0
-		&& IsCombatUnit() && canMove()
+		&& IsCombatUnit()
 		&& m_pUnitInfo->GetDomainType() == DOMAIN_LAND && !isEmbarked()
 		&& !m_pUnitInfo->IsCannotBeEstablishedCorps();
 }
@@ -12343,6 +12321,20 @@ bool CvUnit::goldenAge()
 		GAMEEVENTINVOKE_HOOK(GAMEEVENT_GoldenAgeDiscover, getOwner(), GetID(), getX(), getY(), IsGreatPerson());
 	}
 #endif
+	if (kPlayer.GetPlayerTraits()->IsArtistGoldenAgeTechBoost() && getUnitClassType() == GC.getInfoTypeForString("UNITCLASS_ARTIST"))
+	{
+		int iMedianTechResearch = kPlayer.GetPlayerTechs()->GetMedianTechResearch();
+		iMedianTechResearch = (iMedianTechResearch * kPlayer.GetMedianTechPercentage()) / 100;
+		TechTypes eCurrentTech = kPlayer.GetPlayerTechs()->GetCurrentResearch();
+		if (eCurrentTech == NO_TECH)
+		{
+			kPlayer.changeOverflowResearch(iMedianTechResearch);
+		}
+		else
+		{
+			GET_TEAM(getTeam()).GetTeamTechs()->ChangeResearchProgress(eCurrentTech, iMedianTechResearch, kPlayer.GetID());
+		}
+	}
 
 	if(IsGreatPerson())
 	{
@@ -21605,6 +21597,11 @@ bool CvUnit::IsImmobile() const
 void CvUnit::ChangesNumImmobile(int iValue)
 {
 	m_iNumImmobile += iValue;
+	if(iValue != 0 && m_iNumImmobile == 0 || m_iNumImmobile == 1)
+	{
+		auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));
+		gDLL->GameplayUnitShouldDimFlag(pDllUnit.get(), /*bDim*/ getMoves() <= 0);
+	}
 }
 
 //	--------------------------------------------------------------------------------
@@ -25858,7 +25855,9 @@ int CvUnit::getUnitClassModifier(UnitClassTypes eIndex) const
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
-	return m_unitClassModifier[eIndex];
+	auto it = m_unitClassModifier.find(eIndex);
+	if (it != m_unitClassModifier.end()) return it->second;
+	else return 0;
 }
 
 
@@ -25868,7 +25867,11 @@ void CvUnit::changeUnitClassModifier(UnitClassTypes eIndex, int iChange)
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
-	m_unitClassModifier.setAt(eIndex, m_unitClassModifier[eIndex] + iChange);
+	m_unitClassModifier[eIndex] += iChange;
+	if (m_unitClassModifier[eIndex] == 0)
+	{
+		m_unitClassModifier.erase(eIndex);
+	}
 }
 
 
@@ -27039,6 +27042,8 @@ void CvUnit::read(FDataStream& kStream)
 		m_iNumGoodyHutsPopped = 0;
 	}
 
+	SERIALIZE_READ_UNORDERED_MAP(kStream, m_unitClassModifier);
+
 	kStream >> m_bIgnoreDangerWakeup;
 
 	kStream >> m_iEmbarkedAllWaterCount;
@@ -27148,6 +27153,7 @@ void CvUnit::read(FDataStream& kStream)
 #endif
 
 #if defined(MOD_ROG_CORE)
+	SERIALIZE_READ_UNORDERED_MAP(kStream, m_aiNumTimesAttackedThisTurn);
 	kStream >> m_iOriginCity;
 	kStream >> m_iMoveLfetAttackMod;
 	kStream >> m_iMoveUsedAttackMod;
@@ -27204,6 +27210,7 @@ void CvUnit::read(FDataStream& kStream)
 		m_iNumExoticGoods = 0;
 	}
 
+	kStream >> m_iNumImmobile;
 #if defined(MOD_UNITS_XP_TIMES_100)
 	MOD_SERIALIZE_READ(74, kStream, m_iExperienceTimes100, m_iExperience * 100);
 #endif
@@ -27457,6 +27464,8 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iMapLayer;
 	kStream << m_iNumGoodyHutsPopped;
 
+	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_unitClassModifier);
+
 	// slewis - move to autovariable when saves are broken
 	kStream << m_bIgnoreDangerWakeup;
 	kStream << m_iEmbarkedAllWaterCount;
@@ -27547,6 +27556,7 @@ void CvUnit::write(FDataStream& kStream) const
 #endif
 
 #if defined(MOD_ROG_CORE)
+	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_aiNumTimesAttackedThisTurn);
 	kStream << m_iOriginCity;
 	kStream << m_iMoveLfetAttackMod;
 	kStream << m_iMoveUsedAttackMod;
@@ -27586,6 +27596,7 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iSapperCount;
 	kStream << m_iCanHeavyCharge;
 	kStream << m_iNumExoticGoods;
+	kStream << m_iNumImmobile;
 #if defined(MOD_UNITS_XP_TIMES_100)
 	MOD_SERIALIZE_WRITE(kStream, m_iExperienceTimes100);
 #endif
@@ -32491,12 +32502,20 @@ CvString CvUnit::GetPlotCorruptionScoreReport() const
 #endif
 
 
+void CvUnit::ClearNumTimesAttackedThisTurn()
+{
+	m_aiNumTimesAttackedThisTurn.clear();
+}
 void CvUnit::ChangeNumTimesAttackedThisTurn(PlayerTypes ePlayer, int iValue)
 {
 	VALIDATE_OBJECT
     CvAssertMsg(ePlayer >= 0, "ePlayer expected to be >= 0");
 	CvAssertMsg(ePlayer < REALLY_MAX_PLAYERS, "ePlayer expected to be < NUM_DOMAIN_TYPES")
-	m_aiNumTimesAttackedThisTurn.setAt(ePlayer, m_aiNumTimesAttackedThisTurn[ePlayer] + iValue);
+	m_aiNumTimesAttackedThisTurn[ePlayer] += iValue;
+	if (m_aiNumTimesAttackedThisTurn[ePlayer] == 0)
+	{
+		m_aiNumTimesAttackedThisTurn.erase(ePlayer);
+	}
 }
 
 int CvUnit::GetNumTimesAttackedThisTurn(PlayerTypes ePlayer) const
@@ -32504,7 +32523,9 @@ int CvUnit::GetNumTimesAttackedThisTurn(PlayerTypes ePlayer) const
 	VALIDATE_OBJECT
 	CvAssertMsg(ePlayer >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(ePlayer < REALLY_MAX_PLAYERS, "eIndex expected to be < NUM_DOMAIN_TYPES");
-	return m_aiNumTimesAttackedThisTurn[ePlayer];
+	auto it = m_aiNumTimesAttackedThisTurn.find(ePlayer);
+	if (it != m_aiNumTimesAttackedThisTurn.end()) return it->second;
+	else return 0;
 }
 
 int CvUnit::GetInstantYieldPerReligionFollowerConverted(YieldTypes eIndex) const

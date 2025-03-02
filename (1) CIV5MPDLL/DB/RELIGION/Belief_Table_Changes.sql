@@ -59,3 +59,30 @@ CREATE TABLE Belief_RiverPlotYieldChanges (
 );
 
 ALTER TABLE Beliefs ADD COLUMN 'CuttingBonusModifier' INTEGER DEFAULT 0;
+ALTER TABLE Beliefs ADD COLUMN 'FounderFreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
+ALTER TABLE Beliefs ADD COLUMN 'FollowingCityFreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
+
+--Per 25 will add about 1 AI-judge score if leader's this flavor is 6
+--common  AI-popular beliefs` score about 100-200,common no-AI-choose beliefs` score about 20-40
+CREATE TABLE Belief_ExtraFlavors (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    FlavorType TEXT REFERENCES Flavors(Type),
+    Flavor INTEGER DEFAULT 0 NOT NULL
+);
+--Yield = Modifier * cutting-production
+CREATE TABLE Belief_CuttingInstantYieldModifier (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    YieldType TEXT REFERENCES Yields(Type),
+    Modifier INTEGER DEFAULT 0
+);
+CREATE TABLE Belief_CuttingInstantYield (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    YieldType TEXT REFERENCES Yields(Type),
+    Yield INTEGER DEFAULT 0
+);
+--Need define Belief_MaxYieldModifierPerFollower before use this, Actual value = 100 + Modifier
+CREATE TABLE Belief_YieldModifierPerFollowerTimes100 (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    YieldType TEXT REFERENCES Yields(Type),
+    Modifier INTEGER DEFAULT 0
+);

@@ -8189,6 +8189,16 @@ bool CvDiplomacyAI::IsCapitalCapturedBy(PlayerTypes ePlayer)
 	return false;
 }
 
+bool CvDiplomacyAI::IsReligionCapturedBy(PlayerTypes ePlayer)
+{
+	if(!MOD_GLOBAL_HOLY_CITY_FOUNDER_CHANGE) return false;
+	ReligionTypes eReligion = GET_PLAYER(ePlayer).GetReligions()->GetReligionCreatedByPlayer();
+	if(eReligion <= RELIGION_PANTHEON) return false;
+	const CvReligion* pkReligion = GC.getGame().GetGameReligions()->GetReligion(eReligion, NO_PLAYER);
+	if(pkReligion->m_eOriginalFounder == m_pPlayer->GetID()) return true;
+	return false;
+}
+
 bool CvDiplomacyAI::IsAngryAboutProtectedMinorKilled(PlayerTypes ePlayer)
 {
 	CvAssertMsg(ePlayer >= 0, "DIPLOMACY_AI: Invalid Player Index.  Please send Anton your save file and version.");
@@ -24230,6 +24240,14 @@ int CvDiplomacyAI::GetCapitalCapturedByScore(PlayerTypes ePlayer)
 	int iOpinionWeight = 0;
 	if(IsCapitalCapturedBy(ePlayer))
 		iOpinionWeight += /*80*/ GC.getOPINION_WEIGHT_CAPTURED_CAPITAL();
+	return iOpinionWeight;
+}
+
+int CvDiplomacyAI::GetReligionCapturedByScore(PlayerTypes ePlayer)
+{
+	int iOpinionWeight = 0;
+	if(IsReligionCapturedBy(ePlayer))
+		iOpinionWeight += /*80*/ GC.getOPINION_WEIGHT_CAPTURED_RELIGION();
 	return iOpinionWeight;
 }
 

@@ -793,5 +793,30 @@
 		<Row Tag="TXT_KEY_PRODMOD_WONDER_TRAIT">
 			<Text>[NEWLINE][ICON_BULLET]奇跡的特質修正值： {1_Num}%</Text>
 		</Row>
+
+		<Replace Tag="TXT_KEY_HOLY_CITY_REGAINED">
+			<Text>[ICON_RELIGION]聖城光復！</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_REGAINED_TT">
+			<Text>{1_LeaderName}光復了{2_ReligionName}的[ICON_RELIGION][COLOR_POSITIVE_TEXT]聖城[ENDCOLOR]：{3_HolyCity}，下回合將重新成為該宗教的領袖！</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED">
+			<Text>[ICON_RELIGION]聖城占領！</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_TT">
+			<Text>{1_LeaderName}占領了{2_ReligionName}的[ICON_RELIGION][COLOR_POSITIVE_TEXT]聖城[ENDCOLOR]：{3_HolyCity}。城市[ICON_RESISTANCE]抵抗結束後，如果該文明中{2_ReligionName}信徒數量超過{2_ReligionName}總信徒的1/2，且超過3/4的城市信仰{2_ReligionName}，其將在新的回合成為{2_ReligionName}的領袖！</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_ALTER">
+			<Text>新的宗教領袖！</Text>
+		</Replace>
+		<Replace Tag="TXT_KEY_HOLY_CITY_OCCUPIED_ALTER_TT">
+			<Text>{1_LeaderName}從{2_ReligionName}的[ICON_RELIGION][COLOR_POSITIVE_TEXT]聖城[ENDCOLOR]：{3_HolyCity}獲得宣稱，成為{2_ReligionName}的宗教領袖！</Text>
+		</Replace>
+		<Row Tag="TXT_KEY_DIPLO_CAPTURED_RELIGION">
+			<Text>[COLOR_NEGATIVE_TEXT]你與他們爭奪宗教正統。[ENDCOLOR]</Text>
+		</Row>
+		<Row Tag="TXT_KEY_BELIEF_CUTTING_NONUS">
+			<Text>宗教信條為{1_CityName}帶來了額外獎勵: {2_BonusStr}。</Text>
+		</Row>
 	</Language_zh_Hant_HK>
 </GameData>

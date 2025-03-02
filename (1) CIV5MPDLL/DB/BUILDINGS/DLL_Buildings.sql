@@ -58,3 +58,6 @@ ALTER TABLE Buildings ADD 'GlobalGrowthFoodNeededModifier' INTEGER DEFAULT 0;
 ALTER TABLE Buildings ADD 'SecondCapitalsExtraScore' INTEGER DEFAULT 0;
 ALTER TABLE Buildings ADD 'NotNeedOccupied' BOOLEAN DEFAULT 0;
 ALTER TABLE Buildings ADD 'TechNoPrereqClasses' TEXT DEFAULT NULL REFERENCES Technologies(Type);
+
+ALTER TABLE Buildings ADD 'CapitalOnly' BOOLEAN DEFAULT 0;
+ALTER TABLE Buildings ADD 'OriginalCapitalOnly' BOOLEAN DEFAULT 0;

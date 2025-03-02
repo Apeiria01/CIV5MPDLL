@@ -786,6 +786,7 @@ protected:
 	LUAAPIEXTN(SetIsBatchMark, void, value);
 	LUAAPIEXTN(IsCheat, bool);
 	LUAAPIEXTN(SetIsCheat, void, value);
+	LUAAPIEXTN(SetGraphicalFortify, void, value);
 };
 
 

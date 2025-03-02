@@ -400,6 +400,7 @@ public:
 	bool IsHasPaidTributeTo(PlayerTypes ePlayer);
 	bool IsNukedBy(PlayerTypes ePlayer);
 	bool IsCapitalCapturedBy(PlayerTypes ePlayer);
+	bool IsReligionCapturedBy(PlayerTypes ePlayer);
 	bool IsAngryAboutProtectedMinorKilled(PlayerTypes ePlayer);
 	bool IsAngryAboutProtectedMinorAttacked(PlayerTypes ePlayer);
 	bool IsAngryAboutProtectedMinorBullied(PlayerTypes ePlayer);
@@ -1041,6 +1042,7 @@ public:
 	int GetRecentAssistScore(PlayerTypes ePlayer);
 	int GetNukedByScore(PlayerTypes ePlayer);
 	int GetCapitalCapturedByScore(PlayerTypes ePlayer);
+	int GetReligionCapturedByScore(PlayerTypes ePlayer);
 	int GetGaveAssistanceToScore(PlayerTypes ePlayer);
 	int GetPaidTributeToScore(PlayerTypes ePlayer);
 	int GetLikedTheirProposalScore(PlayerTypes ePlayer);

@@ -665,6 +665,7 @@ public:
 	int GetReligionExtraMissionarySpreads(ReligionTypes eReligion);
 	int GetBeliefExtraMissionarySpreads(BeliefTypes eBelief);
 	int GetCuttingBonusModifier() const;
+	void DoCuttingExtraInstantYield(int iBaseYield);
 #endif	
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
 #if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
@@ -1033,6 +1034,7 @@ public:
 	int getFreePromotionCount(PromotionTypes eIndex) const;
 	bool isFreePromotion(PromotionTypes eIndex) const;
 	void changeFreePromotionCount(PromotionTypes eIndex, int iChange);
+	int getFreeFollowingPromotionCount(PromotionTypes eIndex) const;
 
 	int getTradeRouteDomainRangeModifier(DomainTypes eIndex) const;
 	void changeTradeRouteDomainRangeModifier(DomainTypes eIndex, int iChange);
@@ -1298,6 +1300,7 @@ public:
 	int CountWorkedTerrain(TerrainTypes iTerrainType) const;
 #endif
 
+	void DoReligionFounderChange();
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
 	//int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
 	bool HasYieldFromOtherYield() const;

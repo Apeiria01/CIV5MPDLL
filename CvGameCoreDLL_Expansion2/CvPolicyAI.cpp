@@ -411,12 +411,15 @@ void CvPolicyAI::DoChooseIdeology(CvPlayer *pPlayer)
 	}
 	else
 	{
-		iFreedomTotal = (iTechPriority + iCulturePriority) * 125 / 100;
+		iFreedomTotal += iCulturePriority * 150 / 100;
+		iFreedomTotal += iTechPriority * 125 / 100;
 		iFreedomTotal += iDiploPriority * 50 /100;
-		iAutocracyTotal = (iDiploPriority + iCulturePriority) * 50 /100;
-		iAutocracyTotal += iConquestPriority * 2;
-		iOrderTotal = (iTechPriority + iConquestPriority) * 125 / 100;
-		iOrderTotal += iCulturePriority * 50 /100;
+		iAutocracyTotal += iDiploPriority * 25 /100;
+		iAutocracyTotal += iTechPriority * 25 / 100;
+		iAutocracyTotal += iConquestPriority * 300 / 100;
+		iOrderTotal += iTechPriority * 175 / 100;
+		iOrderTotal += iConquestPriority * 125 / 100;
+		iOrderTotal += iCulturePriority * 25 /100;
 	}
 	
 	int iGrandTotal = iFreedomTotal + iAutocracyTotal + iOrderTotal;

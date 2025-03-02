@@ -170,6 +170,7 @@ public:
 	BuildingTypes GetFreeBuildingOnConquest() const;
 
 	bool IsTrainedAll() const;
+	bool IsCanConquerUC() const;
 	bool IsWLKDCityNoResearchCost() const;
 	bool IsGoodyUnitUpgradeFirst() const;
 	bool IsFightWellDamaged() const;
@@ -181,6 +182,7 @@ public:
 	bool IsEmbarkedToLandFlatCost() const;
 	bool IsNoHillsImprovementMaintenance() const;
 	bool IsTechBoostFromCapitalScienceBuildings() const;
+	bool IsArtistGoldenAgeTechBoost() const;
 	bool IsStaysAliveZeroCities() const;
 	bool IsFaithFromUnimprovedForest() const;
 #if defined(MOD_TRAITS_ANY_BELIEF)
@@ -455,6 +457,7 @@ protected:
 
 	
 	bool m_bTrainedAll;
+	bool m_bCanConquerUC;
 	bool m_bFightWellDamaged;
 	bool m_bBuyOwnedTiles;
 	bool m_bMoveFriendlyWoodsAsRoad;
@@ -464,6 +467,7 @@ protected:
 	bool m_bEmbarkedToLandFlatCost;
 	bool m_bNoHillsImprovementMaintenance;
 	bool m_bTechBoostFromCapitalScienceBuildings;
+	bool m_bArtistGoldenAgeTechBoost;
 	bool m_bStaysAliveZeroCities;
 	bool m_bFaithFromUnimprovedForest;
 	bool m_bWLKDCityNoResearchCost;
@@ -1061,6 +1065,10 @@ public:
 	{
 		return m_bTrainedAll;
 	};
+	bool IsCanConquerUC() const
+	{
+		return m_bCanConquerUC;
+	};
 	bool IsFightWellDamaged() const
 	{
 		return m_bFightWellDamaged;
@@ -1096,6 +1104,10 @@ public:
 	bool IsTechBoostFromCapitalScienceBuildings() const
 	{
 		return m_bTechBoostFromCapitalScienceBuildings;
+	};
+	bool IsArtistGoldenAgeTechBoost() const
+	{
+		return m_bArtistGoldenAgeTechBoost;
 	};
 	bool IsStaysAliveZeroCities() const
 	{
@@ -1505,6 +1517,7 @@ private:
 #endif
 	// Saved
 	bool m_bTrainedAll = false;
+	bool m_bCanConquerUC = false;
 	bool m_bFightWellDamaged = false;
 	bool m_bBuyOwnedTiles = false;
 	bool m_bMoveFriendlyWoodsAsRoad = false;
@@ -1514,6 +1527,7 @@ private:
 	bool m_bEmbarkedToLandFlatCost = false;
 	bool m_bNoHillsImprovementMaintenance = false;
 	bool m_bTechBoostFromCapitalScienceBuildings = false;
+	bool m_bArtistGoldenAgeTechBoost = false;
 	bool m_bStaysAliveZeroCities = false;
 	bool m_bFaithFromUnimprovedForest = false;
 #if defined(MOD_TRAITS_ANY_BELIEF)

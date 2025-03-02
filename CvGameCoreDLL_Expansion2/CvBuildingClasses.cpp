@@ -362,7 +362,10 @@ CvBuildingEntry::CvBuildingEntry(void):
 #endif
 	m_iNumFreeUnit(0),
 	m_iNumFreeUnitTotal(0),
-	m_pFreeUnits(nullptr)
+	m_pFreeUnits(nullptr),
+
+	m_bCapitalOnly(false),
+	m_bOriginalCapitalOnly(false)
 
 {
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
@@ -755,6 +758,9 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 	m_iGlobalGrowthFoodNeededModifier = kResults.GetInt("GlobalGrowthFoodNeededModifier");
 	m_iSecondCapitalsExtraScore = kResults.GetInt("SecondCapitalsExtraScore");
+
+	m_bCapitalOnly = kResults.GetBool("CapitalOnly");
+	m_bOriginalCapitalOnly = kResults.GetBool("OriginalCapitalOnly");
 
 	//References
 	const char* szTextVal;
@@ -4407,6 +4413,18 @@ int CvBuildingEntry::GetTradeRouteFromTheCityYields(YieldTypes eYieldTypes) cons
 	}
 
 	return m_aTradeRouteFromTheCityYields[eYieldTypes];
+}
+
+//This building can only be built in capital
+bool CvBuildingEntry::IsCapitalOnly() const
+{
+	return m_bCapitalOnly;
+}
+
+//This building can only be built in original capital city
+bool CvBuildingEntry::IsOriginalCapitalOnly() const
+{
+	return m_bOriginalCapitalOnly;
 }
 
 

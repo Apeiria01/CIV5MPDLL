@@ -1199,6 +1199,7 @@
     <Row Class="6" Name="GLOBAL_SP_BARBARIAN_ENHANCE" Value="0"/>
 
     <Row Class="6" Name="GLOBAL_UNIQUE_PROJECT_CAPTURE" Value="0"/>
+    <Row Class="6" Name="GLOBAL_HOLY_CITY_FOUNDER_CHANGE" Value="0"/>
     <Row Class="6" Name="GLOBAL_OPTIONAL_UC" Value="0"/>
 
     <Row Class="6" Name="DISABLE_AI_DO_TURN_DIPLOMACY_TO_HUMAN" Value="0"/>

@@ -18,7 +18,7 @@
 #include "../CvUnitCombat.h"
 #include <CvGameCoreUtils.h>
 #include "NetworkMessageUtil.h"
-
+#include "CvDllUnit.h"
 
 
 //Utility macro for registering methods
@@ -858,6 +858,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(SetIsBatchMark);
 	Method(IsCheat);
 	Method(SetIsCheat);
+	Method(SetGraphicalFortify);
 }
 //------------------------------------------------------------------------------
 const char* CvLuaUnit::GetTypeName()
@@ -6724,3 +6725,11 @@ LUAAPIIMPL(Unit, SetIsBatchMark)
 
 LUAAPIIMPL(Unit, IsCheat)
 LUAAPIIMPL(Unit, SetIsCheat)
+int CvLuaUnit::lSetGraphicalFortify(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	bool bFortify = lua_toboolean(L, 2);
+	auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(pkUnit));
+	gDLL->GameplayUnitFortify(pDllUnit.get(), bFortify);
+	return 0;
+}

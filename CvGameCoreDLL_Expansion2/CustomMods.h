@@ -983,6 +983,7 @@
 #define MOD_GLOBAL_UNIT_BARBARIAN_CAN_TRAIN gCustomMods.isGLOBAL_UNIT_BARBARIAN_CAN_TRAIN()
 #define MOD_GLOBAL_SP_BARBARIAN_ENHANCE gCustomMods.isGLOBAL_SP_BARBARIAN_ENHANCE()
 #define MOD_GLOBAL_UNIQUE_PROJECT_CAPTURE gCustomMods.isGLOBAL_UNIQUE_PROJECT_CAPTURE()
+#define MOD_GLOBAL_HOLY_CITY_FOUNDER_CHANGE gCustomMods.isGLOBAL_HOLY_CITY_FOUNDER_CHANGE()
 #define MOD_GLOBAL_OPTIONAL_UC gCustomMods.isGLOBAL_OPTIONAL_UC()
 
 #define MOD_DISABLE_AI_DO_TURN_DIPLOMACY_TO_HUMAN gCustomMods.isDISABLE_AI_DO_TURN_DIPLOMACY_TO_HUMAN();
@@ -1262,6 +1263,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_ReligionEnhanced				"ReligionEnhanced",				"iiii"
 #define GAMEEVENT_ReligionFounded				"ReligionFounded",				"iiiiiiii"
 #define GAMEEVENT_ReligionReformed				"ReligionReformed",				"iiiiiii"
+#define GAMEEVENT_ReligionFounderChanged		"ReligionFounderChanged",		"iiiib"
 #define GAMEEVENT_ResolutionProposing			"ResolutionProposing",			"ii"
 #define GAMEEVENT_ResolutionResult				"ResolutionResult",				"iibb"
 #define GAMEEVENT_ResolutionVoting				"ResolutionVoting",				"ii"
@@ -1379,6 +1381,29 @@ enum BattleTypeTypes
 #define MOD_SERIALIZE_WRITE_HASH(stream, member, type, size) __noop
 #endif
 
+#define SERIALIZE_READ_UNORDERED_MAP(stream, map) \
+{ \
+	int iLen = 0; \
+	kStream >> iLen; \
+	map.clear(); \
+	for (int i = 0; i < iLen; i++) \
+	{ \
+		decltype(map)::key_type key = 0; \
+		decltype(map)::mapped_type value = 0; \
+		kStream >> key; \
+		kStream >> value; \
+		map[key] = value; \
+	} \
+}
+#define SERIALIZE_WRITE_UNORDERED_MAP(stream, map) \
+{ \
+	stream << map.size(); \
+	for (auto iter = map.begin(); iter != map.end(); iter++) \
+	{ \
+		stream << (int) iter->first; \
+		stream << (int) iter->second; \
+	} \
+}
 
 // Custom database table name and columns
 #define MOD_DB_TABLE "CustomModOptions"
@@ -1758,6 +1783,7 @@ public:
 	MOD_OPT_DECL(GLOBAL_UNIT_BARBARIAN_CAN_TRAIN);
 	MOD_OPT_DECL(GLOBAL_SP_BARBARIAN_ENHANCE);
 	MOD_OPT_DECL(GLOBAL_UNIQUE_PROJECT_CAPTURE);
+	MOD_OPT_DECL(GLOBAL_HOLY_CITY_FOUNDER_CHANGE);
 	MOD_OPT_DECL(GLOBAL_OPTIONAL_UC);
 
 	MOD_OPT_DECL(DISABLE_AI_DO_TURN_DIPLOMACY_TO_HUMAN);
