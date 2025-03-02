@@ -395,6 +395,7 @@ CvPlayer::CvPlayer() :
 	, m_iGlobalRangedStrikeModifier(0)
 	, m_iResearchTotalCostModifier(0)
 	, m_iLiberatedInfluence(0)
+	, m_iExtraUnitPlayerInstances(0)
 	, m_iWaterTileDamageGlobal(0)
 	, m_iWaterTileMovementReduceGlobal(0)
 	, m_iWaterTileTurnDamageGlobal(0)
@@ -1192,6 +1193,7 @@ void CvPlayer::uninit()
 	m_iGlobalRangedStrikeModifier = 0;
 	m_iResearchTotalCostModifier = 0;
 	m_iLiberatedInfluence = 0;
+	m_iExtraUnitPlayerInstances = 0;
 	m_iWaterTileDamageGlobal = 0;
 	m_iWaterTileMovementReduceGlobal = 0;
 	m_iWaterTileTurnDamageGlobal = 0;
@@ -10049,7 +10051,7 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	ChangeGlobalRangedStrikeModifier(pBuildingInfo->GetGlobalRangedStrikeModifier()* iChange);
 	ChangeResearchTotalCostModifier(pBuildingInfo->GetResearchTotalCostModifier()* iChange);
 	ChangeLiberatedInfluence(pBuildingInfo->GetLiberatedInfluence()* iChange);
-
+	ChangeExtraUnitPlayerInstances(pBuildingInfo->GetExtraUnitPlayerInstances()* iChange);
 	ChangeWaterTileDamageGlobal(pBuildingInfo->GetWaterTileDamageGlobal()* iChange);
 	ChangeWaterTileMovementReduceGlobal(pBuildingInfo->GetWaterTileMovementReduceGlobal()* iChange);
 	ChangeWaterTileTurnDamageGlobal(pBuildingInfo->GetWaterTileTurnDamageGlobal()* iChange);
@@ -23550,7 +23552,7 @@ bool CvPlayer::isUnitClassMaxedOut(UnitClassTypes eIndex, int iExtra) const
 
 	CvAssertMsg(getUnitClassCount(eIndex) <= pkUnitClassInfo->getMaxPlayerInstances(), "getUnitClassCount is expected to be less than maximum bound of MaxPlayerInstances (invalid index)");
 
-	return ((getUnitClassCount(eIndex) + iExtra) >= pkUnitClassInfo->getMaxPlayerInstances());
+	return ((getUnitClassCount(eIndex) + iExtra) >= pkUnitClassInfo->getMaxPlayerInstances() + GetExtraUnitPlayerInstances());
 }
 
 
@@ -28327,7 +28329,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGlobalRangedStrikeModifier;
 	kStream >> m_iResearchTotalCostModifier;
 	kStream >> m_iLiberatedInfluence;
-
+	kStream >> m_iExtraUnitPlayerInstances;
 	kStream >> m_iWaterTileDamageGlobal;
 	kStream >> m_iWaterTileMovementReduceGlobal;
 	kStream >> m_iWaterTileTurnDamageGlobal;
@@ -29103,7 +29105,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGlobalRangedStrikeModifier;
 	kStream << m_iResearchTotalCostModifier;
 	kStream << m_iLiberatedInfluence;
-
+	kStream << m_iExtraUnitPlayerInstances;
 	kStream << m_iWaterTileDamageGlobal;
 	kStream << m_iWaterTileMovementReduceGlobal;
 	kStream << m_iWaterTileTurnDamageGlobal;
@@ -30181,7 +30183,27 @@ void CvPlayer::ChangeLiberatedInfluence(int iChange)
 	}
 }
 
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetExtraUnitPlayerInstances() const
+{
+	return m_iExtraUnitPlayerInstances;
+}
 
+//	--------------------------------------------------------------------------------
+void CvPlayer::SetExtraUnitPlayerInstances(int iValue)
+{
+	CvAssert(iValue >= 0);
+	m_iExtraUnitPlayerInstances = iValue;
+}
+
+//	--------------------------------------------------------------------------------
+void CvPlayer::ChangeExtraUnitPlayerInstances(int iChange)
+{
+	if (iChange != 0)
+	{
+		SetExtraUnitPlayerInstances(GetExtraUnitPlayerInstances() + iChange);
+	}
+}
 
 
 //	--------------------------------------------------------------------------------
