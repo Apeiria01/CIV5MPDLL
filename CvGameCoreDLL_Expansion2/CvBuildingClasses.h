@@ -234,6 +234,7 @@ public:
 	int GetPopulationChange() const;
 	int GetMinorCivFriendship() const;
 	int GetLiberatedInfluence() const;
+	int GetExtraUnitPlayerInstances() const;
 	int GetGlobalCityStrengthMod() const;
 	int GetGlobalRangedStrikeModifier() const;
 	int GetResearchTotalCostModifier() const;
@@ -694,6 +695,7 @@ private:
 	int m_iPopulationChange;
 	int m_iMinorCivFriendship;
 	int m_iLiberatedInfluence;
+	int m_iExtraUnitPlayerInstances;
 	int m_iResetDamageValue;
 	int m_iReduceDamageValue;
 
