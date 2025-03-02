@@ -430,28 +430,28 @@ CvUnit::CvUnit() :
 #endif
 
 #if defined(MOD_ROG_CORE)
-		, m_aiNumTimesAttackedThisTurn("CvUnit::m_aiNumTimesAttackedThisTurn", m_syncArchive/*, true*/)
-		, m_iOriginCity()
-		, m_iMoveLfetAttackMod(0)
-		, m_iMoveUsedAttackMod(0)
-		, m_iGoldenAgeMod(0)
-		, m_iAntiHigherPopMod(0)
-		, m_iRangedSupportFireMod(0)
-		, m_iBarbCombatBonus(0)
-		, m_iDamageAoEFortified(0)
-		, m_iCanMoraleBreak(0)
-		, m_iIgnoreDamageChance(0)
-		, m_iWorkRateMod(0)
-		, m_iTurnDamage(0)
-		, m_iTurnDamagePercent(0)
-		, m_iNearbyEnemyDamage(0)
-		, m_iAdjacentEnemySapMovement(0)
-		, m_iAdjacentSapExperience(0)
-		, m_iAdjacentFriendlySapMovement(0)
-		, m_iPillageReplenishMoves(0)
-		, m_iPillageReplenishHealth(0)
-		, m_iAOEDamageOnKill(0)
-		, m_iAOEDamageOnPillage(0)
+	, m_aiNumTimesAttackedThisTurn()
+	, m_iOriginCity()
+	, m_iMoveLfetAttackMod(0)
+	, m_iMoveUsedAttackMod(0)
+	, m_iGoldenAgeMod(0)
+	, m_iAntiHigherPopMod(0)
+	, m_iRangedSupportFireMod(0)
+	, m_iBarbCombatBonus(0)
+	, m_iDamageAoEFortified(0)
+	, m_iCanMoraleBreak(0)
+	, m_iIgnoreDamageChance(0)
+	, m_iWorkRateMod(0)
+	, m_iTurnDamage(0)
+	, m_iTurnDamagePercent(0)
+	, m_iNearbyEnemyDamage(0)
+	, m_iAdjacentEnemySapMovement(0)
+	, m_iAdjacentSapExperience(0)
+	, m_iAdjacentFriendlySapMovement(0)
+	, m_iPillageReplenishMoves(0)
+	, m_iPillageReplenishHealth(0)
+	, m_iAOEDamageOnKill(0)
+	, m_iAOEDamageOnPillage(0)
 #endif
 
 	, m_iCannotBeCapturedCount(0)
@@ -1719,9 +1719,6 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		}
 
 #if defined(MOD_API_UNIFIED_YIELDS)
-		m_aiNumTimesAttackedThisTurn.clear();
-		m_aiNumTimesAttackedThisTurn.resize(REALLY_MAX_PLAYERS);
-
 		m_yieldFromKills.clear();
 		m_yieldFromBarbarianKills.clear();
 		
@@ -1732,11 +1729,6 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		{
 			m_yieldFromKills.setAt(i,0);
 			m_yieldFromBarbarianKills.setAt(i,0);
-		}
-
-		for (int iI = 0; iI < REALLY_MAX_PLAYERS; iI++)
-		{
-			m_aiNumTimesAttackedThisTurn.setAt(iI, 0);
 		}
 #endif
 
@@ -1853,6 +1845,7 @@ void CvUnit::uninitInfos()
 #endif
 	m_extraUnitCombatModifier.clear();
 	m_unitClassModifier.clear();
+	m_aiNumTimesAttackedThisTurn.clear();
 	m_iCombatModPerAdjacentUnitCombatModifier.clear();
 	m_iCombatModPerAdjacentUnitCombatAttackMod.clear();
 	m_iCombatModPerAdjacentUnitCombatDefenseMod.clear();
@@ -2856,10 +2849,7 @@ void CvUnit::doTurn()
 	ChangeNumTimesDoFallBackThisTurn(-1 * GetNumTimesDoFallBackThisTurn());
 	ChangeNumTimesBeFallBackThisTurn(-1 * GetNumTimesBeFallBackThisTurn());
 
-	for (int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
-	{
-		ChangeNumTimesAttackedThisTurn((PlayerTypes)iPlayerLoop, (-1 * GetNumTimesAttackedThisTurn((PlayerTypes)iPlayerLoop)));
-	}
+	ClearNumTimesAttackedThisTurn();
 
 	int turndamage = GetTurnDamage()+ (GetMaxHitPoints() * GetTurnDamagePercent());
 	if (0 != turndamage)
@@ -25866,7 +25856,7 @@ int CvUnit::getUnitClassModifier(UnitClassTypes eIndex) const
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
 	auto it = m_unitClassModifier.find(eIndex);
-	if (it != m_unitClassModifier.end()) return  it->second;
+	if (it != m_unitClassModifier.end()) return it->second;
 	else return 0;
 }
 
@@ -27163,6 +27153,7 @@ void CvUnit::read(FDataStream& kStream)
 #endif
 
 #if defined(MOD_ROG_CORE)
+	SERIALIZE_READ_UNORDERED_MAP(kStream, m_aiNumTimesAttackedThisTurn);
 	kStream >> m_iOriginCity;
 	kStream >> m_iMoveLfetAttackMod;
 	kStream >> m_iMoveUsedAttackMod;
@@ -27565,6 +27556,7 @@ void CvUnit::write(FDataStream& kStream) const
 #endif
 
 #if defined(MOD_ROG_CORE)
+	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_aiNumTimesAttackedThisTurn);
 	kStream << m_iOriginCity;
 	kStream << m_iMoveLfetAttackMod;
 	kStream << m_iMoveUsedAttackMod;
@@ -32510,12 +32502,20 @@ CvString CvUnit::GetPlotCorruptionScoreReport() const
 #endif
 
 
+void CvUnit::ClearNumTimesAttackedThisTurn()
+{
+	m_aiNumTimesAttackedThisTurn.clear();
+}
 void CvUnit::ChangeNumTimesAttackedThisTurn(PlayerTypes ePlayer, int iValue)
 {
 	VALIDATE_OBJECT
     CvAssertMsg(ePlayer >= 0, "ePlayer expected to be >= 0");
 	CvAssertMsg(ePlayer < REALLY_MAX_PLAYERS, "ePlayer expected to be < NUM_DOMAIN_TYPES")
-	m_aiNumTimesAttackedThisTurn.setAt(ePlayer, m_aiNumTimesAttackedThisTurn[ePlayer] + iValue);
+	m_aiNumTimesAttackedThisTurn[ePlayer] += iValue;
+	if (m_aiNumTimesAttackedThisTurn[ePlayer] == 0)
+	{
+		m_aiNumTimesAttackedThisTurn.erase(ePlayer);
+	}
 }
 
 int CvUnit::GetNumTimesAttackedThisTurn(PlayerTypes ePlayer) const
@@ -32523,7 +32523,9 @@ int CvUnit::GetNumTimesAttackedThisTurn(PlayerTypes ePlayer) const
 	VALIDATE_OBJECT
 	CvAssertMsg(ePlayer >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(ePlayer < REALLY_MAX_PLAYERS, "eIndex expected to be < NUM_DOMAIN_TYPES");
-	return m_aiNumTimesAttackedThisTurn[ePlayer];
+	auto it = m_aiNumTimesAttackedThisTurn.find(ePlayer);
+	if (it != m_aiNumTimesAttackedThisTurn.end()) return it->second;
+	else return 0;
 }
 
 int CvUnit::GetInstantYieldPerReligionFollowerConverted(YieldTypes eIndex) const

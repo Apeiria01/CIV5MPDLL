@@ -988,6 +988,7 @@ public:
 	void MoveToEnemyPlotDamage(CvPlot* pWhere);
 
 #if defined(MOD_ROG_CORE)
+	void ClearNumTimesAttackedThisTurn();
 	void ChangeNumTimesAttackedThisTurn(PlayerTypes ePlayer, int iValue);
 	int GetNumTimesAttackedThisTurn(PlayerTypes ePlayer) const;
 
@@ -2326,7 +2327,7 @@ protected:
 
 
 #if defined(MOD_ROG_CORE)
-	FAutoVariable<std::vector<int>, CvUnit> m_aiNumTimesAttackedThisTurn;
+	std::tr1::unordered_map<int, int> m_aiNumTimesAttackedThisTurn;
 	FAutoVariable<int, CvUnit> m_iMultiAttackBonus;
 	FAutoVariable<int, CvUnit> m_iNumAttacksMadeThisTurnAttackMod;
 	FAutoVariable<int, CvUnit> m_iNumSpyDefenseMod;
