@@ -1853,7 +1853,7 @@ int CvBuilderTaskingAI::GetBuildTimeWeight(CvUnit* pUnit, CvPlot* pPlot, BuildTy
 	}
 
 	int iBuildTimeNormal = pPlot->getBuildTime(eBuild, m_pPlayer->GetID());
-	int iBuildTurnsLeft = pPlot->getBuildTurnsLeft(eBuild, m_pPlayer->GetID(), pUnit->workRate(true), pUnit->workRate(true));
+	int iBuildTurnsLeft = pPlot->getBuildTurnsLeft(eBuild, m_pPlayer->GetID(), pUnit->workRate(true, eBuild), pUnit->workRate(true, eBuild));
 	int iBuildTime = min(iBuildTimeNormal, iBuildTurnsLeft);
 	if(bIgnoreFeatureTime)
 	{

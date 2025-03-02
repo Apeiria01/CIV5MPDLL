@@ -276,6 +276,7 @@ public:
 	bool IsAuraPromotionNoSelf() const;
 	bool GetDomainAuraValid(int i) const;
 #endif
+	bool IsIncludeBuild() const;
 #if defined(MOD_PROMOTION_NEW_EFFECT_FOR_SP)
 	int GetMeleeAttackModifier() const;
 	int GetCaptureEmenyExtraMax() const;
@@ -445,6 +446,7 @@ public:
 #if defined(MOD_ROG_CORE)
 	bool GetUnitType(int i) const;
 #endif
+	bool GetBuildType(int i) const;
 
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	bool IsUnitNaming(int i) const;
@@ -659,6 +661,7 @@ protected:
 	bool m_bAuraPromotionNoSelf;
 	bool* m_pbDomainAuraValid;
 #endif
+	bool m_bIncludeBuild;
 #if defined(MOD_PROMOTION_NEW_EFFECT_FOR_SP)
 	int m_iMeleeAttackModifier;
 	int m_iCaptureEmenyExtraMax;
@@ -926,6 +929,7 @@ protected:
 	std::vector<int> m_vPrePromotions;
 #endif	
 	bool* m_pbUnitType;
+	bool* m_pbBuildType;
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	bool* m_pbUnitName;
 #endif

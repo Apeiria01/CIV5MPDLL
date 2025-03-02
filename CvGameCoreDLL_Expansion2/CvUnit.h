@@ -2124,6 +2124,8 @@ public:
 	int GetInstantYieldPerReligionFollowerConverted(YieldTypes eIndex) const;
 	void ChangeInstantYieldPerReligionFollowerConverted(YieldTypes eIndex, int iChange);
 
+	void ChangePromotionBuilds(BuildTypes eIndex,int iChange);
+    bool IsPromotionBuilds(BuildTypes eIndex) const;
 protected:
 	const MissionQueueNode* HeadMissionQueueNode() const;
 	MissionQueueNode* HeadMissionQueueNode();
@@ -2493,6 +2495,7 @@ protected:
 #endif
 	FAutoVariable<std::vector<int>, CvUnit> m_extraUnitCombatModifier;
 	std::tr1::unordered_map<int, int> m_unitClassModifier;
+	std::tr1::unordered_map<int, int> m_piGetPromotionBuilds;
 
 	int m_iMissionTimer;
 	FAutoVariable<int, CvUnit> m_iMissionAIX;

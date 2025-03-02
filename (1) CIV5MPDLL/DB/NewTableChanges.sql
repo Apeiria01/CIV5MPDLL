@@ -307,3 +307,8 @@ CREATE TABLE Promotion_AuraPromotionProviderNum (
     `AuraPromotionType` TEXT DEFAULT '' REFERENCES UnitPromotions(Type),
     'ProviderNum' INTEGER DEFAULT 0
 );
+-- Allow build from promotion
+CREATE TABLE Promotion_Builds (
+	PromotionType text REFERENCES UnitPromotions(Type),
+	BuildType text REFERENCES Builds(Type)
+);
