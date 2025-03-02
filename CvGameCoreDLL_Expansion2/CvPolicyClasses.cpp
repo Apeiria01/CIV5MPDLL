@@ -202,6 +202,7 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_bDummy(false),
 #endif
 	m_bAlwaysWeLoveKindDayInGoldenAge(false),
+	m_bGlobalUnlimitedOneTurnTGCP(false),
 	m_bNoResistance(false),
 	m_bUpgradeAllTerritory(false),
 	m_iDefenseBoost(0),
@@ -527,6 +528,7 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	}
 #endif
 	m_bAlwaysWeLoveKindDayInGoldenAge = kResults.GetInt("AlwaysWeLoveKindDayInGoldenAge");
+	m_bGlobalUnlimitedOneTurnTGCP = kResults.GetInt("GlobalUnlimitedOneTurnTGCP");
 	m_bNoResistance = kResults.GetInt("NoResistance");
 	m_bUpgradeAllTerritory = kResults.GetInt("UpgradeAllTerritory");
 	m_iDefenseBoost = kResults.GetInt("DefenseBoostAllCities");
@@ -2363,6 +2365,10 @@ bool CvPolicyEntry::IsDummy() const
 bool CvPolicyEntry::IsAlwaysWeLoveKindDayInGoldenAge() const
 {
 	return m_bAlwaysWeLoveKindDayInGoldenAge;
+}
+bool CvPolicyEntry::IsGlobalUnlimitedOneTurnTGCP() const
+{
+	return m_bGlobalUnlimitedOneTurnTGCP;
 }
 
 bool CvPolicyEntry::IsNoResistance() const

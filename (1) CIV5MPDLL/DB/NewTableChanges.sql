@@ -307,3 +307,4 @@ CREATE TABLE Promotion_AuraPromotionProviderNum (
     `AuraPromotionType` TEXT DEFAULT '' REFERENCES UnitPromotions(Type),
     'ProviderNum' INTEGER DEFAULT 0
 );
+ALTER TABLE Policies ADD COLUMN 'GlobalUnlimitedOneTurnTGCP' BOOLEAN DEFAULT 0;

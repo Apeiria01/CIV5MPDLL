@@ -5918,6 +5918,38 @@ void CvTeam::setHasTech(TechTypes eIndex, bool bNewValue, PlayerTypes ePlayer, b
 				if (kPlayer.GetPlayerTechs()->IsResearchingTech(eIndex))
 				{
 					kPlayer.popResearch(eIndex);
+					bool bPolicyActive = false;
+					for (int iPolicy = 0; iPolicy < GC.getNumPolicyInfos(); ++iPolicy)
+					{
+						const PolicyTypes ePolicy = static_cast<PolicyTypes>(iPolicy);
+						const CvPolicyEntry* pPolicy = GC.getPolicyInfo(ePolicy);
+						if(pPolicy && 
+						pPolicy->IsGlobalUnlimitedOneTurnTGCP() &&
+						kPlayer.GetPlayerPolicies()->HasPolicy(ePolicy))
+						{
+							bPolicyActive = true;
+							break;
+						}
+					}
+					if (bPolicyActive)
+					{
+						if (!kPlayer.isHuman()) {
+							kPlayer.AI_chooseResearch();
+						}
+						TechTypes eCurrentResearch = kPlayer.GetPlayerTechs()->GetCurrentResearch();
+						if (eCurrentResearch != NO_TECH)
+						{
+							int iResearchModifier = kPlayer.calculateResearchModifier(eCurrentResearch);
+							long long iOverflowResearch = kPlayer.getOverflowResearchTimes100();
+							iOverflowResearch = iOverflowResearch * iResearchModifier / 100;
+							kPlayer.setOverflowResearchTimes100(0);
+							GetTeamTechs()->ChangeResearchProgressTimes100(
+								eCurrentResearch, 
+								iOverflowResearch, 
+								eLoopPlayer
+							);
+						}
+					}
 #ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH
 					if (MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH) {
 						if (!kPlayer.isHuman()) {
