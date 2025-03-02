@@ -9583,55 +9583,50 @@ void CvDiplomacyAI::DoUpdateOnePlayerMilitaryAggressivePosture(PlayerTypes ePlay
 	for(pLoopUnit = kPlayer.firstUnit(&iUnitLoop); pLoopUnit != NULL; pLoopUnit = kPlayer.nextUnit(&iUnitLoop))
 	{
 		// Don't be scared of noncombat Units!
-		if(pLoopUnit->IsCombatUnit())
+		if(!pLoopUnit->IsCombatUnit() || pLoopUnit->getUnitInfo().IsNoAggressive()) continue;
+
+		CvPlot* pUnitPlot = pLoopUnit->plot();
+		// Can we actually see this Unit's Plot?  No cheating!
+		if(!pUnitPlot->isVisible(eOurTeam)) continue;
+
+		// On our home front
+		if(!pUnitPlot->IsHomeFrontForPlayer(eOurPlayerID)) continue;
+
+		// At war with someone? Because if this is Unit in the vicinity of another player he's already at war with, don't count this Unit as aggressive
+		bool bUnitVicinityOther = false;
+		if(bIsAtWarWithSomeone)
 		{
-			CvPlot* pUnitPlot = pLoopUnit->plot();
-			// Can we actually see this Unit's Plot?  No cheating!
-			if(pUnitPlot->isVisible(eOurTeam))
+			// Loop through all players...
+			for(iOtherPlayerLoop = 0; iOtherPlayerLoop < MAX_CIV_PLAYERS; iOtherPlayerLoop++)
 			{
-				// On our home front
-				if(pUnitPlot->IsHomeFrontForPlayer(eOurPlayerID))
+				eLoopOtherPlayer = (PlayerTypes) iOtherPlayerLoop;
+
+				// Don't look at us or see if this player is at war with himself
+				if(eLoopOtherPlayer == ePlayer || eLoopOtherPlayer == eOurPlayerID) continue;
+
+				// At war with this player?
+				if(GET_PLAYER(eLoopOtherPlayer).isAlive() 
+				&& kTeam.isAtWar(GET_PLAYER(eLoopOtherPlayer).getTeam())
+				&& pUnitPlot->IsHomeFrontForPlayer(eLoopOtherPlayer))
 				{
-					// At war with someone?  Because if this is Unit in the vicinity of another player he's already at war with, don't count this Unit as aggressive
-					if(bIsAtWarWithSomeone)
-					{
-						// Loop through all players...
-						for(iOtherPlayerLoop = 0; iOtherPlayerLoop < MAX_CIV_PLAYERS; iOtherPlayerLoop++)
-						{
-							eLoopOtherPlayer = (PlayerTypes) iOtherPlayerLoop;
-
-							// Don't look at us or see if this player is at war with himself
-							if(eLoopOtherPlayer != ePlayer && eLoopOtherPlayer != eOurPlayerID)
-							{
-								// At war with this player?
-								if(kTeam.isAtWar(GET_PLAYER(eLoopOtherPlayer).getTeam()))
-								{
-									if(GET_PLAYER(eLoopOtherPlayer).isAlive())
-									{
-										if(pUnitPlot->IsHomeFrontForPlayer(eLoopOtherPlayer))
-										{
-											continue;
-										}
-									}
-								}
-							}
-						}
-					}
-
-					iValueToAdd = 10;
-
-					// If the Unit is in the other player's territory, halve it's "aggression value," since he may just be defending himself
-					if(pLoopUnit->plot()->isOwned())
-					{
-						if(pLoopUnit->plot()->getOwner() == ePlayer)
-							iValueToAdd /= 2;
-					}
-
-					// Maybe look at Unit Power here instead?
-					iUnitValueOnMyHomeFront += iValueToAdd;
+					bUnitVicinityOther = true;
+					break;
 				}
 			}
 		}
+		if(bUnitVicinityOther) continue;
+
+		iValueToAdd = 10;
+
+		// If the Unit is in the other player's territory, halve it's "aggression value," since he may just be defending himself
+		if(pLoopUnit->plot()->isOwned())
+		{
+			if(pLoopUnit->plot()->getOwner() == ePlayer)
+				iValueToAdd /= 2;
+		}
+
+		// Maybe look at Unit Power here instead?
+		iUnitValueOnMyHomeFront += iValueToAdd;
 	}
 
 	// So how threatening is he being?
