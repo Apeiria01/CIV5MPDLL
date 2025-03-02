@@ -43,6 +43,7 @@
 #include "CvDllCity.h"
 #include "CvGameQueries.h"
 #include "CvBarbarians.h"
+#include <map>
 
 
 
@@ -573,6 +574,7 @@ CvUnit::CvUnit() :
 	, m_iMapLayer(DEFAULT_UNIT_MAP_LAYER)
 	, m_iNumGoodyHutsPopped(0)
 	, m_iLastGameTurnAtFullHealth(-1)
+	, m_piGetPromotionBuilds()
 {
 	initPromotions();
 	OBJECT_ALLOCATED
@@ -1162,6 +1164,7 @@ void CvUnit::uninit()
 	m_Promotions.Uninit();
 
 	m_kLastPath.clear();
+	m_piGetPromotionBuilds.clear();
 
 	delete m_pReligion;
 	m_pReligion = NULL;
@@ -1287,6 +1290,7 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iKamikazePercent = 0;
 	m_eFacingDirection = DIRECTION_SOUTHEAST;
 	m_iIgnoreTerrainCostCount = 0;
+	std::map<int, int> m_piGetPromotionBuilds;
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	m_iIgnoreTerrainDamageCount = 0;
 	m_iIgnoreFeatureDamageCount = 0;
@@ -6700,6 +6704,21 @@ int CvUnit::GetMoveLfetAttackMod() const
 	return m_iMoveLfetAttackMod;
 }
 
+void CvUnit::ChangePromotionBuilds(int i,int iChange) 
+{
+	CvAssertMsg(i < GC.getNumBuildInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	m_piGetPromotionBuilds[i] += iChange;
+}
+
+/// what improvements can this unit build from its promotions
+int CvUnit::GetPromotionBuilds(int i) const
+{
+	CvAssertMsg(i < GC.getNumBuildInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	auto it = m_piGetPromotionBuilds.find(i);
+    return (it != m_piGetPromotionBuilds.end()) ? it->second : 0;
+}
 
 //	--------------------------------------------------------------------------------
 void CvUnit::ChangeMoveUsedAttackMod(int iValue)
@@ -12698,8 +12717,7 @@ bool CvUnit::canBuild(const CvPlot* pPlot, BuildTypes eBuild, bool bTestVisible,
 	VALIDATE_OBJECT
 	CvAssertMsg(eBuild < GC.getNumBuildInfos() && eBuild >= 0, "Index out of bounds");
 
-
-	if(!(m_pUnitInfo->GetBuilds(eBuild)))
+	if (!(m_pUnitInfo->GetBuilds(eBuild)) && GetPromotionBuilds(eBuild) <= 0) 
 	{
 		return false;
 	}
@@ -12860,14 +12878,14 @@ bool CvUnit::build(BuildTypes eBuild)
 		iWorkRateFactor = 2;
 #else
 		// wipe out all build progress also
-		bFinished = pPlot->changeBuildProgress(eBuild, workRate(false), getOwner());
+		bFinished = pPlot->changeBuildProgress(eBuild, workRate(false,eBuild), getOwner());
 #endif
 	}
 
 #if defined(MOD_BUGFIX_MINOR)
-	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false) * iWorkRateFactor, getOwner());
+	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false,eBuild) * iWorkRateFactor, getOwner());
 #else
-	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false), getOwner());
+	bFinished = pPlot->changeBuildProgress(eBuild, workRate(false,eBuild), getOwner());
 #endif
 
 #if defined(MOD_EVENTS_PLOT)
@@ -14334,7 +14352,7 @@ BuildTypes CvUnit::getBuildType() const
 
 
 //	--------------------------------------------------------------------------------
-int CvUnit::workRate(bool bMax, BuildTypes /*eBuild*/) const
+int CvUnit::workRate(bool bMax, BuildTypes eBuild) const
 {
 	VALIDATE_OBJECT
 	int iRate;
@@ -14348,6 +14366,10 @@ int CvUnit::workRate(bool bMax, BuildTypes /*eBuild*/) const
 	}
 
 	iRate = m_pUnitInfo->GetWorkRate();
+	if(GetPromotionBuilds(eBuild) >0 && !(m_pUnitInfo->GetBuilds(eBuild)))
+	{
+		iRate = 100;
+	}
 
 #if defined(MOD_ROG_CORE)
 	int Modifiers = 0;
@@ -26850,6 +26872,14 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeHeavyChargeCollateralPercent(iChange * thisPromotion.GetHeavyChargeCollateralPercent());
 
 		ChangeOutsideFriendlyLandsInflictDamageChange(iChange * thisPromotion.GetOutsideFriendlyLandsInflictDamageChange());
+		if(thisPromotion.IsIncludeBuild())
+		{
+			for(int i = 0; i < GC.getNumBuildInfos(); i++)
+			{
+				if (!thisPromotion.GetBuildType(i)) continue;
+				ChangePromotionBuilds(i,iChange);
+			}
+		}
 
 #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)

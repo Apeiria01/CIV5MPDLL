@@ -2123,6 +2123,10 @@ public:
 	int GetInstantYieldPerReligionFollowerConverted(YieldTypes eIndex) const;
 	void ChangeInstantYieldPerReligionFollowerConverted(YieldTypes eIndex, int iChange);
 
+	void ChangePromotionBuilds(int i, int iValue);
+    int GetPromotionBuilds(int i) const;
+	int GetExtraBuildNum() const;
+
 protected:
 	const MissionQueueNode* HeadMissionQueueNode() const;
 	MissionQueueNode* HeadMissionQueueNode();
@@ -2694,6 +2698,7 @@ protected:
 private:
 
 	mutable MissionQueue m_missionQueue;
+	std::map<int, int> m_piGetPromotionBuilds;
 };
 
 FDataStream& operator<<(FDataStream&, const CvUnit&);
