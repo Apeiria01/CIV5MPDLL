@@ -1959,18 +1959,6 @@ bool CvBuilderTaskingAI::IsImprovementBeneficial(CvPlot* pPlot, const CvBuildInf
 {
 	const ImprovementTypes eImprovement = (ImprovementTypes)kBuild.getImprovement();
 
-	const FeatureTypes eFeature = pPlot->getFeatureType();
-
-	bool bFeatureNeedsRemove = false;
-
-	if(eFeature != NO_FEATURE)
-	{
-		if(kBuild.isFeatureRemove(eFeature))
-		{
-			bFeatureNeedsRemove = true;
-		}
-	}
-
 	CvImprovementEntry* pkImprovementInfo = NULL;
 	if(eImprovement != NO_IMPROVEMENT)
 	{
@@ -2002,6 +1990,12 @@ bool CvBuilderTaskingAI::IsImprovementBeneficial(CvPlot* pPlot, const CvBuildInf
 		return true;
 	}
 
+	const FeatureTypes eFeature = pPlot->getFeatureType();
+	bool bFeatureNeedsRemove = (eFeature != NO_FEATURE && kBuild.isFeatureRemove(eFeature));
+
+	const ResourceTypes eResource = pPlot->getResourceType();
+	bool bResourceNeedsRemove = (eResource != NO_RESOURCE && kBuild.isResourceRemove(eResource));
+
 	for(uint ui = 0; ui < NUM_YIELD_TYPES; ui++)
 	{
 		// calculate natural yields
@@ -2011,13 +2005,7 @@ bool CvBuilderTaskingAI::IsImprovementBeneficial(CvPlot* pPlot, const CvBuildInf
 		// calculate improvement yields
 		aiImprovedYieldTypes[ui] = 0;
 
-		bool bIgnoreFeature = false;
-		if(bFeatureNeedsRemove)
-		{
-			bIgnoreFeature = true;
-		}
-
-		aiImprovedYieldTypes[ui] = pPlot->calculateNatureYield((YieldTypes)ui, m_pPlayer->getTeam(), bIgnoreFeature);
+		aiImprovedYieldTypes[ui] = pPlot->calculateNatureYield((YieldTypes)ui, m_pPlayer->getTeam(), bFeatureNeedsRemove, bResourceNeedsRemove);
 		if(pkPlotRouteInfo)
 		{
 			aiImprovedYieldTypes[ui] += pkPlotRouteInfo->getYieldChange(ui);

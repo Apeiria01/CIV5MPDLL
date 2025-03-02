@@ -8792,7 +8792,7 @@ int CvPlot::getYield(YieldTypes eIndex) const
 
 
 //	--------------------------------------------------------------------------------
-int CvPlot::calculateNatureYield(YieldTypes eYield, TeamTypes eTeam, bool bIgnoreFeature) const
+int CvPlot::calculateNatureYield(YieldTypes eYield, TeamTypes eTeam, bool bIgnoreFeature, bool bIgnoreResource) const
 {
 	ResourceTypes eResource;
 	int iYield;
@@ -9006,7 +9006,7 @@ int CvPlot::calculateNatureYield(YieldTypes eYield, TeamTypes eTeam, bool bIgnor
 		iYield += iReligionChange;
 	}
 
-	if(eTeam != NO_TEAM)
+	if(eTeam != NO_TEAM && !bIgnoreResource)
 	{
 		eResource = getResourceType(eTeam);
 
@@ -11136,6 +11136,12 @@ bool CvPlot::changeBuildProgress(BuildTypes eBuild, int iChange, PlayerTypes ePl
 				}
 			}
 
+			// Remove Resource
+			if(getResourceType() != NO_RESOURCE && pkBuildInfo->isResourceRemove(getResourceType()))
+			{
+				setResourceType(NO_RESOURCE, 0);
+			}
+
 			// Repairing a Pillaged Tile
 			if(pkBuildInfo->isRepair())
 			{
@@ -12348,8 +12354,11 @@ int CvPlot::getYieldWithBuild(BuildTypes eBuild, YieldTypes eYield, bool bWithUp
 			bIgnoreFeature = true;
 	}
 
+	// Will the build remove the Resource?
+	bool bIgnoreResource = (getResourceType() != NO_RESOURCE && GC.getBuildInfo(eBuild)->isResourceRemove(getResourceType()));
+
 	// Nature yield
-	iYield = calculateNatureYield(eYield, getTeam(), bIgnoreFeature);
+	iYield = calculateNatureYield(eYield, getTeam(), bIgnoreFeature, bIgnoreResource);
 
 	ImprovementTypes eImprovement = (ImprovementTypes)GC.getBuildInfo(eBuild)->getImprovement();
 

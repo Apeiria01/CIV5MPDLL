@@ -312,3 +312,8 @@ CREATE TABLE Promotion_Builds (
 	PromotionType text REFERENCES UnitPromotions(Type),
 	BuildType text REFERENCES Builds(Type)
 );
+
+CREATE TABLE IF NOT EXISTS Build_ResourceRemove (
+    BuildType TEXT DEFAULT NULL  REFERENCES Builds(Type),
+    ResourceType TEXT DEFAULT NULL REFERENCES Resources(Type)
+)

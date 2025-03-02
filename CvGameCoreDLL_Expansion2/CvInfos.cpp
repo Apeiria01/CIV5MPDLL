@@ -3847,7 +3847,8 @@ CvBuildInfo::CvBuildInfo() :
 	m_paiFeatureObsoleteTech(NULL),
 	m_pabFeatureRemoveOnly(NULL),
 #endif
-	m_pabFeatureRemove(NULL)
+	m_pabFeatureRemove(NULL),
+	m_pabResourceRemove(NULL)
 {
 }
 //------------------------------------------------------------------------------
@@ -3863,6 +3864,7 @@ CvBuildInfo::~CvBuildInfo()
 	SAFE_DELETE_ARRAY(m_paiFeatureObsoleteTech);
 	SAFE_DELETE_ARRAY(m_pabFeatureRemoveOnly);
 #endif
+	SAFE_DELETE_ARRAY(m_pabResourceRemove);
 }
 //------------------------------------------------------------------------------
 int CvBuildInfo::getTime() const
@@ -4003,6 +4005,13 @@ bool CvBuildInfo::isFeatureRemoveOnly(int i) const
 }
 #endif
 //------------------------------------------------------------------------------
+bool CvBuildInfo::isResourceRemove(int i) const
+{
+	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_pabResourceRemove ? m_pabResourceRemove[i] : false;
+}
+//------------------------------------------------------------------------------
 bool CvBuildInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility)
 {
 	if(!CvHotKeyInfo::CacheResults(kResults, kUtility))
@@ -4079,7 +4088,9 @@ bool CvBuildInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	
 	const char* szBuildType = GetType();
 	kUtility.PopulateArrayByValue(m_paiTechTimeChange, "Technologies", "Build_TechTimeChanges", "TechType", "BuildType", szBuildType, "TimeChange");
-
+	
+	kUtility.InitializeArray(m_pabResourceRemove, "Resources");
+	kUtility.PopulateArrayByExistence(m_pabResourceRemove, "Resources", "Build_ResourceRemove", "ResourceType", "BuildType", szBuildType);
 	return true;
 }
 
