@@ -293,8 +293,7 @@ CvPlayer::CvPlayer() :
 	, m_iDifferentIdeologyTourismModifier(0)
 	, m_iHappinessPerPolicy(0)
 	, m_iWaterBuildSpeedModifier(0)
-	, m_iSettlerProductionEraModifier(0)
-	, m_iSettlerProductionStartEra(0)
+	, m_vSettlerProductionEraModifier()
 #endif
 	, m_iNullifyInfluenceModifier(0)
 	, m_iNumTradeRouteBonus(0)
@@ -1098,8 +1097,8 @@ void CvPlayer::uninit()
 	m_iDifferentIdeologyTourismModifier = 0;
 	m_iHappinessPerPolicy = 0;
 	m_iWaterBuildSpeedModifier = 0;
-	m_iSettlerProductionEraModifier = 0;
-	m_iSettlerProductionStartEra = NO_ERA;
+	m_vSettlerProductionEraModifier.clear();
+	m_vSettlerProductionEraModifier.resize(GC.getNumEraInfos(), 0);
 #endif
 	m_iNullifyInfluenceModifier = 0;
 	m_iNumTradeRouteBonus = 0;
@@ -16986,41 +16985,19 @@ void CvPlayer::changeWaterBuildSpeedModifier(int iChange)
 
 
 //	--------------------------------------------------------------------------------
-int CvPlayer::getSettlerProductionEraModifier() const
+int CvPlayer::getSettlerProductionEraModifier(EraTypes eEra) const
 {
-	return m_iSettlerProductionEraModifier;
+	return m_vSettlerProductionEraModifier[eEra];
 }
-void CvPlayer::setSettlerProductionEraModifier(int iChange)
+void CvPlayer::changeSettlerProductionEraModifier(EraTypes eStartEra, int iChange)
 {
-	if(iChange > 0)
+	if(iChange == 0) return;
+	for(int i = 0; i < GC.getNumEraInfos(); i++)
 	{
-		m_iSettlerProductionEraModifier = iChange;
-	}
-	else if(iChange < 0)
-	{
-		m_iSettlerProductionEraModifier = 0;
-	}
-
-}
-
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getSettlerProductionStartEra() const
-{
-	return m_iSettlerProductionStartEra;
-}
-void CvPlayer::setSettlerProductionStartEra(int iChange)
-{
-	if(iChange > NO_ERA)
-	{
-		m_iSettlerProductionStartEra = iChange;
-	}
-	else if(iChange < NO_ERA)
-	{
-		m_iSettlerProductionStartEra = NO_ERA;
+		if(i < eStartEra) continue;
+		m_vSettlerProductionEraModifier[i] += iChange;
 	}
 }
-
 
 #endif
 //	--------------------------------------------------------------------------------
@@ -17261,12 +17238,7 @@ void CvPlayer::changeWonderProductionModifier(int iChange)
 //	--------------------------------------------------------------------------------
 int CvPlayer::getSettlerProductionModifier() const
 {
-	int res = m_iSettlerProductionModifier;
-	if(getSettlerProductionEraModifier() > 0 && GetCurrentEra() >= getSettlerProductionStartEra())
-	{
-		res += getSettlerProductionEraModifier();
-	}
-	return res;
+	return m_iSettlerProductionModifier + getSettlerProductionEraModifier(GetCurrentEra());
 }
 
 //	--------------------------------------------------------------------------------
@@ -26862,8 +26834,7 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	changeHappinessPerPolicy(pPolicy->GetHappinessPerPolicy() * iChange);
 	changeNumTradeRouteBonus(pPolicy->GetNumTradeRouteBonus() * iChange);
 	changeWaterBuildSpeedModifier(pPolicy->GetWaterBuildSpeedModifier() * iChange);
-	setSettlerProductionEraModifier(pPolicy->GetSettlerProductionEraModifier() * iChange);
-	setSettlerProductionStartEra(pPolicy->GetSettlerProductionStartEra() * iChange);
+	changeSettlerProductionEraModifier((EraTypes)pPolicy->GetSettlerProductionStartEra(), pPolicy->GetSettlerProductionEraModifier() * iChange);
 #endif
 	changeImprovementCostModifier(pPolicy->GetImprovementCostModifier() * iChange);
 	changeImprovementUpgradeRateModifier(pPolicy->GetImprovementUpgradeRateModifier() * iChange);
@@ -28192,8 +28163,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iDifferentIdeologyTourismModifier;
 	kStream >> m_iHappinessPerPolicy;
 	kStream >> m_iWaterBuildSpeedModifier;
-	kStream >> m_iSettlerProductionEraModifier;
-	kStream >> m_iSettlerProductionStartEra;
+	kStream >> m_vSettlerProductionEraModifier;
 #endif
 	kStream >> m_iNullifyInfluenceModifier;
 	kStream >> m_iNumTradeRouteBonus;
@@ -28996,8 +28966,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iDifferentIdeologyTourismModifier;
 	kStream << m_iHappinessPerPolicy;
 	kStream << m_iWaterBuildSpeedModifier;
-	kStream << m_iSettlerProductionEraModifier;
-	kStream << m_iSettlerProductionStartEra;
+	kStream << m_vSettlerProductionEraModifier;
 #endif
 	kStream << m_iNullifyInfluenceModifier;
 	kStream << m_iNumTradeRouteBonus;
