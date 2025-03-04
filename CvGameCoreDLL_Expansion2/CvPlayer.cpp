@@ -23353,24 +23353,10 @@ void CvPlayer::ChangeFreePromotionCount(PromotionTypes ePromotion, int iChange)
 				if(pLoopUnit->isHasPromotion(ePromotion)) continue;
 
 				// Valid Promotion for this Unit?
-				if(::IsPromotionValidForUnitCombatType(ePromotion, pLoopUnit->getUnitType()))
+				if (::IsPromotionValidForUnit(ePromotion, *pLoopUnit))
 				{
 					pLoopUnit->setHasPromotion(ePromotion, true);
 				}
-				else if(::IsPromotionValidForCivilianUnitType(ePromotion, pLoopUnit->getUnitType()))
-				{
-					pLoopUnit->setHasPromotion(ePromotion, true);
-				}
-				else if (::IsPromotionValidForUnitType(ePromotion, pLoopUnit->getUnitType()))
-				{
-					pLoopUnit->setHasPromotion(ePromotion, true);
-				}
-#if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
-				else if (::IsPromotionValidForUnitPromotions(ePromotion, *pLoopUnit))
-				{
-					pLoopUnit->setHasPromotion(ePromotion, true);
-				}
-#endif
 			}
 		}
 	}

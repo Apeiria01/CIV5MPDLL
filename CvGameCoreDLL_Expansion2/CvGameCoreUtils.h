@@ -385,13 +385,15 @@ inline const CvUnit* GetPlayerUnit(const IDInfo& unit)
 
 bool isBeforeUnitCycle(const CvUnit* pFirstUnit, const CvUnit* pSecondUnit);
 bool IsPromotionValidForUnitCombatType(PromotionTypes ePromotion, UnitTypes eUnit);
-bool IsPromotionValidForCivilianUnitType(PromotionTypes ePromotion, UnitTypes eUnit);
 
-
-bool IsPromotionValidForUnitType(PromotionTypes ePromotion, UnitTypes eUnit);
+bool IsPromotionValidForCivilianUnitType(CvPromotionEntry* pPromotionInfo, UnitTypes eUnit);
+bool IsPromotionValidForUnitType(CvPromotionEntry* pPromotionInfo, UnitTypes eUnit);
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
-bool IsPromotionValidForUnitPromotions(PromotionTypes ePromotion, CvUnit& pUnit);
+bool IsPromotionValidForUnitPromotions(CvPromotionEntry* pPromotionInfo, CvUnit& pUnit);
 #endif
+bool IsPromotionValidForUnitPromotionAnds(CvPromotionEntry* pPromotionInfo, CvUnit& pUnit);
+bool IsPromotionValidForUnitPromotionExclusion(CvPromotionEntry* pPromotionInfo, CvUnit& pUnit);
+bool IsPromotionValidForUnit(PromotionTypes ePromotion, CvUnit& pUnit);
 
 bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq=false);
 

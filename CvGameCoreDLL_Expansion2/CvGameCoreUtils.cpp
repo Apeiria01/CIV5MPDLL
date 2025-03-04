@@ -379,35 +379,22 @@ bool IsPromotionValidForUnitCombatType(PromotionTypes ePromotion, UnitTypes eUni
 	return true;
 }
 
-#if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
-bool IsPromotionValidForUnitPromotions(PromotionTypes ePromotion, CvUnit& pUnit)
+/// Is this a valid Promotion for the Unit Type?
+bool IsPromotionValidForUnitType(CvPromotionEntry* pPromotionInfo, UnitTypes eUnit)
 {
-	CvPromotionEntry* promotionInfo = GC.getPromotionInfo(ePromotion);
-	if(promotionInfo == NULL) return false;
+	return pPromotionInfo->GetUnitType((int)eUnit);
+}
 
-	//Have Exclusions?
-	const std::vector<int>& pExclusions = promotionInfo->GetPromotionExclusionAny();
-	if(!pExclusions.empty())
-	{
-		for(int Ii=0; Ii < pExclusions.size(); Ii++)
-		{
-			if(pExclusions[Ii] != NO_PROMOTION && pUnit.isHasPromotion((PromotionTypes)pExclusions[Ii]))
-			return false;
-		}
-	}
-	// Has all needed Promotions
-	const std::vector<int>& pPrereqAnds = promotionInfo->GetPromotionPrereqAnds();
-	if(!pPrereqAnds.empty())
-	{
-		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
-		{
-			if(pPrereqAnds[Ii] != NO_PROMOTION && !pUnit.isHasPromotion((PromotionTypes)pPrereqAnds[Ii]))
-			return false;
-		}
-	}
+/// Is this a valid Promotion for this civilian?
+bool IsPromotionValidForCivilianUnitType(CvPromotionEntry* pPromotionInfo, UnitTypes eUnit)
+{
+	return pPromotionInfo->GetCivilianUnitType((int)eUnit);
+}
 
-	const std::vector<int>& prePromotions = promotionInfo->GetPrePromotions();
-
+#if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
+bool IsPromotionValidForUnitPromotions(CvPromotionEntry* pPromotionInfo, CvUnit& pUnit)
+{
+	const std::vector<int>& prePromotions = pPromotionInfo->GetPrePromotions();
 	for(int Ii=0; Ii < prePromotions.size(); Ii++)
 	{
 		if(prePromotions[Ii] != NO_PROMOTION && pUnit.isHasPromotion((PromotionTypes)prePromotions[Ii]))
@@ -417,38 +404,48 @@ bool IsPromotionValidForUnitPromotions(PromotionTypes ePromotion, CvUnit& pUnit)
 	return false;
 }
 #endif
-
-/// Is this a valid Promotion for the Unit Type?
-bool IsPromotionValidForUnitType(PromotionTypes ePromotion, UnitTypes eUnit)
+bool IsPromotionValidForUnitPromotionAnds(CvPromotionEntry* pPromotionInfo, CvUnit& pUnit)
 {
-	CvPromotionEntry* promotionInfo = GC.getPromotionInfo(ePromotion);
-
-	if (promotionInfo == NULL)
-		return false;
-
-	if (!(promotionInfo->GetUnitType((int)eUnit)))
+	// Has all needed Promotions
+	const std::vector<int>& pPrereqAnds = pPromotionInfo->GetPromotionPrereqAnds();
+	if(!pPrereqAnds.empty())
 	{
-		return false;
+		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
+		{
+			if(pPrereqAnds[Ii] != NO_PROMOTION && !pUnit.isHasPromotion((PromotionTypes)pPrereqAnds[Ii]))
+			return false;
+		}
 	}
-
 	return true;
 }
-
-
-/// Is this a valid Promotion for this civilian?
-bool IsPromotionValidForCivilianUnitType(PromotionTypes ePromotion, UnitTypes eUnit)
+bool IsPromotionValidForUnitPromotionExclusion(CvPromotionEntry* pPromotionInfo, CvUnit& pUnit)
+{
+	//Have Exclusions?
+	const std::vector<int>& pExclusions = pPromotionInfo->GetPromotionExclusionAny();
+	if(!pExclusions.empty())
+	{
+		for(int Ii=0; Ii < pExclusions.size(); Ii++)
+		{
+			if(pExclusions[Ii] != NO_PROMOTION && pUnit.isHasPromotion((PromotionTypes)pExclusions[Ii]))
+			return false;
+		}
+	}
+	return true;
+}
+bool IsPromotionValidForUnit(PromotionTypes ePromotion, CvUnit& pUnit)
 {
 	CvPromotionEntry* promotionInfo = GC.getPromotionInfo(ePromotion);
+	if(promotionInfo == nullptr) return false;
+	if(!IsPromotionValidForUnitPromotionAnds(promotionInfo, pUnit)) return false;
+	if(!IsPromotionValidForUnitPromotionExclusion(promotionInfo, pUnit)) return false;
 
-	if(promotionInfo == NULL)
-		return false;
-
-	if(!(promotionInfo->GetCivilianUnitType((int)eUnit)))
-	{
-		return false;
-	}
-
-	return true;
+	const UnitTypes eUnitType = pUnit.getUnitType();
+	return IsPromotionValidForUnitCombatType(ePromotion, eUnitType)
+		|| IsPromotionValidForCivilianUnitType(promotionInfo, eUnitType)
+		|| IsPromotionValidForUnitType(promotionInfo, eUnitType)
+#if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
+		|| IsPromotionValidForUnitPromotions(promotionInfo, pUnit);
+#endif
 }
 
 bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq)

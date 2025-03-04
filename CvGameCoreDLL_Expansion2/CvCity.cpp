@@ -4883,19 +4883,7 @@ void CvCity::addProductionExperience(CvUnit* pUnit, bool bConscript)
 		CvPromotionEntry* pkPromotionInfo = GC.getPromotionInfo(ePromotion);
 		if(pkPromotionInfo && !pUnit->isHasPromotion(ePromotion))
 		{
-			if((pUnit->getUnitCombatType() != NO_UNITCOMBAT) && pkPromotionInfo->GetUnitCombatClass(pUnit->getUnitCombatType()))
-			{
-				pUnit->setHasPromotion(ePromotion, true);
-			}
-			else if(::IsPromotionValidForUnitPromotions(ePromotion, *pUnit))
-			{
-				pUnit->setHasPromotion(ePromotion, true);
-			}
-			else if (::IsPromotionValidForUnitType(ePromotion, pUnit->getUnitType()))
-			{
-				pUnit->setHasPromotion(ePromotion, true);
-			}
-			else if(::IsPromotionValidForCivilianUnitType(ePromotion, pUnit->getUnitType()))
+			if(::IsPromotionValidForUnit(ePromotion, *pUnit))
 			{
 				pUnit->setHasPromotion(ePromotion, true);
 			}
