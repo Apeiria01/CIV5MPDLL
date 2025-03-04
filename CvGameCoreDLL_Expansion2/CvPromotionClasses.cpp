@@ -18,19 +18,6 @@
 CvPromotionEntry::CvPromotionEntry():
 	m_iLayerAnimationPath(ANIMATIONPATH_NONE),
 	m_iPrereqPromotion(NO_PROMOTION),
-	m_iPrereqOrPromotion1(NO_PROMOTION),
-	m_iPrereqOrPromotion2(NO_PROMOTION),
-	m_iPrereqOrPromotion3(NO_PROMOTION),
-	m_iPrereqOrPromotion4(NO_PROMOTION),
-	m_iPrereqOrPromotion5(NO_PROMOTION),
-	m_iPrereqOrPromotion6(NO_PROMOTION),
-	m_iPrereqOrPromotion7(NO_PROMOTION),
-	m_iPrereqOrPromotion8(NO_PROMOTION),
-	m_iPrereqOrPromotion9(NO_PROMOTION),
-	m_iPrereqOrPromotion10(NO_PROMOTION),
-	m_iPrereqOrPromotion11(NO_PROMOTION),
-	m_iPrereqOrPromotion12(NO_PROMOTION),
-	m_iPrereqOrPromotion13(NO_PROMOTION),
 	m_iMutuallyExclusiveGroup(0),
 	m_iTechPrereq(NO_TECH),
 	m_iInvisibleType(NO_INVISIBLE),
@@ -427,6 +414,7 @@ CvPromotionEntry::~CvPromotionEntry(void)
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	m_vPrePromotions.clear();
 #endif
+	m_vPromotionPrereqOrs.clear();
 	m_vPromotionPrereqAnds.clear();
 	m_vPromotionExclusionAny.clear();
 #if defined(MOD_PROMOTION_AURA_PROMOTION)
@@ -897,45 +885,6 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 	const char* szPromotionPrereq = kResults.GetText("PromotionPrereq");
 	m_iPrereqPromotion = GC.getInfoTypeForString(szPromotionPrereq, true);
-
-	const char* szPromotionPrereqOr1 = kResults.GetText("PromotionPrereqOr1");
-	m_iPrereqOrPromotion1 = GC.getInfoTypeForString(szPromotionPrereqOr1, true);
-
-	const char* szPromotionPrereqOr2 = kResults.GetText("PromotionPrereqOr2");
-	m_iPrereqOrPromotion2 = GC.getInfoTypeForString(szPromotionPrereqOr2, true);
-
-	const char* szPromotionPrereqOr3 = kResults.GetText("PromotionPrereqOr3");
-	m_iPrereqOrPromotion3 = GC.getInfoTypeForString(szPromotionPrereqOr3, true);
-
-	const char* szPromotionPrereqOr4 = kResults.GetText("PromotionPrereqOr4");
-	m_iPrereqOrPromotion4 = GC.getInfoTypeForString(szPromotionPrereqOr4, true);
-
-	const char* szPromotionPrereqOr5 = kResults.GetText("PromotionPrereqOr5");
-	m_iPrereqOrPromotion5 = GC.getInfoTypeForString(szPromotionPrereqOr5, true);
-
-	const char* szPromotionPrereqOr6 = kResults.GetText("PromotionPrereqOr6");
-	m_iPrereqOrPromotion6 = GC.getInfoTypeForString(szPromotionPrereqOr6, true);
-
-	const char* szPromotionPrereqOr7 = kResults.GetText("PromotionPrereqOr7");
-	m_iPrereqOrPromotion7 = GC.getInfoTypeForString(szPromotionPrereqOr7, true);
-
-	const char* szPromotionPrereqOr8 = kResults.GetText("PromotionPrereqOr8");
-	m_iPrereqOrPromotion8 = GC.getInfoTypeForString(szPromotionPrereqOr8, true);
-
-	const char* szPromotionPrereqOr9 = kResults.GetText("PromotionPrereqOr9");
-	m_iPrereqOrPromotion9 = GC.getInfoTypeForString(szPromotionPrereqOr9, true);
-
-	const char* szPromotionPrereqOr10 = kResults.GetText("PromotionPrereqOr10");
-	m_iPrereqOrPromotion10 = GC.getInfoTypeForString(szPromotionPrereqOr10, true);
-
-	const char* szPromotionPrereqOr11 = kResults.GetText("PromotionPrereqOr11");
-	m_iPrereqOrPromotion11 = GC.getInfoTypeForString(szPromotionPrereqOr11, true);
-
-	const char* szPromotionPrereqOr12 = kResults.GetText("PromotionPrereqOr12");
-	m_iPrereqOrPromotion12 = GC.getInfoTypeForString(szPromotionPrereqOr12, true);
-
-	const char* szPromotionPrereqOr13 = kResults.GetText("PromotionPrereqOr13");
-	m_iPrereqOrPromotion13 = GC.getInfoTypeForString(szPromotionPrereqOr13, true);
 
 	//Arrays
 	const int iNumUnitClasses = kUtility.MaxRows("UnitClasses");
@@ -1461,6 +1410,19 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 		pResults->Reset();
 	}
+
+	//PromotionPrereqOr1-13
+	{
+		for(int i = 1; i <= 13; i++)
+		{
+			CvString szPrereqOri;
+			szPrereqOri.Format("PromotionPrereqOr%d", i);
+			const char* szPromotionPrereqOri = kResults.GetText(szPrereqOri.c_str());
+			int iPrereqOrPromotioni = GC.getInfoTypeForString(szPromotionPrereqOri, true);
+			if(iPrereqOrPromotioni == NO_PROMOTION) continue;
+			m_vPromotionPrereqOrs.push_back(iPrereqOrPromotioni);
+		}
+	}
 	//Promotion_PromotionPrereqAnds
 	{
 		m_vPromotionPrereqAnds.clear();
@@ -1658,166 +1620,6 @@ void CvPromotionEntry::SetPrereqPromotion(int i)
 {
 	m_iPrereqPromotion = i;
 }
-
-/// Accessor: Gets promotion 1 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion1() const
-{
-	return m_iPrereqOrPromotion1;
-}
-
-/// Accessor: Sets promotion 1 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion1(int i)
-{
-	m_iPrereqOrPromotion1 = i;
-}
-
-/// Accessor: Gets promotion 2 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion2() const
-{
-	return m_iPrereqOrPromotion2;
-}
-
-/// Accessor: Sets promotion 2 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion2(int i)
-{
-	m_iPrereqOrPromotion2 = i;
-}
-
-/// Accessor: Gets promotion 3 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion3() const
-{
-	return m_iPrereqOrPromotion3;
-}
-
-/// Accessor: Sets promotion 3 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion3(int i)
-{
-	m_iPrereqOrPromotion3 = i;
-}
-
-/// Accessor: Gets promotion 4 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion4() const
-{
-	return m_iPrereqOrPromotion4;
-}
-
-/// Accessor: Sets promotion 4 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion4(int i)
-{
-	m_iPrereqOrPromotion4 = i;
-}
-
-/// Accessor: Gets promotion 5 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion5() const
-{
-	return m_iPrereqOrPromotion5;
-}
-
-/// Accessor: Sets promotion 5 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion5(int i)
-{
-	m_iPrereqOrPromotion5 = i;
-}
-
-/// Accessor: Gets promotion 6 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion6() const
-{
-	return m_iPrereqOrPromotion6;
-}
-
-/// Accessor: Sets promotion 6 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion6(int i)
-{
-	m_iPrereqOrPromotion6 = i;
-}
-
-/// Accessor: Gets promotion 7 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion7() const
-{
-	return m_iPrereqOrPromotion7;
-}
-
-/// Accessor: Sets promotion 7 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion7(int i)
-{
-	m_iPrereqOrPromotion7 = i;
-}
-
-/// Accessor: Gets promotion 8 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion8() const
-{
-	return m_iPrereqOrPromotion8;
-}
-
-/// Accessor: Sets promotion 8 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion8(int i)
-{
-	m_iPrereqOrPromotion8 = i;
-}
-
-/// Accessor: Gets promotion 9 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion9() const
-{
-	return m_iPrereqOrPromotion9;
-}
-
-/// Accessor: Sets promotion 9 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion9(int i)
-{
-	m_iPrereqOrPromotion9 = i;
-}
-
-/// Accessor: Gets promotion 10 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion10() const
-{
-	return m_iPrereqOrPromotion10;
-}
-
-/// Accessor: Sets promotion 10 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion10(int i)
-{
-	m_iPrereqOrPromotion10 = i;
-}
-
-/// Accessor: Gets promotion 10 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion11() const
-{
-	return m_iPrereqOrPromotion11;
-}
-
-/// Accessor: Sets promotion 11 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion11(int i)
-{
-	m_iPrereqOrPromotion11 = i;
-}
-
-
-/// Accessor: Gets promotion 11 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion12() const
-{
-	return m_iPrereqOrPromotion12;
-}
-
-/// Accessor: Sets promotion 10 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion12(int i)
-{
-	m_iPrereqOrPromotion12 = i;
-}
-
-
-/// Accessor: Gets promotion 11 of an either/or promotion prerequisite.
-int CvPromotionEntry::GetPrereqOrPromotion13() const
-{
-	return m_iPrereqOrPromotion13;
-}
-
-/// Accessor: Sets promotion 10 of an either/or promotion prerequisite.
-void CvPromotionEntry::SetPrereqOrPromotion13(int i)
-{
-	m_iPrereqOrPromotion13 = i;
-}
-
-
 
 /// Accessor: Gets the tech prerequisite for this promotion
 int CvPromotionEntry::GetTechPrereq() const
@@ -3677,6 +3479,10 @@ const std::vector<int>& CvPromotionEntry::GetPrePromotions() const
 	return m_vPrePromotions;
 }
 #endif
+const std::vector<int>& CvPromotionEntry::GetPromotionPrereqOrs() const
+{
+	return m_vPromotionPrereqOrs;
+}
 const std::vector<int>& CvPromotionEntry::GetPromotionPrereqAnds() const
 {
 	return m_vPromotionPrereqAnds;

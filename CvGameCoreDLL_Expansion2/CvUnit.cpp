@@ -25920,26 +25920,26 @@ bool CvUnit::canAcquirePromotion(PromotionTypes ePromotion) const
 	{
 		return false;
 	}
+
 	//Have Exclusions?
 	const std::vector<int>& pExclusions = pkPromotionInfo->GetPromotionExclusionAny();
 	if(!pExclusions.empty())
 	{
 		for(int Ii=0; Ii < pExclusions.size(); Ii++)
 		{
-			if(isHasPromotion((PromotionTypes)pExclusions[Ii]))return false;
+			if(isHasPromotion((PromotionTypes)pExclusions[Ii])) return false;
 		}
 	}
+
 	// Has all needed Promotions?
 	const std::vector<int>& pPrereqAnds = pkPromotionInfo->GetPromotionPrereqAnds();
 	if(!pPrereqAnds.empty())
 	{
 		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
 		{
-			if(!isHasPromotion((PromotionTypes)pPrereqAnds[Ii]))return false;
+			if(!isHasPromotion((PromotionTypes)pPrereqAnds[Ii])) return false;
 		}
 	}
-	
-
 
 	// AND prereq
 	if(pkPromotionInfo->GetPrereqPromotion() != NO_PROMOTION)
@@ -25951,151 +25951,18 @@ bool CvUnit::canAcquirePromotion(PromotionTypes ePromotion) const
 	}
 
 	// OR prereqs
-	bool bLacksOrPrereq = false;
-
-	PromotionTypes ePromotion1 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion1();
-	if(ePromotion1 != NO_PROMOTION)
+	const std::vector<int>& vPrereqOrs = pkPromotionInfo->GetPromotionPrereqOrs();
+	bool bLacksOrPrereq = vPrereqOrs.size() > 0;
+	for(const auto iPrereq : pkPromotionInfo->GetPromotionPrereqOrs())
 	{
-		if(!isHasPromotion(ePromotion1))
-			bLacksOrPrereq = true;
-	}
-
-	// OR Promotion 2
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion2 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion2();
-		if(ePromotion2 != NO_PROMOTION)
+		PromotionTypes ePrereq = (PromotionTypes)iPrereq;
+		if (ePrereq == NO_PROMOTION) continue;
+		if (isHasPromotion(ePrereq))
 		{
-			if(isHasPromotion(ePromotion2))
-				bLacksOrPrereq = false;
+			bLacksOrPrereq = false;
+			break;
 		}
 	}
-
-	// OR Promotion 3
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion3 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion3();
-		if(ePromotion3 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion3))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 4
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion4 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion4();
-		if(ePromotion4 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion4))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 5
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion5 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion5();
-		if(ePromotion5 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion5))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 6
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion6 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion6();
-		if(ePromotion6 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion6))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 7
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion7 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion7();
-		if(ePromotion7 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion7))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 8
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion8 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion8();
-		if(ePromotion8 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion8))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 9
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion9 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion9();
-		if(ePromotion9 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion9))
-				bLacksOrPrereq = false;
-		}
-	}
-
-
-	// OR Promotion 10
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion10 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion10();
-		if (ePromotion10 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion10))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 11
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion11 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion11();
-		if (ePromotion11 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion11))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 12
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion12 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion12();
-		if (ePromotion12 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion12))
-				bLacksOrPrereq = false;
-		}
-	}
-
-
-
-	// OR Promotion 13
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion13 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion13();
-		if (ePromotion13 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion13))
-				bLacksOrPrereq = false;
-		}
-	}
-
-
 	if(bLacksOrPrereq)
 	{
 		return false;

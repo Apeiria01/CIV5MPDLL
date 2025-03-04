@@ -34,34 +34,6 @@ public:
 	int	GetLayerAnimationPath() const;
 	int	GetPrereqPromotion() const;
 	void	SetPrereqPromotion(int i);
-	int	GetPrereqOrPromotion1() const;
-	void	SetPrereqOrPromotion1(int i);
-	int	GetPrereqOrPromotion2() const;
-	void	SetPrereqOrPromotion2(int i);
-	int	GetPrereqOrPromotion3() const;
-	void	SetPrereqOrPromotion3(int i);
-	int	GetPrereqOrPromotion4() const;
-	void	SetPrereqOrPromotion4(int i);
-	int	GetPrereqOrPromotion5() const;
-	void	SetPrereqOrPromotion5(int i);
-	int	GetPrereqOrPromotion6() const;
-	void	SetPrereqOrPromotion6(int i);
-	int	GetPrereqOrPromotion7() const;
-	void	SetPrereqOrPromotion7(int i);
-	int	GetPrereqOrPromotion8() const;
-	void	SetPrereqOrPromotion8(int i);
-	int	GetPrereqOrPromotion9() const;
-	void	SetPrereqOrPromotion9(int i);
-
-
-	int	GetPrereqOrPromotion10() const;
-	void	SetPrereqOrPromotion10(int i);
-	int	GetPrereqOrPromotion11() const;
-	void	SetPrereqOrPromotion11(int i);
-	int	GetPrereqOrPromotion12() const;
-	void	SetPrereqOrPromotion12(int i);
-	int	GetPrereqOrPromotion13() const;
-	void	SetPrereqOrPromotion13(int i);
 
 	int  GetTechPrereq() const;
 	int  GetInvisibleType() const;
@@ -442,6 +414,7 @@ public:
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	const std::vector<int>& GetPrePromotions() const;
 #endif
+	const std::vector<int>& GetPromotionPrereqOrs() const;
 	const std::vector<int>& GetPromotionPrereqAnds() const;
 	const std::vector<int>& GetPromotionExclusionAny() const;
 #if defined(MOD_ROG_CORE)
@@ -539,19 +512,6 @@ public:
 protected:
 	int m_iLayerAnimationPath;
 	int m_iPrereqPromotion;
-	int m_iPrereqOrPromotion1;
-	int m_iPrereqOrPromotion2;
-	int m_iPrereqOrPromotion3;
-	int m_iPrereqOrPromotion4;
-	int m_iPrereqOrPromotion5;
-	int m_iPrereqOrPromotion6;
-	int m_iPrereqOrPromotion7;
-	int m_iPrereqOrPromotion8;
-	int m_iPrereqOrPromotion9;
-	int m_iPrereqOrPromotion10;
-	int m_iPrereqOrPromotion11;
-	int m_iPrereqOrPromotion12;
-	int m_iPrereqOrPromotion13;
 
 	int m_iTechPrereq;
 	int m_iInvisibleType;
@@ -928,7 +888,8 @@ protected:
 	bool* m_pbCivilianUnitType;
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	std::vector<int> m_vPrePromotions;
-#endif	
+#endif
+	std::vector<int> m_vPromotionPrereqOrs;
 	std::vector<int> m_vPromotionPrereqAnds;
 	std::vector<int> m_vPromotionExclusionAny;
 	bool* m_pbUnitType;

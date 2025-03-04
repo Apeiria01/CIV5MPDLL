@@ -496,6 +496,8 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 			return false;
 		}
 	}
+
+	// Does not have Exclusion promotion
 	const std::vector<int>& pExclusions = promotionInfo->GetPromotionExclusionAny();
 	if(!pExclusions.empty())
 	{
@@ -507,6 +509,7 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 			}
 		}
 	}
+
 	// Has all needed Promotions
 	const std::vector<int>& pPrereqAnds = promotionInfo->GetPromotionPrereqAnds();
 	if(!pPrereqAnds.empty())
@@ -529,149 +532,19 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 		}
 	}
 
-	PromotionTypes ePrereq1 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion1();
-	PromotionTypes ePrereq2 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion2();
-	PromotionTypes ePrereq3 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion3();
-	PromotionTypes ePrereq4 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion4();
-	PromotionTypes ePrereq5 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion5();
-	PromotionTypes ePrereq6 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion6();
-	PromotionTypes ePrereq7 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion7();
-	PromotionTypes ePrereq8 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion8();
-	PromotionTypes ePrereq9 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion9();
-
-
-	PromotionTypes ePrereq10 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion10();
-	PromotionTypes ePrereq11 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion11();
-	PromotionTypes ePrereq12 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion12();
-	PromotionTypes ePrereq13 = (PromotionTypes)promotionInfo->GetPrereqOrPromotion13();
-
-	if(ePrereq1 != NO_PROMOTION ||
-		ePrereq2 != NO_PROMOTION ||
-		ePrereq3 != NO_PROMOTION ||
-		ePrereq4 != NO_PROMOTION ||
-		ePrereq5 != NO_PROMOTION ||
-		ePrereq6 != NO_PROMOTION ||
-		ePrereq7 != NO_PROMOTION ||
-		ePrereq8 != NO_PROMOTION ||
-		ePrereq9 != NO_PROMOTION ||
-		ePrereq10 != NO_PROMOTION ||
-		ePrereq11 != NO_PROMOTION ||
-		ePrereq12 != NO_PROMOTION || 
-		ePrereq13 != NO_PROMOTION )
+	const std::vector<int>& vPrereqOrs = promotionInfo->GetPromotionPrereqOrs();
+	bool bValid = vPrereqOrs.size() == 0;
+	for(const auto iPrereq : promotionInfo->GetPromotionPrereqOrs())
 	{
-		bool bValid = false;
-		if(!bValid)
+		PromotionTypes ePrereq = (PromotionTypes)iPrereq;
+		if (ePrereq == NO_PROMOTION) continue;
+		if (isPromotionValid(ePrereq, eUnit, bLeader, true))
 		{
-			if(NO_PROMOTION != ePrereq1 && isPromotionValid(ePrereq1, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq2 && isPromotionValid(ePrereq2, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq3 && isPromotionValid(ePrereq3, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq4 && isPromotionValid(ePrereq4, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq5 && isPromotionValid(ePrereq5, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq6 && isPromotionValid(ePrereq6, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq7 && isPromotionValid(ePrereq7, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq8 && isPromotionValid(ePrereq8, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if(!bValid)
-		{
-			if(NO_PROMOTION != ePrereq9 && isPromotionValid(ePrereq9, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if (!bValid)
-		{
-			if (NO_PROMOTION != ePrereq10 && isPromotionValid(ePrereq10, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if (!bValid)
-		{
-			if (NO_PROMOTION != ePrereq11 && isPromotionValid(ePrereq11, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if (!bValid)
-		{
-			if (NO_PROMOTION != ePrereq12 && isPromotionValid(ePrereq12, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-		if (!bValid)
-		{
-			if (NO_PROMOTION != ePrereq13 && isPromotionValid(ePrereq13, eUnit, bLeader, true))
-			{
-				bValid = true;
-			}
-		}
-
-
-		if(!bValid)
-		{
-			return false;
+			bValid = true;
+			break;
 		}
 	}
-
-	return true;
+	return bValid;
 }
 
 int getPopulationAsset(int iPopulation)
