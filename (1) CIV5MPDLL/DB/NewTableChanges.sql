@@ -317,4 +317,14 @@ CREATE TABLE Promotion_Builds (
 CREATE TABLE IF NOT EXISTS Build_ResourceRemove (
     BuildType TEXT DEFAULT NULL  REFERENCES Builds(Type),
     ResourceType TEXT DEFAULT NULL REFERENCES Resources(Type)
-)
+);
+--Must have all needed promotions to unlock Promotion
+CREATE TABLE Promotion_PromotionPrereqAnds (
+	PromotionType text REFERENCES UnitPromotions(Type),
+	PrereqPromotionType text REFERENCES UnitPromotions(Type)
+);
+--Must any Exclusion promotions will lock Promotion，not two-way
+CREATE TABLE Promotion_PromotionExclusionAny (
+	PromotionType text REFERENCES UnitPromotions(Type),
+	ExclusionPromotionType text REFERENCES UnitPromotions(Type)
+);

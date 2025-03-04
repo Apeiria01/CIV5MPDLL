@@ -385,6 +385,27 @@ bool IsPromotionValidForUnitPromotions(PromotionTypes ePromotion, CvUnit& pUnit)
 	CvPromotionEntry* promotionInfo = GC.getPromotionInfo(ePromotion);
 	if(promotionInfo == NULL) return false;
 
+	//Have Exclusions?
+	const std::vector<int>& pExclusions = promotionInfo->GetPromotionExclusionAny();
+	if(!pExclusions.empty())
+	{
+		for(int Ii=0; Ii < pExclusions.size(); Ii++)
+		{
+			if(pExclusions[Ii] != NO_PROMOTION && pUnit.isHasPromotion((PromotionTypes)pExclusions[Ii]))
+			return false;
+		}
+	}
+	// Has all needed Promotions
+	const std::vector<int>& pPrereqAnds = promotionInfo->GetPromotionPrereqAnds();
+	if(!pPrereqAnds.empty())
+	{
+		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
+		{
+			if(pPrereqAnds[Ii] != NO_PROMOTION && !pUnit.isHasPromotion((PromotionTypes)pPrereqAnds[Ii]))
+			return false;
+		}
+	}
+
 	const std::vector<int>& prePromotions = promotionInfo->GetPrePromotions();
 
 	for(int Ii=0; Ii < prePromotions.size(); Ii++)
@@ -473,6 +494,29 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 		if(promotionInfo->IsBlitz())
 		{
 			return false;
+		}
+	}
+	const std::vector<int>& pExclusions = promotionInfo->GetPromotionExclusionAny();
+	if(!pExclusions.empty())
+	{
+		for(int Ii=0; Ii < pExclusions.size(); Ii++)
+		{
+			if(pExclusions[Ii] != NO_PROMOTION && unitInfo->GetFreePromotions(pExclusions[Ii]))
+			{
+				return false;
+			}
+		}
+	}
+	// Has all needed Promotions
+	const std::vector<int>& pPrereqAnds = promotionInfo->GetPromotionPrereqAnds();
+	if(!pPrereqAnds.empty())
+	{
+		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
+		{
+			if(!isPromotionValid((PromotionTypes)pPrereqAnds[Ii], eUnit, bLeader, true))
+			{
+				return false;
+			}
 		}
 	}
 

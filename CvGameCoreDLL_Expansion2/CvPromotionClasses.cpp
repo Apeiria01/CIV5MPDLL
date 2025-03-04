@@ -427,6 +427,8 @@ CvPromotionEntry::~CvPromotionEntry(void)
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	m_vPrePromotions.clear();
 #endif
+	m_vPromotionPrereqAnds.clear();
+	m_vPromotionExclusionAny.clear();
 #if defined(MOD_PROMOTION_AURA_PROMOTION)
 	SAFE_DELETE_ARRAY(m_pbDomainAuraValid);
 #endif
@@ -1455,6 +1457,54 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			CvAssert(iBuild < iNumBuildTypes);
 			m_pbBuildType[iBuild] = true;
 			m_bIncludeBuild = true;
+		}
+
+		pResults->Reset();
+	}
+	//Promotion_PromotionPrereqAnds
+	{
+		m_vPromotionPrereqAnds.clear();
+		std::string sqlKey = "m_vPromotionPrereqAnds";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if(pResults == NULL)
+		{
+			const char* szSQL = "select UnitPromotions.ID from Promotion_PromotionPrereqAnds inner join UnitPromotions on UnitPromotions.Type = PrereqPromotionType where PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step())
+		{
+			const int iPrereqPromotion = (PromotionTypes)pResults->GetInt(0);
+			CvAssert(iPrereqPromotion < iNumUnitPromotions);
+			m_vPromotionPrereqAnds.push_back(iPrereqPromotion);
+		}
+
+		pResults->Reset();
+	}
+	//Promotion_PromotionExclusionAny
+	{
+		m_vPromotionExclusionAny.clear();
+		std::string sqlKey = "m_vPromotionExclusionAny";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if(pResults == NULL)
+		{
+			const char* szSQL = "select UnitPromotions.ID from Promotion_PromotionExclusionAny inner join UnitPromotions on UnitPromotions.Type = ExclusionPromotionType where PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step())
+		{
+			const int iExclusionPromotion = (PromotionTypes)pResults->GetInt(0);
+			CvAssert(iExclusionPromotion < iNumUnitPromotions);
+			m_vPromotionExclusionAny.push_back(iExclusionPromotion);
 		}
 
 		pResults->Reset();
@@ -3627,6 +3677,14 @@ const std::vector<int>& CvPromotionEntry::GetPrePromotions() const
 	return m_vPrePromotions;
 }
 #endif
+const std::vector<int>& CvPromotionEntry::GetPromotionPrereqAnds() const
+{
+	return m_vPromotionPrereqAnds;
+}
+const std::vector<int>& CvPromotionEntry::GetPromotionExclusionAny() const
+{
+	return m_vPromotionExclusionAny;
+}
 
 
 

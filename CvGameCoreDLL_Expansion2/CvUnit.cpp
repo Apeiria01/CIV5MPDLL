@@ -25920,6 +25920,26 @@ bool CvUnit::canAcquirePromotion(PromotionTypes ePromotion) const
 	{
 		return false;
 	}
+	//Have Exclusions?
+	const std::vector<int>& pExclusions = pkPromotionInfo->GetPromotionExclusionAny();
+	if(!pExclusions.empty())
+	{
+		for(int Ii=0; Ii < pExclusions.size(); Ii++)
+		{
+			if(isHasPromotion((PromotionTypes)pExclusions[Ii]))return false;
+		}
+	}
+	// Has all needed Promotions?
+	const std::vector<int>& pPrereqAnds = pkPromotionInfo->GetPromotionPrereqAnds();
+	if(!pPrereqAnds.empty())
+	{
+		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
+		{
+			if(!isHasPromotion((PromotionTypes)pPrereqAnds[Ii]))return false;
+		}
+	}
+	
+
 
 	// AND prereq
 	if(pkPromotionInfo->GetPrereqPromotion() != NO_PROMOTION)

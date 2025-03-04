@@ -442,7 +442,8 @@ public:
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	const std::vector<int>& GetPrePromotions() const;
 #endif
-
+	const std::vector<int>& GetPromotionPrereqAnds() const;
+	const std::vector<int>& GetPromotionExclusionAny() const;
 #if defined(MOD_ROG_CORE)
 	bool GetUnitType(int i) const;
 #endif
@@ -928,6 +929,8 @@ protected:
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	std::vector<int> m_vPrePromotions;
 #endif	
+	std::vector<int> m_vPromotionPrereqAnds;
+	std::vector<int> m_vPromotionExclusionAny;
 	bool* m_pbUnitType;
 	bool* m_pbBuildType;
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
