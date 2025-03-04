@@ -818,5 +818,8 @@
 		<Row Tag="TXT_KEY_BELIEF_CUTTING_NONUS">
 			<Text>宗教信條為{1_CityName}帶來了額外獎勵: {2_BonusStr}。</Text>
 		</Row>
+		<Row Tag="TXT_KEY_MPDLL_ERROR_VERSION">
+			<Text>[COLOR_NEGATIVE_TEXT]MPDLL出現錯誤，如果你使用的都是最新版本，請和管理員聯系[COLOR_NEGATIVE_TEXT]</Text>
+		</Row>
 	</Language_zh_Hant_HK>
 </GameData>

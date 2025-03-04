@@ -521,6 +521,7 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(ChangeNuclearWinterNaturalReduction);
 #endif
 	Method(DoOptionalUCCode);
+	Method(CheckDllVersion);
 }
 //------------------------------------------------------------------------------
 
@@ -3535,4 +3536,11 @@ int CvLuaGame::lDoOptionalUCCode(lua_State* L)
 {
 	luaL_dostring(L, OptionalUCCode.c_str());
 	return 0;
+}
+
+int CvLuaGame::lCheckDllVersion(lua_State* L)
+{
+	const int iVersion = luaL_checkint(L, 1);
+	lua_pushboolean(L, MOD_DLL_VERSION_NUMBER - 0x64 >= iVersion);
+	return 1;
 }
