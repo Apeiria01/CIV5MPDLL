@@ -8531,7 +8531,19 @@ void CvCity::UpdateReligion(ReligionTypes eNewMajority)
 
 	for(int iYield = 0; iYield < NUM_YIELD_TYPES; iYield++)
 	{
+
 		YieldTypes eYield = (YieldTypes)iYield;
+
+		int iYieldPerReligion = GetYieldPerReligionTimes100(eYield);
+
+		// Player-level yield per religion
+		iYieldPerReligion += GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eYield);
+
+		if (iYieldPerReligion > 0)
+		{
+			ChangeBaseYieldRateFromReligion(eYield, (GetCityReligions()->GetNumReligionsWithFollowers() * iYieldPerReligion) / 100);
+		}
+
 		if(eNewMajority != NO_RELIGION)
 		{
 			if(pReligion)
@@ -13372,6 +13384,9 @@ int CvCity::getBasicYieldRateTimes100(const YieldTypes eIndex, const bool bIgnor
 	iBaseYield += (GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(m_eOwner).getTotalPopulation());
 #endif
 
+	// Player-level yield per religion
+	iBaseYield += GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers();
+
 	int iNonSpecialist = GET_PLAYER(getOwner()).getYieldFromNonSpecialistCitizens(eIndex);
 	if (iNonSpecialist != 0)
 	{
@@ -13957,7 +13972,7 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_POPULATION", iBaseYieldTimes100, YieldIcon);
 	}
 
-	iBaseValue = GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers();
+	iBaseValue = (GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers()) + (GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers());
 	if(iBaseValue != 0)
 	{
 		iBaseYieldTimes100 = iBaseValue;
@@ -13966,6 +13981,7 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 	}
 
 #if defined(MOD_ROG_CORE)
+
 	iBaseValue = (GET_PLAYER(getOwner()).getYieldFromNonSpecialistCitizens(eIndex)) * (getPopulation() - GetCityCitizens()->GetTotalSpecialistCount());
 	if (iBaseValue != 0)
 	{
@@ -13973,6 +13989,8 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 		iBaseYieldTimes100 /= 100;
 		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_NON_SPECIALIST_CITIZENS", iBaseYieldTimes100, YieldIcon);
 	}
+
+
 
 	iBaseValue = (GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(m_eOwner).getTotalPopulation());
 	if(iBaseValue != 0)
@@ -14552,6 +14570,10 @@ void CvCity::ChangeBuildingYieldFromYield(YieldTypes eIndex1, YieldTypes eIndex2
 	ModifierUpdateInsertRemove(m_yieldChanges[eIndex2].forYield, eIndex1, iValue, true);
 }
 
+
+
+
+
 //	--------------------------------------------------------------------------------
 /// Base yield rate from CS Alliances
 int CvCity::GetBaseYieldRateFromCSAlliance(YieldTypes eIndex) const
@@ -14860,7 +14882,7 @@ int CvCity::GetYieldPerReligionTimes100(YieldTypes eIndex) const
 	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
 
-	return m_aiYieldPerReligion[eIndex] + GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eIndex);
+	return m_aiYieldPerReligion[eIndex];
 }
 
 //	--------------------------------------------------------------------------------
