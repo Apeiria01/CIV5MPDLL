@@ -26806,6 +26806,7 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	changePolicyModifiers(POLICYMOD_SCIENCE_MODIFIER_FROM_RA_NUM, pPolicy->GetScienceModifierFromRANum() * iChange);
 	changePolicyModifiers(POLICYMOD_DIPLOMAT_PROPAGANDA_MODIFIER, pPolicy->GetDiplomatPropagandaModifier() * iChange);
 	changePolicyModifiers(POLICYMOD_DEEP_WATER_NAVAL_CULTURE_STRENGTH_MODIFIER, pPolicy->GetDeepWaterNavalStrengthCultureModifier() * iChange);
+	changePolicyModifiers(POLICYMOD_CITY_EXTRA_PRODUCTION_COUNT, pPolicy->GetCityExtraProductionCount() * iChange);
 
 	if(pPolicy->GetFreeBuildingClass() != NO_BUILDINGCLASS)
 	{

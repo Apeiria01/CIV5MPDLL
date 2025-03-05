@@ -123,6 +123,7 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_iTourismModifierPerGPCreation(0),
 	m_iScienceModifierFromRANum(0),
 	m_iDiplomatPropagandaModifier(0),
+	m_iCityExtraProductionCount(0),
 	m_iGoldPerUnit(0),
 	m_iGoldPerMilitaryUnit(0),
 	m_iCityStrengthMod(0),
@@ -448,6 +449,7 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_iTourismModifierPerGPCreation = kResults.GetInt("TourismModifierPerGPCreation");
 	m_iScienceModifierFromRANum = kResults.GetInt("ScienceModifierFromRANum");
 	m_iDiplomatPropagandaModifier = kResults.GetInt("DiplomatPropagandaModifier");
+	m_iCityExtraProductionCount = kResults.GetInt("CityExtraProductionCount");
 	m_iGoldPerUnit = kResults.GetInt("GoldPerUnit");
 	m_iGoldPerMilitaryUnit = kResults.GetInt("GoldPerMilitaryUnit");
 	m_iCityStrengthMod = kResults.GetInt("CityStrengthMod");
@@ -1911,6 +1913,11 @@ int CvPolicyEntry::GetScienceModifierFromRANum() const
 int CvPolicyEntry::GetDiplomatPropagandaModifier() const
 {
 	return m_iDiplomatPropagandaModifier;
+}
+
+int CvPolicyEntry::GetCityExtraProductionCount() const
+{
+	return m_iCityExtraProductionCount;
 }
 
 /// Upkeep cost
