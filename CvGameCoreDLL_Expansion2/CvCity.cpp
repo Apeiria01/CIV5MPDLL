@@ -19479,80 +19479,21 @@ void CvCity::doProduction(bool bAllowNoProduction)
 	{
 		return;
 	}
-#ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION
-	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION)
+
+	if (!isProduction())
 	{
-		if (!isProduction())
-		{
-			changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
-			return;
-		}
-
-		for (int iProductionCount = 0, iMaxProductionCount = 5; iProductionCount < iMaxProductionCount && isProduction(); iProductionCount++)
-		{
-			if (isProductionBuilding())
-			{
-				const OrderData *pOrderNode = headOrderQueueNode();
-				int iData1 = -1;
-				if (pOrderNode != NULL)
-				{
-					iData1 = pOrderNode->iData1;
-				}
-
-				const BuildingTypes eBuilding = static_cast<BuildingTypes>(iData1);
-				CvBuildingEntry *pkBuildingInfo = GC.getBuildingInfo(eBuilding);
-				if (pkBuildingInfo)
-				{
-					if (isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
-					{
-						if (m_pCityBuildings->GetBuildingProduction(eBuilding) == 0) // otherwise we are probably already showing this
-						{
-							auto_ptr<ICvCity1> pDllCity(new CvDllCity(this));
-							DLLUI->AddDeferredWonderCommand(WONDER_CREATED, pDllCity.get(), eBuilding, 0);
-						}
-					}
-				}
-			}
-
-			// notice: To avoid product duplicated, we only count the difference production once.
-			changeProductionTimes100(iProductionCount == 0 ? getCurrentProductionDifferenceTimes100(false, true) : getOverflowProductionTimes100());
-
-#if defined(MOD_PROCESS_STOCKPILE)
-			if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
-#endif
-				setOverflowProduction(0);
-			setFeatureProduction(0);
-
-#if defined(MOD_PROCESS_STOCKPILE)
-			if (getProduction() >= getProductionNeeded())
-#else
-			if (getProduction() >= getProductionNeeded() && !isProductionProcess())
-#endif
-			{
-#if defined(MOD_PROCESS_STOCKPILE)
-				popOrder(0, !isProductionProcess(), true);
-				if (!isHuman() || isProductionAutomated())
-				{
-					AI_chooseProduction(false /*bInterruptWonders*/); // the previous order is finished. choose next one.
-				}
-#else
-				popOrder(0, true, true);
-#endif
-			}
-			else
-			{
-				break;
-			}
-		}
+		changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
+		return;
 	}
-	else // old rule
-	{
-		if (!isProduction())
-		{
-			changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
-			return;
-		}
 
+	int iMaxProductionCount = 1;
+	iMaxProductionCount += GET_PLAYER(getOwner()).getPolicyModifiers(POLICYMOD_CITY_EXTRA_PRODUCTION_COUNT);
+#ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION
+	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION) iMaxProductionCount += 4;
+#endif
+
+	for (int iProductionCount = 0; iProductionCount < iMaxProductionCount && isProduction(); iProductionCount++)
+	{
 		if (isProductionBuilding())
 		{
 			const OrderData *pOrderNode = headOrderQueueNode();
@@ -19577,7 +19518,8 @@ void CvCity::doProduction(bool bAllowNoProduction)
 			}
 		}
 
-		changeProductionTimes100(getCurrentProductionDifferenceTimes100(false, true));
+		// notice: To avoid product duplicated, we only count the difference production once.
+		changeProductionTimes100(iProductionCount == 0 ? getCurrentProductionDifferenceTimes100(false, true) : getOverflowProductionTimes100());
 
 #if defined(MOD_PROCESS_STOCKPILE)
 		if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
@@ -19593,63 +19535,19 @@ void CvCity::doProduction(bool bAllowNoProduction)
 		{
 #if defined(MOD_PROCESS_STOCKPILE)
 			popOrder(0, !isProductionProcess(), true);
+			if (!isHuman() || isProductionAutomated())
+			{
+				AI_chooseProduction(false /*bInterruptWonders*/); // the previous order is finished. choose next one.
+			}
 #else
 			popOrder(0, true, true);
 #endif
 		}
-	}
-#else  // old rule
-	if (!isProduction())
-	{
-		changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
-		return;
-	}
-
-	if (isProductionBuilding())
-	{
-		const OrderData *pOrderNode = headOrderQueueNode();
-		int iData1 = -1;
-		if (pOrderNode != NULL)
+		else
 		{
-			iData1 = pOrderNode->iData1;
-		}
-
-		const BuildingTypes eBuilding = static_cast<BuildingTypes>(iData1);
-		CvBuildingEntry *pkBuildingInfo = GC.getBuildingInfo(eBuilding);
-		if (pkBuildingInfo)
-		{
-			if (isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
-			{
-				if (m_pCityBuildings->GetBuildingProduction(eBuilding) == 0) // otherwise we are probably already showing this
-				{
-					auto_ptr<ICvCity1> pDllCity(new CvDllCity(this));
-					DLLUI->AddDeferredWonderCommand(WONDER_CREATED, pDllCity.get(), eBuilding, 0);
-				}
-			}
+			break;
 		}
 	}
-
-	changeProductionTimes100(getCurrentProductionDifferenceTimes100(false, true));
-
-#if defined(MOD_PROCESS_STOCKPILE)
-	if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
-#endif
-		setOverflowProduction(0);
-	setFeatureProduction(0);
-
-#if defined(MOD_PROCESS_STOCKPILE)
-	if (getProduction() >= getProductionNeeded())
-#else
-	if (getProduction() >= getProductionNeeded() && !isProductionProcess())
-#endif
-	{
-#if defined(MOD_PROCESS_STOCKPILE)
-		popOrder(0, !isProductionProcess(), true);
-#else
-		popOrder(0, true, true);
-#endif
-	}
-#endif
 }
 
 
