@@ -44,6 +44,7 @@ public:
 	int GetFlavorValue(int i) const;
 	bool IsSpaceship() const;
 	bool IsAllowsNukes() const;
+	bool IsNoBroadcast() const;
 	int CostScalerNumberOfRepeats() const;
 	int GetGoldMaintenance() const;
 	int CostScalerEra() const;
@@ -82,6 +83,7 @@ protected:
 
 	bool m_bSpaceship;
 	bool m_bAllowsNukes;
+	bool m_bNoBroadcast;
 	int m_iGoldMaintenance;
 	int m_iCostScalerEra;
 	int m_iCostScalerNumRepeats;
