@@ -7285,7 +7285,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 					{
 						iScore = 400;
 					}
-					iScore /= (1+ m_pPlayer->getWritersFromFaith());
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ARTIST"))
 				{
@@ -7297,7 +7297,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 					{
 						iScore = 400;
 					}
-					iScore /= (1+ m_pPlayer->getArtistsFromFaith());
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MUSICIAN"))
 				{
@@ -7309,7 +7309,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 					{
 						iScore = 400;
 					}
-					iScore /= (1+ m_pPlayer->getMusiciansFromFaith());
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_SCIENTIST"))
 				{
@@ -7322,7 +7322,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 						iScore = 400;
 					}
 					iScore = 1000;
-					iScore /= (1+ m_pPlayer->getScientistsFromFaith());
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MERCHANT"))
 				{
@@ -7334,7 +7334,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 					{
 						iScore = 400;
 					}
-					iScore /= (1+ m_pPlayer->getMerchantsFromFaith());
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ENGINEER"))
 				{
@@ -7347,7 +7347,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 					{
 						iScore = 500;
 					}
-					iScore /= (1+ m_pPlayer->getEngineersFromFaith());
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL"))
 				{
@@ -7359,7 +7359,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 					{
 						iScore = 400;
 					}
-					iScore /= (1+ m_pPlayer->getGeneralsFromFaith() + m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_GENERAL));
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass) + m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_GENERAL));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL"))
 				{
@@ -7371,7 +7371,7 @@ UnitTypes CvReligionAI::GetDesiredFaithGreatPerson() const
 					{
 						iScore = 400;
 					}
-					iScore /= (1+ m_pPlayer->getAdmiralsFromFaith() + m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_ADMIRAL));
+					iScore /= (1+ m_pPlayer->getUnitClassesFromFaith(eUnitClass) + m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_ADMIRAL));
 				}
 				else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MISSIONARY"))
 				{

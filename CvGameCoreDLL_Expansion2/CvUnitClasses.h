@@ -99,6 +99,8 @@ public:
 	int GetTrainPopulationConsume() const;
 	int GetNoSpreadTurnPopModifierAfterRemovingHeresy() const;
 	bool IsNoAggressive() const;
+	bool IsFaithCostIncrease() const;
+	int GetFaithCostIncrease() const;
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	bool IsNoTroops() const;
@@ -299,6 +301,7 @@ private:
 	int m_iTrainPopulationConsume;
 	int m_iNoSpreadTurnPopModifierAfterRemovingHeresy;
 	bool m_bNoAggressive;
+	int m_iFaithCostIncrease;
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	bool m_bNoTroops;

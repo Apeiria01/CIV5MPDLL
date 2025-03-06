@@ -5951,48 +5951,40 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 				)
 				{
 					PolicyBranchTypes eBranch = NO_POLICY_BRANCH_TYPE;
-					int iNum = 0;
+					int iNum = kPlayer.getUnitClassesFromFaith(eUnitClass);
 
 					// Check social policy tree
 					if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_WRITER", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_AESTHETICS", true /*bHideAssert*/);
-						iNum = kPlayer.getWritersFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ARTIST", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_AESTHETICS", true /*bHideAssert*/);
-						iNum = kPlayer.getArtistsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MUSICIAN", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_AESTHETICS", true /*bHideAssert*/);
-						iNum = kPlayer.getMusiciansFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_SCIENTIST", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_RATIONALISM", true /*bHideAssert*/);
-						iNum = kPlayer.getScientistsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MERCHANT", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_COMMERCE", true /*bHideAssert*/);
-						iNum = kPlayer.getMerchantsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ENGINEER", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_TRADITION", true /*bHideAssert*/);
-						iNum = kPlayer.getEngineersFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_HONOR", true /*bHideAssert*/);
-						iNum = kPlayer.getGeneralsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_EXPLORATION", true /*bHideAssert*/);
-						iNum = kPlayer.getAdmiralsFromFaith();
 					}
 
 					bool bAllUnlockedByBelief = false;
@@ -6092,6 +6084,10 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 			iCost = pkUnitInfo->GetProductionCost() * kOwner.GetPlayerTraits()->GetFaithPurchaseCombatUnitCostPercent() / 100;
 		}
 #endif
+		if(pkUnitInfo->IsFaithCostIncrease())
+		{
+			iCost += pkUnitInfo->GetFaithCostIncrease() * kOwner.getUnitClassesFromFaith((UnitClassTypes)pkUnitInfo->GetUnitClassType());
+		}
 		EraTypes eEra = GET_TEAM(kOwner.getTeam()).GetCurrentEra();
 		int iMultiplier = GC.getEraInfo(eEra)->getFaithCostMultiplier();
 		iCost = iCost * iMultiplier / 100;
@@ -18942,37 +18938,12 @@ void CvCity::Purchase(UnitTypes eUnitType, BuildingTypes eBuildingType, ProjectT
 			kPlayer.ChangeFaith(-iFaithCost);
 
 			UnitClassTypes eUnitClass = pUnit->getUnitClassType();
-			if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_WRITER"))
+			if (pUnit->getUnitInfo().IsFaithCostIncrease())
 			{
-				kPlayer.incrementWritersFromFaith();
+				kPlayer.incrementUnitClassesFromFaith(eUnitClass);
 			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ARTIST"))
+			if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL"))
 			{
-				kPlayer.incrementArtistsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MUSICIAN"))
-			{
-				kPlayer.incrementMusiciansFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_SCIENTIST"))
-			{
-				kPlayer.incrementScientistsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MERCHANT"))
-			{
-				kPlayer.incrementMerchantsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ENGINEER"))
-			{
-				kPlayer.incrementEngineersFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL"))
-			{
-				kPlayer.incrementGeneralsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL"))
-			{
-				kPlayer.incrementAdmiralsFromFaith();
 				CvPlot *pSpawnPlot = kPlayer.GetGreatAdmiralSpawnPlot(pUnit);
 				if (pUnit->plot() != pSpawnPlot)
 				{

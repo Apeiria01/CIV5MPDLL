@@ -247,14 +247,7 @@ CvPlayer::CvPlayer() :
 	, m_iGreatWritersCreated(0)
 	, m_iGreatArtistsCreated(0)
 	, m_iGreatMusiciansCreated(0)
-	, m_iMerchantsFromFaith(0)
-	, m_iScientistsFromFaith(0)
-	, m_iWritersFromFaith(0)
-	, m_iArtistsFromFaith(0)
-	, m_iMusiciansFromFaith(0)
-	, m_iGeneralsFromFaith(0)
-	, m_iAdmiralsFromFaith(0)
-	, m_iEngineersFromFaith(0)
+	, m_mUnitClassesFromFaith()
 	, m_iGreatPeopleThresholdModifier("CvPlayer::m_iGreatPeopleThresholdModifier", m_syncArchive)
 	, m_iGreatGeneralsThresholdModifier("CvPlayer::m_iGreatGeneralsThresholdModifier", m_syncArchive)
 	, m_iGreatAdmiralsThresholdModifier(0)
@@ -1044,14 +1037,7 @@ void CvPlayer::uninit()
 	m_iGreatWritersCreated = 0;
 	m_iGreatArtistsCreated = 0;
 	m_iGreatMusiciansCreated = 0;
-	m_iMerchantsFromFaith = 0;
-	m_iScientistsFromFaith = 0;
-	m_iWritersFromFaith = 0;
-	m_iArtistsFromFaith = 0;
-	m_iMusiciansFromFaith = 0;
-	m_iGeneralsFromFaith = 0;
-	m_iAdmiralsFromFaith = 0;
-	m_iEngineersFromFaith = 0;
+	m_mUnitClassesFromFaith.clear();
 	m_iGreatPeopleThresholdModifier = 0;
 	m_iGreatGeneralsThresholdModifier = 0;
 	m_iGreatAdmiralsThresholdModifier = 0;
@@ -15631,100 +15617,23 @@ void CvPlayer::incrementGreatMusiciansCreated(bool bIsFree)
 
 
 //	--------------------------------------------------------------------------------
-int CvPlayer::getMerchantsFromFaith() const
+int CvPlayer::getUnitClassesFromFaith(UnitClassTypes eIndex) const
 {
-	return m_iMerchantsFromFaith;
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
+	auto it = m_mUnitClassesFromFaith.find(eIndex);
+	if (it != m_mUnitClassesFromFaith.end()) return it->second;
+	else return 0;
+}
+void CvPlayer::incrementUnitClassesFromFaith(UnitClassTypes eIndex)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
+	m_mUnitClassesFromFaith[eIndex]++;
 }
 
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementMerchantsFromFaith()
-{
-	m_iMerchantsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getScientistsFromFaith() const
-{
-	return m_iScientistsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementScientistsFromFaith()
-{
-	m_iScientistsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getWritersFromFaith() const
-{
-	return m_iWritersFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementWritersFromFaith()
-{
-	m_iWritersFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getArtistsFromFaith() const
-{
-	return m_iArtistsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementArtistsFromFaith()
-{
-	m_iArtistsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getMusiciansFromFaith() const
-{
-	return m_iMusiciansFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementMusiciansFromFaith()
-{
-	m_iMusiciansFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getGeneralsFromFaith() const
-{
-	return m_iGeneralsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementGeneralsFromFaith()
-{
-	m_iGeneralsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getAdmiralsFromFaith() const
-{
-	return m_iAdmiralsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementAdmiralsFromFaith()
-{
-	m_iAdmiralsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getEngineersFromFaith() const
-{
-	return m_iEngineersFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementEngineersFromFaith()
-{
-	m_iEngineersFromFaith++;
-}
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getGreatPeopleThresholdModifier() const
@@ -28082,14 +27991,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGreatWritersCreated;
 	kStream >> m_iGreatArtistsCreated;
 	kStream >> m_iGreatMusiciansCreated;
-	kStream >> m_iMerchantsFromFaith;
-	kStream >> m_iScientistsFromFaith;
-	kStream >> m_iWritersFromFaith;
-	kStream >> m_iArtistsFromFaith;
-	kStream >> m_iMusiciansFromFaith;
-	kStream >> m_iGeneralsFromFaith;
-	kStream >> m_iAdmiralsFromFaith;
-	kStream >> m_iEngineersFromFaith;
+	kStream >> m_mUnitClassesFromFaith;
 	kStream >> m_iGreatPeopleThresholdModifier;
 	kStream >> m_iGreatGeneralsThresholdModifier;
 	kStream >> m_iGreatAdmiralsThresholdModifier;
@@ -28900,14 +28802,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGreatWritersCreated;
 	kStream << m_iGreatArtistsCreated;
 	kStream << m_iGreatMusiciansCreated;
-	kStream << m_iMerchantsFromFaith;
-	kStream << m_iScientistsFromFaith;
-	kStream << m_iWritersFromFaith;
-	kStream << m_iArtistsFromFaith;
-	kStream << m_iMusiciansFromFaith;
-	kStream << m_iGeneralsFromFaith;
-	kStream << m_iAdmiralsFromFaith;
-	kStream << m_iEngineersFromFaith;
+	kStream << m_mUnitClassesFromFaith;
 	kStream << m_iGreatPeopleThresholdModifier;
 	kStream << m_iGreatGeneralsThresholdModifier;
 	kStream << m_iGreatAdmiralsThresholdModifier;

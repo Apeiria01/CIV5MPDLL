@@ -745,22 +745,8 @@ public:
 	int getGreatMusiciansCreated(bool bExcludeFree = MOD_GLOBAL_TRULY_FREE_GP) const;
 	void incrementGreatMusiciansCreated(bool bIsFree = MOD_GLOBAL_TRULY_FREE_GP);
 
-	int getMerchantsFromFaith() const;
-	void incrementMerchantsFromFaith();
-	int getScientistsFromFaith() const;
-	void incrementScientistsFromFaith();
-	int getWritersFromFaith() const;
-	void incrementWritersFromFaith();
-	int getArtistsFromFaith() const;
-	void incrementArtistsFromFaith();
-	int getMusiciansFromFaith() const;
-	void incrementMusiciansFromFaith();
-	int getGeneralsFromFaith() const;
-	void incrementGeneralsFromFaith();
-	int getAdmiralsFromFaith() const;
-	void incrementAdmiralsFromFaith();
-	int getEngineersFromFaith() const;
-	void incrementEngineersFromFaith();
+	int getUnitClassesFromFaith(UnitClassTypes eIndex) const;
+	void incrementUnitClassesFromFaith(UnitClassTypes eIndex);
 
 	int getGreatPeopleThresholdModifier() const;
 	void changeGreatPeopleThresholdModifier(int iChange);
@@ -2436,14 +2422,7 @@ protected:
 	int m_iGreatWritersCreated;
 	int m_iGreatArtistsCreated;
 	int m_iGreatMusiciansCreated;
-	int m_iMerchantsFromFaith;
-	int m_iScientistsFromFaith;
-	int m_iWritersFromFaith;
-	int m_iArtistsFromFaith;
-	int m_iMusiciansFromFaith;
-	int m_iGeneralsFromFaith;
-	int m_iAdmiralsFromFaith;
-	int m_iEngineersFromFaith;
+	std::tr1::unordered_map<UnitClassTypes, int> m_mUnitClassesFromFaith;
 	FAutoVariable<int, CvPlayer> m_iGreatPeopleThresholdModifier;
 	FAutoVariable<int, CvPlayer> m_iGreatGeneralsThresholdModifier;
 	int m_iGreatAdmiralsThresholdModifier;

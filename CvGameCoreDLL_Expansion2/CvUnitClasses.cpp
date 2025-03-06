@@ -83,6 +83,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_iTrainPopulationConsume(0),
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy(0),
 	m_bNoAggressive(false),
+	m_iFaithCostIncrease(false),
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	m_bNoTroops(false),
@@ -355,6 +356,22 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_iTrainPopulationConsume = kResults.GetInt("TrainPopulationConsume");
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy = kResults.GetInt("NoSpreadTurnPopModifierAfterRemovingHeresy");
 	m_bNoAggressive = kResults.GetBool("NoAggressive");
+	
+	if(m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_WRITER", true /*bHideAssert*/)
+	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_ARTIST", true /*bHideAssert*/)
+	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_MUSICIAN", true /*bHideAssert*/)
+	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_SCIENTIST", true /*bHideAssert*/)
+	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_ENGINEER", true /*bHideAssert*/)
+	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_MERCHANT", true /*bHideAssert*/)
+	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL", true /*bHideAssert*/)
+	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL", true /*bHideAssert*/))
+	{
+		m_iFaithCostIncrease = 1;
+	}
+	else
+	{
+		m_iFaithCostIncrease = kResults.GetInt("FaithCostIncrease");
+	}
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	m_bNoTroops = kResults.GetBool("NoTroopConsume");
@@ -915,6 +932,15 @@ int CvUnitEntry::GetNoSpreadTurnPopModifierAfterRemovingHeresy() const
 bool CvUnitEntry::IsNoAggressive() const
 {
 	return m_bNoAggressive;
+}
+
+bool CvUnitEntry::IsFaithCostIncrease() const
+{
+	return m_iFaithCostIncrease > 0;
+}
+int CvUnitEntry::GetFaithCostIncrease() const
+{
+	return m_iFaithCostIncrease;
 }
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
