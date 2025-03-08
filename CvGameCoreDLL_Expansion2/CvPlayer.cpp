@@ -14727,6 +14727,17 @@ void CvPlayer::doAdoptPolicy(PolicyTypes ePolicy)
 	updateYield();		// Policies can change the yield
 }
 
+void CvPlayer::UpdateGlobalUnlimitedPolicyStatus() {
+    m_bGlobalUnlimitedOneTurnTGCP = false;
+    for (int iPolicy = 0; iPolicy < GC.getNumPolicyInfos(); ++iPolicy) {
+        const PolicyTypes ePolicy = static_cast<PolicyTypes>(iPolicy);
+        const CvPolicyEntry* pPolicy = GC.getPolicyInfo(ePolicy);
+        if (pPolicy && pPolicy->IsGlobalUnlimitedOneTurnTGCP() && GetPlayerPolicies()->HasPolicy(ePolicy)) {
+            m_bGlobalUnlimitedOneTurnTGCP = true;
+            break;  
+        }
+    }
+}
 //	--------------------------------------------------------------------------------
 /// Empire in Anarchy?
 bool CvPlayer::IsAnarchy() const

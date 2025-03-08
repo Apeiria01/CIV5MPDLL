@@ -2304,7 +2304,7 @@ void CvCity::doTurn()
 		}
 
 #ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_CULTURE
-		if (MOD_GLOBAL_UNLIMITED_ONE_TURN_CULTURE)
+		if (MOD_GLOBAL_UNLIMITED_ONE_TURN_CULTURE || GET_PLAYER(getOwner()).HasGlobalUnlimitedPolicy())
 		{
 			while (GetJONSCultureStored() >= GetJONSCultureThreshold())
 			{
@@ -19075,7 +19075,7 @@ void CvCity::doGrowth()
 	setFoodKept(range(getFoodKept(), 0, ((iGrowthThreshold * getMaxFoodKeptPercent()) / 100)));
 
 #ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH
-	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH)
+	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH || GET_PLAYER(getOwner()).HasGlobalUnlimitedPolicy())
 	{	
 		while (getFood() >= iGrowthThreshold)
 		{
@@ -19460,7 +19460,7 @@ void CvCity::doProduction(bool bAllowNoProduction)
 	int iMaxProductionCount = 1;
 	iMaxProductionCount += GET_PLAYER(getOwner()).getPolicyModifiers(POLICYMOD_CITY_EXTRA_PRODUCTION_COUNT);
 #ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION
-	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION) iMaxProductionCount += 4;
+	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION || GET_PLAYER(getOwner()).HasGlobalUnlimitedPolicy()) iMaxProductionCount += 4;
 #endif
 
 	for (int iProductionCount = 0; iProductionCount < iMaxProductionCount && isProduction(); iProductionCount++)
