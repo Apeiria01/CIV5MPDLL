@@ -760,6 +760,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 	m_iGlobalGrowthFoodNeededModifier = kResults.GetInt("GlobalGrowthFoodNeededModifier");
 	m_iSecondCapitalsExtraScore = kResults.GetInt("SecondCapitalsExtraScore");
+	m_iFoodKeptFromPollution = kResults.GetInt("FoodKeptFromPollution");
 
 	m_bCapitalOnly = kResults.GetBool("CapitalOnly");
 	m_bOriginalCapitalOnly = kResults.GetBool("OriginalCapitalOnly");
@@ -2556,6 +2557,10 @@ int CvBuildingEntry::GetGlobalGrowthFoodNeededModifier() const {
 
 int CvBuildingEntry::GetSecondCapitalsExtraScore() const {
 	return m_iSecondCapitalsExtraScore;
+}
+
+int CvBuildingEntry::GetFoodKeptFromPollution() const {
+	return m_iFoodKeptFromPollution;
 }
 
 int CvBuildingEntry::GetExtraAttacks() const

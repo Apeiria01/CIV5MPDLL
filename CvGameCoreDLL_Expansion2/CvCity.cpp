@@ -270,6 +270,7 @@ CvCity::CvCity() :
 	, m_iPlotBuyCostModifier(0)
 	, m_iUnitMaxExperienceLocal(0)
 	, m_iSecondCapitalsExtraScore(0)
+	, m_iFoodKeptFromPollution(0)
 	, m_iNumAllowsFoodTradeRoutes(0)
 	, m_iNumAllowsProductionTradeRoutes(0)
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -1129,6 +1130,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iPlotBuyCostModifier = 0;
 	m_iUnitMaxExperienceLocal = 0;
 	m_iSecondCapitalsExtraScore = 0;
+	m_iFoodKeptFromPollution = 0;
 	m_iNumAllowsFoodTradeRoutes = 0;
 	m_iNumAllowsProductionTradeRoutes = 0;
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -7755,6 +7757,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changePlotBuyCostModifier(pBuildingInfo->GetPlotBuyCostModifier() * iChange);
 		ChangeUnitMaxExperienceLocal(pBuildingInfo->GetUnitMaxExperienceLocal() * iChange);
 		ChangeSecondCapitalsExtraScore(pBuildingInfo->GetSecondCapitalsExtraScore() * iChange);
+		ChangeFoodKeptFromPollution(pBuildingInfo->GetFoodKeptFromPollution() * iChange);
 		ChangeNumAllowsFoodTradeRoutes(pBuildingInfo->AllowsFoodTradeRoutes() ? iChange : 0);
 		ChangeNumAllowsProductionTradeRoutes(pBuildingInfo->AllowsProductionTradeRoutes() ? iChange : 0);
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -11063,6 +11066,17 @@ void CvCity::ChangeSecondCapitalsExtraScore(int iChange)
 	}
 }
 //	--------------------------------------------------------------------------------
+int CvCity::GetFoodKeptFromPollution() const
+{
+	VALIDATE_OBJECT
+	return m_iFoodKeptFromPollution;
+}
+void CvCity::ChangeFoodKeptFromPollution(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iFoodKeptFromPollution += iChange;
+}
+//	--------------------------------------------------------------------------------
 bool CvCity::IsAllowsFoodTradeRoutes()
 {
 	return m_iNumAllowsFoodTradeRoutes > 0;
@@ -11355,7 +11369,7 @@ int CvCity::getMaxFoodKeptPercent() const
 	if (MOD_GLOBAL_CITY_SCALES && !CanGrowNormally())
 		return 0;
 #endif
-	return m_iMaxFoodKeptPercent;
+	return m_iMaxFoodKeptPercent + std::min(0, GetFoodKeptFromPollution());
 }
 
 
@@ -11364,7 +11378,7 @@ void CvCity::changeMaxFoodKeptPercent(int iChange)
 {
 	VALIDATE_OBJECT
 	m_iMaxFoodKeptPercent = (m_iMaxFoodKeptPercent + iChange);
-	CvAssert(getMaxFoodKeptPercent() >= 0);
+	CvAssert(m_iMaxFoodKeptPercent >= 0);
 }
 
 
@@ -19712,6 +19726,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iPlotBuyCostModifier;
 	kStream >> m_iUnitMaxExperienceLocal;
 	kStream >> m_iSecondCapitalsExtraScore;
+	kStream >> m_iFoodKeptFromPollution;
 	kStream >> m_iNumAllowsFoodTradeRoutes;
 	kStream >> m_iNumAllowsProductionTradeRoutes;
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -20216,6 +20231,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iPlotBuyCostModifier; // Added for Version 12
 	kStream << m_iUnitMaxExperienceLocal;
 	kStream << m_iSecondCapitalsExtraScore;
+	kStream << m_iFoodKeptFromPollution;
 	kStream << m_iNumAllowsFoodTradeRoutes;
 	kStream << m_iNumAllowsProductionTradeRoutes;
 #if defined(MOD_BUILDINGS_CITY_WORKING)

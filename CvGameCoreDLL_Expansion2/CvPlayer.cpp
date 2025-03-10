@@ -25565,7 +25565,7 @@ void CvPlayer::doAdvancedStartAction(AdvancedStartActionTypes eAction, int iX, i
 				{
 					pCity->GetCityBuildings()->SetNumRealBuilding(eBuilding, pCity->GetCityBuildings()->GetNumRealBuilding(eBuilding)+1);
 					changeAdvancedStartPoints(-iCost);
-					if(pkBuildingInfo->GetFoodKept() != 0)
+					if(pkBuildingInfo->GetFoodKept() != 0 || pkBuildingInfo->GetFoodKeptFromPollution() != 0)
 					{
 						pCity->setFoodKept((pCity->getFood() * pCity->getMaxFoodKeptPercent()) / 100);
 					}
@@ -25577,7 +25577,7 @@ void CvPlayer::doAdvancedStartAction(AdvancedStartActionTypes eAction, int iX, i
 			{
 				pCity->GetCityBuildings()->SetNumRealBuilding(eBuilding, pCity->GetCityBuildings()->GetNumRealBuilding(eBuilding)-1);
 				changeAdvancedStartPoints(iCost);
-				if(pkBuildingInfo->GetFoodKept() != 0)
+				if(pkBuildingInfo->GetFoodKept() != 0 || pkBuildingInfo->GetFoodKeptFromPollution() != 0)
 				{
 					pCity->setFoodKept((pCity->getFood() * pCity->getMaxFoodKeptPercent()) / 100);
 				}
