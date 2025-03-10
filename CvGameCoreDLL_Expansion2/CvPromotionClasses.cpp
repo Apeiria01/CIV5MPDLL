@@ -32,6 +32,8 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iRangedAttackModifier(0),
 	m_iRangeSuppressModifier(0),
 	m_iMaintenanceCost(0),
+	m_iInterceptionDamageMod(0),
+	m_iAirSweepDamageMod(0),
 	m_iInterceptionCombatModifier(0),
 	m_iInterceptionDefenseDamageModifier(0),
 	m_iAirSweepCombatModifier(0),
@@ -650,6 +652,8 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iRangedAttackModifier = kResults.GetInt("RangedAttackModifier");
 	m_iRangeSuppressModifier = kResults.GetInt("RangeSuppressModifier");
 	m_iMaintenanceCost = kResults.GetInt("MaintenanceCost");
+	m_iInterceptionDamageMod = kResults.GetInt("InterceptionDamageMod");
+	m_iAirSweepDamageMod = kResults.GetInt("AirSweepDamageMod");
 	m_iInterceptionCombatModifier = kResults.GetInt("InterceptionCombatModifier");
 	m_iInterceptionDefenseDamageModifier = kResults.GetInt("InterceptionDefenseDamageModifier");
 	m_iAirSweepCombatModifier = kResults.GetInt("AirSweepCombatModifier");
@@ -1698,6 +1702,18 @@ int CvPromotionEntry::GetRangeSuppressModifier() const
 int CvPromotionEntry::GetMaintenanceCost() const
 {
 	return m_iMaintenanceCost;
+}
+
+/// How much damage reduce mod when intercepting
+int CvPromotionEntry::GetInterceptionDamageMod() const
+{
+	return m_iInterceptionDamageMod;
+}
+
+///How much damage reduce mod when Air Sweep
+int CvPromotionEntry::GetAirSweepDamageMod() const
+{
+	return m_iAirSweepDamageMod;
 }
 
 /// Accessor: How much the strength of the unit is modified when intercepting

@@ -52,6 +52,8 @@ public:
 	int  GetRangedAttackModifier() const;
 	int  GetRangeSuppressModifier() const;
 	int  GetMaintenanceCost() const;
+	int  GetInterceptionDamageMod() const;
+	int  GetAirSweepDamageMod() const;
 	int  GetInterceptionCombatModifier() const;
 	int  GetInterceptionDefenseDamageModifier() const;
 	int  GetAirSweepCombatModifier() const;
@@ -530,6 +532,8 @@ protected:
 	int m_iRangedAttackModifier;
 	int m_iRangeSuppressModifier;
 	int m_iMaintenanceCost;
+	int m_iInterceptionDamageMod;
+	int m_iAirSweepDamageMod;
 	int m_iInterceptionCombatModifier;
 	int m_iInterceptionDefenseDamageModifier;
 	int m_iAirSweepCombatModifier;

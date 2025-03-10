@@ -424,6 +424,8 @@ protected:
 	
 	static int lGetUnitRangeSuppressModifier(lua_State* L);
 	static int lGetPromotionMaintenanceCost(lua_State* L);
+	static int lGetInterceptionDamageMod(lua_State* L);
+	static int lGetAirSweepDamageMod(lua_State* L);
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 	static int lOtherPromotionModifier(lua_State* L);
 	static int lOtherPromotionAttackModifier(lua_State* L);

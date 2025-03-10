@@ -329,3 +329,6 @@ CREATE TABLE Promotion_PromotionExclusionAny (
 	PromotionType text REFERENCES UnitPromotions(Type),
 	ExclusionPromotionType text REFERENCES UnitPromotions(Type)
 );
+--InterceptionDamageMod/AirSweepDamageMod
+ALTER TABLE UnitPromotions ADD COLUMN 'InterceptionDamageMod' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD COLUMN 'AirSweepDamageMod' INTEGER DEFAULT 0;

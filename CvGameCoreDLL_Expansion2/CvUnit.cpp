@@ -242,6 +242,8 @@ CvUnit::CvUnit() :
 	, m_iRangedAttackModifier("CvUnit::m_iRangedAttackModifier", m_syncArchive)
 	, m_iRangeSuppressModifier("CvUnit::m_iRangeSuppressModifier", m_syncArchive)
 	, m_iPromotionMaintenanceCost("CvUnit::m_iPromotionMaintenanceCost", m_syncArchive)
+	, m_iInterceptionDamageMod("CvUnit::m_iInterceptionDamageMod", m_syncArchive)
+	, m_iAirSweepDamageMod("CvUnit::m_iAirSweepDamageMod", m_syncArchive)
 	, m_iInterceptionCombatModifier("CvUnit::m_iInterceptionCombatModifier", m_syncArchive)
 	, m_iInterceptionDefenseDamageModifier("CvUnit::m_iInterceptionDefenseDamageModifier", m_syncArchive)
 	, m_iAirSweepCombatModifier("CvUnit::m_iAirSweepCombatModifier", m_syncArchive)
@@ -1240,6 +1242,8 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iRangedAttackModifier = 0;
 	m_iRangeSuppressModifier = 0;
 	m_iPromotionMaintenanceCost = 0;
+	m_iInterceptionDamageMod = 0;
+	m_iAirSweepDamageMod = 0;
 	m_iInterceptionCombatModifier = 0;
 	m_iInterceptionDefenseDamageModifier = 0;
 	m_iAirSweepCombatModifier = 0;
@@ -19296,6 +19300,39 @@ void CvUnit::ChangePromotionMaintenanceCost(int iValue)
 }
 
 //	--------------------------------------------------------------------------------
+int CvUnit::GetInterceptionDamageMod() const
+{
+	VALIDATE_OBJECT
+	return m_iInterceptionDamageMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeInterceptionDamageMod(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iInterceptionDamageMod += iValue;
+	}
+}
+//	--------------------------------------------------------------------------------
+int CvUnit::GetAirSweepDamageMod() const
+{
+	VALIDATE_OBJECT
+	return m_iAirSweepDamageMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeAirSweepDamageMod(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iAirSweepDamageMod += iValue;
+	}
+}
+
+//	--------------------------------------------------------------------------------
 int CvUnit::GetInterceptionCombatModifier() const
 {
 	VALIDATE_OBJECT
@@ -26019,14 +26056,14 @@ bool CvUnit::isPromotionValid(PromotionTypes ePromotion) const
 	}
 
 	// Can't acquire interception promotion if unit can't intercept!
-	if(promotionInfo->GetInterceptionCombatModifier() != 0)
+	if(promotionInfo->GetInterceptionCombatModifier() != 0 || promotionInfo->GetInterceptionDamageMod() != 0)
 	{
 		if(!canAirDefend())
 			return false;
 	}
 
 	// Can't acquire Air Sweep promotion if unit can't air sweep!
-	if(promotionInfo->GetAirSweepCombatModifier() != 0)
+	if(promotionInfo->GetAirSweepCombatModifier() != 0 || promotionInfo->GetAirSweepDamageMod() != 0)
 	{
 		if(!IsAirSweepCapable())
 			return false;
@@ -26429,6 +26466,8 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeRangeSuppressModifier(thisPromotion.GetRangeSuppressModifier() * iChange);
 		if(thisPromotion.GetMaintenanceCost() > 0) ChangePromotionMaintenanceCost(thisPromotion.GetMaintenanceCost() * iChange);
 		ChangeInterceptionCombatModifier(thisPromotion.GetInterceptionCombatModifier() * iChange);
+		ChangeInterceptionDamageMod(thisPromotion.GetInterceptionDamageMod() * iChange);
+		ChangeAirSweepDamageMod(thisPromotion.GetAirSweepDamageMod() * iChange);
 		ChangeInterceptionDefenseDamageModifier(thisPromotion.GetInterceptionDefenseDamageModifier() * iChange);
 		ChangeAirSweepCombatModifier(thisPromotion.GetAirSweepCombatModifier() * iChange);
 		changeInterceptChance(thisPromotion.GetInterceptChanceChange() * iChange);
@@ -27273,6 +27312,8 @@ void CvUnit::read(FDataStream& kStream)
 #endif
 	kStream >> m_iRangeSuppressModifier;
 	kStream >> m_iPromotionMaintenanceCost;
+	kStream >> m_iInterceptionDamageMod;
+	kStream >> m_iAirSweepDamageMod;
 #ifdef MOD_PROMOTIONS_EXTRARES_BONUS
 
 	kStream >> m_eExtraResourceType;
@@ -27617,6 +27658,8 @@ void CvUnit::write(FDataStream& kStream) const
 #endif
 	kStream << m_iRangeSuppressModifier;
 	kStream << m_iPromotionMaintenanceCost;
+	kStream << m_iInterceptionDamageMod;
+	kStream << m_iAirSweepDamageMod;
 #ifdef MOD_PROMOTIONS_EXTRARES_BONUS
 	kStream << m_eExtraResourceType;
 	kStream << m_iExtraResourceCombatModifier;
