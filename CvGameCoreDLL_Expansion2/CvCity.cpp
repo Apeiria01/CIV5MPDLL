@@ -19572,7 +19572,11 @@ void CvCity::doProcess()
 //	--------------------------------------------------------------------------------
 void CvCity::doDecay()
 {
+#if defined(MOD_CITY_NO_DECAY)
+	if(MOD_CITY_NO_DECAY) return;
+#endif
 	VALIDATE_OBJECT
+	if(!isHuman()) return;
 	AI_PERF_FORMAT("City-AI-perf.csv", ("CvCity::doDecay, Turn %03d, %s, %s", GC.getGame().getElapsedGameTurns(), GetPlayer()->getCivilizationShortDescription(), getName().c_str()) );
 	int iI;
 
@@ -19587,13 +19591,9 @@ void CvCity::doDecay()
 			if(m_pCityBuildings->GetBuildingProduction((BuildingTypes)iI) > 0)
 			{
 				m_pCityBuildings->ChangeBuildingProductionTime(((BuildingTypes)iI), 1);
-
-				if(isHuman())
+				if(m_pCityBuildings->GetBuildingProductionTime((BuildingTypes)iI) > iBuildingProductionDecayTime)
 				{
-					if(m_pCityBuildings->GetBuildingProductionTime((BuildingTypes)iI) > iBuildingProductionDecayTime)
-					{
-						m_pCityBuildings->SetBuildingProduction(((BuildingTypes)iI), ((m_pCityBuildings->GetBuildingProduction((BuildingTypes)iI) * iBuildingProductionDecayPercent) / 100));
-					}
+					m_pCityBuildings->SetBuildingProduction(((BuildingTypes)iI), ((m_pCityBuildings->GetBuildingProduction((BuildingTypes)iI) * iBuildingProductionDecayPercent) / 100));
 				}
 			}
 			else
@@ -19618,13 +19618,9 @@ void CvCity::doDecay()
 				if(getUnitProduction(eUnit) > 0)
 				{
 					changeUnitProductionTime(eUnit, 1);
-
-					if(isHuman())
+					if(getUnitProductionTime(eUnit) > iUnitProductionDecayTime)
 					{
-						if(getUnitProductionTime(eUnit) > iUnitProductionDecayTime)
-						{
-							setUnitProduction(eUnit, ((getUnitProduction(eUnit) * iUnitProductionDecayPercent) / 100));
-						}
+						setUnitProduction(eUnit, ((getUnitProduction(eUnit) * iUnitProductionDecayPercent) / 100));
 					}
 				}
 				else
