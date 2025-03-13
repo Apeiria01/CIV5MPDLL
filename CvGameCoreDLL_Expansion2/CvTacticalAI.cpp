@@ -9435,7 +9435,13 @@ bool CvTacticalAI::FindClosestOperationUnit(CvPlot* pTarget, bool bSafeForRanged
 
 			if(bValidUnit)
 			{
-				int iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, false /*bIgnoreUnits*/);
+				int iTurns = 0;
+				int iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY());
+				if(MOD_SP_FASTER_AI && iDistance > m_iRecruitRange)
+				{
+					iTurns = iDistance / pLoopUnit->maxMoves();
+				}
+				else iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, false /*bIgnoreUnits*/);
 
 				if(iTurns != MAX_INT)
 				{
@@ -9443,7 +9449,7 @@ bool CvTacticalAI::FindClosestOperationUnit(CvPlot* pTarget, bool bSafeForRanged
 					unit.SetID(pLoopUnit->GetID());
 					unit.SetAttackStrength(1000-iTurns);
 					unit.SetHealthPercent(10,10);
-					unit.SetMovesToTarget(plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY()));
+					unit.SetMovesToTarget(iDistance);
 					m_CurrentMoveUnits.push_back(unit);
 					rtnValue = true;
 				}
@@ -9486,7 +9492,13 @@ bool CvTacticalAI::FindClosestNavalOperationUnit(CvPlot* pTarget, bool bEscorted
 
 			if(bValidUnit)
 			{
-				int iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, true /*bIgnoreUnits*/);
+				int iTurns = 0;
+				int iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY());
+				if(MOD_SP_FASTER_AI && iDistance > m_iRecruitRange)
+				{
+					iTurns = iDistance / pLoopUnit->maxMoves();
+				}
+				else iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, false /*bIgnoreUnits*/);
 
 				if(iTurns != MAX_INT)
 				{
@@ -9494,7 +9506,7 @@ bool CvTacticalAI::FindClosestNavalOperationUnit(CvPlot* pTarget, bool bEscorted
 					unit.SetID(pLoopUnit->GetID());
 					unit.SetAttackStrength(1000-iTurns);
 					unit.SetHealthPercent(10,10);
-					unit.SetMovesToTarget(plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY()));
+					unit.SetMovesToTarget(iDistance);
 					m_CurrentMoveUnits.push_back(unit);
 					rtnValue = true;
 				}
