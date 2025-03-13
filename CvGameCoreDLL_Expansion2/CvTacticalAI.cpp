@@ -8407,17 +8407,16 @@ void CvTacticalAI::ExecuteCloseOnTarget(CvTacticalTarget& kTarget, CvTacticalDom
 
 					if(pUnit->IsCanAttackRanged())
 					{
-#if defined(MOD_AI_SMART_V3)
-						if (MOD_AI_SMART_V3)
+						if(MOD_AI_SMART_V3 && pUnit->GetRange() <= 1)
 						{
-							if (pUnit->GetRange() > 1)
-								unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
-							else
-								unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_FRONT_LINE]);
-						} else
-#endif
-						unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
-						iRangedUnits++;
+							unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_FRONT_LINE]);
+							iMeleeUnits++;
+						}
+						else
+						{
+							unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
+							iRangedUnits++;
+						}
 						m_OperationUnits.push_back(unit);
 
 					}

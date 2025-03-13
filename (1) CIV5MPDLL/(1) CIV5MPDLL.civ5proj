@@ -5,7 +5,7 @@
     <ProjectGuid>{0b961596-36f9-4289-a247-0e889fef1f39}</ProjectGuid>
     <Name>(1) CIV5MPDLL</Name>
     <Guid>a2969a0a-e4da-41cc-9e0b-19b29aa971d8</Guid>
-    <ModVersion>42</ModVersion>
+    <ModVersion>43</ModVersion>
     <Stability>Alpha</Stability>
     <Teaser>Based on whoward69's DLL-VMC v97, fixes multiplayer gaming sync bugs and provides more powerful modding utilities</Teaser>
     <Description>This mod is based on whoward69's DLL-VMC v97. It fixes out-of-sync problem of
