@@ -67,6 +67,7 @@ ALTER TABLE Policies ADD 'TourismModifierPerGPCreation' BOOLEAN DEFAULT 0;
 ALTER TABLE Policies ADD 'ScienceModifierFromRANum' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD 'DiplomatPropagandaModifier' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD 'CityExtraProductionCount' INTEGER DEFAULT 0;
+ALTER TABLE Policies ADD 'NationalWonderCityCostModifier' INTEGER DEFAULT 0;
 
 ALTER TABLE Policies ADD 'DeepWaterNavalStrengthCultureModifier' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD 'FreeBuildingClass' text default null references BuildingClasses(Type);
