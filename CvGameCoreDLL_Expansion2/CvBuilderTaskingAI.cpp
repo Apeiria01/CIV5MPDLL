@@ -641,9 +641,6 @@ bool CvBuilderTaskingAI::EvaluateBuilder(CvUnit* pUnit, BuilderDirective* paDire
 		Update();
 	}
 
-	// if AI don't have many cities, there is no need to limit distance
- 	if(m_pPlayer->getNumCities() < 15) bLimit = false;
-
 	CvAssertMsg(uaDirectives > 0, "Need more than one directive");
 
 	for(uint ui = 0; ui < uaDirectives; ui++)

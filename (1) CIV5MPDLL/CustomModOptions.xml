@@ -1185,6 +1185,7 @@
     <Row Class="6" Name="RESOURCE_EXTRA_BUFF" Value="0"/>
 
     <Row Class="6" Name="SP_SMART_AI" Value="0"/>
+    <Row Class="6" Name="SP_FASTER_AI" Value="0"/>
 
     <Row Class="6" Name="TRAITS_SPREAD_RELIGION_AFTER_KILLING" Value="0"/>
     <Row Class="6" Name="TRAITS_COMBAT_BONUS_FROM_CAPTURED_HOLY_CITY" Value="0"/>

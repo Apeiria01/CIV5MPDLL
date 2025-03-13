@@ -2919,45 +2919,39 @@ void CvHomelandAI::ExecuteWorkerMoves(bool bSecondary)
 			}
 
 			// For SP, Worker is cheap, so disband it when AI cannot find a MISSION
-			if(MOD_SP_SMART_AI && MOD_UNITS_LOCAL_WORKERS && !m_pPlayer->isHuman() && pUnit->getUnitClassType() == eWorkerClassType && (m_pPlayer->getUnitClassCount(pUnit->getUnitClassType()) > (m_pPlayer->isMinorCiv() ? 2 : 6)))
+			if(MOD_SP_FASTER_AI && MOD_UNITS_LOCAL_WORKERS && !m_pPlayer->isHuman() && pUnit->getUnitClassType() == eWorkerClassType && (m_pPlayer->getUnitClassCount(pUnit->getUnitClassType()) > (m_pPlayer->isMinorCiv() ? 2 : 6)))
 			{
 				CvString strLogString;
 				strLogString.Format("UnitID: %d Disbanding or Moving Worker, X: %d, Y: %d", pUnit->GetID(), pUnit->getX(), pUnit->getY());
 				LogHomelandMessage(strLogString);
 
-				UnitProcessed(pUnit->GetID());
 				// roll and find a another city to send worker;
-				CvCity *pCity = pUnit->plot()->getWorkingCity();
-				if(pCity)
+				int iNowArea = pUnit->getArea();
+				std::vector<CvCity*> vCityList;
+				int iCityLoop = 0;
+				int iLimitLength = gCustomMods.getOption("UNITS_LOCAL_WORKERS_LANDLIMIT", 10);
+				for(CvCity* pLoopCity = m_pPlayer->firstCity(&iCityLoop); pLoopCity != NULL; pLoopCity = m_pPlayer->nextCity(&iCityLoop))
 				{
-					int iCapitalArea = m_pPlayer->getCapitalCity()->getArea();
-					int iNowArea = pCity->getArea();
-					std::vector<CvCity*> vCityList;
-					vCityList.clear();
-					int iCityLoop = 0;
-					CvCity* pLoopCity = NULL;
-					for(pLoopCity = m_pPlayer->firstCity(&iCityLoop); pLoopCity != NULL; pLoopCity = m_pPlayer->nextCity(&iCityLoop))
+					if(plotDistance(pUnit->getX(), pUnit->getY(), pLoopCity->getX(), pLoopCity->getY()) <= iLimitLength)
 					{
-						if(plotDistance(pCity->getX(), pCity->getY(), pLoopCity->getX(), pLoopCity->getY()) <= 9)
-						{
-							pLoopCity->SetLastTurnWorkerDisbanded(GC.getGame().getElapsedGameTurns());
-						}
-						else if(pLoopCity->getArea() != iCapitalArea)
-						{
-							vCityList.push_back(pLoopCity);
-						}
+						pLoopCity->SetLastTurnWorkerDisbanded(GC.getGame().getElapsedGameTurns());
 					}
-					if(vCityList.size() > 0)
+					else if(pLoopCity->getArea() != iNowArea)
 					{
-						pLoopCity = vCityList[GC.getGame().getJonRandNum(vCityList.size(), "Find a city to send worker")];
-						if(pLoopCity->getArea() != iNowArea)
-						{
-							pUnit->PushMission(CvTypes::getMISSION_MOVE_TO(), pLoopCity->getX(), pLoopCity->getY());
-							pUnit->finishMoves();
-							continue;
-						}
+						vCityList.push_back(pLoopCity);
 					}
 				}
+				if(vCityList.size() > 0)
+				{
+					CvCity *pCity = vCityList[GC.getGame().getJonRandNum(vCityList.size(), "Find a city to send worker")];
+					if(pCity->getArea() != iNowArea)
+					{
+						pUnit->PushMission(CvTypes::getMISSION_MOVE_TO(), pCity->getX(), pCity->getY());
+						pUnit->finishMoves();
+						continue;
+					}
+				}
+				UnitProcessed(pUnit->GetID());
 				pUnit->scrap();
 			}
 			else
