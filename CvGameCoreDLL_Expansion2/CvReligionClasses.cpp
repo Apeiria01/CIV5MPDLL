@@ -6228,6 +6228,8 @@ int CvReligionAI::ScoreBelief(CvBeliefEntry* pEntry)
 	int iExtraScore = BeliefExtraScore(pEntry);
 	iRtnValue += iExtraScore;
 
+	iRtnValue += pEntry->GetCivilizationFlavorValue(m_pPlayer->getCivilizationType());
+
 	// Divide by 2 if a Pantheon belief (to deemphasize these to Byzantine bonus belief)
 	if (pEntry->IsPantheonBelief())
 	{
