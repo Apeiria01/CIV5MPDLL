@@ -304,6 +304,7 @@ public:
 	bool IsDummy() const;
 #endif
 	bool IsAlwaysWeLoveKindDayInGoldenAge() const;
+	bool IsGlobalUnlimitedOneTurnTGCP() const;
 	bool IsNoResistance() const;
 	bool IsUpgradeAllTerritory() const;
 	int GetDefenseBoost() const;
@@ -546,6 +547,7 @@ private:
 	bool m_bDummy;
 #endif
 	bool m_bAlwaysWeLoveKindDayInGoldenAge;
+	bool m_bGlobalUnlimitedOneTurnTGCP;
 	bool m_bNoResistance;
 	bool m_bUpgradeAllTerritory;
 	int m_iDefenseBoost;

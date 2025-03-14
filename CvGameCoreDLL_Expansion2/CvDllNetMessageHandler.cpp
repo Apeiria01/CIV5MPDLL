@@ -1126,5 +1126,6 @@ void CvDllNetMessageHandler::ResponseUpdatePolicies(PlayerTypes ePlayer, bool bN
 			pPlayerPolicies->DoUnlockPolicyBranch(eBranch);
 		}
 	}
+	kPlayer.UpdateGlobalUnlimitedPolicyStatus();
 }
 //------------------------------------------------------------------------------

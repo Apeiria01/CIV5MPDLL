@@ -5922,7 +5922,7 @@ void CvTeam::setHasTech(TechTypes eIndex, bool bNewValue, PlayerTypes ePlayer, b
 				{
 					kPlayer.popResearch(eIndex);
 #ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH
-					if (MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH) {
+					if (MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH || kPlayer.HasGlobalUnlimitedPolicy()) {
 						if (!kPlayer.isHuman()) {
 							kPlayer.AI_chooseResearch();
 						}
