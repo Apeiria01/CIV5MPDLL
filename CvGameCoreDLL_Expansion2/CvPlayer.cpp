@@ -247,14 +247,7 @@ CvPlayer::CvPlayer() :
 	, m_iGreatWritersCreated(0)
 	, m_iGreatArtistsCreated(0)
 	, m_iGreatMusiciansCreated(0)
-	, m_iMerchantsFromFaith(0)
-	, m_iScientistsFromFaith(0)
-	, m_iWritersFromFaith(0)
-	, m_iArtistsFromFaith(0)
-	, m_iMusiciansFromFaith(0)
-	, m_iGeneralsFromFaith(0)
-	, m_iAdmiralsFromFaith(0)
-	, m_iEngineersFromFaith(0)
+	, m_mUnitClassesFromFaith()
 	, m_iGreatPeopleThresholdModifier("CvPlayer::m_iGreatPeopleThresholdModifier", m_syncArchive)
 	, m_iGreatGeneralsThresholdModifier("CvPlayer::m_iGreatGeneralsThresholdModifier", m_syncArchive)
 	, m_iGreatAdmiralsThresholdModifier(0)
@@ -293,8 +286,7 @@ CvPlayer::CvPlayer() :
 	, m_iDifferentIdeologyTourismModifier(0)
 	, m_iHappinessPerPolicy(0)
 	, m_iWaterBuildSpeedModifier(0)
-	, m_iSettlerProductionEraModifier(0)
-	, m_iSettlerProductionStartEra(0)
+	, m_vSettlerProductionEraModifier()
 #endif
 	, m_iNullifyInfluenceModifier(0)
 	, m_iNumTradeRouteBonus(0)
@@ -730,6 +722,7 @@ void CvPlayer::init(PlayerTypes eID)
 
 		CvAssert(m_pTraits);
 		m_pTraits->InitPlayerTraits();
+		GetBuilderTaskingAI()->UpdateKeepFeatures(this);
 
 		// Special handling for the Polynesian trait's overriding of embarked unit graphics
 		if(m_pTraits->IsEmbarkedAllWater())
@@ -1045,14 +1038,7 @@ void CvPlayer::uninit()
 	m_iGreatWritersCreated = 0;
 	m_iGreatArtistsCreated = 0;
 	m_iGreatMusiciansCreated = 0;
-	m_iMerchantsFromFaith = 0;
-	m_iScientistsFromFaith = 0;
-	m_iWritersFromFaith = 0;
-	m_iArtistsFromFaith = 0;
-	m_iMusiciansFromFaith = 0;
-	m_iGeneralsFromFaith = 0;
-	m_iAdmiralsFromFaith = 0;
-	m_iEngineersFromFaith = 0;
+	m_mUnitClassesFromFaith.clear();
 	m_iGreatPeopleThresholdModifier = 0;
 	m_iGreatGeneralsThresholdModifier = 0;
 	m_iGreatAdmiralsThresholdModifier = 0;
@@ -1098,8 +1084,8 @@ void CvPlayer::uninit()
 	m_iDifferentIdeologyTourismModifier = 0;
 	m_iHappinessPerPolicy = 0;
 	m_iWaterBuildSpeedModifier = 0;
-	m_iSettlerProductionEraModifier = 0;
-	m_iSettlerProductionStartEra = NO_ERA;
+	m_vSettlerProductionEraModifier.clear();
+	m_vSettlerProductionEraModifier.resize(GC.getNumEraInfos(), 0);
 #endif
 	m_iNullifyInfluenceModifier = 0;
 	m_iNumTradeRouteBonus = 0;
@@ -9433,7 +9419,12 @@ int CvPlayer::getProductionNeeded(BuildingTypes eBuilding) const
 
 	if(pkBuildingInfo->GetNumCityCostMod() > 0 && getNumCities() > 0)
 	{
-		iProductionNeeded += (pkBuildingInfo->GetNumCityCostMod() * getNumCities());
+		int iNumCityCost = (pkBuildingInfo->GetNumCityCostMod() * getNumCities());
+		if(pkBuildingInfo->GetBuildingClassInfo().getMaxPlayerInstances() == 1)
+		{
+			iNumCityCost = iNumCityCost * (100 + getPolicyModifiers(POLICYMOD_NATIONAL_WONDER_CITY_COST_MODIFIER)) / 100;
+		}
+		iProductionNeeded += iNumCityCost;
 	}
 
 	if(isMinorCiv())
@@ -15632,100 +15623,23 @@ void CvPlayer::incrementGreatMusiciansCreated(bool bIsFree)
 
 
 //	--------------------------------------------------------------------------------
-int CvPlayer::getMerchantsFromFaith() const
+int CvPlayer::getUnitClassesFromFaith(UnitClassTypes eIndex) const
 {
-	return m_iMerchantsFromFaith;
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
+	auto it = m_mUnitClassesFromFaith.find(eIndex);
+	if (it != m_mUnitClassesFromFaith.end()) return it->second;
+	else return 0;
+}
+void CvPlayer::incrementUnitClassesFromFaith(UnitClassTypes eIndex)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < GC.getNumUnitClassInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
+	m_mUnitClassesFromFaith[eIndex]++;
 }
 
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementMerchantsFromFaith()
-{
-	m_iMerchantsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getScientistsFromFaith() const
-{
-	return m_iScientistsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementScientistsFromFaith()
-{
-	m_iScientistsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getWritersFromFaith() const
-{
-	return m_iWritersFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementWritersFromFaith()
-{
-	m_iWritersFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getArtistsFromFaith() const
-{
-	return m_iArtistsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementArtistsFromFaith()
-{
-	m_iArtistsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getMusiciansFromFaith() const
-{
-	return m_iMusiciansFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementMusiciansFromFaith()
-{
-	m_iMusiciansFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getGeneralsFromFaith() const
-{
-	return m_iGeneralsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementGeneralsFromFaith()
-{
-	m_iGeneralsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getAdmiralsFromFaith() const
-{
-	return m_iAdmiralsFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementAdmiralsFromFaith()
-{
-	m_iAdmiralsFromFaith++;
-}
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getEngineersFromFaith() const
-{
-	return m_iEngineersFromFaith;
-}
-
-//	--------------------------------------------------------------------------------
-void CvPlayer::incrementEngineersFromFaith()
-{
-	m_iEngineersFromFaith++;
-}
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getGreatPeopleThresholdModifier() const
@@ -16986,41 +16900,19 @@ void CvPlayer::changeWaterBuildSpeedModifier(int iChange)
 
 
 //	--------------------------------------------------------------------------------
-int CvPlayer::getSettlerProductionEraModifier() const
+int CvPlayer::getSettlerProductionEraModifier(EraTypes eEra) const
 {
-	return m_iSettlerProductionEraModifier;
+	return m_vSettlerProductionEraModifier[eEra];
 }
-void CvPlayer::setSettlerProductionEraModifier(int iChange)
+void CvPlayer::changeSettlerProductionEraModifier(EraTypes eStartEra, int iChange)
 {
-	if(iChange > 0)
+	if(iChange == 0) return;
+	for(int i = 0; i < GC.getNumEraInfos(); i++)
 	{
-		m_iSettlerProductionEraModifier = iChange;
-	}
-	else if(iChange < 0)
-	{
-		m_iSettlerProductionEraModifier = 0;
-	}
-
-}
-
-
-//	--------------------------------------------------------------------------------
-int CvPlayer::getSettlerProductionStartEra() const
-{
-	return m_iSettlerProductionStartEra;
-}
-void CvPlayer::setSettlerProductionStartEra(int iChange)
-{
-	if(iChange > NO_ERA)
-	{
-		m_iSettlerProductionStartEra = iChange;
-	}
-	else if(iChange < NO_ERA)
-	{
-		m_iSettlerProductionStartEra = NO_ERA;
+		if(i < eStartEra) continue;
+		m_vSettlerProductionEraModifier[i] += iChange;
 	}
 }
-
 
 #endif
 //	--------------------------------------------------------------------------------
@@ -17261,12 +17153,7 @@ void CvPlayer::changeWonderProductionModifier(int iChange)
 //	--------------------------------------------------------------------------------
 int CvPlayer::getSettlerProductionModifier() const
 {
-	int res = m_iSettlerProductionModifier;
-	if(getSettlerProductionEraModifier() > 0 && GetCurrentEra() >= getSettlerProductionStartEra())
-	{
-		res += getSettlerProductionEraModifier();
-	}
-	return res;
+	return m_iSettlerProductionModifier + getSettlerProductionEraModifier(GetCurrentEra());
 }
 
 //	--------------------------------------------------------------------------------
@@ -23381,24 +23268,10 @@ void CvPlayer::ChangeFreePromotionCount(PromotionTypes ePromotion, int iChange)
 				if(pLoopUnit->isHasPromotion(ePromotion)) continue;
 
 				// Valid Promotion for this Unit?
-				if(::IsPromotionValidForUnitCombatType(ePromotion, pLoopUnit->getUnitType()))
+				if (::IsPromotionValidForUnit(ePromotion, *pLoopUnit))
 				{
 					pLoopUnit->setHasPromotion(ePromotion, true);
 				}
-				else if(::IsPromotionValidForCivilianUnitType(ePromotion, pLoopUnit->getUnitType()))
-				{
-					pLoopUnit->setHasPromotion(ePromotion, true);
-				}
-				else if (::IsPromotionValidForUnitType(ePromotion, pLoopUnit->getUnitType()))
-				{
-					pLoopUnit->setHasPromotion(ePromotion, true);
-				}
-#if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
-				else if (::IsPromotionValidForUnitPromotions(ePromotion, *pLoopUnit))
-				{
-					pLoopUnit->setHasPromotion(ePromotion, true);
-				}
-#endif
 			}
 		}
 	}
@@ -25698,7 +25571,7 @@ void CvPlayer::doAdvancedStartAction(AdvancedStartActionTypes eAction, int iX, i
 				{
 					pCity->GetCityBuildings()->SetNumRealBuilding(eBuilding, pCity->GetCityBuildings()->GetNumRealBuilding(eBuilding)+1);
 					changeAdvancedStartPoints(-iCost);
-					if(pkBuildingInfo->GetFoodKept() != 0)
+					if(pkBuildingInfo->GetFoodKept() != 0 || pkBuildingInfo->GetFoodKeptFromPollution() != 0)
 					{
 						pCity->setFoodKept((pCity->getFood() * pCity->getMaxFoodKeptPercent()) / 100);
 					}
@@ -25710,7 +25583,7 @@ void CvPlayer::doAdvancedStartAction(AdvancedStartActionTypes eAction, int iX, i
 			{
 				pCity->GetCityBuildings()->SetNumRealBuilding(eBuilding, pCity->GetCityBuildings()->GetNumRealBuilding(eBuilding)-1);
 				changeAdvancedStartPoints(iCost);
-				if(pkBuildingInfo->GetFoodKept() != 0)
+				if(pkBuildingInfo->GetFoodKept() != 0 || pkBuildingInfo->GetFoodKeptFromPollution() != 0)
 				{
 					pCity->setFoodKept((pCity->getFood() * pCity->getMaxFoodKeptPercent()) / 100);
 				}
@@ -26848,6 +26721,8 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	changePolicyModifiers(POLICYMOD_SCIENCE_MODIFIER_FROM_RA_NUM, pPolicy->GetScienceModifierFromRANum() * iChange);
 	changePolicyModifiers(POLICYMOD_DIPLOMAT_PROPAGANDA_MODIFIER, pPolicy->GetDiplomatPropagandaModifier() * iChange);
 	changePolicyModifiers(POLICYMOD_DEEP_WATER_NAVAL_CULTURE_STRENGTH_MODIFIER, pPolicy->GetDeepWaterNavalStrengthCultureModifier() * iChange);
+	changePolicyModifiers(POLICYMOD_CITY_EXTRA_PRODUCTION_COUNT, pPolicy->GetCityExtraProductionCount() * iChange);
+	changePolicyModifiers(POLICYMOD_NATIONAL_WONDER_CITY_COST_MODIFIER, pPolicy->GetNationalWonderCityCostModifier() * iChange);
 
 	if(pPolicy->GetFreeBuildingClass() != NO_BUILDINGCLASS)
 	{
@@ -26862,8 +26737,7 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	changeHappinessPerPolicy(pPolicy->GetHappinessPerPolicy() * iChange);
 	changeNumTradeRouteBonus(pPolicy->GetNumTradeRouteBonus() * iChange);
 	changeWaterBuildSpeedModifier(pPolicy->GetWaterBuildSpeedModifier() * iChange);
-	setSettlerProductionEraModifier(pPolicy->GetSettlerProductionEraModifier() * iChange);
-	setSettlerProductionStartEra(pPolicy->GetSettlerProductionStartEra() * iChange);
+	changeSettlerProductionEraModifier((EraTypes)pPolicy->GetSettlerProductionStartEra(), pPolicy->GetSettlerProductionEraModifier() * iChange);
 #endif
 	changeImprovementCostModifier(pPolicy->GetImprovementCostModifier() * iChange);
 	changeImprovementUpgradeRateModifier(pPolicy->GetImprovementUpgradeRateModifier() * iChange);
@@ -28124,14 +27998,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGreatWritersCreated;
 	kStream >> m_iGreatArtistsCreated;
 	kStream >> m_iGreatMusiciansCreated;
-	kStream >> m_iMerchantsFromFaith;
-	kStream >> m_iScientistsFromFaith;
-	kStream >> m_iWritersFromFaith;
-	kStream >> m_iArtistsFromFaith;
-	kStream >> m_iMusiciansFromFaith;
-	kStream >> m_iGeneralsFromFaith;
-	kStream >> m_iAdmiralsFromFaith;
-	kStream >> m_iEngineersFromFaith;
+	kStream >> m_mUnitClassesFromFaith;
 	kStream >> m_iGreatPeopleThresholdModifier;
 	kStream >> m_iGreatGeneralsThresholdModifier;
 	kStream >> m_iGreatAdmiralsThresholdModifier;
@@ -28192,8 +28059,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iDifferentIdeologyTourismModifier;
 	kStream >> m_iHappinessPerPolicy;
 	kStream >> m_iWaterBuildSpeedModifier;
-	kStream >> m_iSettlerProductionEraModifier;
-	kStream >> m_iSettlerProductionStartEra;
+	kStream >> m_vSettlerProductionEraModifier;
 #endif
 	kStream >> m_iNullifyInfluenceModifier;
 	kStream >> m_iNumTradeRouteBonus;
@@ -28943,14 +28809,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGreatWritersCreated;
 	kStream << m_iGreatArtistsCreated;
 	kStream << m_iGreatMusiciansCreated;
-	kStream << m_iMerchantsFromFaith;
-	kStream << m_iScientistsFromFaith;
-	kStream << m_iWritersFromFaith;
-	kStream << m_iArtistsFromFaith;
-	kStream << m_iMusiciansFromFaith;
-	kStream << m_iGeneralsFromFaith;
-	kStream << m_iAdmiralsFromFaith;
-	kStream << m_iEngineersFromFaith;
+	kStream << m_mUnitClassesFromFaith;
 	kStream << m_iGreatPeopleThresholdModifier;
 	kStream << m_iGreatGeneralsThresholdModifier;
 	kStream << m_iGreatAdmiralsThresholdModifier;
@@ -28996,8 +28855,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iDifferentIdeologyTourismModifier;
 	kStream << m_iHappinessPerPolicy;
 	kStream << m_iWaterBuildSpeedModifier;
-	kStream << m_iSettlerProductionEraModifier;
-	kStream << m_iSettlerProductionStartEra;
+	kStream << m_vSettlerProductionEraModifier;
 #endif
 	kStream << m_iNullifyInfluenceModifier;
 	kStream << m_iNumTradeRouteBonus;

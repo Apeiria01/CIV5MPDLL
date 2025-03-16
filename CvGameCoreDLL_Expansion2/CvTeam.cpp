@@ -4842,6 +4842,7 @@ void CvTeam::changeProjectCount(ProjectTypes eIndex, int iChange, bool bIsCaptur
 				GC.getGame().makeNukesValid(true);
 			}
 
+			/* It seems that the following code has no practical effect --Qingyin
 			for(iI = 0; iI < MAX_PLAYERS; iI++)
 			{
 				if(GET_PLAYER((PlayerTypes)iI).isAlive())
@@ -4869,7 +4870,7 @@ void CvTeam::changeProjectCount(ProjectTypes eIndex, int iChange, bool bIsCaptur
 						}
 					}
 				}
-			}
+			}*/
 
 			if(GC.getGame().isFinalInitialized())
 			{
@@ -4879,7 +4880,8 @@ void CvTeam::changeProjectCount(ProjectTypes eIndex, int iChange, bool bIsCaptur
 
 				const PlayerTypes eTeamLeader = getLeaderID();
 				if(bIsCapture) strSomeoneCompletesProject = GetLocalizedText("TXT_KEY_MISC_CAPTURE_PROJECT", getName().GetCString(), pkProject->GetTextKey());
-				GC.getGame().addReplayMessage(REPLAY_MESSAGE_MAJOR_EVENT, eTeamLeader, strSomeoneCompletesProject);
+				if(!pkProject->IsNoBroadcast())
+					GC.getGame().addReplayMessage(REPLAY_MESSAGE_MAJOR_EVENT, eTeamLeader, strSomeoneCompletesProject);
 
 				CvPlayerAI& playerWhoLeadsTeam = GET_PLAYER(eTeamLeader);
 				CvCity* pLeadersCapital = playerWhoLeadsTeam.getCapitalCity();
@@ -4888,6 +4890,7 @@ void CvTeam::changeProjectCount(ProjectTypes eIndex, int iChange, bool bIsCaptur
 				for(iI = 0; iI < MAX_MAJOR_CIVS; iI++)
 				{
 					const PlayerTypes ePlayer = static_cast<PlayerTypes>(iI);
+					if(pkProject->IsNoBroadcast() && ePlayer != eTeamLeader) continue;
 					CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 					TeamTypes eTeam = kPlayer.getTeam();
 

@@ -69,6 +69,11 @@ CREATE TABLE Belief_ExtraFlavors (
     FlavorType TEXT REFERENCES Flavors(Type),
     Flavor INTEGER DEFAULT 0 NOT NULL
 );
+CREATE TABLE Belief_CivilizationFlavors (
+    BeliefType TEXT REFERENCES Beliefs(Type),
+    CivilizationType TEXT REFERENCES Civilizations(Type),
+    Flavor INTEGER DEFAULT 0 NOT NULL
+);
 --Yield = Modifier * cutting-production
 CREATE TABLE Belief_CuttingInstantYieldModifier (
     BeliefType TEXT REFERENCES Beliefs(Type),

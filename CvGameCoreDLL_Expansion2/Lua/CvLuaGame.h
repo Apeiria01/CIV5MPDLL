@@ -456,6 +456,7 @@ protected:
 	LUAAPIEXTN(ChangeNuclearWinterNaturalReduction, void, iChange);
 #endif
 	LUAAPIEXTN(DoOptionalUCCode, void);
+	LUAAPIEXTN(CheckDllVersion, bool, iVersion);
 };
 
 #endif //CVLUAGAME_H

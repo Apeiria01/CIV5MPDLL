@@ -51,6 +51,9 @@ void CvBuilderTaskingAI::Init(CvPlayer* pPlayer)
 	m_bKeepMarshes = false;
 	// special case code so Brazil doesn't remove jungle
 	m_bKeepJungle = false;
+	m_bKeepForest = false;
+	m_vKeepAdjacentFeatures.clear();
+	m_vKeepAdjacentFeatures.resize(GC.getNumFeatureInfos(), false);
 
 	for(int i = 0; i < GC.getNumBuildInfos(); i++)
 	{
@@ -78,13 +81,17 @@ void CvBuilderTaskingAI::Init(CvPlayer* pPlayer)
 			CivilizationTypes eCiv = pkImprovementInfo->GetRequiredCivilization();
 			if(eCiv == pPlayer->getCivilizationType())
 			{
-				if(pkImprovementInfo->GetFeatureMakesValid(FEATURE_MARSH))
+				if(pkImprovementInfo->GetFeatureMakesValid(FEATURE_MARSH) || pkImprovementInfo->GetFeaturesNeeded(FEATURE_MARSH))
 				{
 					m_bKeepMarshes = true;
 				}
-				else if (pkImprovementInfo->GetFeatureMakesValid(FEATURE_JUNGLE))
+				if (pkImprovementInfo->GetFeatureMakesValid(FEATURE_JUNGLE) || pkImprovementInfo->GetFeaturesNeeded(FEATURE_JUNGLE))
 				{
 					m_bKeepJungle = true;
+				}
+				if (pkImprovementInfo->GetFeatureMakesValid(FEATURE_FOREST) || pkImprovementInfo->GetFeaturesNeeded(FEATURE_FOREST))
+				{
+					m_bKeepForest = true;
 				}
 			}
 		}
@@ -99,6 +106,7 @@ void CvBuilderTaskingAI::Uninit(void)
 	m_bLogging = false;
 	m_iNumCities = -1;
 	m_pTargetPlot = NULL;
+	m_vKeepAdjacentFeatures.clear();
 }
 
 /// Serialization read
@@ -131,6 +139,8 @@ void CvBuilderTaskingAI::Read(FDataStream& kStream)
 	{
 		m_bKeepJungle = false;
 	}
+	kStream >> m_bKeepForest;
+	kStream >> m_vKeepAdjacentFeatures;
 	m_iNumCities = -1; //Force everyone to do an CvBuilderTaskingAI::Update() after loading
 	m_pTargetPlot = NULL;		//Force everyone to recalculate current yields after loading.
 }
@@ -154,6 +164,8 @@ void CvBuilderTaskingAI::Write(FDataStream& kStream)
 
 	kStream << m_bKeepMarshes;
 	kStream << m_bKeepJungle;
+	kStream << m_bKeepForest;
+	kStream << m_vKeepAdjacentFeatures;
 }
 
 /// Update
@@ -627,6 +639,20 @@ void CvBuilderTaskingAI::UpdateRoutePlots(void)
 	}
 }
 
+void CvBuilderTaskingAI::UpdateKeepFeatures(CvPlayer* pPlayer)
+{
+	for(uint ui = 0; ui < NUM_YIELD_TYPES; ui++)
+	{
+		YieldTypes eYield = (YieldTypes)ui;
+		for(int iJ = 0; iJ < GC.getNumFeatureInfos(); iJ++)
+		{
+			FeatureTypes eFeature = (FeatureTypes)iJ;
+			if(pPlayer->GetPlayerTraits()->GetCityYieldModifierFromAdjacentFeature(eFeature, eYield) > 0) m_vKeepAdjacentFeatures[eFeature] = true;
+			else if(pPlayer->GetPlayerTraits()->GetCityYieldPerAdjacentFeature(eFeature, eYield) > 0) m_vKeepAdjacentFeatures[eFeature] = true;
+		}
+	}
+}
+
 int CorrectWeight(int iWeight)
 {
 	return min(iWeight,0x7FFFFF);
@@ -640,9 +666,6 @@ bool CvBuilderTaskingAI::EvaluateBuilder(CvUnit* pUnit, BuilderDirective* paDire
 	{
 		Update();
 	}
-
-	// if AI don't have many cities, there is no need to limit distance
- 	if(m_pPlayer->getNumCities() < 15) bLimit = false;
 
 	CvAssertMsg(uaDirectives > 0, "Need more than one directive");
 
@@ -1154,6 +1177,38 @@ void CvBuilderTaskingAI::AddImprovingPlotsDirectives(CvUnit* pUnit, CvPlot* pPlo
 				if (m_bLogging) {
 					CvString strTemp;
 					strTemp.Format("Weight,Jungle Remove,%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
+					LogInfo(strTemp, m_pPlayer);
+				}
+				if (pPlot->getResourceType(m_pPlayer->getTeam()) == NO_RESOURCE)
+				{
+					continue;
+				}
+			}
+		}
+
+		if(m_bKeepForest && eFeature == FEATURE_FOREST)
+		{
+			if (pkBuild->isFeatureRemove(FEATURE_FOREST))
+			{
+				if (m_bLogging) {
+					CvString strTemp;
+					strTemp.Format("Weight,Forest Remove,%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
+					LogInfo(strTemp, m_pPlayer);
+				}
+				if (pPlot->getResourceType(m_pPlayer->getTeam()) == NO_RESOURCE)
+				{
+					continue;
+				}
+			}
+		}
+
+		if(eFeature != NO_FEATURE && m_vKeepAdjacentFeatures[eFeature] && pkBuild->isFeatureRemove(eFeature))
+		{
+			if (pPlot->GetAdjacentCity())
+			{
+				if (m_bLogging) {
+					CvString strTemp;
+					strTemp.Format("Weight,Adjacent City Features Remove,%s,,,,%i, %i", GC.getBuildInfo(eBuild)->GetType(), pPlot->getX(), pPlot->getY());
 					LogInfo(strTemp, m_pPlayer);
 				}
 				if (pPlot->getResourceType(m_pPlayer->getTeam()) == NO_RESOURCE)
@@ -2176,6 +2231,7 @@ int CvBuilderTaskingAI::ScorePlot(ImprovementTypes eImprovement, ImprovementType
 	//special define in XML
 	iScore += pImprovement->GetExtraScore();
 	if(m_bKeepJungle && pImprovement->GetNewFeature() == FEATURE_JUNGLE) iScore += 2 * pImprovement->GetExtraScore();
+	if(m_bKeepForest && pImprovement->GetNewFeature() == FEATURE_FOREST) iScore += 2 * pImprovement->GetExtraScore();
 	if(eExistingImprovement != NO_IMPROVEMENT && GC.getImprovementInfo(eExistingImprovement))
 	{
 		iScore -= GC.getImprovementInfo(eExistingImprovement)->GetExtraScore();

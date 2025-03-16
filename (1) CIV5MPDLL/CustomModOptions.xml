@@ -1136,6 +1136,8 @@
     <Row Class="6" Name="NUCLEAR_WINTER_FOR_SP" Value="0"/>
 
     <Row Class="6" Name="UNIT_COST_DONOT_INCTEASE_WITH_TURN" Value="0"/> 
+    <!-- city will not doDecay -->
+    <Row Class="6" Name="CITY_NO_DECAY" Value="0"/> 
 
     <!-- Enabled option may influence Game -->
     <Row Class="6" Name="CHANGE_RESOURCE_LINK_AFTER_ALTER_PLOT" Value="0"/>
@@ -1183,6 +1185,7 @@
     <Row Class="6" Name="RESOURCE_EXTRA_BUFF" Value="0"/>
 
     <Row Class="6" Name="SP_SMART_AI" Value="0"/>
+    <Row Class="6" Name="SP_FASTER_AI" Value="0"/>
 
     <Row Class="6" Name="TRAITS_SPREAD_RELIGION_AFTER_KILLING" Value="0"/>
     <Row Class="6" Name="TRAITS_COMBAT_BONUS_FROM_CAPTURED_HOLY_CITY" Value="0"/>

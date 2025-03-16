@@ -242,6 +242,8 @@ CvUnit::CvUnit() :
 	, m_iRangedAttackModifier("CvUnit::m_iRangedAttackModifier", m_syncArchive)
 	, m_iRangeSuppressModifier("CvUnit::m_iRangeSuppressModifier", m_syncArchive)
 	, m_iPromotionMaintenanceCost("CvUnit::m_iPromotionMaintenanceCost", m_syncArchive)
+	, m_iInterceptionDamageMod("CvUnit::m_iInterceptionDamageMod", m_syncArchive)
+	, m_iAirSweepDamageMod("CvUnit::m_iAirSweepDamageMod", m_syncArchive)
 	, m_iInterceptionCombatModifier("CvUnit::m_iInterceptionCombatModifier", m_syncArchive)
 	, m_iInterceptionDefenseDamageModifier("CvUnit::m_iInterceptionDefenseDamageModifier", m_syncArchive)
 	, m_iAirSweepCombatModifier("CvUnit::m_iAirSweepCombatModifier", m_syncArchive)
@@ -832,25 +834,10 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 
 		if(kPlayer.IsFreePromotion(ePromotion) && !isHasPromotion(ePromotion))
 		{
-			// Valid Promotion for this Unit?
-			if(::IsPromotionValidForUnitCombatType(ePromotion, getUnitType()))
+			if(::IsPromotionValidForUnit(ePromotion, *this))
 			{
 				setHasPromotion(ePromotion, true);
 			}
-			else if(::IsPromotionValidForCivilianUnitType(ePromotion, getUnitType()))
-			{
-				setHasPromotion(ePromotion, true);
-			}
-			else if (::IsPromotionValidForUnitType(ePromotion, getUnitType()))
-			{
-				setHasPromotion(ePromotion, true);
-			}
-#if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
-			else if (::IsPromotionValidForUnitPromotions(ePromotion, *this))
-			{
-				setHasPromotion(ePromotion, true);
-			}
-#endif
 		}
 	}
 
@@ -1255,6 +1242,8 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iRangedAttackModifier = 0;
 	m_iRangeSuppressModifier = 0;
 	m_iPromotionMaintenanceCost = 0;
+	m_iInterceptionDamageMod = 0;
+	m_iAirSweepDamageMod = 0;
 	m_iInterceptionCombatModifier = 0;
 	m_iInterceptionDefenseDamageModifier = 0;
 	m_iAirSweepCombatModifier = 0;
@@ -1916,11 +1905,7 @@ void CvUnit::convert(CvUnit* pUnit, bool bIsUpgrade)
 				// if we get this due to a policy or wonder
 
 
-				else if (GET_PLAYER(getOwner()).IsFreePromotion(ePromotion) &&( 
-					::IsPromotionValidForUnitCombatType(ePromotion, getUnitType()) || 
-					::IsPromotionValidForCivilianUnitType(ePromotion, getUnitType()) || 
-					::IsPromotionValidForUnitType(ePromotion, getUnitType()) ||
-					::IsPromotionValidForUnitPromotions(ePromotion, *pUnit) ))
+				else if (GET_PLAYER(getOwner()).IsFreePromotion(ePromotion) && (::IsPromotionValidForUnit(ePromotion, *pUnit)))
 				{
 					bGivePromotion = true;
 				}
@@ -19315,6 +19300,39 @@ void CvUnit::ChangePromotionMaintenanceCost(int iValue)
 }
 
 //	--------------------------------------------------------------------------------
+int CvUnit::GetInterceptionDamageMod() const
+{
+	VALIDATE_OBJECT
+	return m_iInterceptionDamageMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeInterceptionDamageMod(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iInterceptionDamageMod += iValue;
+	}
+}
+//	--------------------------------------------------------------------------------
+int CvUnit::GetAirSweepDamageMod() const
+{
+	VALIDATE_OBJECT
+	return m_iAirSweepDamageMod;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeAirSweepDamageMod(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iAirSweepDamageMod += iValue;
+	}
+}
+
+//	--------------------------------------------------------------------------------
 int CvUnit::GetInterceptionCombatModifier() const
 {
 	VALIDATE_OBJECT
@@ -25921,6 +25939,26 @@ bool CvUnit::canAcquirePromotion(PromotionTypes ePromotion) const
 		return false;
 	}
 
+	//Have Exclusions?
+	const std::vector<int>& pExclusions = pkPromotionInfo->GetPromotionExclusionAny();
+	if(!pExclusions.empty())
+	{
+		for(int Ii=0; Ii < pExclusions.size(); Ii++)
+		{
+			if(isHasPromotion((PromotionTypes)pExclusions[Ii])) return false;
+		}
+	}
+
+	// Has all needed Promotions?
+	const std::vector<int>& pPrereqAnds = pkPromotionInfo->GetPromotionPrereqAnds();
+	if(!pPrereqAnds.empty())
+	{
+		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
+		{
+			if(!isHasPromotion((PromotionTypes)pPrereqAnds[Ii])) return false;
+		}
+	}
+
 	// AND prereq
 	if(pkPromotionInfo->GetPrereqPromotion() != NO_PROMOTION)
 	{
@@ -25931,151 +25969,18 @@ bool CvUnit::canAcquirePromotion(PromotionTypes ePromotion) const
 	}
 
 	// OR prereqs
-	bool bLacksOrPrereq = false;
-
-	PromotionTypes ePromotion1 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion1();
-	if(ePromotion1 != NO_PROMOTION)
+	const std::vector<int>& vPrereqOrs = pkPromotionInfo->GetPromotionPrereqOrs();
+	bool bLacksOrPrereq = vPrereqOrs.size() > 0;
+	for(const auto iPrereq : pkPromotionInfo->GetPromotionPrereqOrs())
 	{
-		if(!isHasPromotion(ePromotion1))
-			bLacksOrPrereq = true;
-	}
-
-	// OR Promotion 2
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion2 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion2();
-		if(ePromotion2 != NO_PROMOTION)
+		PromotionTypes ePrereq = (PromotionTypes)iPrereq;
+		if (ePrereq == NO_PROMOTION) continue;
+		if (isHasPromotion(ePrereq))
 		{
-			if(isHasPromotion(ePromotion2))
-				bLacksOrPrereq = false;
+			bLacksOrPrereq = false;
+			break;
 		}
 	}
-
-	// OR Promotion 3
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion3 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion3();
-		if(ePromotion3 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion3))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 4
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion4 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion4();
-		if(ePromotion4 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion4))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 5
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion5 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion5();
-		if(ePromotion5 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion5))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 6
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion6 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion6();
-		if(ePromotion6 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion6))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 7
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion7 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion7();
-		if(ePromotion7 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion7))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 8
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion8 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion8();
-		if(ePromotion8 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion8))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 9
-	if(bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion9 = (PromotionTypes) pkPromotionInfo->GetPrereqOrPromotion9();
-		if(ePromotion9 != NO_PROMOTION)
-		{
-			if(isHasPromotion(ePromotion9))
-				bLacksOrPrereq = false;
-		}
-	}
-
-
-	// OR Promotion 10
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion10 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion10();
-		if (ePromotion10 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion10))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 11
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion11 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion11();
-		if (ePromotion11 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion11))
-				bLacksOrPrereq = false;
-		}
-	}
-
-	// OR Promotion 12
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion12 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion12();
-		if (ePromotion12 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion12))
-				bLacksOrPrereq = false;
-		}
-	}
-
-
-
-	// OR Promotion 13
-	if (bLacksOrPrereq)
-	{
-		PromotionTypes ePromotion13 = (PromotionTypes)pkPromotionInfo->GetPrereqOrPromotion13();
-		if (ePromotion13 != NO_PROMOTION)
-		{
-			if (isHasPromotion(ePromotion13))
-				bLacksOrPrereq = false;
-		}
-	}
-
-
 	if(bLacksOrPrereq)
 	{
 		return false;
@@ -26151,14 +26056,14 @@ bool CvUnit::isPromotionValid(PromotionTypes ePromotion) const
 	}
 
 	// Can't acquire interception promotion if unit can't intercept!
-	if(promotionInfo->GetInterceptionCombatModifier() != 0)
+	if(promotionInfo->GetInterceptionCombatModifier() != 0 || promotionInfo->GetInterceptionDamageMod() != 0)
 	{
 		if(!canAirDefend())
 			return false;
 	}
 
 	// Can't acquire Air Sweep promotion if unit can't air sweep!
-	if(promotionInfo->GetAirSweepCombatModifier() != 0)
+	if(promotionInfo->GetAirSweepCombatModifier() != 0 || promotionInfo->GetAirSweepDamageMod() != 0)
 	{
 		if(!IsAirSweepCapable())
 			return false;
@@ -26561,6 +26466,8 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeRangeSuppressModifier(thisPromotion.GetRangeSuppressModifier() * iChange);
 		if(thisPromotion.GetMaintenanceCost() > 0) ChangePromotionMaintenanceCost(thisPromotion.GetMaintenanceCost() * iChange);
 		ChangeInterceptionCombatModifier(thisPromotion.GetInterceptionCombatModifier() * iChange);
+		ChangeInterceptionDamageMod(thisPromotion.GetInterceptionDamageMod() * iChange);
+		ChangeAirSweepDamageMod(thisPromotion.GetAirSweepDamageMod() * iChange);
 		ChangeInterceptionDefenseDamageModifier(thisPromotion.GetInterceptionDefenseDamageModifier() * iChange);
 		ChangeAirSweepCombatModifier(thisPromotion.GetAirSweepCombatModifier() * iChange);
 		changeInterceptChance(thisPromotion.GetInterceptChanceChange() * iChange);
@@ -27405,6 +27312,8 @@ void CvUnit::read(FDataStream& kStream)
 #endif
 	kStream >> m_iRangeSuppressModifier;
 	kStream >> m_iPromotionMaintenanceCost;
+	kStream >> m_iInterceptionDamageMod;
+	kStream >> m_iAirSweepDamageMod;
 #ifdef MOD_PROMOTIONS_EXTRARES_BONUS
 
 	kStream >> m_eExtraResourceType;
@@ -27749,6 +27658,8 @@ void CvUnit::write(FDataStream& kStream) const
 #endif
 	kStream << m_iRangeSuppressModifier;
 	kStream << m_iPromotionMaintenanceCost;
+	kStream << m_iInterceptionDamageMod;
+	kStream << m_iAirSweepDamageMod;
 #ifdef MOD_PROMOTIONS_EXTRARES_BONUS
 	kStream << m_eExtraResourceType;
 	kStream << m_iExtraResourceCombatModifier;

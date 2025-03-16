@@ -8407,17 +8407,16 @@ void CvTacticalAI::ExecuteCloseOnTarget(CvTacticalTarget& kTarget, CvTacticalDom
 
 					if(pUnit->IsCanAttackRanged())
 					{
-#if defined(MOD_AI_SMART_V3)
-						if (MOD_AI_SMART_V3)
+						if(MOD_AI_SMART_V3 && pUnit->GetRange() <= 1)
 						{
-							if (pUnit->GetRange() > 1)
-								unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
-							else
-								unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_FRONT_LINE]);
-						} else
-#endif
-						unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
-						iRangedUnits++;
+							unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_FRONT_LINE]);
+							iMeleeUnits++;
+						}
+						else
+						{
+							unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
+							iRangedUnits++;
+						}
 						m_OperationUnits.push_back(unit);
 
 					}
@@ -9436,7 +9435,13 @@ bool CvTacticalAI::FindClosestOperationUnit(CvPlot* pTarget, bool bSafeForRanged
 
 			if(bValidUnit)
 			{
-				int iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, false /*bIgnoreUnits*/);
+				int iTurns = 0;
+				int iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY());
+				if(MOD_SP_FASTER_AI && iDistance > m_iRecruitRange)
+				{
+					iTurns = iDistance / pLoopUnit->maxMoves();
+				}
+				else iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, false /*bIgnoreUnits*/);
 
 				if(iTurns != MAX_INT)
 				{
@@ -9444,7 +9449,7 @@ bool CvTacticalAI::FindClosestOperationUnit(CvPlot* pTarget, bool bSafeForRanged
 					unit.SetID(pLoopUnit->GetID());
 					unit.SetAttackStrength(1000-iTurns);
 					unit.SetHealthPercent(10,10);
-					unit.SetMovesToTarget(plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY()));
+					unit.SetMovesToTarget(iDistance);
 					m_CurrentMoveUnits.push_back(unit);
 					rtnValue = true;
 				}
@@ -9487,7 +9492,13 @@ bool CvTacticalAI::FindClosestNavalOperationUnit(CvPlot* pTarget, bool bEscorted
 
 			if(bValidUnit)
 			{
-				int iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, true /*bIgnoreUnits*/);
+				int iTurns = 0;
+				int iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY());
+				if(MOD_SP_FASTER_AI && iDistance > m_iRecruitRange)
+				{
+					iTurns = iDistance / pLoopUnit->maxMoves();
+				}
+				else iTurns = TurnsToReachTarget(pLoopUnit, pTarget, false /*bReusePaths*/, false /*bIgnoreUnits*/);
 
 				if(iTurns != MAX_INT)
 				{
@@ -9495,7 +9506,7 @@ bool CvTacticalAI::FindClosestNavalOperationUnit(CvPlot* pTarget, bool bEscorted
 					unit.SetID(pLoopUnit->GetID());
 					unit.SetAttackStrength(1000-iTurns);
 					unit.SetHealthPercent(10,10);
-					unit.SetMovesToTarget(plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pTarget->getX(), pTarget->getY()));
+					unit.SetMovesToTarget(iDistance);
 					m_CurrentMoveUnits.push_back(unit);
 					rtnValue = true;
 				}

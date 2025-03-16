@@ -598,6 +598,8 @@ public:
 	void ChangeUnitMaxExperienceLocal(int iChange);
 	int GetSecondCapitalsExtraScore() const;
 	void ChangeSecondCapitalsExtraScore(int iChange);
+	int GetFoodKeptFromPollution() const;
+	void ChangeFoodKeptFromPollution(int iChange);
 	bool IsAllowsFoodTradeRoutes();
 	void ChangeNumAllowsFoodTradeRoutes(int iChange);
 	bool IsAllowsProductionTradeRoutes();
@@ -1479,6 +1481,7 @@ protected:
 	int m_iPlotBuyCostModifier;
 	int m_iUnitMaxExperienceLocal;
 	int m_iSecondCapitalsExtraScore;
+	int m_iFoodKeptFromPollution;
 	int m_iNumAllowsFoodTradeRoutes;
 	int m_iNumAllowsProductionTradeRoutes;
 #if defined(MOD_BUILDINGS_CITY_WORKING)

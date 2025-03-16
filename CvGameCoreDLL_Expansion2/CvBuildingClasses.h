@@ -595,6 +595,7 @@ public:
 	int GetInstantResearchFromFriendlyGreatScientist() const;
 	int GetGlobalGrowthFoodNeededModifier() const;
 	int GetSecondCapitalsExtraScore() const;
+	int GetFoodKeptFromPollution() const;
 
 	int GetTradeRouteFromTheCityYields(YieldTypes eYieldTypes) const;
 
@@ -1024,6 +1025,7 @@ private:
 
 	int m_iGlobalGrowthFoodNeededModifier = 0;
 	int m_iSecondCapitalsExtraScore = 0;
+	int m_iFoodKeptFromPollution = 0;
 
 	bool m_bCapitalOnly;
 	bool m_bOriginalCapitalOnly;

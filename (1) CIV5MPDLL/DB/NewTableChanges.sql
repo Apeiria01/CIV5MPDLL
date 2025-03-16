@@ -273,6 +273,7 @@ ALTER TABLE GameSpeeds ADD FreePromotion TEXT DEFAULT NULL REFERENCES UnitPromot
 
 ALTER TABLE UnitPromotions ADD COLUMN 'RangeSuppressModifier' INTEGER DEFAULT 0;
 ALTER TABLE Projects ADD COLUMN 'FreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
+ALTER TABLE Projects ADD COLUMN 'NoBroadcast' BOOLEAN DEFAULT 0;
 ALTER TABLE UnitPromotions ADD COLUMN 'MaintenanceCost' INTEGER DEFAULT 0;
 ALTER TABLE UnitPromotions ADD COLUMN 'Immobile' BOOLEAN DEFAULT 0;
 
@@ -317,4 +318,17 @@ CREATE TABLE Promotion_Builds (
 CREATE TABLE IF NOT EXISTS Build_ResourceRemove (
     BuildType TEXT DEFAULT NULL  REFERENCES Builds(Type),
     ResourceType TEXT DEFAULT NULL REFERENCES Resources(Type)
-)
+);
+--Must have all needed promotions to unlock Promotion
+CREATE TABLE Promotion_PromotionPrereqAnds (
+	PromotionType text REFERENCES UnitPromotions(Type),
+	PrereqPromotionType text REFERENCES UnitPromotions(Type)
+);
+--Must any Exclusion promotions will lock Promotion，not two-way
+CREATE TABLE Promotion_PromotionExclusionAny (
+	PromotionType text REFERENCES UnitPromotions(Type),
+	ExclusionPromotionType text REFERENCES UnitPromotions(Type)
+);
+--InterceptionDamageMod/AirSweepDamageMod
+ALTER TABLE UnitPromotions ADD COLUMN 'InterceptionDamageMod' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD COLUMN 'AirSweepDamageMod' INTEGER DEFAULT 0;

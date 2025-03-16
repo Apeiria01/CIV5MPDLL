@@ -270,6 +270,7 @@ CvCity::CvCity() :
 	, m_iPlotBuyCostModifier(0)
 	, m_iUnitMaxExperienceLocal(0)
 	, m_iSecondCapitalsExtraScore(0)
+	, m_iFoodKeptFromPollution(0)
 	, m_iNumAllowsFoodTradeRoutes(0)
 	, m_iNumAllowsProductionTradeRoutes(0)
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -1129,6 +1130,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iPlotBuyCostModifier = 0;
 	m_iUnitMaxExperienceLocal = 0;
 	m_iSecondCapitalsExtraScore = 0;
+	m_iFoodKeptFromPollution = 0;
 	m_iNumAllowsFoodTradeRoutes = 0;
 	m_iNumAllowsProductionTradeRoutes = 0;
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -4883,19 +4885,7 @@ void CvCity::addProductionExperience(CvUnit* pUnit, bool bConscript)
 		CvPromotionEntry* pkPromotionInfo = GC.getPromotionInfo(ePromotion);
 		if(pkPromotionInfo && !pUnit->isHasPromotion(ePromotion))
 		{
-			if((pUnit->getUnitCombatType() != NO_UNITCOMBAT) && pkPromotionInfo->GetUnitCombatClass(pUnit->getUnitCombatType()))
-			{
-				pUnit->setHasPromotion(ePromotion, true);
-			}
-			else if(::IsPromotionValidForUnitPromotions(ePromotion, *pUnit))
-			{
-				pUnit->setHasPromotion(ePromotion, true);
-			}
-			else if (::IsPromotionValidForUnitType(ePromotion, pUnit->getUnitType()))
-			{
-				pUnit->setHasPromotion(ePromotion, true);
-			}
-			else if(::IsPromotionValidForCivilianUnitType(ePromotion, pUnit->getUnitType()))
+			if(::IsPromotionValidForUnit(ePromotion, *pUnit))
 			{
 				pUnit->setHasPromotion(ePromotion, true);
 			}
@@ -5963,48 +5953,40 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 				)
 				{
 					PolicyBranchTypes eBranch = NO_POLICY_BRANCH_TYPE;
-					int iNum = 0;
+					int iNum = kPlayer.getUnitClassesFromFaith(eUnitClass);
 
 					// Check social policy tree
 					if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_WRITER", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_AESTHETICS", true /*bHideAssert*/);
-						iNum = kPlayer.getWritersFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ARTIST", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_AESTHETICS", true /*bHideAssert*/);
-						iNum = kPlayer.getArtistsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MUSICIAN", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_AESTHETICS", true /*bHideAssert*/);
-						iNum = kPlayer.getMusiciansFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_SCIENTIST", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_RATIONALISM", true /*bHideAssert*/);
-						iNum = kPlayer.getScientistsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MERCHANT", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_COMMERCE", true /*bHideAssert*/);
-						iNum = kPlayer.getMerchantsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ENGINEER", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_TRADITION", true /*bHideAssert*/);
-						iNum = kPlayer.getEngineersFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_HONOR", true /*bHideAssert*/);
-						iNum = kPlayer.getGeneralsFromFaith();
 					}
 					else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL", true /*bHideAssert*/))
 					{
 						eBranch = (PolicyBranchTypes)GC.getInfoTypeForString("POLICY_BRANCH_EXPLORATION", true /*bHideAssert*/);
-						iNum = kPlayer.getAdmiralsFromFaith();
 					}
 
 					bool bAllUnlockedByBelief = false;
@@ -6104,6 +6086,10 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 			iCost = pkUnitInfo->GetProductionCost() * kOwner.GetPlayerTraits()->GetFaithPurchaseCombatUnitCostPercent() / 100;
 		}
 #endif
+		if(pkUnitInfo->IsFaithCostIncrease())
+		{
+			iCost += pkUnitInfo->GetFaithCostIncrease() * kOwner.getUnitClassesFromFaith((UnitClassTypes)pkUnitInfo->GetUnitClassType());
+		}
 		EraTypes eEra = GET_TEAM(kOwner.getTeam()).GetCurrentEra();
 		int iMultiplier = GC.getEraInfo(eEra)->getFaithCostMultiplier();
 		iCost = iCost * iMultiplier / 100;
@@ -7771,6 +7757,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changePlotBuyCostModifier(pBuildingInfo->GetPlotBuyCostModifier() * iChange);
 		ChangeUnitMaxExperienceLocal(pBuildingInfo->GetUnitMaxExperienceLocal() * iChange);
 		ChangeSecondCapitalsExtraScore(pBuildingInfo->GetSecondCapitalsExtraScore() * iChange);
+		ChangeFoodKeptFromPollution(pBuildingInfo->GetFoodKeptFromPollution() * iChange);
 		ChangeNumAllowsFoodTradeRoutes(pBuildingInfo->AllowsFoodTradeRoutes() ? iChange : 0);
 		ChangeNumAllowsProductionTradeRoutes(pBuildingInfo->AllowsProductionTradeRoutes() ? iChange : 0);
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -11091,6 +11078,17 @@ void CvCity::ChangeSecondCapitalsExtraScore(int iChange)
 	}
 }
 //	--------------------------------------------------------------------------------
+int CvCity::GetFoodKeptFromPollution() const
+{
+	VALIDATE_OBJECT
+	return m_iFoodKeptFromPollution;
+}
+void CvCity::ChangeFoodKeptFromPollution(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iFoodKeptFromPollution += iChange;
+}
+//	--------------------------------------------------------------------------------
 bool CvCity::IsAllowsFoodTradeRoutes()
 {
 	return m_iNumAllowsFoodTradeRoutes > 0;
@@ -11383,7 +11381,7 @@ int CvCity::getMaxFoodKeptPercent() const
 	if (MOD_GLOBAL_CITY_SCALES && !CanGrowNormally())
 		return 0;
 #endif
-	return m_iMaxFoodKeptPercent;
+	return m_iMaxFoodKeptPercent + std::min(0, GetFoodKeptFromPollution());
 }
 
 
@@ -11392,7 +11390,7 @@ void CvCity::changeMaxFoodKeptPercent(int iChange)
 {
 	VALIDATE_OBJECT
 	m_iMaxFoodKeptPercent = (m_iMaxFoodKeptPercent + iChange);
-	CvAssert(getMaxFoodKeptPercent() >= 0);
+	CvAssert(m_iMaxFoodKeptPercent >= 0);
 }
 
 
@@ -18976,37 +18974,12 @@ void CvCity::Purchase(UnitTypes eUnitType, BuildingTypes eBuildingType, ProjectT
 			kPlayer.ChangeFaith(-iFaithCost);
 
 			UnitClassTypes eUnitClass = pUnit->getUnitClassType();
-			if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_WRITER"))
+			if (pUnit->getUnitInfo().IsFaithCostIncrease())
 			{
-				kPlayer.incrementWritersFromFaith();
+				kPlayer.incrementUnitClassesFromFaith(eUnitClass);
 			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ARTIST"))
+			if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL"))
 			{
-				kPlayer.incrementArtistsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MUSICIAN"))
-			{
-				kPlayer.incrementMusiciansFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_SCIENTIST"))
-			{
-				kPlayer.incrementScientistsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_MERCHANT"))
-			{
-				kPlayer.incrementMerchantsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_ENGINEER"))
-			{
-				kPlayer.incrementEngineersFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL"))
-			{
-				kPlayer.incrementGeneralsFromFaith();
-			}
-			else if (eUnitClass == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL"))
-			{
-				kPlayer.incrementAdmiralsFromFaith();
 				CvPlot *pSpawnPlot = kPlayer.GetGreatAdmiralSpawnPlot(pUnit);
 				if (pUnit->plot() != pSpawnPlot)
 				{
@@ -19513,80 +19486,21 @@ void CvCity::doProduction(bool bAllowNoProduction)
 	{
 		return;
 	}
-#ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION
-	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION)
+
+	if (!isProduction())
 	{
-		if (!isProduction())
-		{
-			changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
-			return;
-		}
-
-		for (int iProductionCount = 0, iMaxProductionCount = 5; iProductionCount < iMaxProductionCount && isProduction(); iProductionCount++)
-		{
-			if (isProductionBuilding())
-			{
-				const OrderData *pOrderNode = headOrderQueueNode();
-				int iData1 = -1;
-				if (pOrderNode != NULL)
-				{
-					iData1 = pOrderNode->iData1;
-				}
-
-				const BuildingTypes eBuilding = static_cast<BuildingTypes>(iData1);
-				CvBuildingEntry *pkBuildingInfo = GC.getBuildingInfo(eBuilding);
-				if (pkBuildingInfo)
-				{
-					if (isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
-					{
-						if (m_pCityBuildings->GetBuildingProduction(eBuilding) == 0) // otherwise we are probably already showing this
-						{
-							auto_ptr<ICvCity1> pDllCity(new CvDllCity(this));
-							DLLUI->AddDeferredWonderCommand(WONDER_CREATED, pDllCity.get(), eBuilding, 0);
-						}
-					}
-				}
-			}
-
-			// notice: To avoid product duplicated, we only count the difference production once.
-			changeProductionTimes100(iProductionCount == 0 ? getCurrentProductionDifferenceTimes100(false, true) : getOverflowProductionTimes100());
-
-#if defined(MOD_PROCESS_STOCKPILE)
-			if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
-#endif
-				setOverflowProduction(0);
-			setFeatureProduction(0);
-
-#if defined(MOD_PROCESS_STOCKPILE)
-			if (getProduction() >= getProductionNeeded())
-#else
-			if (getProduction() >= getProductionNeeded() && !isProductionProcess())
-#endif
-			{
-#if defined(MOD_PROCESS_STOCKPILE)
-				popOrder(0, !isProductionProcess(), true);
-				if (!isHuman() || isProductionAutomated())
-				{
-					AI_chooseProduction(false /*bInterruptWonders*/); // the previous order is finished. choose next one.
-				}
-#else
-				popOrder(0, true, true);
-#endif
-			}
-			else
-			{
-				break;
-			}
-		}
+		changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
+		return;
 	}
-	else // old rule
-	{
-		if (!isProduction())
-		{
-			changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
-			return;
-		}
 
+	int iMaxProductionCount = 1;
+	iMaxProductionCount += GET_PLAYER(getOwner()).getPolicyModifiers(POLICYMOD_CITY_EXTRA_PRODUCTION_COUNT);
+#ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION
+	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_PRODUCTION) iMaxProductionCount += 4;
+#endif
+
+	for (int iProductionCount = 0; iProductionCount < iMaxProductionCount && isProduction(); iProductionCount++)
+	{
 		if (isProductionBuilding())
 		{
 			const OrderData *pOrderNode = headOrderQueueNode();
@@ -19611,7 +19525,8 @@ void CvCity::doProduction(bool bAllowNoProduction)
 			}
 		}
 
-		changeProductionTimes100(getCurrentProductionDifferenceTimes100(false, true));
+		// notice: To avoid product duplicated, we only count the difference production once.
+		changeProductionTimes100(iProductionCount == 0 ? getCurrentProductionDifferenceTimes100(false, true) : getOverflowProductionTimes100());
 
 #if defined(MOD_PROCESS_STOCKPILE)
 		if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
@@ -19627,63 +19542,19 @@ void CvCity::doProduction(bool bAllowNoProduction)
 		{
 #if defined(MOD_PROCESS_STOCKPILE)
 			popOrder(0, !isProductionProcess(), true);
+			if (!isHuman() || isProductionAutomated())
+			{
+				AI_chooseProduction(false /*bInterruptWonders*/); // the previous order is finished. choose next one.
+			}
 #else
 			popOrder(0, true, true);
 #endif
 		}
-	}
-#else  // old rule
-	if (!isProduction())
-	{
-		changeOverflowProductionTimes100(getCurrentProductionDifferenceTimes100(false, false));
-		return;
-	}
-
-	if (isProductionBuilding())
-	{
-		const OrderData *pOrderNode = headOrderQueueNode();
-		int iData1 = -1;
-		if (pOrderNode != NULL)
+		else
 		{
-			iData1 = pOrderNode->iData1;
-		}
-
-		const BuildingTypes eBuilding = static_cast<BuildingTypes>(iData1);
-		CvBuildingEntry *pkBuildingInfo = GC.getBuildingInfo(eBuilding);
-		if (pkBuildingInfo)
-		{
-			if (isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
-			{
-				if (m_pCityBuildings->GetBuildingProduction(eBuilding) == 0) // otherwise we are probably already showing this
-				{
-					auto_ptr<ICvCity1> pDllCity(new CvDllCity(this));
-					DLLUI->AddDeferredWonderCommand(WONDER_CREATED, pDllCity.get(), eBuilding, 0);
-				}
-			}
+			break;
 		}
 	}
-
-	changeProductionTimes100(getCurrentProductionDifferenceTimes100(false, true));
-
-#if defined(MOD_PROCESS_STOCKPILE)
-	if (!(MOD_PROCESS_STOCKPILE && isProductionProcess()))
-#endif
-		setOverflowProduction(0);
-	setFeatureProduction(0);
-
-#if defined(MOD_PROCESS_STOCKPILE)
-	if (getProduction() >= getProductionNeeded())
-#else
-	if (getProduction() >= getProductionNeeded() && !isProductionProcess())
-#endif
-	{
-#if defined(MOD_PROCESS_STOCKPILE)
-		popOrder(0, !isProductionProcess(), true);
-#else
-		popOrder(0, true, true);
-#endif
-	}
-#endif
 }
 
 
@@ -19723,7 +19594,11 @@ void CvCity::doProcess()
 //	--------------------------------------------------------------------------------
 void CvCity::doDecay()
 {
+#if defined(MOD_CITY_NO_DECAY)
+	if(MOD_CITY_NO_DECAY) return;
+#endif
 	VALIDATE_OBJECT
+	if(!isHuman()) return;
 	AI_PERF_FORMAT("City-AI-perf.csv", ("CvCity::doDecay, Turn %03d, %s, %s", GC.getGame().getElapsedGameTurns(), GetPlayer()->getCivilizationShortDescription(), getName().c_str()) );
 	int iI;
 
@@ -19738,13 +19613,9 @@ void CvCity::doDecay()
 			if(m_pCityBuildings->GetBuildingProduction((BuildingTypes)iI) > 0)
 			{
 				m_pCityBuildings->ChangeBuildingProductionTime(((BuildingTypes)iI), 1);
-
-				if(isHuman())
+				if(m_pCityBuildings->GetBuildingProductionTime((BuildingTypes)iI) > iBuildingProductionDecayTime)
 				{
-					if(m_pCityBuildings->GetBuildingProductionTime((BuildingTypes)iI) > iBuildingProductionDecayTime)
-					{
-						m_pCityBuildings->SetBuildingProduction(((BuildingTypes)iI), ((m_pCityBuildings->GetBuildingProduction((BuildingTypes)iI) * iBuildingProductionDecayPercent) / 100));
-					}
+					m_pCityBuildings->SetBuildingProduction(((BuildingTypes)iI), ((m_pCityBuildings->GetBuildingProduction((BuildingTypes)iI) * iBuildingProductionDecayPercent) / 100));
 				}
 			}
 			else
@@ -19769,13 +19640,9 @@ void CvCity::doDecay()
 				if(getUnitProduction(eUnit) > 0)
 				{
 					changeUnitProductionTime(eUnit, 1);
-
-					if(isHuman())
+					if(getUnitProductionTime(eUnit) > iUnitProductionDecayTime)
 					{
-						if(getUnitProductionTime(eUnit) > iUnitProductionDecayTime)
-						{
-							setUnitProduction(eUnit, ((getUnitProduction(eUnit) * iUnitProductionDecayPercent) / 100));
-						}
+						setUnitProduction(eUnit, ((getUnitProduction(eUnit) * iUnitProductionDecayPercent) / 100));
 					}
 				}
 				else
@@ -19877,6 +19744,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iPlotBuyCostModifier;
 	kStream >> m_iUnitMaxExperienceLocal;
 	kStream >> m_iSecondCapitalsExtraScore;
+	kStream >> m_iFoodKeptFromPollution;
 	kStream >> m_iNumAllowsFoodTradeRoutes;
 	kStream >> m_iNumAllowsProductionTradeRoutes;
 #if defined(MOD_BUILDINGS_CITY_WORKING)
@@ -20381,6 +20249,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iPlotBuyCostModifier; // Added for Version 12
 	kStream << m_iUnitMaxExperienceLocal;
 	kStream << m_iSecondCapitalsExtraScore;
+	kStream << m_iFoodKeptFromPollution;
 	kStream << m_iNumAllowsFoodTradeRoutes;
 	kStream << m_iNumAllowsProductionTradeRoutes;
 #if defined(MOD_BUILDINGS_CITY_WORKING)

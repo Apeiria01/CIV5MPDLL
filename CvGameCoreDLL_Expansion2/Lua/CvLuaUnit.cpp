@@ -542,6 +542,8 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(CapitalDefenseFalloff);
 	Method(GetUnitRangeSuppressModifier);
 	Method(GetPromotionMaintenanceCost);
+	Method(GetInterceptionDamageMod);
+	Method(GetAirSweepDamageMod);
 #if defined(MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 	if (MOD_API_PROMOTION_TO_PROMOTION_MODIFIERS)
 	{
@@ -4122,6 +4124,24 @@ int CvLuaUnit::lGetPromotionMaintenanceCost(lua_State* L)
 	CvUnit* pkUnit = GetInstance(L);
 	
 	const int iResult = pkUnit->GetPromotionMaintenanceCost();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//int UnitGetInterceptionDamageMod();
+int CvLuaUnit::lGetInterceptionDamageMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	
+	const int iResult = pkUnit->GetInterceptionDamageMod();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//int UnitGetAirSweepDamageMod();
+int CvLuaUnit::lGetAirSweepDamageMod(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	
+	const int iResult = pkUnit->GetAirSweepDamageMod();
 	lua_pushinteger(L, iResult);
 	return 1;
 }

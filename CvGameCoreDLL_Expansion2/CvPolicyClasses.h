@@ -133,6 +133,8 @@ public:
 	int GetTourismModifierPerGPCreation() const;
 	int GetScienceModifierFromRANum() const;
 	int GetDiplomatPropagandaModifier() const;
+	int GetCityExtraProductionCount() const;
+	int GetNationalWonderCityCostModifier() const;
 
 	int GetYieldFromNonSpecialistCitizens(int i) const;
 	int* GetYieldFromNonSpecialistCitizensArray() const;
@@ -461,6 +463,8 @@ private:
 	int m_iTourismModifierPerGPCreation;
 	int m_iScienceModifierFromRANum;
 	int m_iDiplomatPropagandaModifier;
+	int m_iCityExtraProductionCount;
+	int m_iNationalWonderCityCostModifier;
 	int m_iGoldPerUnit;
 	int m_iGoldPerMilitaryUnit;
 	int m_iCityStrengthMod;

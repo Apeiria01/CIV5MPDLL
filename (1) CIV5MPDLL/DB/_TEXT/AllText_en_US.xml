@@ -821,6 +821,9 @@
 		<Row Tag="TXT_KEY_BELIEF_CUTTING_NONUS">
 			<Text>Religion Beliefs bring {1_CityName} extra bonus: {2_BonusStr}.</Text>
 		</Row>
+		<Row Tag="TXT_KEY_MPDLL_ERROR_VERSION">
+			<Text>[COLOR_NEGATIVE_TEXT]An error occurred with the MPDLL. If you are using the latest versions, please contact the administrator.[COLOR_NEGATIVE_TEXT]</Text>
+		</Row>
 	</Language_en_US>
 
 </GameData>

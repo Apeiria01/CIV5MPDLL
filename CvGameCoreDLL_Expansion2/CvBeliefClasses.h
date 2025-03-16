@@ -154,6 +154,7 @@ public:
 	int GetRiverPlotYieldChange(int i) const;
 #endif
 	int GetExtraFlavorValue(int i) const;
+	int GetCivilizationFlavorValue(int i) const;
 	int GetResourceHappiness(int i) const;
 	int GetYieldChangeAnySpecialist(int i) const;
 	int GetYieldChangeTradeRoute(int i) const;
@@ -292,6 +293,7 @@ protected:
 	int** m_ppiPlotYieldChange;
 #endif
 	int* m_piExtraFlavorValue;
+	int* m_piCivilizationFlavorValue;
 
 	int* m_piResourceHappiness;
 	int* m_piYieldChangeAnySpecialist;

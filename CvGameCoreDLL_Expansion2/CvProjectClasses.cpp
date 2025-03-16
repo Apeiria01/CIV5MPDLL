@@ -53,6 +53,7 @@ bool CvProjectEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility
 
 	m_bSpaceship = kResults.GetBool("Spaceship");
 	m_bAllowsNukes = kResults.GetBool("AllowsNukes");
+	m_bNoBroadcast = kResults.GetBool("NoBroadcast");
 	m_iGoldMaintenance = kResults.GetInt("Maintenance");
 	m_iCostScalerEra = kResults.GetInt("CostScalerEra");
 	m_iCostScalerNumRepeats = kResults.GetInt("CostScalerNumRepeats");
@@ -240,6 +241,11 @@ bool CvProjectEntry::IsSpaceship() const
 bool CvProjectEntry::IsAllowsNukes() const
 {
 	return m_bAllowsNukes;
+}
+
+bool CvProjectEntry::IsNoBroadcast() const
+{
+	return m_bNoBroadcast;
 }
 
 int CvProjectEntry::CostScalerEra() const

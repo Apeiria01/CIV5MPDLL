@@ -28,3 +28,5 @@ ALTER TABLE Units ADD COLUMN 'GoldFromTourismModifier' INTEGER DEFAULT 0;
 ALTER TABLE Units ADD COLUMN 'NoSpreadTurnPopModifierAfterRemovingHeresy' INTEGER DEFAULT 0;
 ALTER TABLE Units ADD COLUMN 'PolicyBranchType' TEXT DEFAULT NULL REFERENCES PolicyBranchTypes(Type);
 ALTER TABLE Units ADD COLUMN 'NoAggressive' BOOLEAN DEFAULT 0;
+--default Great People class is always true, for new Great People, enter a positive value to make it valid(for example: 1), for other Unit, Increase fixed value.
+ALTER TABLE Units ADD COLUMN 'FaithCostIncrease' INTEGER DEFAULT 0;

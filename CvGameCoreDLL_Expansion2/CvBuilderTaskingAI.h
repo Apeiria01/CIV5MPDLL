@@ -73,6 +73,7 @@ public:
 
 	void Update(void);
 	void UpdateRoutePlots(void);
+	void UpdateKeepFeatures(CvPlayer* pPlayer);
 
 	bool EvaluateBuilder(CvUnit* pUnit, BuilderDirective* paDirectives, UINT uaDirectives, std::list<CvPlot*>& lPlayerPlots, bool bKeepOnlyBest = false, bool bOnlyEvaluateWorkersPlot = false, bool bLimit = false);
 
@@ -137,6 +138,8 @@ protected:
 
 	bool m_bKeepMarshes;
 	bool m_bKeepJungle;
+	bool m_bKeepForest;
+	std::vector<bool> m_vKeepAdjacentFeatures;
 };
 
 #endif //CIV5_BUILDER_TASKING_AI_H
