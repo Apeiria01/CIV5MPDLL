@@ -404,6 +404,10 @@ public:
 
 	int GetYieldChange(int i) const;
 	int* GetYieldChangeArray() const;
+	int GetYieldChangePerEra(int i) const;
+	int* GetYieldChangePerEraArray() const;
+	int GetYieldModifierChangePerEra(int i) const;
+	int* GetYieldModifierChangePerEraArray() const;
 	int GetYieldChangePerPop(int i) const;
 	int* GetYieldChangePerPopArray() const;
 	int GetYieldChangePerReligion(int i) const;
@@ -444,6 +448,8 @@ public:
 	int* GetSeaPlotYieldChangeArray() const;
 	int GetRiverPlotYieldChange(int i) const;
 	int* GetRiverPlotYieldChangeArray() const;
+	int GetRiverPlotYieldChangeGlobal(int i) const;
+	int* GetRiverPlotYieldChangeGlobalArray() const;
 	int GetLakePlotYieldChange(int i) const;
 	int* GetLakePlotYieldChangeArray() const;
 	int GetSeaResourceYieldChange(int i) const;
@@ -453,6 +459,10 @@ public:
 	int GetUnitCombatProductionModifier(int i) const;
 	int GetDomainFreeExperience(int i) const;
 	int GetDomainFreeExperiencePerGreatWork(int i) const;
+	int GetDomainFreeExperiencesPerPop(int i) const;
+	int GetDomainFreeExperiencesPerPopGlobal(int i) const;
+	int GetDomainFreeExperiencesPerTurn(int i) const;
+	int GetDomainFreeExperiencesPerTurnGlobal(int i) const;
 
 #if defined(MOD_ROG_CORE)
 	int GetDomainFreeExperiencePerGreatWorkGlobal(int i) const;
@@ -488,6 +498,7 @@ public:
 	int GetEmpireResourceOr(int i) const;
 	int GetFeatureOr(int i) const;
 	int GetFeatureAnd(int i) const;
+	int GetPlotAnd(int i) const;
 	int GetHurryModifier(int i) const;
 	int GetHurryModifierLocal(int i) const;
 	bool IsBuildingClassNeededInCity(int i) const;
@@ -598,6 +609,7 @@ public:
 	int GetFoodKeptFromPollution() const;
 
 	int GetTradeRouteFromTheCityYields(YieldTypes eYieldTypes) const;
+	int GetTradeRouteFromTheCityYieldsPerEra(YieldTypes eYieldTypes) const;
 
 	bool IsCapitalOnly() const;
 	bool IsOriginalCapitalOnly() const;
@@ -881,9 +893,12 @@ private:
 	int* m_piProductionTraits;
 	int* m_piSeaPlotYieldChange;
 	int* m_piRiverPlotYieldChange;
+	int* m_piRiverPlotYieldChangeGlobal;
 	int* m_piLakePlotYieldChange;
 	int* m_piSeaResourceYieldChange;
 	int* m_piYieldChange;
+	int* m_piYieldChangePerEra;
+	int* m_piYieldModifierChangePerEra;
 	int* m_piYieldChangePerPop;
 	int* m_piYieldChangePerReligion;
 	int* m_piYieldModifier;
@@ -908,6 +923,10 @@ private:
 	int* m_piUnitCombatProductionModifiers;
 	int* m_piDomainFreeExperience;
 	int* m_piDomainFreeExperiencePerGreatWork;
+	int* m_piDomainFreeExperiencesPerPop;
+	int* m_piDomainFreeExperiencesPerPopGlobal;
+	int* m_piDomainFreeExperiencesPerTurn;
+	int* m_piDomainFreeExperiencesPerTurnGlobal;
 
 #if defined(MOD_ROG_CORE)
 	int* m_piDomainFreeExperiencePerGreatWorkGlobal;
@@ -937,6 +956,7 @@ private:
 	int* m_piEmpireResourceOrs;
 	int* m_piLocalFeatureOrs;
 	int* m_piLocalFeatureAnds;
+	int* m_piLocalPlotAnds;
 	int* m_paiHurryModifier;
 	int* m_paiHurryModifierLocal;
 
@@ -1031,6 +1051,7 @@ private:
 	bool m_bOriginalCapitalOnly;
 
 	std::tr1::array<int, YieldTypes::NUM_YIELD_TYPES> m_aTradeRouteFromTheCityYields;
+	std::tr1::array<int, YieldTypes::NUM_YIELD_TYPES> m_aTradeRouteFromTheCityYieldsPerEra;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

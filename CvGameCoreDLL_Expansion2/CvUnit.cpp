@@ -2906,7 +2906,25 @@ void CvUnit::doTurn()
 				}
 			}
 		}
-
+		if(IsCombatUnit())
+		{
+			CvCity* pCity = NULL;
+			CvPlot* pPlot = plot();
+			if (pPlot)
+			{
+				pCity = pPlot->getPlotCity();
+				if (!pCity == NULL)
+				{
+					int itempexp = 0;
+					itempexp = pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
+					if (itempexp > 0)
+					{
+						iTotalxp += itempexp;
+					}
+				}
+			}
+			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
+		}
 		if (iTotalxp > 0)
 		{
 #if defined(MOD_UNITS_XP_TIMES_100)
@@ -2914,6 +2932,7 @@ void CvUnit::doTurn()
 #else
 			changeExperience(iTotalxp);
 #endif
+		testPromotionReady();
 		}
 		if (iTotalMove > 0)
 		{
