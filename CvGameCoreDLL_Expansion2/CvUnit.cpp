@@ -2906,7 +2906,16 @@ void CvUnit::doTurn()
 				}
 			}
 		}
-
+		if(IsCombatUnit() && plot())
+		{
+			CvCity* pCity = plot()->getPlotCity();
+			if (pCity)
+			{
+				int itempexp = itempexp = pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
+				if (itempexp > 0) iTotalxp += itempexp;
+			}
+			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
+		}
 		if (iTotalxp > 0)
 		{
 #if defined(MOD_UNITS_XP_TIMES_100)
@@ -2914,6 +2923,7 @@ void CvUnit::doTurn()
 #else
 			changeExperience(iTotalxp);
 #endif
+			testPromotionReady();
 		}
 		if (iTotalMove > 0)
 		{

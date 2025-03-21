@@ -358,6 +358,9 @@ CvCity::CvCity() :
 	, m_aiExtraSpecialistYield("CvCity::m_aiExtraSpecialistYield", m_syncArchive)
 	, m_aiProductionToYieldModifier("CvCity::m_aiProductionToYieldModifier", m_syncArchive)
 	, m_aiDomainFreeExperience("CvCity::m_aiDomainFreeExperience", m_syncArchive)
+	, m_aiDomainFreeExperiencesPerPop("CvCity::m_aiDomainFreeExperiencesPerPop", m_syncArchive)
+	, m_aiDomainFreeExperiencesPerPopGlobal("CvCity::m_aiDomainFreeExperiencesPerPopGlobal", m_syncArchive)
+	, m_aiDomainFreeExperiencesPerTurn("CvCity::m_aiDomainFreeExperiencesPerTurn", m_syncArchive)
 	, m_aiDomainProductionModifier("CvCity::m_aiDomainProductionModifier", m_syncArchive)
 	, m_abEverOwned("CvCity::m_abEverOwned", m_syncArchive)
 	, m_abRevealed("CvCity::m_abRevealed", m_syncArchive, true)
@@ -1244,6 +1247,8 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 #endif
 
 	m_aiYieldPerReligion.resize(NUM_YIELD_TYPES);
+	m_aiYieldPerEra.resize(NUM_YIELD_TYPES);
+	m_aiYieldModifierPerEra.resize(NUM_YIELD_TYPES);
 	m_aiYieldRateModifier.resize(NUM_YIELD_TYPES);
 	m_aiYieldRateMultiplier.resize(NUM_YIELD_TYPES);
 	m_aiPowerYieldRateModifier.resize(NUM_YIELD_TYPES);
@@ -1269,6 +1274,8 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		m_aiBaseYieldRateFromReligion[iI] = 0;
 		m_aiYieldPerPop.setAt(iI, 0);
 		m_aiYieldPerReligion[iI] = 0;
+		m_aiYieldPerEra[iI] = 0;
+		m_aiYieldModifierPerEra[iI] = 0;
 		m_aiYieldRateModifier.setAt(iI, 0);
 		m_aiYieldRateMultiplier.setAt(iI, 0);
 		m_aiPowerYieldRateModifier.setAt(iI, 0);
@@ -1296,10 +1303,16 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 
 	m_aiDomainFreeExperience.resize(NUM_DOMAIN_TYPES);
 	m_aiDomainProductionModifier.resize(NUM_DOMAIN_TYPES);
+	m_aiDomainFreeExperiencesPerPop.resize(NUM_DOMAIN_TYPES);
+	m_aiDomainFreeExperiencesPerPopGlobal.resize(NUM_DOMAIN_TYPES);
+	m_aiDomainFreeExperiencesPerTurn.resize(NUM_DOMAIN_TYPES);
 	for(iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
 	{
 		m_aiDomainFreeExperience.setAt(iI, 0);
 		m_aiDomainProductionModifier.setAt(iI, 0);
+		m_aiDomainFreeExperiencesPerPop.setAt(iI, 0);
+		m_aiDomainFreeExperiencesPerPopGlobal.setAt(iI, 0);
+		m_aiDomainFreeExperiencesPerTurn.setAt(iI, 0);
 	}
 
 
@@ -1638,6 +1651,10 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
 	{
 		m_aTradeRouteFromTheCityYields[i] = 0;
+	}
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		m_aTradeRouteFromTheCityYieldsPerEra[i] = 0;
 	}
 	m_iLastTurnWorkerDisbanded = 0;
 	m_iDefendedAgainstSpreadUntilTurn = 0;
@@ -3462,7 +3479,10 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 		return false;
 	}
 #endif
-
+	if (!IsBuildingPlotValid(eBuilding, toolTipSink))
+	{
+		return false;
+	}
 	// Holy city requirement
 	if (pkBuildingInfo->IsRequiresHolyCity() && !GetCityReligions()->IsHolyCityAnyReligion())
 	{
@@ -3902,7 +3922,7 @@ void CvCity::ChangePlotExtraYield(PlotTypes ePlot, YieldTypes eYield, int iChang
 bool CvCity::IsHasFeatureLocal(FeatureTypes eFeature) const
 {
 	VALIDATE_OBJECT
-		CvAssertMsg(eFeature > -1 && eFeature < GC.getNumFeatureInfos(), "Invalid resource index.");
+	CvAssertMsg(eFeature > -1 && eFeature < GC.getNumFeatureInfos(), "Invalid resource index.");
 
 	// See if we have the resource linked to this city, but not connected yet
 	bool bFoundFeature = false;
@@ -4284,6 +4304,68 @@ bool CvCity::IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSi
 
 
 #endif
+bool CvCity::IsHasPlotLocal(PlotTypes ePlot) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(ePlot > -1 && ePlot < GC.getNumPlotInfos(), "Invalid resource index.");
+
+	// See if we have the resource linked to this city, but not connected yet
+	bool bFoundPlot = false;
+	// Loop through all plots near this City to see if we can find eResource - tests are ordered to optimize performance
+	for (int iCityPlotLoop = 0; iCityPlotLoop < GetNumWorkablePlots(); iCityPlotLoop++)
+	{
+		CvPlot* pLoopPlot = iterateRingPlots(getX(), getY(), iCityPlotLoop);
+		// Invalid plot
+		if (pLoopPlot == NULL)
+			continue;
+
+		// Doesn't have the resource (ignore team first to save time)
+		if (pLoopPlot->getPlotType() != ePlot)
+			continue;
+
+		// Not owned by this player
+		if (pLoopPlot->getOwner() != getOwner())
+			continue;
+
+		if (pLoopPlot->getWorkingCity() != this)
+			//if (pLoopPlot->getOwningCityID() != GetID())
+			continue;
+
+		bFoundPlot = true;
+		break;
+	}
+
+	return bFoundPlot;
+}
+bool CvCity::IsBuildingPlotValid(BuildingTypes eBuilding, CvString* toolTipSink) const
+{
+	VALIDATE_OBJECT
+	CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuilding);
+	if (pkBuildingInfo == NULL)
+		return false;
+
+	// ANDs: City must have ALL of these plots
+	for (int iPlotLoop = 0; iPlotLoop < GC.getNumPlotInfos(); iPlotLoop++)
+	{
+		PlotTypes ePlot = (PlotTypes)pkBuildingInfo->GetPlotAnd(iPlotLoop);
+		// Doesn't require a Plot in this AND slot
+		if (ePlot == NO_PLOT)
+			continue;
+
+		CvPlotInfo* pkPlot = GC.getPlotInfo(ePlot);
+		if (pkPlot == NULL)
+			continue;
+
+		// City doesn't have Plot locally - return false immediately
+		if (!IsHasPlotLocal(ePlot))
+		{
+			GC.getGame().BuildCannotPerformActionHelpText(toolTipSink, "TXT_KEY_NO_ACTION_BUILDING_LOCAL_FEATURE", pkPlot->GetTextKey());
+			return false;
+		}
+	}
+	return true;
+}
+
 
 //	--------------------------------------------------------------------------------
 /// What Resource does this City want so that it goes into WLTKD?
@@ -4785,7 +4867,9 @@ int CvCity::getProductionExperience(UnitTypes eUnit)
 				iExperience += getDomainFreeExperience(eDomain);
 				iExperience += getDomainFreeExperienceFromGreatWorks(eDomain);
 				iExperience += getDomainFreeExperienceFromGreatWorksGlobal(eDomain);
+				iExperience += GetDomainFreeExperiencesPerPop(eDomain) * getPopulation() / 100;
 				iExperience += kOwner.GetDomainFreeExperience(eDomain);
+				iExperience += kOwner.GetDomainFreeExperiencesPerPopGlobal(eDomain);
 			}
 
 			iExperience += getSpecialistFreeExperience();
@@ -8040,6 +8124,8 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 
 			ChangeYieldPerPopTimes100(eYield, pBuildingInfo->GetYieldChangePerPop(eYield) * iChange);
 			ChangeYieldPerReligionTimes100(eYield, pBuildingInfo->GetYieldChangePerReligion(eYield) * iChange);
+			ChangeYieldPerEra(eYield, pBuildingInfo->GetYieldChangePerEra(eYield) * iChange);
+			ChangeYieldModifierPerEra(eYield, (pBuildingInfo->GetYieldModifierChangePerEra(eYield) * iChange));
 			changeYieldRateModifier(eYield, (pBuildingInfo->GetYieldModifier(eYield) * iChange));
 			changeYieldRateMultiplier(eYield, (pBuildingInfo->GetYieldMultiplier(eYield) * iChange));
 
@@ -8087,6 +8173,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 			}
 
 			ChangeTradeRouteFromTheCityYields(eYield, pBuildingInfo->GetTradeRouteFromTheCityYields(eYield) * iChange);
+			ChangeTradeRouteFromTheCityYieldsPerEra(eYield, pBuildingInfo->GetTradeRouteFromTheCityYieldsPerEra(eYield) * iChange);
 
 			if ((pBuildingInfo->GetYieldFromBirth(eYield) > 0))
 			{
@@ -8273,7 +8360,10 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		for(int iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
 		{
 			changeDomainFreeExperience(((DomainTypes)iI), pBuildingInfo->GetDomainFreeExperience(iI) * iChange);
+			changeDomainFreeExperiencesPerPop(((DomainTypes)iI), pBuildingInfo->GetDomainFreeExperiencesPerPop(iI) * iChange);
 			changeDomainProductionModifier(((DomainTypes)iI), pBuildingInfo->GetDomainProductionModifier(iI) * iChange);
+			changeDomainFreeExperiencesPerPopGlobal(((DomainTypes)iI), pBuildingInfo->GetDomainFreeExperiencesPerPopGlobal(iI) * iChange);
+			changeDomainFreeExperiencesPerTurn(((DomainTypes)iI), pBuildingInfo->GetDomainFreeExperiencesPerTurn(iI) * iChange);
 		}
 
 		// Process for our player
@@ -9340,6 +9430,25 @@ void CvCity::ChangeTradeRouteFromTheCityYields(YieldTypes eIndex, int iChange)
 	m_aTradeRouteFromTheCityYields[eIndex] += iChange;
 }
 
+int CvCity::GetTradeRouteFromTheCityYieldsPerEra(YieldTypes eIndex) const
+{
+	if (eIndex < 0 || eIndex >= NUM_YIELD_TYPES)
+	{
+		return 0;
+	}
+
+	return m_aTradeRouteFromTheCityYieldsPerEra[eIndex];
+}
+
+void CvCity::ChangeTradeRouteFromTheCityYieldsPerEra(YieldTypes eIndex, int iChange)
+{
+	if (eIndex < 0 || eIndex >= NUM_YIELD_TYPES)
+	{
+		return;
+	}
+	m_aTradeRouteFromTheCityYieldsPerEra[eIndex] += iChange;
+}
+
 //	--------------------------------------------------------------------------------
 int CvCity::GetLastTurnWorkerDisbanded() const
 {
@@ -10250,7 +10359,7 @@ int CvCity::GetBaseJONSCulturePerTurn() const
 	iCulturePerTurn += GET_PLAYER(getOwner()).GetYieldPerPopChange(YIELD_CULTURE) * getPopulation() / 100;
 #endif
 	iCulturePerTurn += (GetYieldPerReligionTimes100(YIELD_CULTURE) * GetCityReligions()->GetNumReligionsWithFollowers()) /100;
-
+	iCulturePerTurn += (GetYieldPerEra(YIELD_CULTURE) * (GET_PLAYER(getOwner()).GetCurrentEra() + 1));
 #if defined(MOD_ROG_CORE)
 	iCulturePerTurn += GetBaseYieldRateFromCSAlliance(YIELD_CULTURE);
 	iCulturePerTurn += GetBaseYieldRateFromCSFriendship(YIELD_CULTURE);
@@ -10439,7 +10548,7 @@ int CvCity::GetFaithPerTurn(bool bStatic) const
 	iFaith += GET_PLAYER(getOwner()).GetYieldPerPopChange(YIELD_FAITH)* getPopulation() / 100;
 #endif
 	iFaith += (GetYieldPerReligionTimes100(YIELD_FAITH) * GetCityReligions()->GetNumReligionsWithFollowers()) /100;
-
+	iFaith += (GetYieldPerEra(YIELD_FAITH) * (GET_PLAYER(getOwner()).GetCurrentEra() + 1));
 #if defined(MOD_ROG_CORE)
 	iFaith += GetBaseYieldRateFromCSAlliance(YIELD_FAITH);
 	iFaith += GetBaseYieldRateFromCSFriendship(YIELD_FAITH);
@@ -12685,7 +12794,7 @@ int CvCity::getRiverPlotYield(YieldTypes eIndex) const
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
-	return m_aiRiverPlotYield[eIndex];
+	return m_aiRiverPlotYield[eIndex] + GET_PLAYER(getOwner()).getRiverPlotYield(eIndex);
 }
 
 //	--------------------------------------------------------------------------------
@@ -12890,6 +12999,12 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 	iModifier += iTempMod;
 	if(iTempMod != 0 && toolTipSink)
 		GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD", iTempMod);
+	
+	//Yield Modifier from PerEra
+	iTempMod = GetYieldModifierPerEra(eIndex)*(GET_PLAYER(getOwner()).GetCurrentEra()+1);
+	iModifier += iTempMod;
+	if(iTempMod != 0 && toolTipSink)
+		GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_PER_ERA", iTempMod);
 
 	// Yield Modifier from adjacent Feature
 	iTempMod = getAdjacentFeaturesYieldRateModifier(eIndex);
@@ -13491,6 +13606,7 @@ int CvCity::getBaseYieldRate(YieldTypes eIndex, const bool bIgnoreFromOtherYield
 	iValue += GetBaseYieldRateFromMisc(eIndex);
 	iValue += GetBaseYieldRateFromReligion(eIndex);
 	iValue += GetBaseYieldRateFromProjects(eIndex);
+	iValue += (GetYieldPerEra(eIndex) * (GET_PLAYER(getOwner()).GetCurrentEra() + 1));
 
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
 	if (MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD && !bIgnoreFromOtherYield)
@@ -13973,6 +14089,14 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 		iBaseYieldTimes100 = iBaseValue;
 		iBaseYieldTimes100 /= 100;
 		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_RELOGION_POPULATION", iBaseYieldTimes100, YieldIcon);
+	}
+
+	iBaseValue = GetYieldPerEra(eIndex) * (GET_PLAYER(getOwner()).GetCurrentEra() + 1) * 100;
+	if(iBaseValue != 0)
+	{
+		iBaseYieldTimes100 = iBaseValue;
+		iBaseYieldTimes100 /= 100;
+		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ERA", iBaseYieldTimes100, YieldIcon);
 	}
 
 #if defined(MOD_ROG_CORE)
@@ -14878,12 +15002,52 @@ int CvCity::GetYieldPerReligionTimes100(YieldTypes eIndex) const
 void CvCity::ChangeYieldPerReligionTimes100(YieldTypes eIndex, int iChange)
 {
 	VALIDATE_OBJECT
-		CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
 
 	if(iChange != 0)
 	{
 		m_aiYieldPerReligion[eIndex] = m_aiYieldPerReligion[eIndex] + iChange;
+	}
+}
+
+//	--------------------------------------------------------------------------------
+/// Extra yield for each era
+int CvCity::GetYieldPerEra(YieldTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+
+	return m_aiYieldPerEra[eIndex];
+}
+void CvCity::ChangeYieldPerEra(YieldTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+
+	if(iChange != 0)
+	{
+		m_aiYieldPerEra[eIndex] = m_aiYieldPerEra[eIndex] + iChange;
+	}
+}
+int CvCity::GetYieldModifierPerEra(YieldTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+	return m_aiYieldModifierPerEra[eIndex];
+}
+void CvCity::ChangeYieldModifierPerEra(YieldTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+
+	if(iChange != 0)
+	{
+		m_aiYieldModifierPerEra[eIndex] = m_aiYieldModifierPerEra[eIndex] + iChange;
 	}
 }
 
@@ -15305,6 +15469,57 @@ void CvCity::changeDomainFreeExperience(DomainTypes eIndex, int iChange)
 	CvAssert(getDomainFreeExperience(eIndex) >= 0);
 }
 
+//	--------------------------------------------------------------------------------
+int CvCity::GetDomainFreeExperiencesPerPop(DomainTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	return m_aiDomainFreeExperiencesPerPop[eIndex];
+}
+//	--------------------------------------------------------------------------------
+void CvCity::changeDomainFreeExperiencesPerPop(DomainTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	m_aiDomainFreeExperiencesPerPop.setAt(eIndex, m_aiDomainFreeExperiencesPerPop[eIndex] + iChange);
+	CvAssert(GetDomainFreeExperiencesPerPop(eIndex) >= 0);
+}
+int CvCity::GetDomainFreeExperiencesPerPopGlobal(DomainTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	return m_aiDomainFreeExperiencesPerPopGlobal[eIndex];
+}
+
+void CvCity::changeDomainFreeExperiencesPerPopGlobal(DomainTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	m_aiDomainFreeExperiencesPerPopGlobal.setAt(eIndex, m_aiDomainFreeExperiencesPerPopGlobal[eIndex] + iChange);
+	CvAssert(GetDomainFreeExperiencesPerPopGlobal(eIndex) >= 0);
+}
+
+//	--------------------------------------------------------------------------------
+int CvCity::GetDomainFreeExperiencesPerTurn(DomainTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	return m_aiDomainFreeExperiencesPerTurn[eIndex];
+}
+//	--------------------------------------------------------------------------------
+void CvCity::changeDomainFreeExperiencesPerTurn(DomainTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	m_aiDomainFreeExperiencesPerTurn.setAt(eIndex, m_aiDomainFreeExperiencesPerTurn[eIndex] + iChange);
+	CvAssert(GetDomainFreeExperiencesPerTurn(eIndex) >= 0);
+}
 
 //	--------------------------------------------------------------------------------
 int CvCity::getDomainFreeExperienceFromGreatWorks(DomainTypes eIndex) const
@@ -19885,6 +20100,8 @@ void CvCity::read(FDataStream& kStream)
 			m_aiYieldPerReligion[iI] = 0;
 		}
 	}
+	kStream >> m_aiYieldPerEra;
+	kStream >> m_aiYieldModifierPerEra;
 	kStream >> m_aiYieldRateModifier;
 	kStream >> m_aiYieldRateMultiplier;
 	kStream >> m_aiPowerYieldRateModifier;
@@ -19897,6 +20114,9 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_aiProductionToYieldModifier;
 	kStream >> m_aiDomainFreeExperience;
 	kStream >> m_aiDomainProductionModifier;
+	kStream >> m_aiDomainFreeExperiencesPerPop;
+	kStream >> m_aiDomainFreeExperiencesPerPopGlobal;
+	kStream >> m_aiDomainFreeExperiencesPerTurn;
 
 	kStream >> m_abEverOwned;
 	kStream >> m_abRevealed;
@@ -20152,6 +20372,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_ppiYieldModifierFromResource;
 
 	kStream >> m_aTradeRouteFromTheCityYields;
+	kStream >> m_aTradeRouteFromTheCityYieldsPerEra;
 
 	if (uiVersion >= 3)
 	{
@@ -20358,6 +20579,8 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_aiResourceQuantityFromPOP;
 #endif
 	kStream << m_aiYieldPerReligion;
+	kStream << m_aiYieldPerEra;
+	kStream << m_aiYieldModifierPerEra;
 	kStream << m_aiYieldRateModifier;
 	kStream << m_aiYieldRateMultiplier;
 	kStream << m_aiPowerYieldRateModifier;
@@ -20370,6 +20593,9 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_aiProductionToYieldModifier;
 	kStream << m_aiDomainFreeExperience;
 	kStream << m_aiDomainProductionModifier;
+	kStream << m_aiDomainFreeExperiencesPerPop;
+	kStream << m_aiDomainFreeExperiencesPerPopGlobal;
+	kStream << m_aiDomainFreeExperiencesPerTurn;
 
 	kStream << m_abEverOwned;
 	kStream << m_abRevealed;
@@ -20549,6 +20775,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_ppiYieldModifierFromResource;
 
 	kStream << m_aTradeRouteFromTheCityYields;
+	kStream << m_aTradeRouteFromTheCityYieldsPerEra;
 
 	kStream << m_iExtraHitPoints;
 	kStream << m_paiNumBuildingClasses;

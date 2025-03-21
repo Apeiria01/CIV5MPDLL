@@ -62,3 +62,52 @@ ALTER TABLE Buildings ADD 'TechNoPrereqClasses' TEXT DEFAULT NULL REFERENCES Tec
 
 ALTER TABLE Buildings ADD 'CapitalOnly' BOOLEAN DEFAULT 0;
 ALTER TABLE Buildings ADD 'OriginalCapitalOnly' BOOLEAN DEFAULT 0;
+CREATE TABLE "Building_TradeRouteFromTheCityYieldsPerEra" (
+	"BuildingType"	text references Buildings(Type),
+	"YieldType"	text references Yields(Type),
+	"YieldValue"	integer
+);
+CREATE TABLE "Building_YieldChangesPerEra" (
+	"BuildingType"	text references Buildings(Type),
+	"YieldType"	text references Yields(Type),
+	"Yield"	integer
+);
+CREATE TABLE Building_RiverPlotYieldChangesGlobal (
+	'BuildingType' text no null references Buildings(Type),
+	'YieldType' text references Yields(Type),
+	'Yield' int default 0 not null
+);
+
+CREATE TABLE "Building_LocalPlotAnds" (
+	'BuildingType' text no null references Buildings(Type),
+	'PlotType' text references Plots(Type)
+);
+
+CREATE TABLE "Building_DomainFreeExperiencesPerPop" (
+	'BuildingType'	no null references Buildings(Type),
+	'DomainType'	no null references Domains(Type),
+	'Modifier'	integer
+);
+
+CREATE TABLE "Building_DomainFreeExperiencesPerPopGlobal" (
+	'BuildingType'	no null references Buildings(Type),
+	'DomainType'	no null references Domains(Type),
+	'Modifier'	integer
+);
+
+CREATE TABLE "Building_DomainFreeExperiencesPerTurn" (
+	'BuildingType'	no null references Buildings(Type),
+	'DomainType'	no null references Domains(Type),
+	'Value'	integer
+);
+
+CREATE TABLE "Building_DomainFreeExperiencesPerTurnGlobal" (
+	'BuildingType'	no null references Buildings(Type),
+	'DomainType'	no null references Domains(Type),
+	'Value'	integer
+);
+CREATE TABLE "Building_YieldModifiersChangesPerEra" (
+	"BuildingType"	text references Buildings(Type),
+	"YieldType"	text references Yields(Type),
+	"Yield"	integer
+);

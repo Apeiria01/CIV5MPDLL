@@ -536,6 +536,8 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetBaseYieldRate);
 	Method(GetYieldRateInfoTool);
 	Method(GetBaseYieldRateFromProjects);
+	Method(GetYieldPerEra);
+	Method(GetTradeRouteFromTheCityYieldsPerEra);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_GREATWORK_YIELDTYPES)
 	Method(GetBaseYieldRateFromGreatWorks);
 #endif
@@ -3797,6 +3799,27 @@ int CvLuaCity::lGetYieldRateInfoTool(lua_State* L)
 int CvLuaCity::lGetBaseYieldRateFromProjects(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvCity::GetBaseYieldRateFromProjects);
+}
+
+
+//------------------------------------------------------------------------------
+int CvLuaCity::lGetYieldPerEra(lua_State* L) {
+    CvCity* pkCity = GetInstance(L);
+	const YieldTypes eIndex = (YieldTypes)lua_tointeger(L, 2);
+    CvPlayerAI& kPlayer = GET_PLAYER(pkCity->getOwner());
+    int totalYield = (pkCity->GetYieldPerEra(eIndex)) *  (kPlayer.GetCurrentEra() + 1) * 100;
+    lua_pushinteger(L, totalYield);
+    return 1;
+}
+
+// int GetTradeRouteFromTheCityYieldsPerEra(YieldTypes eYield);
+int CvLuaCity::lGetTradeRouteFromTheCityYieldsPerEra(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const YieldTypes eIndex = (YieldTypes) lua_tointeger(L, 2);
+	const int iResult = pkCity->GetTradeRouteFromTheCityYieldsPerEra(eIndex);
+	lua_pushinteger(L, iResult);
+	return 1;
 }
 
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_GREATWORK_YIELDTYPES)

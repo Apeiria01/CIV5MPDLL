@@ -250,6 +250,8 @@ public:
 	bool IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSink = NULL) const;
 	bool IsBuildingEmpireResourceValid(BuildingTypes eBuilding, CvString* toolTipSink = NULL) const;
 #endif
+	bool IsHasPlotLocal(PlotTypes ePlot) const;
+	bool IsBuildingPlotValid(BuildingTypes eBuilding, CvString* toolTipSink = NULL) const;
 	// Resource Demanded
 
 	ResourceTypes GetResourceDemanded(bool bHideUnknown = true) const;
@@ -861,6 +863,10 @@ public:
 	int GetYieldPerReligionTimes100(YieldTypes eIndex) const;
 	void ChangeYieldPerReligionTimes100(YieldTypes eIndex, int iChange);
 
+	int GetYieldPerEra(YieldTypes eIndex) const;
+	void ChangeYieldPerEra(YieldTypes eIndex, int iChange);
+	int GetYieldModifierPerEra(YieldTypes eIndex) const;
+	void ChangeYieldModifierPerEra(YieldTypes eIndex, int iChange);
 
 	void changeNukeInterceptionChance(int iValue);
 	int getNukeInterceptionChance() const;
@@ -942,6 +948,12 @@ public:
 	void changeDomainFreeExperience(DomainTypes eIndex, int iChange);
 
 	int getDomainFreeExperienceFromGreatWorks(DomainTypes eIndex) const;
+	int GetDomainFreeExperiencesPerPop(DomainTypes eIndex) const;
+	void changeDomainFreeExperiencesPerPop(DomainTypes eIndex, int iChange);
+	int GetDomainFreeExperiencesPerPopGlobal(DomainTypes eIndex) const;
+	void changeDomainFreeExperiencesPerPopGlobal(DomainTypes eIndex, int iChange);
+	int GetDomainFreeExperiencesPerTurn(DomainTypes eIndex) const;
+	void changeDomainFreeExperiencesPerTurn(DomainTypes eIndex, int iChange);
 	
 #if defined(MOD_ROG_CORE)
 	int GetBaseYieldRateFromCSAlliance(YieldTypes eIndex) const;
@@ -1436,6 +1448,9 @@ public:
 	int GetTradeRouteFromTheCityYields(YieldTypes eIndex) const;
 	void ChangeTradeRouteFromTheCityYields(YieldTypes eIndex, int iChange);
 
+	int GetTradeRouteFromTheCityYieldsPerEra(YieldTypes eIndex) const;
+	void ChangeTradeRouteFromTheCityYieldsPerEra(YieldTypes eIndex, int iChange);
+
 	int GetLastTurnWorkerDisbanded() const;
 	void SetLastTurnWorkerDisbanded(int iValue);
 
@@ -1622,6 +1637,8 @@ protected:
 
 
 	std::vector<int> m_aiYieldPerReligion;
+	std::vector<int> m_aiYieldPerEra;
+	std::vector<int> m_aiYieldModifierPerEra;
 	FAutoVariable<std::vector<int>, CvCity> m_aiPowerYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiFeatureYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiTerrainYieldRateModifier;
@@ -1632,6 +1649,9 @@ protected:
 	FAutoVariable<std::vector<int>, CvCity> m_aiProductionToYieldModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFreeExperience;
 	FAutoVariable<std::vector<int>, CvCity> m_aiDomainProductionModifier;
+	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFreeExperiencesPerPop;
+	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFreeExperiencesPerPopGlobal;
+	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFreeExperiencesPerTurn;
 
 	FAutoVariable<std::vector<bool>, CvCity> m_abEverOwned;
 	FAutoVariable<std::vector<bool>, CvCity> m_abRevealed;
@@ -1746,6 +1766,7 @@ protected:
 #endif
 
 	std::tr1::array<int, YieldTypes::NUM_YIELD_TYPES> m_aTradeRouteFromTheCityYields;
+	std::tr1::array<int, YieldTypes::NUM_YIELD_TYPES> m_aTradeRouteFromTheCityYieldsPerEra;
 
 	CvCityBuildings* m_pCityBuildings;
 	CvCityStrategyAI* m_pCityStrategyAI;

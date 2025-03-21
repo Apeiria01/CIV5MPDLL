@@ -1013,7 +1013,10 @@ public:
 #if defined(MOD_ROG_CORE)
 	void ChangeDomainFreeExperiencePerGreatWorkGlobal(DomainTypes eDomain, int iChange);
 	int GetDomainFreeExperiencePerGreatWorkGlobal(DomainTypes eDomain) const;
-
+	
+	int GetDomainFreeExperiencesPerPopGlobal(DomainTypes eDomain);
+	void ChangeDomainFreeExperiencesPerTurnGlobal(DomainTypes eDomain, int iChange);
+	int GetDomainFreeExperiencesPerTurnGlobal(DomainTypes eDomain) const;
 	void ChangeDomainFreeExperience(DomainTypes eDomain, int iChange);
 	int GetDomainFreeExperience(DomainTypes) const;
 
@@ -1314,6 +1317,9 @@ public:
 
 	int getSeaPlotYield(YieldTypes eIndex) const;
 	void changeSeaPlotYield(YieldTypes eIndex, int iChange);
+
+	int getRiverPlotYield(YieldTypes eIndex) const;
+	void changeRiverPlotYield(YieldTypes eIndex, int iChange);
 
 	int getCityLoveKingDayYieldMod(YieldTypes eIndex) const;
 	void changeCityLoveKingDayYieldMod(YieldTypes eIndex, int iChange);
@@ -2661,6 +2667,7 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiCapitalYieldPerPopChange;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiYieldPerPopChange;
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiSeaPlotYield;
+	FAutoVariable<std::vector<int>, CvPlayer> m_aiRiverPlotYield;
 
 	FAutoVariable<std::vector<int>, CvPlayer> m_aiYieldFromProcessModifierGlobal;
 
@@ -2687,6 +2694,7 @@ protected:
 	std::vector<int> m_aiWorldWonderCityYieldRateModifier;
 
 	std::vector<int> m_aiDomainFreeExperiencePerGreatWorkGlobal;
+	std::vector<int> m_aiDomainFreeExperiencesPerTurnGlobal;
 
 	std::map<int, int> m_piDomainFreeExperience;
 	std::map<int, int> m_piUnitTypePrmoteHealGlobal;
