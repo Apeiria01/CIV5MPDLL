@@ -3574,9 +3574,7 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 	// Locked Buildings (Mutually Exclusive Buildings?) - not quite sure how this works
 	for(iI = 0; iI < iNumBuildingClassInfos; iI++)
 	{
-		BuildingClassTypes eLockedBuildingClass = (BuildingClassTypes) pkBuildingInfo->GetLockedBuildingClasses(iI);
-
-		if(eLockedBuildingClass != NO_BUILDINGCLASS && GetNumBuildingClass(eLockedBuildingClass) > 0)
+		if(pkBuildingInfo->GetLockedBuildingClasses().count(iI) > 0 && GetNumBuildingClass((BuildingClassTypes)iI) > 0)
 		{
 			return false;
 		}
@@ -4125,9 +4123,9 @@ bool CvCity::IsBuildingLocalResourceValid(BuildingTypes eBuilding, bool bTestVis
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for(iResourceLoop = 0; iResourceLoop < GC.getNUM_BUILDING_RESOURCE_PREREQS(); iResourceLoop++)
+	for(const auto& iResource : pkBuildingInfo->GetLocalResourceAnd())
 	{
-		eResource = (ResourceTypes) pkBuildingInfo->GetLocalResourceAnd(iResourceLoop);
+		eResource = (ResourceTypes)iResource;
 
 		// Doesn't require a resource in this AND slot
 		if(eResource == NO_RESOURCE)
@@ -4148,9 +4146,9 @@ bool CvCity::IsBuildingLocalResourceValid(BuildingTypes eBuilding, bool bTestVis
 	int iOrResources = 0;
 
 	// ORs: City must have ONE of these nearby
-	for(iResourceLoop = 0; iResourceLoop < GC.getNUM_BUILDING_RESOURCE_PREREQS(); iResourceLoop++)
+	for (const auto& iResource : pkBuildingInfo->GetLocalResourceOr())
 	{
-		eResource = (ResourceTypes) pkBuildingInfo->GetLocalResourceOr(iResourceLoop);
+		eResource = (ResourceTypes)iResource;
 
 		// Doesn't require a resource in this AND slot
 		if(eResource == NO_RESOURCE)
@@ -4190,9 +4188,9 @@ bool CvCity::IsBuildingEmpireResourceValid(BuildingTypes eBuilding, CvString* to
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for (int iResourceLoop = 0; iResourceLoop < GC.getNumResourceInfos(); iResourceLoop++)
+	for (const auto& iResource : pkBuildingInfo->GetEmpireResourceAnd())
 	{
-		ResourceTypes eResource = (ResourceTypes)pkBuildingInfo->GetEmpireResourceAnd(iResourceLoop);
+		ResourceTypes eResource = (ResourceTypes)iResource;
 
 		// Doesn't require a feature in this AND slot
 		if (eResource == NO_RESOURCE)
@@ -4215,9 +4213,9 @@ bool CvCity::IsBuildingEmpireResourceValid(BuildingTypes eBuilding, CvString* to
 	int iOrResources = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (int iResourceLoop = 0; iResourceLoop < GC.getNumResourceInfos(); iResourceLoop++)
+	for (const auto& iResource : pkBuildingInfo->GetEmpireResourceAnd())
 	{
-		ResourceTypes eResource = (ResourceTypes)pkBuildingInfo->GetEmpireResourceAnd(iResourceLoop);
+		ResourceTypes eResource = (ResourceTypes)iResource;
 
 		// Doesn't require a feature in this AND slot
 		if (eResource == NO_RESOURCE)
@@ -4251,9 +4249,9 @@ bool CvCity::IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSi
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for (int iFeatureLoop = 0; iFeatureLoop < GC.getNumFeatureInfos(); iFeatureLoop++)
+	for (const auto& iFeature : pkBuildingInfo->GetFeatureAnd())
 	{
-		FeatureTypes eFeature = (FeatureTypes)pkBuildingInfo->GetFeatureAnd(iFeatureLoop);
+		FeatureTypes eFeature = (FeatureTypes)iFeature;
 
 		// Doesn't require a feature in this AND slot
 		if (eFeature == NO_FEATURE)
@@ -4274,9 +4272,9 @@ bool CvCity::IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSi
 	int iOrFeatures = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (int iFeatureLoop = 0; iFeatureLoop < GC.getNumFeatureInfos(); iFeatureLoop++)
+	for (const auto& iFeature : pkBuildingInfo->GetFeatureOr())
 	{
-		FeatureTypes eFeature = (FeatureTypes)pkBuildingInfo->GetFeatureOr(iFeatureLoop);
+		FeatureTypes eFeature = (FeatureTypes)iFeature;
 
 		// Doesn't require a feature in this AND slot
 		if (eFeature == NO_FEATURE)
@@ -4345,9 +4343,9 @@ bool CvCity::IsBuildingPlotValid(BuildingTypes eBuilding, CvString* toolTipSink)
 		return false;
 
 	// ANDs: City must have ALL of these plots
-	for (int iPlotLoop = 0; iPlotLoop < GC.getNumPlotInfos(); iPlotLoop++)
+	for (const auto& iPlot : pkBuildingInfo->GetPlotAnd())
 	{
-		PlotTypes ePlot = (PlotTypes)pkBuildingInfo->GetPlotAnd(iPlotLoop);
+		PlotTypes ePlot = (PlotTypes)iPlot;
 		// Doesn't require a Plot in this AND slot
 		if (ePlot == NO_PLOT)
 			continue;

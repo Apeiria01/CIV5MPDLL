@@ -483,8 +483,6 @@ public:
 #endif
 
 	int GetDomainProductionModifier(int i) const;
-	int GetLockedBuildingClasses(int i) const;
-	int GetPrereqAndTechs(int i) const;
 	int GetResourceQuantityRequirement(int i) const;
 	int GetResourceQuantity(int i) const;
 	int GetResourceCultureChange(int i) const;
@@ -492,13 +490,17 @@ public:
 	int GetProductionTraits(int i) const;
 	int GetPrereqNumOfBuildingClass(int i) const;
 	int GetFlavorValue(int i) const;
-	int GetLocalResourceAnd(int i) const;
-	int GetLocalResourceOr(int i) const;
-	int GetEmpireResourceAnd(int i) const;
-	int GetEmpireResourceOr(int i) const;
-	int GetFeatureOr(int i) const;
-	int GetFeatureAnd(int i) const;
-	int GetPlotAnd(int i) const;
+	
+	const std::tr1::unordered_set<int>& GetLockedBuildingClasses() const;
+	const std::tr1::unordered_set<int>& GetPrereqAndTechs() const;
+	const std::tr1::unordered_set<int>& GetLocalResourceAnd() const;
+	const std::tr1::unordered_set<int>& GetLocalResourceOr() const;
+	const std::tr1::unordered_set<int>& GetEmpireResourceAnd() const;
+	const std::tr1::unordered_set<int>& GetEmpireResourceOr() const;
+	const std::tr1::unordered_set<int>& GetFeatureOr() const;
+	const std::tr1::unordered_set<int>& GetFeatureAnd() const;
+	const std::tr1::unordered_set<int>& GetPlotAnd() const;
+
 	int GetHurryModifier(int i) const;
 	int GetHurryModifierLocal(int i) const;
 	bool IsBuildingClassNeededInCity(int i) const;
@@ -883,9 +885,6 @@ private:
 	CvString m_strThemingBonusHelp;
 
 	// Arrays
-
-	int* m_piLockedBuildingClasses;
-	int* m_piPrereqAndTechs;
 	int* m_piResourceQuantityRequirements;
 	int* m_piResourceQuantity;
 	int* m_piResourceCultureChanges;
@@ -950,13 +949,17 @@ private:
 	int* m_piDomainProductionModifier;
 	int* m_piPrereqNumOfBuildingClass;
 	int* m_piFlavorValue;
-	int* m_piLocalResourceAnds;
-	int* m_piLocalResourceOrs;
-	int* m_piEmpireResourceAnds;
-	int* m_piEmpireResourceOrs;
-	int* m_piLocalFeatureOrs;
-	int* m_piLocalFeatureAnds;
-	int* m_piLocalPlotAnds;
+
+	std::tr1::unordered_set<int> m_piLockedBuildingClasses;
+	std::tr1::unordered_set<int> m_piPrereqAndTechs;
+	std::tr1::unordered_set<int> m_piLocalResourceAnds;
+	std::tr1::unordered_set<int> m_piLocalResourceOrs;
+	std::tr1::unordered_set<int> m_piEmpireResourceAnds;
+	std::tr1::unordered_set<int> m_piEmpireResourceOrs;
+	std::tr1::unordered_set<int> m_piLocalFeatureOrs;
+	std::tr1::unordered_set<int> m_piLocalFeatureAnds;
+	std::tr1::unordered_set<int> m_piLocalPlotAnds;
+
 	int* m_paiHurryModifier;
 	int* m_paiHurryModifierLocal;
 

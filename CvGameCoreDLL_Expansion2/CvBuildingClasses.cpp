@@ -249,8 +249,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_bAllowsFoodTradeRoutes(false),
 	m_bAllowsProductionTradeRoutes(false),
 	m_bNullifyInfluenceModifier(false),
-	m_piLockedBuildingClasses(NULL),
-	m_piPrereqAndTechs(NULL),
 	m_piResourceQuantityRequirements(NULL),
 	m_piResourceQuantity(NULL),
 	m_piResourceCultureChanges(NULL),
@@ -388,8 +386,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 /// Destructor
 CvBuildingEntry::~CvBuildingEntry(void)
 {
-	SAFE_DELETE_ARRAY(m_piLockedBuildingClasses);
-	SAFE_DELETE_ARRAY(m_piPrereqAndTechs);
 	SAFE_DELETE_ARRAY(m_piResourceQuantityRequirements);
 	SAFE_DELETE_ARRAY(m_piResourceQuantity);
 	SAFE_DELETE_ARRAY(m_piResourceCultureChanges);
@@ -440,14 +436,6 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piDomainProductionModifier);
 	SAFE_DELETE_ARRAY(m_piPrereqNumOfBuildingClass);
 	SAFE_DELETE_ARRAY(m_piFlavorValue);
-	SAFE_DELETE_ARRAY(m_piLocalResourceAnds);
-	SAFE_DELETE_ARRAY(m_piLocalResourceOrs);
-
-	SAFE_DELETE_ARRAY(m_piEmpireResourceAnds);
-	SAFE_DELETE_ARRAY(m_piEmpireResourceOrs);
-	SAFE_DELETE_ARRAY(m_piLocalFeatureOrs);
-	SAFE_DELETE_ARRAY(m_piLocalFeatureAnds);
-	SAFE_DELETE_ARRAY(m_piLocalPlotAnds);
 
 	SAFE_DELETE_ARRAY(m_paiHurryModifier);
 	SAFE_DELETE_ARRAY(m_paiHurryModifierLocal);
@@ -3755,22 +3743,6 @@ int CvBuildingEntry::GetDomainProductionModifier(int i) const
 	return m_piDomainProductionModifier ? m_piDomainProductionModifier[i] : -1;
 }
 
-/// BuildingClasses that may no longer be constructed after this Building is built in a City
-int CvBuildingEntry::GetLockedBuildingClasses(int i) const
-{
-	CvAssertMsg(i < GC.getNumBuildingClassInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLockedBuildingClasses ? m_piLockedBuildingClasses[i] : -1;
-}
-
-/// Prerequisite techs with AND
-int CvBuildingEntry::GetPrereqAndTechs(int i) const
-{
-	CvAssertMsg(i < GC.getNUM_BUILDING_AND_TECH_PREREQS(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piPrereqAndTechs ? m_piPrereqAndTechs[i] : -1;
-}
-
 /// Resources consumed to construct
 int CvBuildingEntry::GetResourceQuantityRequirement(int i) const
 {
@@ -3827,63 +3799,51 @@ int CvBuildingEntry::GetFlavorValue(int i) const
 	return m_piFlavorValue ? m_piFlavorValue[i] : 0;
 }
 
+
+/// BuildingClasses that may no longer be constructed after this Building is built in a City
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetLockedBuildingClasses() const
+{
+	return m_piLockedBuildingClasses;
+}
+/// Prerequisite techs with AND
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetPrereqAndTechs() const
+{
+	return m_piPrereqAndTechs;
+}
 /// Prerequisite resources with AND
-int CvBuildingEntry::GetLocalResourceAnd(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetLocalResourceAnd() const
 {
-	CvAssertMsg(i < GC.getNUM_BUILDING_RESOURCE_PREREQS(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalResourceAnds ? m_piLocalResourceAnds[i] : -1;
+	return m_piLocalResourceAnds;
 }
-
 /// Prerequisite resources with OR
-int CvBuildingEntry::GetLocalResourceOr(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetLocalResourceOr() const
 {
-	CvAssertMsg(i < GC.getNUM_BUILDING_RESOURCE_PREREQS(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalResourceOrs ? m_piLocalResourceOrs[i] : -1;
+	return m_piLocalResourceOrs;
 }
-
-
-
-
 /// Prerequisite Feature with AND
-int CvBuildingEntry::GetEmpireResourceAnd(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetEmpireResourceAnd() const
 {
-	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piEmpireResourceAnds ? m_piEmpireResourceAnds[i] : -1;
+	return m_piEmpireResourceAnds;
 }
-
 /// Prerequisite resources with OR
-int CvBuildingEntry::GetEmpireResourceOr(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetEmpireResourceOr() const
 {
-	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piEmpireResourceOrs ? m_piEmpireResourceOrs[i] : -1;
+	return m_piEmpireResourceOrs;
 }
-
-
 /// Prerequisite Feature with AND
-int CvBuildingEntry::GetFeatureAnd(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetFeatureAnd() const
 {
-	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalFeatureAnds ? m_piLocalFeatureAnds[i] : -1;
+	return m_piLocalFeatureAnds;
 }
 /// Prerequisite Feature with OR
-int CvBuildingEntry::GetFeatureOr(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetFeatureOr() const
 {
-	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalFeatureOrs ? m_piLocalFeatureOrs[i] : -1;
+	return m_piLocalFeatureOrs;
 }
-
 /// Prerequisite Plot with AND
-int CvBuildingEntry::GetPlotAnd(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetPlotAnd() const
 {
-	CvAssertMsg(i < GC.getNumPlotInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalPlotAnds ? m_piLocalPlotAnds[i] : -1;
+	return m_piLocalPlotAnds;
 }
 
 /// Modifier to Hurry cost

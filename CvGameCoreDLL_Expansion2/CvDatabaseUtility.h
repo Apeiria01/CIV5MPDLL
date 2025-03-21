@@ -61,6 +61,12 @@ void InitializeArray(T*& pArray, const char* szTableName, T default = (T)0);
 	                              const char* szFilterColumn,
 	                              const char* szFilterValue);
 
+	bool PopulateArrayByExistence(std::tr1::unordered_set<int>& set,	const char* szTypeTableName,
+	                              const char* szDataTableName,
+	                              const char* szTypeColumn,
+	                              const char* szFilterColumn,
+	                              const char* szFilterValue);						  
+
 	//!Allocates an array to Count(szTypeTableName) and initializes to 0
 	//!Then assigns pArray[Type.ID] = value for all resulting rows.
 	bool PopulateArrayByValue(int*& pArray, const char* szTypeTableName,
