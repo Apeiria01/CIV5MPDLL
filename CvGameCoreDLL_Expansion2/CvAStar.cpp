@@ -924,10 +924,10 @@ int PathDestValid(int iToX, int iToY, const void* pointer, CvAStar* finder)
 	}
 
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-	if(bToPlotRevealed && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || pUnit->IsCombatUnit()))
-#else
-	if(bToPlotRevealed)
+	// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+	//if(bToPlotRevealed && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || pUnit->IsCombatUnit()))
 #endif
+	if(bToPlotRevealed)
 	{
 		CvCity* pCity = pToPlot->getPlotCity();
 		if(pCity)
@@ -1382,10 +1382,10 @@ int PathValid(CvAStarNode* parent, CvAStarNode* node, int data, const void* poin
 					}
 
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-					if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
-#else
-					if(kNodeCacheData.bIsRevealedToTeam)
+					// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+					//if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
 #endif
+					if(kNodeCacheData.bIsRevealedToTeam)
 					{
 						if (kNodeCacheData.bContainsOtherFriendlyTeamCity && !(iFinderIgnoreStacking))
 							return FALSE;
@@ -3605,10 +3605,10 @@ int TacticalAnalysisMapPathValid(CvAStarNode* parent, CvAStarNode* node, int dat
 					}
 
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-					if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
-#else
-					if(kNodeCacheData.bIsRevealedToTeam)
+					// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+					//if(kNodeCacheData.bIsRevealedToTeam && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || bUnitIsCombat))
 #endif
+					if(kNodeCacheData.bIsRevealedToTeam)
 					{
 						if (kNodeCacheData.bContainsOtherFriendlyTeamCity && !(iFinderIgnoreStacking))
 							return FALSE;

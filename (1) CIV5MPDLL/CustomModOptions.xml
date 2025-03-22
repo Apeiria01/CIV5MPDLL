@@ -45,6 +45,7 @@
     <!-- This is the "No More Civilian Traffic Jams (NMCTJs) Mod" by Pazyryk - see http://forums.civfanatics.com/showthread.php?t=519754 (v45) -->
     <!-- See also: "Global - No More Civilian Traffic Jams" -->
     <Row Class="6" Name="GLOBAL_BREAK_CIVILIAN_1UPT" Value="0"/>
+    <!-- Now not allow civilian enter others city to avoid bug -->
     <Row Class="6" Name="GLOBAL_BREAK_CIVILIAN_RESTRICTIONS" Value="0"/>
 
     <!-- Great Generals and Admirals gained from combat experience spawn in the war-zone and not in a distant city (v19) -->

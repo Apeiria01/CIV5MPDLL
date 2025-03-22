@@ -3970,10 +3970,10 @@ bool CvUnit::canMoveInto(const CvPlot& plot, byte bMoveFlags) const
 
 	// Added in Civ 5: Destination plots can't allow stacked Units of the same type
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-	if((bMoveFlags & MOVEFLAG_DESTINATION) && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || !IsCivilianUnit()))
-#else
-	if(bMoveFlags & MOVEFLAG_DESTINATION)
+	// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+	//if((bMoveFlags & MOVEFLAG_DESTINATION) && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || !IsCivilianUnit()))
 #endif
+	if(bMoveFlags & MOVEFLAG_DESTINATION)
 	{
 		// Don't let another player's unit inside someone's city
 		if(!(bMoveFlags & MOVEFLAG_ATTACK) && !(bMoveFlags & MOVEFLAG_DECLARE_WAR))
