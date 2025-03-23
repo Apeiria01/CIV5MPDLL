@@ -11515,11 +11515,71 @@ int CvPlayer::GetJONSCulturePerTurnFromExcessHappiness() const
 int CvPlayer::GetJONSCulturePerTurnFromTraits() const
 {
 #if defined(MOD_API_UNIFIED_YIELDS)
-	return GetYieldPerTurnFromTraits(YIELD_CULTURE);
+	return (GetYieldPerTurnFromTraits(YIELD_CULTURE)+ GetYieldPerTurnFromResources(YIELD_CULTURE, true, true));
 #else
 	return GetPlayerTraits()->GetYieldChangePerTradePartner(YIELD_CULTURE) * GetTrade()->GetNumDifferentTradingPartners();
 #endif
 }
+#if defined(MOD_BALANCE_CORE)
+/// Yield per turn from resources imported/exported
+int CvPlayer::GetYieldPerTurnFromResources(YieldTypes eYield, bool bExported, bool bImported) const
+{
+	int iExport = 0;
+	int iImport = 0;
+	int iTotal = 0;
+	int iEra = GetCurrentEra();
+	if(iEra < 1)
+	{
+		iEra = 1;
+	}
+	//Let's get our total imports/exports
+	for (int iResourceLoop = 0; iResourceLoop < GC.getNumResourceInfos(); iResourceLoop++)
+	{
+		ResourceTypes eResourceLoop = (ResourceTypes) iResourceLoop;
+		CvResourceInfo* pInfo = GC.getResourceInfo(eResourceLoop);
+		// Is it a luxury?
+		if (pInfo && pInfo->getResourceUsage() == RESOURCEUSAGE_LUXURY)
+		{
+			if(getResourceExport(eResourceLoop) > 0)
+			{
+				iExport++;
+			}
+			if(getResourceFromMinors(eResourceLoop) > 0)
+			{
+				iImport++;
+			}
+			else if(getResourceFromMinors(eResourceLoop) > 0)
+			{
+				iImport++;
+			}
+			else if(getResourceImport(eResourceLoop) > 0)
+			{
+				iImport++;
+			}
+			else if(getResourceSiphoned(eResourceLoop) > 0)
+			{
+				iImport++;
+			}
+		}
+	}
+	if(bExported)
+	{
+		if(GetPlayerTraits()->GetYieldFromExport(eYield) > 0)
+		{
+			iTotal += (iEra * iExport * GetPlayerTraits()->GetYieldFromExport(eYield));
+		}
+	}
+	if(bImported)
+	{
+		if(GetPlayerTraits()->GetYieldFromImport(eYield) > 0)
+		{
+			iTotal += (iEra * iImport * GetPlayerTraits()->GetYieldFromImport(eYield));
+		}
+	}
+
+	return iTotal;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 /// Culture per turn player starts with for free

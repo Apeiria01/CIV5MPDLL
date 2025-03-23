@@ -281,6 +281,9 @@ public:
 #if defined(MOD_PROCESS_STOCKPILE)
 	int getMaxStockpile() const;
 #endif
+#if defined(MOD_BALANCE_CORE)
+	int GetYieldPerTurnFromResources(YieldTypes eYield, bool bExported, bool bImported) const;
+#endif
 
 	int getProductionModifier(CvString* toolTipSink = NULL) const;
 	int getProductionModifier(UnitTypes eUnit, CvString* toolTipSink = NULL) const;
