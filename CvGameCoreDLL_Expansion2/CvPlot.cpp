@@ -3152,7 +3152,8 @@ int CvPlot::getBuildTime(BuildTypes eBuild, PlayerTypes ePlayer) const
 	}
 
 	// Repair is either 3 turns or the original build time, whichever is shorter
-	if(GC.getBuildInfo(eBuild)->isRepair())
+	// When not in our plot, cannot be shorter
+	if(GC.getBuildInfo(eBuild)->isRepair() && (!MOD_NO_FASTER_REPAIR_OUTSIDE || getOwner() == ePlayer))
 	{
 		RouteTypes eRoute = getRouteType();
 

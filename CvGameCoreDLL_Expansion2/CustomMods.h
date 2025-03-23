@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
 #define MOD_DLL_NAME "CIV5 MPDLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 143)
+#define MOD_DLL_VERSION_NUMBER ((uint) 144)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -936,6 +936,7 @@
 #define MOD_NUCLEAR_WINTER_FOR_SP           				gCustomMods.isNUCLEAR_WINTER_FOR_SP()
 
 #define MOD_UNIT_COST_DONOT_INCTEASE_WITH_TURN           	gCustomMods.isUNIT_COST_DONOT_INCTEASE_WITH_TURN()
+#define MOD_NO_FASTER_REPAIR_OUTSIDE           				gCustomMods.isNO_FASTER_REPAIR_OUTSIDE()
 #define MOD_CITY_NO_DECAY           						gCustomMods.isCITY_NO_DECAY()
 #define MOD_CHANGE_RESOURCE_LINK_AFTER_ALTER_PLOT           gCustomMods.isCHANGE_RESOURCE_LINK_AFTER_ALTER_PLOT()
 #define MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION             gCustomMods.isPOLICY_FREE_PROMOTION_FOR_PROMOTION()
@@ -1743,6 +1744,7 @@ public:
 	MOD_OPT_DECL(NUCLEAR_WINTER_FOR_SP);
 
 	MOD_OPT_DECL(UNIT_COST_DONOT_INCTEASE_WITH_TURN);
+	MOD_OPT_DECL(NO_FASTER_REPAIR_OUTSIDE);
 	MOD_OPT_DECL(CITY_NO_DECAY);
 	MOD_OPT_DECL(CHANGE_RESOURCE_LINK_AFTER_ALTER_PLOT);
 
