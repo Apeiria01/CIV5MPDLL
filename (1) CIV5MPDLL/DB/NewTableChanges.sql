@@ -332,3 +332,5 @@ CREATE TABLE Promotion_PromotionExclusionAny (
 --InterceptionDamageMod/AirSweepDamageMod
 ALTER TABLE UnitPromotions ADD COLUMN 'InterceptionDamageMod' INTEGER DEFAULT 0;
 ALTER TABLE UnitPromotions ADD COLUMN 'AirSweepDamageMod' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD COLUMN 'RoadDoubleMove' BOOLEAN DEFAULT 0;
+ALTER TABLE UnitPromotions ADD COLUMN 'RiverDoubleMove' BOOLEAN DEFAULT 0;

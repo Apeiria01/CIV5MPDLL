@@ -1017,6 +1017,8 @@ public:
 	int GetDomainFreeExperiencesPerPopGlobal(DomainTypes eDomain);
 	void ChangeDomainFreeExperiencesPerTurnGlobal(DomainTypes eDomain, int iChange);
 	int GetDomainFreeExperiencesPerTurnGlobal(DomainTypes eDomain) const;
+	void ChangeDomainEnemyCombatModifierGlobal(DomainTypes eDomain, int iChange);
+	int GetDomainEnemyCombatModifierGlobal(DomainTypes eDomain) const;
 	void ChangeDomainFreeExperience(DomainTypes eDomain, int iChange);
 	int GetDomainFreeExperience(DomainTypes) const;
 
@@ -2695,6 +2697,7 @@ protected:
 
 	std::vector<int> m_aiDomainFreeExperiencePerGreatWorkGlobal;
 	std::vector<int> m_aiDomainFreeExperiencesPerTurnGlobal;
+	std::vector<int> m_aiDomainEnemyCombatModifierGlobal;
 
 	std::map<int, int> m_piDomainFreeExperience;
 	std::map<int, int> m_piUnitTypePrmoteHealGlobal;

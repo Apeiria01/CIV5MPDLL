@@ -806,6 +806,7 @@ public:
 	int GetRangeSuppressModifier() const;
 	void ChangeRangeSuppressModifier(int iValue);
 	int GetRangeSuppressModifier(const CvUnit* pOtherUnit) const;
+	int GetCombatModifierFromBuilding() const;
 	int GetPromotionMaintenanceCost() const;
 	void ChangePromotionMaintenanceCost(int iValue);
 	int GetInterceptionDamageMod() const;
@@ -1110,6 +1111,14 @@ public:
 	int getHillsDoubleMoveCount() const;
 	bool isHillsDoubleMove() const;
 	void changeHillsDoubleMoveCount(int iChange);
+
+	int getRoadDoubleMoveCount() const;
+	bool isRoadDoubleMove() const;
+	void changeRoadDoubleMoveCount(int iChange);
+
+	int getRiverDoubleMoveCount() const;
+	bool isRiverDoubleMove() const;
+	void changeRiverDoubleMoveCount(int iChange);
 
 	int getImmuneToFirstStrikesCount() const;
 	void changeImmuneToFirstStrikesCount(int iChange);
@@ -2201,6 +2210,8 @@ protected:
 	FAutoVariable<int, CvUnit> m_iAlwaysHealCount;
 	FAutoVariable<int, CvUnit> m_iHealOutsideFriendlyCount;
 	FAutoVariable<int, CvUnit> m_iHillsDoubleMoveCount;
+	FAutoVariable<int, CvUnit> m_iRoadDoubleMoveCount;
+	FAutoVariable<int, CvUnit> m_iRiverDoubleMoveCount;
 	FAutoVariable<int, CvUnit> m_iImmuneToFirstStrikesCount;
 	FAutoVariable<int, CvUnit> m_iExtraVisibilityRange;
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)

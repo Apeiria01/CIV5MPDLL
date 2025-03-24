@@ -211,6 +211,8 @@ CvUnit::CvUnit() :
 	, m_iAlwaysHealCount("CvUnit::m_iAlwaysHealCount", m_syncArchive)
 	, m_iHealOutsideFriendlyCount("CvUnit::m_iHealOutsideFriendlyCount", m_syncArchive)
 	, m_iHillsDoubleMoveCount("CvUnit::m_iHillsDoubleMoveCount", m_syncArchive)
+	, m_iRoadDoubleMoveCount("CvUnit::m_iRoadDoubleMoveCount", m_syncArchive)
+	, m_iRiverDoubleMoveCount("CvUnit::m_iRiverDoubleMoveCount", m_syncArchive)
 	, m_iImmuneToFirstStrikesCount("CvUnit::m_iImmuneToFirstStrikesCount", m_syncArchive)
 	, m_iExtraVisibilityRange("CvUnit::m_iExtraVisibilityRange", m_syncArchive)
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
@@ -1213,6 +1215,8 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iAlwaysHealCount = 0;
 	m_iHealOutsideFriendlyCount = 0;
 	m_iHillsDoubleMoveCount = 0;
+	m_iRoadDoubleMoveCount = 0;
+	m_iRiverDoubleMoveCount = 0;
 	m_iImmuneToFirstStrikesCount = 0;
 	m_iExtraVisibilityRange = 0;
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
@@ -2906,7 +2910,7 @@ void CvUnit::doTurn()
 				}
 			}
 		}
-		if(IsCombatUnit() && plot())
+		if(!IsCivilianUnit() && plot())
 		{
 			CvCity* pCity = plot()->getPlotCity();
 			if (pCity)
@@ -14785,6 +14789,9 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 	iTempModifier = getExtraCombatPercent();
 	iModifier += iTempModifier;
 
+	// Building combat modifier
+	iModifier += GetCombatModifierFromBuilding();
+
 	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
 	CvGameReligions* pReligions = GC.getGame().GetGameReligions();
 	ReligionTypes eFoundedReligion = pReligions->GetFounderBenefitsReligion(kPlayer.GetID());
@@ -15953,6 +15960,9 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 	// Extra combat percent
 	iModifier = getExtraCombatPercent();
+
+	// Building combat modifier
+	iModifier += GetCombatModifierFromBuilding();
 
 	// Kamikaze attack
 	if(getKamikazePercent() != 0)
@@ -19291,6 +19301,36 @@ int CvUnit::GetRangeSuppressModifier(const CvUnit* pOtherUnit) const
 }
 
 //	--------------------------------------------------------------------------------
+int CvUnit::GetCombatModifierFromBuilding() const
+{
+    VALIDATE_OBJECT
+	if (IsCivilianUnit() || !plot()) return 0;
+
+    if (plot()->getTeam() == NO_TEAM || !plot()->isOwned()) return 0;
+
+    CvCity* pCity = plot()->getWorkingCity();
+    if (!pCity) return 0;
+
+    const DomainTypes eDomain = getDomainType();
+    int iModifier = 0;
+
+    const PlayerTypes eCityOwner = pCity->getOwner();
+    const TeamTypes eCityTeam = GET_PLAYER(eCityOwner).getTeam();
+    const TeamTypes eUnitTeam = getTeam();
+
+    if (GET_TEAM(eUnitTeam).isAtWar(eCityTeam)) {
+        iModifier += pCity->GetDomainEnemyCombatModifier(eDomain);
+        iModifier += GET_PLAYER(eCityOwner).GetDomainEnemyCombatModifierGlobal(eDomain);
+    }
+
+    if (eUnitTeam == eCityTeam) {
+        iModifier += pCity->GetDomainFriendsCombatModifierLocal(eDomain);
+    }
+
+    return iModifier;
+}
+
+//	--------------------------------------------------------------------------------
 /// Get extra cost for unit maintenance in Gold from promotions
 int CvUnit::GetPromotionMaintenanceCost() const
 {
@@ -22593,6 +22633,53 @@ void CvUnit::changeHillsDoubleMoveCount(int iChange)
 	CvAssert(getHillsDoubleMoveCount() >= 0);
 }
 
+//	--------------------------------------------------------------------------------
+int CvUnit::getRoadDoubleMoveCount() const
+{
+	VALIDATE_OBJECT
+	return m_iRoadDoubleMoveCount;
+}
+
+
+//	--------------------------------------------------------------------------------
+bool CvUnit::isRoadDoubleMove() const
+{
+	VALIDATE_OBJECT
+	return (getRoadDoubleMoveCount() > 0);
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeRoadDoubleMoveCount(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iRoadDoubleMoveCount = (m_iRoadDoubleMoveCount + iChange);
+	CvAssert(getRoadDoubleMoveCount() >= 0);
+}
+
+//	--------------------------------------------------------------------------------
+int CvUnit::getRiverDoubleMoveCount() const
+{
+	VALIDATE_OBJECT
+	return m_iRiverDoubleMoveCount;
+}
+
+
+//	--------------------------------------------------------------------------------
+bool CvUnit::isRiverDoubleMove() const
+{
+	VALIDATE_OBJECT
+	return (getRiverDoubleMoveCount() > 0);
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeRiverDoubleMoveCount(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iRiverDoubleMoveCount = (m_iRiverDoubleMoveCount + iChange);
+	CvAssert(getRiverDoubleMoveCount() >= 0);
+}
 
 //	--------------------------------------------------------------------------------
 int CvUnit::getImmuneToFirstStrikesCount() const
@@ -26228,6 +26315,8 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		changeAlwaysHealCount((thisPromotion.IsAlwaysHeal()) ? iChange : 0);
 		changeHealOutsideFriendlyCount((thisPromotion.IsHealOutsideFriendly()) ? iChange : 0);
 		changeHillsDoubleMoveCount((thisPromotion.IsHillsDoubleMove()) ? iChange : 0);
+		changeRoadDoubleMoveCount((thisPromotion.IsRoadDoubleMove()) ? iChange : 0);
+		changeRiverDoubleMoveCount((thisPromotion.IsRiverDoubleMove()) ? iChange : 0);
 		changeIgnoreTerrainCostCount((thisPromotion.IsIgnoreTerrainCost()) ? iChange : 0);
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 		changeIgnoreTerrainDamageCount((thisPromotion.IsIgnoreTerrainDamage()) ? iChange : 0);

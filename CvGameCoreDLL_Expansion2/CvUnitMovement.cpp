@@ -63,6 +63,16 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 			iRegularCost /= 2;
 		}
 
+		if(pToPlot->getRouteType() != NO_ROUTE && pFromPlot->getRouteType() != NO_ROUTE && pUnit->isRoadDoubleMove())
+		{
+			iRegularCost /= 2;
+		}
+
+		if(pToPlot->isRiver() && pFromPlot->isRiver() && pUnit->isRiverDoubleMove())
+		{
+			iRegularCost /= 2;
+		}
+
 		else if((eFeature == NO_FEATURE) ? pUnit->isTerrainDoubleMove(eTerrain) : pUnit->isFeatureDoubleMove(eFeature))
 		{
 			iRegularCost /= 2;

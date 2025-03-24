@@ -652,6 +652,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 #endif
 
 	Method(GetExtraCombatPercent);
+	Method(GetCombatModifierFromBuilding);
 	Method(GetFriendlyLandsModifier);
 	Method(GetFriendlyLandsAttackModifier);
 	Method(GetOutsideFriendlyLandsModifier);
@@ -5525,6 +5526,16 @@ int CvLuaUnit::lGetExtraCombatPercent(lua_State* L)
 	CvUnit* pkUnit = GetInstance(L);
 
 	const int iResult = pkUnit->getExtraCombatPercent();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+//int GetCombatModifierFromBuilding();
+int CvLuaUnit::lGetCombatModifierFromBuilding(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetCombatModifierFromBuilding();
 	lua_pushinteger(L, iResult);
 	return 1;
 }

@@ -303,6 +303,8 @@ public:
 	bool IsAlwaysHeal() const;
 	bool IsHealOutsideFriendly() const;
 	bool IsHillsDoubleMove() const;
+	bool IsRoadDoubleMove() const;
+	bool IsRiverDoubleMove() const;
 	int GetMutuallyExclusiveGroup() const;
 	bool IsIgnoreTerrainCost() const;
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
@@ -783,6 +785,8 @@ protected:
 	bool m_bAlwaysHeal;
 	bool m_bHealOutsideFriendly;
 	bool m_bHillsDoubleMove;
+	bool m_bRoadDoubleMove;
+	bool m_bRiverDoubleMove;
 	bool m_bIgnoreTerrainCost;
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	bool m_bIgnoreTerrainDamage;

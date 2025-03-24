@@ -245,6 +245,8 @@ CvPromotionEntry::CvPromotionEntry():
 	m_bHealOutsideFriendly(false),
 	m_bHillsDoubleMove(false),
 	m_bIgnoreTerrainCost(false),
+	m_bRoadDoubleMove(false),
+	m_bRiverDoubleMove(false),
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	m_bIgnoreTerrainDamage(false),
 	m_bIgnoreFeatureDamage(false),
@@ -454,6 +456,8 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_bHealOutsideFriendly = kResults.GetBool("HealOutsideFriendly");
 	m_bHillsDoubleMove = kResults.GetBool("HillsDoubleMove");
 	m_bIgnoreTerrainCost = kResults.GetBool("IgnoreTerrainCost");
+	m_bRoadDoubleMove = kResults.GetBool("RoadDoubleMove");
+	m_bRiverDoubleMove = kResults.GetBool("RiverDoubleMove");
 	m_iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	m_bIgnoreTerrainDamage = kResults.GetBool("IgnoreTerrainDamage");
@@ -2763,6 +2767,18 @@ bool CvPromotionEntry::IsHealOutsideFriendly() const
 bool CvPromotionEntry::IsHillsDoubleMove() const
 {
 	return m_bHillsDoubleMove;
+}
+
+/// Accessor: Double movement on roads
+bool CvPromotionEntry::IsRoadDoubleMove() const
+{
+	return m_bRoadDoubleMove;
+}
+
+/// Accessor: Double movement near river
+bool CvPromotionEntry::IsRiverDoubleMove() const
+{
+	return m_bRiverDoubleMove;
 }
 
 /// Accessor: Ignores terrain movement penalties

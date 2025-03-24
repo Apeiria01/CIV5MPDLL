@@ -954,6 +954,10 @@ public:
 	void changeDomainFreeExperiencesPerPopGlobal(DomainTypes eIndex, int iChange);
 	int GetDomainFreeExperiencesPerTurn(DomainTypes eIndex) const;
 	void changeDomainFreeExperiencesPerTurn(DomainTypes eIndex, int iChange);
+	int GetDomainEnemyCombatModifier(DomainTypes eIndex) const;
+	void changeDomainEnemyCombatModifier(DomainTypes eIndex, int iChange);
+	int GetDomainFriendsCombatModifierLocal(DomainTypes eIndex) const;
+	void changeDomainFriendsCombatModifierLocal(DomainTypes eIndex, int iChange);
 	
 #if defined(MOD_ROG_CORE)
 	int GetBaseYieldRateFromCSAlliance(YieldTypes eIndex) const;
@@ -1652,6 +1656,8 @@ protected:
 	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFreeExperiencesPerPop;
 	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFreeExperiencesPerPopGlobal;
 	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFreeExperiencesPerTurn;
+	FAutoVariable<std::vector<int>, CvCity> m_aiDomainEnemyCombatModifier;
+	FAutoVariable<std::vector<int>, CvCity> m_aiDomainFriendsCombatModifierLocal;
 
 	FAutoVariable<std::vector<bool>, CvCity> m_abEverOwned;
 	FAutoVariable<std::vector<bool>, CvCity> m_abRevealed;

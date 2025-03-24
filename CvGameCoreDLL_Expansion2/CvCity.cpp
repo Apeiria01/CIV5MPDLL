@@ -361,6 +361,8 @@ CvCity::CvCity() :
 	, m_aiDomainFreeExperiencesPerPop("CvCity::m_aiDomainFreeExperiencesPerPop", m_syncArchive)
 	, m_aiDomainFreeExperiencesPerPopGlobal("CvCity::m_aiDomainFreeExperiencesPerPopGlobal", m_syncArchive)
 	, m_aiDomainFreeExperiencesPerTurn("CvCity::m_aiDomainFreeExperiencesPerTurn", m_syncArchive)
+	, m_aiDomainEnemyCombatModifier("CvCity::m_aiDomainEnemyCombatModifier", m_syncArchive)
+	, m_aiDomainFriendsCombatModifierLocal("CvCity::m_aiDomainFriendsCombatModifierLocal", m_syncArchive)
 	, m_aiDomainProductionModifier("CvCity::m_aiDomainProductionModifier", m_syncArchive)
 	, m_abEverOwned("CvCity::m_abEverOwned", m_syncArchive)
 	, m_abRevealed("CvCity::m_abRevealed", m_syncArchive, true)
@@ -1306,6 +1308,8 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_aiDomainFreeExperiencesPerPop.resize(NUM_DOMAIN_TYPES);
 	m_aiDomainFreeExperiencesPerPopGlobal.resize(NUM_DOMAIN_TYPES);
 	m_aiDomainFreeExperiencesPerTurn.resize(NUM_DOMAIN_TYPES);
+	m_aiDomainEnemyCombatModifier.resize(NUM_DOMAIN_TYPES);
+	m_aiDomainFriendsCombatModifierLocal.resize(NUM_DOMAIN_TYPES);
 	for(iI = 0; iI < NUM_DOMAIN_TYPES; iI++)
 	{
 		m_aiDomainFreeExperience.setAt(iI, 0);
@@ -1313,6 +1317,8 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		m_aiDomainFreeExperiencesPerPop.setAt(iI, 0);
 		m_aiDomainFreeExperiencesPerPopGlobal.setAt(iI, 0);
 		m_aiDomainFreeExperiencesPerTurn.setAt(iI, 0);
+		m_aiDomainEnemyCombatModifier.setAt(iI, 0);
+		m_aiDomainFriendsCombatModifierLocal.setAt(iI, 0);
 	}
 
 
@@ -8362,6 +8368,8 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 			changeDomainProductionModifier(((DomainTypes)iI), pBuildingInfo->GetDomainProductionModifier(iI) * iChange);
 			changeDomainFreeExperiencesPerPopGlobal(((DomainTypes)iI), pBuildingInfo->GetDomainFreeExperiencesPerPopGlobal(iI) * iChange);
 			changeDomainFreeExperiencesPerTurn(((DomainTypes)iI), pBuildingInfo->GetDomainFreeExperiencesPerTurn(iI) * iChange);
+			changeDomainEnemyCombatModifier(((DomainTypes)iI), pBuildingInfo->GetDomainEnemyCombatModifier(iI) * iChange);
+			changeDomainFriendsCombatModifierLocal(((DomainTypes)iI), pBuildingInfo->GetDomainFriendsCombatModifierLocal(iI) * iChange);
 		}
 
 		// Process for our player
@@ -15518,6 +15526,40 @@ void CvCity::changeDomainFreeExperiencesPerTurn(DomainTypes eIndex, int iChange)
 	m_aiDomainFreeExperiencesPerTurn.setAt(eIndex, m_aiDomainFreeExperiencesPerTurn[eIndex] + iChange);
 	CvAssert(GetDomainFreeExperiencesPerTurn(eIndex) >= 0);
 }
+//	--------------------------------------------------------------------------------
+int CvCity::GetDomainEnemyCombatModifier(DomainTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	return m_aiDomainEnemyCombatModifier[eIndex];
+}
+//	--------------------------------------------------------------------------------
+void CvCity::changeDomainEnemyCombatModifier(DomainTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	m_aiDomainEnemyCombatModifier.setAt(eIndex, m_aiDomainEnemyCombatModifier[eIndex] + iChange);
+	CvAssert(GetDomainEnemyCombatModifier(eIndex) >= 0);
+}
+//	--------------------------------------------------------------------------------
+int CvCity::GetDomainFriendsCombatModifierLocal(DomainTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	return m_aiDomainFriendsCombatModifierLocal[eIndex];
+}
+//	--------------------------------------------------------------------------------
+void CvCity::changeDomainFriendsCombatModifierLocal(DomainTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	m_aiDomainFriendsCombatModifierLocal.setAt(eIndex, m_aiDomainFriendsCombatModifierLocal[eIndex] + iChange);
+	CvAssert(GetDomainFriendsCombatModifierLocal(eIndex) >= 0);
+}
 
 //	--------------------------------------------------------------------------------
 int CvCity::getDomainFreeExperienceFromGreatWorks(DomainTypes eIndex) const
@@ -20115,6 +20157,8 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_aiDomainFreeExperiencesPerPop;
 	kStream >> m_aiDomainFreeExperiencesPerPopGlobal;
 	kStream >> m_aiDomainFreeExperiencesPerTurn;
+	kStream >> m_aiDomainEnemyCombatModifier;
+	kStream >> m_aiDomainFriendsCombatModifierLocal;
 
 	kStream >> m_abEverOwned;
 	kStream >> m_abRevealed;
@@ -20594,6 +20638,8 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_aiDomainFreeExperiencesPerPop;
 	kStream << m_aiDomainFreeExperiencesPerPopGlobal;
 	kStream << m_aiDomainFreeExperiencesPerTurn;
+	kStream << m_aiDomainEnemyCombatModifier;
+	kStream << m_aiDomainFriendsCombatModifierLocal;
 
 	kStream << m_abEverOwned;
 	kStream << m_abRevealed;

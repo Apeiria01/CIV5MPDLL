@@ -463,7 +463,9 @@ public:
 	int GetDomainFreeExperiencesPerPopGlobal(int i) const;
 	int GetDomainFreeExperiencesPerTurn(int i) const;
 	int GetDomainFreeExperiencesPerTurnGlobal(int i) const;
-
+	int GetDomainEnemyCombatModifier(int i) const;
+	int GetDomainEnemyCombatModifierGlobal(int i) const;
+	int GetDomainFriendsCombatModifierLocal(int i) const;
 #if defined(MOD_ROG_CORE)
 	int GetDomainFreeExperiencePerGreatWorkGlobal(int i) const;
 	int GetDomainFreeExperienceGlobal(int i) const;
@@ -926,6 +928,9 @@ private:
 	int* m_piDomainFreeExperiencesPerPopGlobal;
 	int* m_piDomainFreeExperiencesPerTurn;
 	int* m_piDomainFreeExperiencesPerTurnGlobal;
+	int* m_piDomainEnemyCombatModifier;
+	int* m_piDomainEnemyCombatModifierGlobal;
+	int* m_piDomainFriendsCombatModifierLocal;
 
 #if defined(MOD_ROG_CORE)
 	int* m_piDomainFreeExperiencePerGreatWorkGlobal;

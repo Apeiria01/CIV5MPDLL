@@ -277,6 +277,9 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_piDomainFreeExperiencesPerPopGlobal(NULL),
 	m_piDomainFreeExperiencesPerTurn(NULL),
 	m_piDomainFreeExperiencesPerTurnGlobal(NULL),
+	m_piDomainEnemyCombatModifier(NULL),
+	m_piDomainEnemyCombatModifierGlobal(NULL),
+	m_piDomainFriendsCombatModifierLocal(NULL),
 
 #if defined(MOD_ROG_CORE)
 	m_piYieldFromConstruction(NULL),
@@ -414,7 +417,9 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencesPerPopGlobal);
 	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencesPerTurn);
 	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencesPerTurnGlobal);
-
+	SAFE_DELETE_ARRAY(m_piDomainEnemyCombatModifier);
+	SAFE_DELETE_ARRAY(m_piDomainEnemyCombatModifierGlobal);
+	SAFE_DELETE_ARRAY(m_piDomainFriendsCombatModifierLocal);
 #if defined(MOD_ROG_CORE)
 	SAFE_DELETE_ARRAY(m_piYieldFromConstruction);
 	SAFE_DELETE_ARRAY(m_piYieldFromUnitProduction);
@@ -911,6 +916,9 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencesPerPopGlobal, "Domains", "Building_DomainFreeExperiencesPerPopGlobal", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
 	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencesPerTurn, "Domains", "Building_DomainFreeExperiencesPerTurn", "DomainType", "BuildingType", szBuildingType, "Value", 0, NUM_DOMAIN_TYPES);
 	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencesPerTurnGlobal, "Domains", "Building_DomainFreeExperiencesPerTurnGlobal", "DomainType", "BuildingType", szBuildingType, "Value", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainEnemyCombatModifier, "Domains", "Building_DomainEnemyCombatModifier", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainEnemyCombatModifierGlobal, "Domains", "Building_DomainEnemyCombatModifierGlobal", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainFriendsCombatModifierLocal, "Domains", "Building_DomainFriendsCombatModifierLocal", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
 
 
 #if defined(MOD_ROG_CORE)
@@ -3687,6 +3695,29 @@ int CvBuildingEntry::GetDomainFreeExperiencesPerTurnGlobal(int i) const
 	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_piDomainFreeExperiencesPerTurnGlobal ? m_piDomainFreeExperiencesPerTurnGlobal[i] : -1;
+}
+
+/// Enemy combat punishment from this building
+int CvBuildingEntry::GetDomainEnemyCombatModifier(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainEnemyCombatModifier ? m_piDomainEnemyCombatModifier[i] : -1;
+}
+
+int CvBuildingEntry::GetDomainEnemyCombatModifierGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainEnemyCombatModifierGlobal ? m_piDomainEnemyCombatModifierGlobal[i] : -1;
+}
+
+/// Our units' combat bonus in this city from this building
+int CvBuildingEntry::GetDomainFriendsCombatModifierLocal(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainFriendsCombatModifierLocal ? m_piDomainFriendsCombatModifierLocal[i] : -1;
 }
 
 #if defined(MOD_ROG_CORE)

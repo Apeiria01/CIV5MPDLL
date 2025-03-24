@@ -111,3 +111,21 @@ CREATE TABLE "Building_YieldModifiersChangesPerEra" (
 	"YieldType"	text references Yields(Type),
 	"Yield"	integer
 );
+
+CREATE TABLE "Building_DomainEnemyCombatModifier" (
+	'BuildingType'	no null references Buildings(Type),
+	'DomainType'	no null references Domains(Type),
+	'Modifier'	integer
+);
+
+CREATE TABLE "Building_DomainEnemyCombatModifierGlobal" (
+	'BuildingType'	no null references Buildings(Type),
+	'DomainType'	no null references Domains(Type),
+	'Modifier'	integer
+);
+
+CREATE TABLE "Building_DomainFriendsCombatModifierLocal" (
+	'BuildingType'	no null references Buildings(Type),
+	'DomainType'	no null references Domains(Type),
+	'Modifier'	integer
+);
