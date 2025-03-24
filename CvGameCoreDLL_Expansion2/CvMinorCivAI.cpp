@@ -8553,11 +8553,7 @@ void CvMinorCivAI::DoSpawnUnit(PlayerTypes eMajor)
 			
 #if defined(MOD_GLOBAL_CS_GIFTS)
 			if (bExplore) {
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 				eUnit = GC.getGame().GetCsGiftSpawnUnitType(eMajor, pMinorCapitalPlot->isCoastalLand() && MOD_GLOBAL_CS_GIFT_SHIPS);
-#else
-				eUnit = GC.getGame().GetCsGiftSpawnUnitType(eMajor);
-#endif
 			} else {
 #endif
 				if (bUseUniqueUnit)
@@ -8566,11 +8562,7 @@ void CvMinorCivAI::DoSpawnUnit(PlayerTypes eMajor)
 				}
 				else
 				{
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 					eUnit = GC.getGame().GetCompetitiveSpawnUnitType(eMajor, /*bIncludeUUs*/ false, /*bIncludeRanged*/true, MOD_GLOBAL_CS_GIFT_SHIPS);
-#else
-					eUnit = GC.getGame().GetCompetitiveSpawnUnitType(eMajor, /*bIncludeUUs*/ false, /*bIncludeRanged*/true);
-#endif
 				}
 #if defined(MOD_GLOBAL_CS_GIFTS)
 			}
@@ -8580,18 +8572,10 @@ void CvMinorCivAI::DoSpawnUnit(PlayerTypes eMajor)
 		{
 #if defined(MOD_GLOBAL_CS_GIFTS)
 			if (bExplore) {
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 				eUnit = GC.getGame().GetCsGiftSpawnUnitType(eMajor, pMinorCapitalPlot->isCoastalLand() && MOD_GLOBAL_CS_GIFT_SHIPS);
-#else
-				eUnit = GC.getGame().GetCsGiftSpawnUnitType(eMajor);
-#endif
 			} else {
 #endif
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 				eUnit = GC.getGame().GetCompetitiveSpawnUnitType(eMajor, /*bIncludeUUs*/ false, /*bIncludeRanged*/true, MOD_GLOBAL_CS_GIFT_SHIPS);
-#else
-				eUnit = GC.getGame().GetCompetitiveSpawnUnitType(eMajor, /*bIncludeUUs*/ false, /*bIncludeRanged*/true);
-#endif
 #if defined(MOD_GLOBAL_CS_GIFTS)
 			}
 #endif
