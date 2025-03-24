@@ -12872,6 +12872,9 @@ bool CvUnit::build(BuildTypes eBuild)
 #endif
 
 	finishMoves(); // needs to be at bottom because movesLeft() can affect workRate()...
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	GC.getGame().IncreasePlotBuildNum(getOwner(), pPlot);
+#endif
 
 	if(bFinished)
 	{

@@ -53,5 +53,9 @@
 			<Name>UNIT_MOVES_AFTER_DISEMBARK</Name>
 			<Value>0</Value>
 		</Row>
+		<Row>
+			<Name>NUM_OUTSIZE_PLOT_MAX_BUILD</Name>
+			<Value>0</Value>
+		</Row>
 	</Defines>
 </GameData>

@@ -80,6 +80,11 @@ public:
 	int GetNuclearWinterYieldMultiplier(YieldTypes eIndex);
 	int GetYieldFromNuclearWinter(YieldTypes eIndex);
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	bool IsPlotExceedMaxBuild(PlayerTypes ePlayer, CvPlot *pPlot) const;
+	void IncreasePlotBuildNum(PlayerTypes ePlayer, CvPlot *pPlot);
+	void DoPlotBuildNumTurn();
+#endif
 
 	void updateCitySight(bool bIncrement);
 	void updateSelectionList();
@@ -703,6 +708,9 @@ protected:
 	int m_iNuclearWinterProcess;
 	int m_iNuclearWinterNaturalReduction;
 	int m_iNuclearWinterLevelIndex;
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	std::tr1::unordered_map<int, int> m_mapPlotBuildNum;
 #endif
 
 	unsigned int m_uiInitialTime;

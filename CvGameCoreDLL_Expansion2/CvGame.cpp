@@ -1028,6 +1028,9 @@ void CvGame::uninit()
 	m_iNuclearWinterNaturalReduction = 1;
 	m_iNuclearWinterLevelIndex = NO_NUCLEAR_WINTER;
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	m_mapPlotBuildNum.clear();
+#endif
 
 	m_uiInitialTime = 0;
 
@@ -1931,6 +1934,30 @@ int CvGame::GetYieldFromNuclearWinter(YieldTypes eIndex)
 		iYield /= 100;
 	}
 	return iYield;
+}
+#endif
+//	--------------------------------------------------------------------------------
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+bool CvGame::IsPlotExceedMaxBuild(PlayerTypes ePlayer, CvPlot *pPlot) const
+{
+	if(pPlot == nullptr || !GET_PLAYER(ePlayer).isHuman()) return false;
+	int iMaxBuild = pPlot->getOwner() == ePlayer ? 0 : GC.getNUM_OUTSIZE_PLOT_MAX_BUILD();
+	if(iMaxBuild <= 0) return false;
+
+	const auto& it = m_mapPlotBuildNum.find(pPlot->GetPlotIndex());
+	if(it == m_mapPlotBuildNum.end()) return false;
+
+	return it->second >= iMaxBuild;
+}
+void CvGame::IncreasePlotBuildNum(PlayerTypes ePlayer, CvPlot *pPlot)
+{
+	if(pPlot == nullptr || GC.getNUM_OUTSIZE_PLOT_MAX_BUILD() <= 0 || !GET_PLAYER(ePlayer).isHuman()) return;
+
+	m_mapPlotBuildNum[pPlot->GetPlotIndex()]++;
+}
+void CvGame::DoPlotBuildNumTurn()
+{
+	m_mapPlotBuildNum.clear();
 }
 #endif
 //	--------------------------------------------------------------------------------
@@ -7877,6 +7904,9 @@ void CvGame::doTurn()
 #if defined(MOD_NUCLEAR_WINTER_FOR_SP)
 	DoNuclearWinterTurn();
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	DoPlotBuildNumTurn();
+#endif
 
 	// Victory stuff
 	testVictory();
@@ -9782,6 +9812,9 @@ void CvGame::Read(FDataStream& kStream)
 	kStream >> m_iNuclearWinterProcess;
 	kStream >> m_iNuclearWinterLevelIndex;
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	kStream >> m_mapPlotBuildNum;
+#endif
 
 	// m_uiInitialTime not saved
 
@@ -10023,6 +10056,9 @@ void CvGame::Write(FDataStream& kStream) const
 #if defined(MOD_NUCLEAR_WINTER_FOR_SP)
 	kStream << m_iNuclearWinterProcess;
 	kStream << m_iNuclearWinterLevelIndex;
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	kStream << m_mapPlotBuildNum;
 #endif
 
 	// m_uiInitialTime not saved

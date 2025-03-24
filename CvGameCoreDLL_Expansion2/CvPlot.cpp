@@ -2832,6 +2832,9 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 	{
 		return false;
 	}
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	if(!bTestVisible && GC.getGame().IsPlotExceedMaxBuild(ePlayer, const_cast<CvPlot*>(this))) return false;
+#endif
 
 	bValid = false;
 

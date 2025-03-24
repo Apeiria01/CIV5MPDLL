@@ -1138,6 +1138,8 @@
 
     <Row Class="6" Name="UNIT_COST_DONOT_INCTEASE_WITH_TURN" Value="0"/> 
     <Row Class="6" Name="NO_FASTER_REPAIR_OUTSIDE" Value="0"/>
+    <!-- set NUM_OUTSIZE_PLOT_MAX_BUILD to make it valid, only for human -->
+    <Row Class="6" Name="GLOBAL_MAX_PLOT_BUILD" Value="0"/>
     <!-- city will not doDecay -->
     <Row Class="6" Name="CITY_NO_DECAY" Value="0"/> 
 
