@@ -31,9 +31,7 @@ public:
 	int GetProductionCost() const;
 	int GetFaithCost() const;
 	bool IsRequiresFaithPurchaseEnabled() const;
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 	bool IsNoMinorGifts() const;
-#endif
 	bool IsPurchaseOnly() const;
 	bool CanMoveAfterPurchase() const;
 #if defined(MOD_GLOBAL_MOVE_AFTER_UPGRADE)
@@ -234,9 +232,7 @@ private:
 	int m_iProductionCost;
 	int m_iFaithCost;
 	bool m_bRequiresFaithPurchaseEnabled;
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 	bool m_bNoMinorGifts;
-#endif
 	bool m_bPurchaseOnly;
 	bool m_bMoveAfterPurchase;
 #if defined(MOD_GLOBAL_MOVE_AFTER_UPGRADE)

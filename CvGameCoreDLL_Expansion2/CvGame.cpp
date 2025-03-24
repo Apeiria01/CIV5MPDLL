@@ -8018,10 +8018,8 @@ UnitTypes CvGame::GetRandomSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, 
 			if(!bValid)
 				continue;
 
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 			// Exclude if this unit is invalid for Minor Gifts
-			if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+			if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 			// Avoid Recon units
 			if(pkUnitInfo->GetDefaultUnitAIType() == UNITAI_EXPLORE)
@@ -8156,10 +8154,8 @@ UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bInclude
 			}
 		}
 
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 		// Exclude if this unit is invalid for Minor Gifts
-		if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+		if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 		// Avoid Recon units
 		if(pkUnitInfo->GetDefaultUnitAIType() == UNITAI_EXPLORE)
@@ -8235,10 +8231,8 @@ UnitTypes CvGame::GetCsGiftSpawnUnitType(PlayerTypes ePlayer)
 		// Exclude unique units
 		if (eLoopUnit != pkUnitClassInfo->getDefaultUnitIndex()) continue;
 
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 		// Exclude if this unit is invalid for Minor Gifts
-		if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+		if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 		// Must be able to train this thing
 		if (!GET_PLAYER(ePlayer).canTrain(eLoopUnit, false, false, false, /*bIgnoreUniqueUnitStatus*/ true)) continue;
@@ -8326,10 +8320,8 @@ UnitTypes CvGame::GetRandomUniqueUnitType(bool bIncludeCivsInGame, bool bInclude
 		if(eLoopUnit == pkUnitClassInfo->getDefaultUnitIndex())
 			continue;
 		
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 		// Exclude if this unit is invalid for Minor Gifts
-		if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+		if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 		// Is it a unique unit from a civ that is in our game?
 		if (!bIncludeCivsInGame)
