@@ -84,26 +84,26 @@ CREATE TABLE "Building_LocalPlotAnds" (
 );
 
 CREATE TABLE "Building_DomainFreeExperiencesPerPop" (
-	'BuildingType'	no null references Buildings(Type),
-	'DomainType'	no null references Domains(Type),
+	'BuildingType'	text no null references Buildings(Type),
+	'DomainType'	text no null references Domains(Type),
 	'Modifier'	integer
 );
 
 CREATE TABLE "Building_DomainFreeExperiencesPerPopGlobal" (
-	'BuildingType'	no null references Buildings(Type),
-	'DomainType'	no null references Domains(Type),
+	'BuildingType'	text no null references Buildings(Type),
+	'DomainType'	text no null references Domains(Type),
 	'Modifier'	integer
 );
 
 CREATE TABLE "Building_DomainFreeExperiencesPerTurn" (
-	'BuildingType'	no null references Buildings(Type),
-	'DomainType'	no null references Domains(Type),
+	'BuildingType'	text no null references Buildings(Type),
+	'DomainType'	text no null references Domains(Type),
 	'Value'	integer
 );
 
 CREATE TABLE "Building_DomainFreeExperiencesPerTurnGlobal" (
-	'BuildingType'	no null references Buildings(Type),
-	'DomainType'	no null references Domains(Type),
+	'BuildingType'	text no null references Buildings(Type),
+	'DomainType'	text no null references Domains(Type),
 	'Value'	integer
 );
 CREATE TABLE "Building_YieldModifiersChangesPerEra" (
@@ -113,19 +113,19 @@ CREATE TABLE "Building_YieldModifiersChangesPerEra" (
 );
 
 CREATE TABLE "Building_DomainEnemyCombatModifier" (
-	'BuildingType'	no null references Buildings(Type),
-	'DomainType'	no null references Domains(Type),
+	'BuildingType'	text no null references Buildings(Type),
+	'DomainType'	text no null references Domains(Type),
 	'Modifier'	integer
 );
 
 CREATE TABLE "Building_DomainEnemyCombatModifierGlobal" (
-	'BuildingType'	no null references Buildings(Type),
-	'DomainType'	no null references Domains(Type),
+	'BuildingType'	text no null references Buildings(Type),
+	'DomainType'	text no null references Domains(Type),
 	'Modifier'	integer
 );
 
 CREATE TABLE "Building_DomainFriendsCombatModifierLocal" (
-	'BuildingType'	no null references Buildings(Type),
-	'DomainType'	no null references Domains(Type),
+	'BuildingType'	text no null references Buildings(Type),
+	'DomainType'	text no null references Domains(Type),
 	'Modifier'	integer
 );
