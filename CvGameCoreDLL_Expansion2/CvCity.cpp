@@ -19301,112 +19301,38 @@ void CvCity::doGrowth()
 	int iGrowthThreshold = growthThreshold();
 	setFoodKept(range(getFoodKept(), 0, ((iGrowthThreshold * getMaxFoodKeptPercent()) / 100)));
 
+	int iLoopTime = 1;
 #ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH
-	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH)
-	{	
-		while (getFood() >= iGrowthThreshold)
-		{
-			if (GetCityCitizens()->IsForcedAvoidGrowth())  // don't grow a city if we are at avoid growth
-			{
-				setFood(iGrowthThreshold);
-				break;
-			}
-
-			changeFood(-(std::max(0, (iGrowthThreshold - getFoodKept()))));
-			changePopulation(1);
-			iGrowthThreshold = growthThreshold();
-
-			// Only show notification if the city is small
-			if(getPopulation() <= GC.getMAX_POPULATION_INCREASE_NOTIOFACATION())
-			{
-				CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
-				if(pNotifications)
-				{
-					Localization::String localizedText = Localization::Lookup("TXT_KEY_NOTIFICATION_CITY_GROWTH");
-					localizedText << getNameKey() << getPopulation();
-					Localization::String localizedSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_CITY_GROWTH");
-					localizedSummary << getNameKey();
-					pNotifications->Add(NOTIFICATION_CITY_GROWTH, localizedText.toUTF8(), localizedSummary.toUTF8(), getX(), getY(), GetID());
-				}
-			}
-		}
-
-		if (getFood() < 0)
-		{
-			changeFood(-(getFood()));
-
-			if(getPopulation() > 1)
-			{
-				changePopulation(-1);
-			}
-		}
-	}
-	else // old rule
+	if (MOD_GLOBAL_UNLIMITED_ONE_TURN_GROWTH) iLoopTime = 1000;
+#endif
+	while (getFood() >= iGrowthThreshold && iLoopTime--)
 	{
-		if(getFood() >= iGrowthThreshold)
-		{
-			if(GetCityCitizens()->IsForcedAvoidGrowth())  // don't grow a city if we are at avoid growth
-			{
-				setFood(iGrowthThreshold);
-			}
-			else
-			{
-				changeFood(-(std::max(0, (iGrowthThreshold - getFoodKept()))));
-				changePopulation(1);
-
-				// Only show notification if the city is small
-				if(getPopulation() <= GC.getMAX_POPULATION_INCREASE_NOTIOFACATION())
-				{
-					CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
-					if(pNotifications)
-					{
-						Localization::String localizedText = Localization::Lookup("TXT_KEY_NOTIFICATION_CITY_GROWTH");
-						localizedText << getNameKey() << getPopulation();
-						Localization::String localizedSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_CITY_GROWTH");
-						localizedSummary << getNameKey();
-						pNotifications->Add(NOTIFICATION_CITY_GROWTH, localizedText.toUTF8(), localizedSummary.toUTF8(), getX(), getY(), GetID());
-					}
-				}
-			}
-		}
-		else if(getFood() < 0)
-		{
-			changeFood(-(getFood()));
-
-			if(getPopulation() > 1)
-			{
-				changePopulation(-1);
-			}
-		}
-	}
-#else
-	if(getFood() >= iGrowthThreshold)
-	{
-		if(GetCityCitizens()->IsForcedAvoidGrowth())  // don't grow a city if we are at avoid growth
+		if (GetCityCitizens()->IsForcedAvoidGrowth())  // don't grow a city if we are at avoid growth
 		{
 			setFood(iGrowthThreshold);
+			break;
 		}
-		else
-		{
-			changeFood(-(std::max(0, (iGrowthThreshold - getFoodKept()))));
-			changePopulation(1);
 
-			// Only show notification if the city is small
-			if(getPopulation() <= GC.getMAX_POPULATION_INCREASE_NOTIOFACATION())
+		changeFood(-(std::max(0, (iGrowthThreshold - getFoodKept()))));
+		changePopulation(1);
+		iGrowthThreshold = growthThreshold();
+
+		// Only show notification if the city is small
+		if(getPopulation() <= GC.getMAX_POPULATION_INCREASE_NOTIOFACATION())
+		{
+			CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
+			if(pNotifications)
 			{
-				CvNotifications* pNotifications = GET_PLAYER(getOwner()).GetNotifications();
-				if(pNotifications)
-				{
-					Localization::String localizedText = Localization::Lookup("TXT_KEY_NOTIFICATION_CITY_GROWTH");
-					localizedText << getNameKey() << getPopulation();
-					Localization::String localizedSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_CITY_GROWTH");
-					localizedSummary << getNameKey();
-					pNotifications->Add(NOTIFICATION_CITY_GROWTH, localizedText.toUTF8(), localizedSummary.toUTF8(), getX(), getY(), GetID());
-				}
+				Localization::String localizedText = Localization::Lookup("TXT_KEY_NOTIFICATION_CITY_GROWTH");
+				localizedText << getNameKey() << getPopulation();
+				Localization::String localizedSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_CITY_GROWTH");
+				localizedSummary << getNameKey();
+				pNotifications->Add(NOTIFICATION_CITY_GROWTH, localizedText.toUTF8(), localizedSummary.toUTF8(), getX(), getY(), GetID());
 			}
 		}
 	}
-	else if(getFood() < 0)
+
+	if (getFood() < 0)
 	{
 		changeFood(-(getFood()));
 
@@ -19415,7 +19341,6 @@ void CvCity::doGrowth()
 			changePopulation(-1);
 		}
 	}
-#endif
 }
 
 //	--------------------------------------------------------------------------------

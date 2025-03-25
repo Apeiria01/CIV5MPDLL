@@ -27235,6 +27235,7 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	int iNumCitiesFreeFoodBuilding = pPolicy->GetNumCitiesFreeFoodBuilding();
 
 	int iInstanceFoodThresholdPercent = pPolicy->GetInstantFoodThresholdPercent();
+	int iInstantFoodKeptPercent = pPolicy->GetInstantFoodKeptPercent();
 
 #ifdef MOD_GLOBAL_CORRUPTION
 	for (size_t i = 0; i < GC.getNumCorruptionLevel(); i++)
@@ -27407,6 +27408,10 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 		if (iInstanceFoodThresholdPercent > 0 && iChange > 0)
 		{
 			pLoopCity->changeFoodTimes100(iInstanceFoodThresholdPercent * pLoopCity->growthThreshold());
+		}
+		if(iInstantFoodKeptPercent > 0 && iChange > 0)
+		{
+			pLoopCity->setFoodKept(iInstantFoodKeptPercent * pLoopCity->growthThreshold() / 100);
 		}
 	}
 

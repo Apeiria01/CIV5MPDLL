@@ -336,6 +336,7 @@ public:
 #endif
 
 	int GetInstantFoodThresholdPercent() const;
+	int GetInstantFoodKeptPercent() const;
 	LuaFormulaTypes GetCaptureCityResistanceTurnsChangeFormula() const;
 
 	std::vector<PolicyYieldInfo>& GetCityWithWorldWonderYieldModifier();
@@ -640,6 +641,7 @@ private:
 #endif
 
 	int m_iInstantFoodThresholdPercent = 0;
+	int m_iInstantFoodKeptPercent = 0;
 
 	LuaFormulaTypes m_eCaptureCityResistanceTurnsChangeFormula = NO_LUA_FORMULA;
 
