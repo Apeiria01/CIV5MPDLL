@@ -129,3 +129,8 @@ CREATE TABLE "Building_DomainFriendsCombatModifierLocal" (
 	'DomainType'	text no null references Domains(Type),
 	'Modifier'	integer
 );
+CREATE TABLE "Building_CityStateTradeRouteYieldModifiers" (
+	"BuildingType"	text references Buildings(Type),
+	"YieldType"	text references Yields(Type),
+	"Yield"	integer
+);
