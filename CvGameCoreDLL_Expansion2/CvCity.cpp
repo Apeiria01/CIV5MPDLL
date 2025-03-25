@@ -1249,6 +1249,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_aiYieldPerReligion.resize(NUM_YIELD_TYPES);
 	m_aiYieldPerEra.resize(NUM_YIELD_TYPES);
 	m_aiYieldModifierPerEra.resize(NUM_YIELD_TYPES);
+	m_aiCityStateTradeRouteYieldModifierGlobal.resize(NUM_YIELD_TYPES);
 	m_aiYieldRateModifier.resize(NUM_YIELD_TYPES);
 	m_aiYieldRateMultiplier.resize(NUM_YIELD_TYPES);
 	m_aiPowerYieldRateModifier.resize(NUM_YIELD_TYPES);
@@ -1276,6 +1277,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		m_aiYieldPerReligion[iI] = 0;
 		m_aiYieldPerEra[iI] = 0;
 		m_aiYieldModifierPerEra[iI] = 0;
+		m_aiCityStateTradeRouteYieldModifierGlobal[iI] = 0;
 		m_aiYieldRateModifier.setAt(iI, 0);
 		m_aiYieldRateMultiplier.setAt(iI, 0);
 		m_aiPowerYieldRateModifier.setAt(iI, 0);
@@ -8124,6 +8126,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 			ChangeYieldPerReligionTimes100(eYield, pBuildingInfo->GetYieldChangePerReligion(eYield) * iChange);
 			ChangeYieldPerEra(eYield, pBuildingInfo->GetYieldChangePerEra(eYield) * iChange);
 			ChangeYieldModifierPerEra(eYield, (pBuildingInfo->GetYieldModifierChangePerEra(eYield) * iChange));
+			ChangeCityStateTradeRouteYieldModifierGlobal(eYield, (pBuildingInfo->GetCityStateTradeRouteChangeYieldModifierGlobal(eYield) * iChange));
 			changeYieldRateModifier(eYield, (pBuildingInfo->GetYieldModifier(eYield) * iChange));
 			changeYieldRateMultiplier(eYield, (pBuildingInfo->GetYieldMultiplier(eYield) * iChange));
 
@@ -13004,6 +13007,12 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 	if(iTempMod != 0 && toolTipSink)
 		GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_PER_ERA", iTempMod);
 
+	// Yield Modifier Yield Rate Modifier Global from City States
+	iTempMod = GetCityStateTradeRouteYieldModifierGlobal(eIndex);	
+	iModifier += iTempMod;
+	if(iTempMod != 0 && toolTipSink)
+		GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_YIELDMODIFIER_MINOR_TRADE_GLOBAL", iTempMod);
+		
 	// Yield Modifier from adjacent Feature
 	iTempMod = getAdjacentFeaturesYieldRateModifier(eIndex);
 	iModifier += iTempMod;
@@ -15049,6 +15058,25 @@ void CvCity::ChangeYieldModifierPerEra(YieldTypes eIndex, int iChange)
 	}
 }
 
+int CvCity::GetCityStateTradeRouteYieldModifierGlobal(YieldTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+	int iFriendOrAllyCityStates = GET_PLAYER(m_eOwner).GetTrade()->GetNumberOfFriendOrAllyCityStateTradeRoutes();
+	return m_aiCityStateTradeRouteYieldModifierGlobal[eIndex]* iFriendOrAllyCityStates;
+}
+void CvCity::ChangeCityStateTradeRouteYieldModifierGlobal(YieldTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+
+	if(iChange != 0)
+	{
+		m_aiCityStateTradeRouteYieldModifierGlobal[eIndex] = m_aiCityStateTradeRouteYieldModifierGlobal[eIndex] + iChange;
+	}
+}
 //	--------------------------------------------------------------------------------
 int CvCity::getYieldRateModifier(YieldTypes eIndex)	const
 {
@@ -20100,6 +20128,7 @@ void CvCity::read(FDataStream& kStream)
 	}
 	kStream >> m_aiYieldPerEra;
 	kStream >> m_aiYieldModifierPerEra;
+	kStream >> m_aiCityStateTradeRouteYieldModifierGlobal;
 	kStream >> m_aiYieldRateModifier;
 	kStream >> m_aiYieldRateMultiplier;
 	kStream >> m_aiPowerYieldRateModifier;
@@ -20579,6 +20608,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_aiYieldPerReligion;
 	kStream << m_aiYieldPerEra;
 	kStream << m_aiYieldModifierPerEra;
+	kStream << m_aiCityStateTradeRouteYieldModifierGlobal;
 	kStream << m_aiYieldRateModifier;
 	kStream << m_aiYieldRateMultiplier;
 	kStream << m_aiPowerYieldRateModifier;

@@ -262,6 +262,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_piYieldChange(NULL),
 	m_piYieldChangePerEra(NULL),
 	m_piYieldModifierChangePerEra(NULL),
+	m_piCityStateTradeRouteChangeYieldModifierGlobal(NULL),
 	m_piYieldChangePerPop(NULL),
 	m_piYieldChangePerReligion(NULL),
 	m_piYieldModifier(NULL),
@@ -399,6 +400,7 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piYieldChange);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerEra);
 	SAFE_DELETE_ARRAY(m_piYieldModifierChangePerEra);
+	SAFE_DELETE_ARRAY(m_piCityStateTradeRouteChangeYieldModifierGlobal);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerPop);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerReligion);
 	SAFE_DELETE_ARRAY(m_piYieldModifier);
@@ -872,6 +874,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.SetYields(m_piYieldChange, "Building_YieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerEra, "Building_YieldChangesPerEra", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldModifierChangePerEra, "Building_YieldModifiersChangesPerEra", "BuildingType", szBuildingType);
+	kUtility.SetYields(m_piCityStateTradeRouteChangeYieldModifierGlobal, "Building_CityStateTradeRouteYieldModifiersGlobal", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerPop, "Building_YieldChangesPerPop", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerReligion, "Building_YieldChangesPerReligion", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldModifier, "Building_YieldModifiers", "BuildingType", szBuildingType);
@@ -3185,6 +3188,10 @@ bool CvBuildingEntry::IsScienceBuilding() const
 	{
 		bRtnValue = true;
 	}
+	else if(GetCityStateTradeRouteChangeYieldModifierGlobal(YIELD_SCIENCE) > 0)
+	{
+		bRtnValue = true;
+	}
 	else if(GetYieldChangePerPop(YIELD_SCIENCE) > 0)
 	{
 		bRtnValue = true;
@@ -3295,6 +3302,19 @@ int CvBuildingEntry::GetYieldModifierChangePerEra(int i) const
 int* CvBuildingEntry::GetYieldModifierChangePerEraArray() const
 {
 	return m_piYieldModifierChangePerEra;
+}
+/// Change to yieldModifier by type City State TradeRoute
+int CvBuildingEntry::GetCityStateTradeRouteChangeYieldModifierGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piCityStateTradeRouteChangeYieldModifierGlobal ? m_piCityStateTradeRouteChangeYieldModifierGlobal[i] : -1;
+}
+
+/// Array of yieldModifier changes City State TradeRoute
+int* CvBuildingEntry::GetCityStateTradeRouteChangeYieldModifierGlobalArray() const
+{
+	return m_piCityStateTradeRouteChangeYieldModifierGlobal;
 }
 
 /// Change to yield by type

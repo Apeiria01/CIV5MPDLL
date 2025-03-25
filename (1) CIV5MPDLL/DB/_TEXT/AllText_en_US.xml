@@ -704,6 +704,9 @@
 		<Row Tag="TXT_KEY_PRODMOD_YIELD_MINOR_TRADE_GLOBAL">
 			<Text>[NEWLINE][ICON_BULLET]Modifier for Minor Trade global: {1_Num}%</Text>
 		</Row>
+		<Row Tag="TXT_KEY_YIELDMODIFIER_MINOR_TRADE_GLOBAL">
+			<Text>[NEWLINE][ICON_BULLET]Modifier for Friend or ally Minor Trade global: {1_Num}%</Text>
+		</Row>
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ADJACENT_FEATURE">
 			<Text>[NEWLINE][ICON_BULLET]Modifier for adjacent Feature: {1_Num}%</Text>
 		</Row>

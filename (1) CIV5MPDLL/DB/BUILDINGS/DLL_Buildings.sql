@@ -111,3 +111,8 @@ CREATE TABLE "Building_YieldModifiersChangesPerEra" (
 	"YieldType"	text references Yields(Type),
 	"Yield"	integer
 );
+CREATE TABLE "Building_CityStateTradeRouteYieldModifiersGlobal" (
+	"BuildingType"	text references Buildings(Type),
+	"YieldType"	text references Yields(Type),
+	"Yield"	integer
+);
