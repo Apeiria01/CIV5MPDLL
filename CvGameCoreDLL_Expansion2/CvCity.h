@@ -1377,6 +1377,8 @@ public:
 
 	int GetCorruptionScoreChangeFromBuilding() const;
 	void ChangeCorruptionScoreChangeFromBuilding(int value);
+	void ChangeCorruptionScoreYieldModifierFromBuilding(int value);
+	int GetCorruptionScoreYieldModifierFromBuilding() const;
 
 	int GetCorruptionLevelChangeFromBuilding() const;
 	void ChangeCorruptionLevelChangeFromBuilding(int value);
@@ -1729,6 +1731,7 @@ protected:
 	CorruptionLevelTypes m_eCachedCorruptionLevel = INVALID_CORRUPTION;
 
 	int m_iCorruptionScoreChangeFromBuilding = 0;
+	int m_iCorruptionScoreYieldModifierFromBuilding = 0;
 	int m_iCorruptionLevelChangeFromBuilding = 0;
 #endif
 

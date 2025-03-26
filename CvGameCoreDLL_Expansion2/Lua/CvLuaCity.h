@@ -719,6 +719,7 @@ protected:
 	LUAAPIEXTN(CalculateCorruptionScoreModifierFromSpy, int);
 	LUAAPIEXTN(CalculateCorruptionScoreModifierFromTrait, int);
 	LUAAPIEXTN(GetCorruptionScoreChangeFromBuilding, int);
+	LUAAPIEXTN(GetCorruptionScoreYieldModifierFromBuilding, int);
 	LUAAPIEXTN(GetCorruptionLevelChangeFromBuilding, int);
 	LUAAPIEXTN(CalculateCorruptionScoreFromResource, int);
 	LUAAPIEXTN(CalculateCorruptionScoreFromTrait, int);
