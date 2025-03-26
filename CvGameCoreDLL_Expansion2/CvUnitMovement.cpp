@@ -63,12 +63,7 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 			iRegularCost /= 2;
 		}
 
-		if(pToPlot->getRouteType() != NO_ROUTE && pFromPlot->getRouteType() != NO_ROUTE && pUnit->isRoadDoubleMove())
-		{
-			iRegularCost /= 2;
-		}
-
-		if(pToPlot->isRiver() && pFromPlot->isRiver() && pUnit->isRiverDoubleMove())
+		else if(pToPlot->isRiver() && pFromPlot->isRiver() && pUnit->isRiverDoubleMove())
 		{
 			iRegularCost /= 2;
 		}
@@ -101,8 +96,9 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 
 		int iMovementCost = (pRouteInfo != NULL)? pRouteInfo->getMovementCost() : 0;
 		int iFlatMovementCost = (pRouteInfo != NULL)? pRouteInfo->getFlatMovementCost() : 0;
-
-		iRouteCost = std::max(iFromMovementCost + kUnitTeam.getRouteChange(pFromPlot->getRouteType()), iMovementCost + kUnitTeam.getRouteChange(pToPlot->getRouteType()));
+		iFromMovementCost += kUnitTeam.getRouteChange(pFromPlot->getRouteType()) + pUnit->getRouteMovementChanges(pFromPlot->getRouteType());
+		iMovementCost += kUnitTeam.getRouteChange(pToPlot->getRouteType()) + pUnit->getRouteMovementChanges(pToPlot->getRouteType());
+		iRouteCost = std::max(iFromMovementCost,iMovementCost);
 		iRouteFlatCost = std::max(iFromFlatMovementCost * iBaseMoves, iFlatMovementCost * iBaseMoves);
 	}
 	else if((MOD_TRAIT_WOOD_AS_ROAD_SP || pUnit->getOwner() == pToPlot->getOwner()) && (eFeature == FEATURE_FOREST || eFeature == FEATURE_JUNGLE) && pTraits->IsMoveFriendlyWoodsAsRoad())

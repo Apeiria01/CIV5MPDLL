@@ -1112,10 +1112,6 @@ public:
 	bool isHillsDoubleMove() const;
 	void changeHillsDoubleMoveCount(int iChange);
 
-	int getRoadDoubleMoveCount() const;
-	bool isRoadDoubleMove() const;
-	void changeRoadDoubleMoveCount(int iChange);
-
 	int getRiverDoubleMoveCount() const;
 	bool isRiverDoubleMove() const;
 	void changeRiverDoubleMoveCount(int iChange);
@@ -1761,6 +1757,8 @@ public:
 	void ChangeMoveUsedDefenseMod(int iValue);
 	int GetMoveUsedDefenseMod() const;
 #endif
+	int getRouteMovementChanges(RouteTypes eIndex) const;
+	void changeRouteMovementChanges(RouteTypes eIndex, int iChange);
 
 #if defined(MOD_ROG_CORE)
 	void ChangeMoveLfetAttackMod(int iValue);
@@ -2210,7 +2208,6 @@ protected:
 	FAutoVariable<int, CvUnit> m_iAlwaysHealCount;
 	FAutoVariable<int, CvUnit> m_iHealOutsideFriendlyCount;
 	FAutoVariable<int, CvUnit> m_iHillsDoubleMoveCount;
-	FAutoVariable<int, CvUnit> m_iRoadDoubleMoveCount;
 	FAutoVariable<int, CvUnit> m_iRiverDoubleMoveCount;
 	FAutoVariable<int, CvUnit> m_iImmuneToFirstStrikesCount;
 	FAutoVariable<int, CvUnit> m_iExtraVisibilityRange;
@@ -2538,7 +2535,7 @@ protected:
 	int m_iMoveLeftDefenseMod;
 	int m_iMoveUsedDefenseMod;
 #endif
-
+	FAutoVariable<std::vector<int>, CvUnit> m_iRouteMovementChanges;
 #if defined(MOD_ROG_CORE)
 	FAutoVariable<std::vector<int>, CvUnit> m_iCombatModPerAdjacentUnitCombatModifier;
 	FAutoVariable<std::vector<int>, CvUnit> m_iCombatModPerAdjacentUnitCombatAttackMod;

@@ -245,7 +245,6 @@ CvPromotionEntry::CvPromotionEntry():
 	m_bHealOutsideFriendly(false),
 	m_bHillsDoubleMove(false),
 	m_bIgnoreTerrainCost(false),
-	m_bRoadDoubleMove(false),
 	m_bRiverDoubleMove(false),
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	m_bIgnoreTerrainDamage(false),
@@ -339,6 +338,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_piCombatModPerAdjacentUnitCombatDefenseModifier(NULL),
 	m_pbTerrainDoubleMove(NULL),
 	m_pbFeatureDoubleMove(NULL),
+	m_piRouteMovementChanges(NULL),
 #if defined(MOD_PROMOTIONS_HALF_MOVE)
 	m_pbTerrainHalfMove(NULL),
 	m_pbFeatureHalfMove(NULL),
@@ -392,6 +392,7 @@ CvPromotionEntry::~CvPromotionEntry(void)
 	SAFE_DELETE_ARRAY(m_piCombatModPerAdjacentUnitCombatDefenseModifier);
 	SAFE_DELETE_ARRAY(m_pbTerrainDoubleMove);
 	SAFE_DELETE_ARRAY(m_pbFeatureDoubleMove);
+	SAFE_DELETE_ARRAY(m_piRouteMovementChanges);
 #if defined(MOD_PROMOTIONS_HALF_MOVE)
 	SAFE_DELETE_ARRAY(m_pbTerrainHalfMove);
 	SAFE_DELETE_ARRAY(m_pbFeatureHalfMove);
@@ -456,7 +457,6 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_bHealOutsideFriendly = kResults.GetBool("HealOutsideFriendly");
 	m_bHillsDoubleMove = kResults.GetBool("HillsDoubleMove");
 	m_bIgnoreTerrainCost = kResults.GetBool("IgnoreTerrainCost");
-	m_bRoadDoubleMove = kResults.GetBool("RoadDoubleMove");
 	m_bRiverDoubleMove = kResults.GetBool("RiverDoubleMove");
 	m_iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
@@ -904,6 +904,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	const int iNumUnitTypes = kUtility.MaxRows("Units");
 	const int iNumBuildTypes = kUtility.MaxRows("Builds");
 	const int iNumUnitPromotions = kUtility.MaxRows("UnitPromotions");
+	const int iNumRouteTypes = kUtility.MaxRows("Routes");
 
 	const char* szPromotionType = GetType();
 
@@ -1607,7 +1608,34 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		"NewPromotion",
 		"PromotionType",
 		szPromotionType);
+	//Promotion_RouteMovementChanges
+	{
+		kUtility.InitializeArray(m_piRouteMovementChanges, iNumRouteTypes, 0);
 
+		std::string sqlKey = "m_piRouteMovementChanges";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if(pResults == NULL)
+		{
+			const char* szSQL = "select Routes.ID, MovementChange from Promotion_RouteMovementChanges inner join Routes on Routes.Type = RouteType where PromotionType = ?;";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+
+		CvAssert(pResults);
+		if(!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+
+		while(pResults->Step())
+		{
+			const int iRouteID = pResults->GetInt(0);
+			CvAssert(iRouteID > -1 && iRouteID < iNumRouteTypes);
+
+			const int iRouteMovementChange = pResults->GetInt(1);
+			m_piRouteMovementChanges[iRouteID] = iRouteMovementChange;
+		}
+
+		pResults->Reset();
+	}
 	return true;
 }
 
@@ -2769,12 +2797,6 @@ bool CvPromotionEntry::IsHillsDoubleMove() const
 	return m_bHillsDoubleMove;
 }
 
-/// Accessor: Double movement on roads
-bool CvPromotionEntry::IsRoadDoubleMove() const
-{
-	return m_bRoadDoubleMove;
-}
-
 /// Accessor: Double movement near river
 bool CvPromotionEntry::IsRiverDoubleMove() const
 {
@@ -3239,6 +3261,20 @@ int CvPromotionEntry::GetUnitCombatModifierPercent(int i) const
 	if(i > -1 && i < GC.getNumUnitCombatClassInfos() && m_piUnitCombatModifierPercent)
 	{
 		return m_piUnitCombatModifierPercent[i];
+	}
+
+	return -1;
+}
+
+/// Returns an array of movement bonuses when this unit on route
+int CvPromotionEntry::GetRouteMovementChanges(int i) const
+{
+	CvAssertMsg(i < GC.getNumRouteInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+
+	if(i > -1 && i < GC.getNumRouteInfos() && m_piRouteMovementChanges)
+	{
+		return m_piRouteMovementChanges[i];
 	}
 
 	return -1;

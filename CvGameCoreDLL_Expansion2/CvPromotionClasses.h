@@ -303,7 +303,6 @@ public:
 	bool IsAlwaysHeal() const;
 	bool IsHealOutsideFriendly() const;
 	bool IsHillsDoubleMove() const;
-	bool IsRoadDoubleMove() const;
 	bool IsRiverDoubleMove() const;
 	int GetMutuallyExclusiveGroup() const;
 	bool IsIgnoreTerrainCost() const;
@@ -406,6 +405,7 @@ public:
 	int GetCombatModPerAdjacentUnitCombatDefenseModifier(int i) const;
 	bool GetTerrainDoubleMove(int i) const;
 	bool GetFeatureDoubleMove(int i) const;
+	int GetRouteMovementChanges(int i) const;
 #if defined(MOD_PROMOTIONS_HALF_MOVE)
 	bool GetTerrainHalfMove(int i) const;
 	bool GetFeatureHalfMove(int i) const;
@@ -785,7 +785,6 @@ protected:
 	bool m_bAlwaysHeal;
 	bool m_bHealOutsideFriendly;
 	bool m_bHillsDoubleMove;
-	bool m_bRoadDoubleMove;
 	bool m_bRiverDoubleMove;
 	bool m_bIgnoreTerrainCost;
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
@@ -886,6 +885,7 @@ protected:
 	int* m_piFeaturePassableTech;
 	bool* m_pbTerrainDoubleMove;
 	bool* m_pbFeatureDoubleMove;
+	int* m_piRouteMovementChanges;
 #if defined(MOD_PROMOTIONS_HALF_MOVE)
 	bool* m_pbTerrainHalfMove;
 	bool* m_pbFeatureHalfMove;
