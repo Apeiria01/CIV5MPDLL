@@ -7934,9 +7934,11 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 #ifdef MOD_GLOBAL_CORRUPTION
 		ChangeCorruptionScoreChangeFromBuilding(pBuildingInfo->GetCorruptionScoreChange() * iChange);
 		ChangeCorruptionLevelChangeFromBuilding(pBuildingInfo->GetCorruptionLevelChange() * iChange);
+		ChangeCorruptionScoreYieldModifierFromBuilding(pBuildingInfo->GetCorruptionScoreYieldModifier()* iChange);
 
 		if (pBuildingInfo->GetCorruptionScoreChange() * iChange != 0 || 
-			pBuildingInfo->GetCorruptionLevelChange() * iChange != 0)
+			pBuildingInfo->GetCorruptionLevelChange() * iChange != 0 ||
+			pBuildingInfo->GetCorruptionScoreYieldModifier() * iChange != 0)
 		{
 			UpdateCorruption();
 		}
@@ -20322,6 +20324,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iCachedCorruptionScore;
 	kStream >> (int&) m_eCachedCorruptionLevel;
 	kStream >> m_iCorruptionScoreChangeFromBuilding;
+	kStream >> m_iCorruptionScoreYieldModifierFromBuilding;
 	kStream >> m_iCorruptionLevelChangeFromBuilding;
 #endif
 
@@ -20725,6 +20728,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iCachedCorruptionScore;
 	kStream << (int) m_eCachedCorruptionLevel;
 	kStream << m_iCorruptionScoreChangeFromBuilding;
+	kStream << m_iCorruptionScoreYieldModifierFromBuilding;
 	kStream << m_iCorruptionLevelChangeFromBuilding;
 #endif
 
@@ -23697,6 +23701,7 @@ int CvCity::CalculateTotalCorruptionScore() const
 	modifier += CalculateCorruptionScoreModifierFromSpy();
 	modifier += CalculateCorruptionScoreModifierFromTrait();
 	modifier += owner.GetCorruptionScoreModifierFromPolicy();
+	modifier += GetCorruptionScoreYieldModifierFromBuilding();
 	modifier = std::max(0, modifier);
 
 	score = score * modifier / 100;
@@ -23867,6 +23872,15 @@ int CvCity::GetCorruptionScoreChangeFromBuilding() const
 void CvCity::ChangeCorruptionScoreChangeFromBuilding(int value)
 {
 	m_iCorruptionScoreChangeFromBuilding += value;
+}
+int CvCity::GetCorruptionScoreYieldModifierFromBuilding() const
+{
+	return m_iCorruptionScoreYieldModifierFromBuilding;
+}
+
+void CvCity::ChangeCorruptionScoreYieldModifierFromBuilding(int value)
+{
+	m_iCorruptionScoreYieldModifierFromBuilding += value;
 }
 
 int CvCity::GetCorruptionLevelChangeFromBuilding() const

@@ -745,6 +745,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 #ifdef MOD_GLOBAL_CORRUPTION
 	m_iCorruptionScoreChange = kResults.GetInt("CorruptionScoreChange");
+	m_iCorruptionScoreYieldModifier = kResults.GetInt("CorruptionScoreYieldModifier");
 	m_iCorruptionLevelChange = kResults.GetInt("CorruptionLevelChange");
 	m_iCorruptionPolicyCostModifier = kResults.GetInt("CorruptionPolicyCostModifier");
 	m_iMinCorruptionLevelNeeded = kResults.GetInt("MinCorruptionLevelNeeded");
@@ -2537,6 +2538,10 @@ bool CvBuildingEntry::CanAllScaleImmigrantIn() const
 int CvBuildingEntry::GetCorruptionScoreChange() const
 {
 	return m_iCorruptionScoreChange;
+}
+int CvBuildingEntry::GetCorruptionScoreYieldModifier() const
+{
+	return m_iCorruptionScoreYieldModifier;
 }
 
 int CvBuildingEntry::GetCorruptionLevelChange() const
