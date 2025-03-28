@@ -194,6 +194,8 @@ CvTraitEntry::CvTraitEntry() :
 	m_paiYieldChangePerTradePartner(NULL),
 	m_paiYieldChangeIncomingTradeRoute(NULL),
 	m_paiYieldModifier(NULL),
+	m_piYieldFromExport(NULL),
+	m_piYieldFromImport(NULL),
 #ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	m_paiGoldenAgeYieldModifier(NULL),
 #endif
@@ -254,6 +256,14 @@ CvTraitEntry::~CvTraitEntry()
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiCityYieldPerAdjacentFeature);
 }
 
+int CvTraitEntry::GetYieldFromExport(int i) const
+{
+	return m_piYieldFromExport ? m_piYieldFromExport[i] : -1;
+}
+int CvTraitEntry::GetYieldFromImport(int i) const
+{
+	return m_piYieldFromImport ? m_piYieldFromImport[i] : -1;
+}
 /// Accessor:: Modifier to experience needed for new level
 int CvTraitEntry::GetLevelExperienceModifier() const
 {
@@ -2075,6 +2085,8 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	kUtility.SetYields(m_piCityYieldChanges, "Trait_CityYieldChanges", "TraitType", szTraitType);
 	kUtility.SetYields(m_piCoastalCityYieldChanges, "Trait_CoastalCityYieldChanges", "TraitType", szTraitType);
 	kUtility.SetYields(m_piGreatWorkYieldChanges, "Trait_GreatWorkYieldChanges", "TraitType", szTraitType);
+	kUtility.SetYields(m_piYieldFromExport, "Trait_YieldFromExport", "TraitType", szTraitType);
+	kUtility.SetYields(m_piYieldFromImport, "Trait_YieldFromImport", "TraitType", szTraitType);
 
 	//FeatureYieldChanges
 	if (MOD_API_UNIFIED_YIELDS)
@@ -2887,6 +2899,8 @@ void CvPlayerTraits::InitPlayerTraits()
 				m_iYieldChangePerTradePartner[iYield] = trait->GetYieldChangePerTradePartner(iYield);
 				m_iYieldChangeIncomingTradeRoute[iYield] = trait->GetYieldChangeIncomingTradeRoute(iYield);
 				m_iYieldRateModifier[iYield] = trait->GetYieldModifier(iYield);
+				m_iYieldFromExport[iYield] = trait->GetYieldFromExport(iYield);
+				m_iYieldFromImport[iYield] = trait->GetYieldFromImport(iYield);
 #ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 				m_iGoldenAgeYieldRateModifier[iYield] = trait->GetGoldenAgeYieldModifier(iYield);
 #endif
@@ -3337,6 +3351,8 @@ void CvPlayerTraits::Reset()
 		m_iYieldChangePerTradePartner[iYield] = 0;
 		m_iYieldChangeIncomingTradeRoute[iYield] = 0;
 		m_iYieldRateModifier[iYield] = 0;
+		m_iYieldFromExport[iYield] = 0;
+		m_iYieldFromImport[iYield] = 0;
 #ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 		m_iGoldenAgeYieldRateModifier[iYield] = 0;
 #endif
@@ -4489,6 +4505,8 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_iGreatScientistRateModifier;
 	kStream >> m_iGreatGeneralRateModifier;
 	kStream >> m_iGreatGeneralExtraBonus;
+	kStream >> m_iYieldFromExport;
+	kStream >> m_iYieldFromImport;
 
 	kStream >> m_iGreatPersonGiftInfluence;
 
@@ -5064,6 +5082,8 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iSeaBarbarianConversionPercent;
 	kStream << m_iCapitalBuildingModifier;
 	kStream << m_iPlotBuyCostModifier;
+	kStream << m_iYieldFromExport;
+	kStream << m_iYieldFromImport;
 #if defined(MOD_TRAITS_CITY_WORKING)
     MOD_SERIALIZE_WRITE(kStream, m_iCityWorkingChange);
 #endif

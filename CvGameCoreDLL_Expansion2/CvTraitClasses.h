@@ -250,6 +250,8 @@ public:
 	int GetYieldFromBarbarianKills(YieldTypes eYield) const;
 	int GetYieldChangeTradeRoute(int i) const;
 	int GetYieldChangeWorldWonder(int i) const;
+	int GetYieldFromExport(int i) const;
+	int GetYieldFromImport(int i) const;
 	int GetTradeRouteYieldChange(DomainTypes eIndex1, YieldTypes eIndex2) const;
 #endif
 	int GetSpecialistYieldChanges(SpecialistTypes eIndex1, YieldTypes eIndex2) const;
@@ -518,6 +520,8 @@ protected:
 	int* m_piMovesChangeUnitCombats;
 	int* m_piMaintenanceModifierUnitCombats;
 	int** m_ppiImprovementYieldChanges;
+	int* m_piYieldFromExport;
+	int* m_piYieldFromImport;
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	int** m_ppiPlotYieldChanges;
 #endif
@@ -1212,6 +1216,14 @@ public:
 	{
 		return m_iYieldRateModifier[(int)eYield];
 	};
+	int GetYieldFromExport(YieldTypes eYield) const
+	{
+		return m_iYieldFromExport[(int)eYield];
+	};
+	int GetYieldFromImport(YieldTypes eYield) const
+	{
+		return m_iYieldFromImport[(int)eYield];
+	};
 #ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	int GetGoldenAgeYieldRateModifier(YieldTypes eYield) const
 	{
@@ -1573,6 +1585,8 @@ private:
 	int m_iYieldChangePerTradePartner[NUM_YIELD_TYPES];
 	int m_iYieldChangeIncomingTradeRoute[NUM_YIELD_TYPES];
 	int m_iYieldRateModifier[NUM_YIELD_TYPES];
+	int m_iYieldFromExport[NUM_YIELD_TYPES];
+	int m_iYieldFromImport[NUM_YIELD_TYPES];
 #ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	int m_iGoldenAgeYieldRateModifier[NUM_YIELD_TYPES];
 #endif
