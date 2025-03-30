@@ -426,7 +426,7 @@
 #define MOD_EVENTS_MINORS                           gCustomMods.isEVENTS_MINORS()
 
 // Event sent upon a City State giving a gift (v73)
-//   GameEvents.MinorGift.Add(function(iMinor, iMajor, iGift, iFriendshipBoost, 0, bFirstMajorCiv, false, szTxtKeySuffix) end)
+//   GameEvents.MinorGift.Add(function(iMinor, iMajor, iGoldGift, iGift, 0, bFirstMajorCiv, false, szTxtKeySuffix) end)
 #define MOD_EVENTS_MINORS_GIFTS                     gCustomMods.isEVENTS_MINORS_GIFTS()
 
 // Events sent on interaction with City States (v68)

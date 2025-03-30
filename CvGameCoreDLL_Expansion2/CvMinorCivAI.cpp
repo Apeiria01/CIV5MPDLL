@@ -2476,10 +2476,10 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 			MinorCivPersonalityTypes eRealPersonality = GetPersonality();
 			MinorCivPersonalityTypes eFakePersonality = eRealPersonality;
 
-			int iFriendshipBoost = 0;
 			int iCultureGift = 0;
 			int iFoodGift = 0;
-			int iUnitGift = 0;
+			int iExtraGoldGift = 0;
+			int iFriendshipBoost = 0;
 
 			int iGift = 0;
 			char* szTxtKeySuffix = "UNKNOWN";
@@ -2494,8 +2494,9 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 #if defined(MOD_GLOBAL_CS_GIFTS)
 				// Gift depends on the type of city state met
 				if (MOD_GLOBAL_CS_GIFTS) {
+					// All CS types give an initial gold boost
 					bFirstMajorCiv = (GET_TEAM(GetPlayer()->getTeam()).getHasMetCivCount(true) == 0);
-					iFriendshipBoost = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP(); // All CS types give an initial friendship boost
+					iGoldGift = /*60*/ GC.getMINOR_CIV_CONTACT_GOLD_FIRST();
 
 					if (eTrait == MINOR_CIV_TRAIT_CULTURED) {
 						iCultureGift = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_CULTURE();
@@ -2504,14 +2505,14 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 						iFaithGift = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_FAITH();
 						szTxtKeySuffix = "FAITH";
 					} else if (eTrait == MINOR_CIV_TRAIT_MERCANTILE) {
-						iGoldGift = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_GOLD();
+						iExtraGoldGift = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_GOLD();
 						szTxtKeySuffix = "GOLD";
 					} else if (eTrait == MINOR_CIV_TRAIT_MARITIME) {
 						iFoodGift = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_FOOD();
 						szTxtKeySuffix = "FOOD";
 					} else if (eTrait == MINOR_CIV_TRAIT_MILITARISTIC) {
-						iUnitGift = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_UNIT();
-						szTxtKeySuffix = "UNIT";
+						iFriendshipBoost = GC.getMINOR_CIV_FIRST_CONTACT_BONUS_FRIENDSHIP();
+						szTxtKeySuffix = "FRIENDSHIP";
 					}
 				}
 #endif
@@ -2536,22 +2537,27 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 				{
 #if defined(MOD_GLOBAL_CS_GIFTS)
 					if (MOD_GLOBAL_CS_GIFTS) {
-						// Reduce gifts if we're not the first team to meet the CS
+						// Reduce gifts if we're not the first team to meet the CS(default is 1/2)
+						iGoldGift = /*30*/ GC.getMINOR_CIV_CONTACT_GOLD_OTHER();
 						int iBonusMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_MULTIPLIER();
 						int iBonusDivisor = GC.getMINOR_CIV_FIRST_CONTACT_SUBSEQUENT_TEAM_DIVISOR();
 
-						if (iBonusDivisor == 0) {
+						if (iBonusDivisor == 0)
+						{
+							iCultureGift = 0;
+							iFaithGift = 0;
+							iFoodGift = 0;
+							iExtraGoldGift = 0;
 							iFriendshipBoost = 0;
-						} else {
+						}
+						else
+						{
+							iCultureGift = iCultureGift * iBonusMultiplier / iBonusDivisor;
+							iFaithGift = iFaithGift * iBonusMultiplier / iBonusDivisor;
+							iFoodGift = iFoodGift * iBonusMultiplier / iBonusDivisor;
+							iExtraGoldGift = iExtraGoldGift * iBonusMultiplier / iBonusDivisor;
 							iFriendshipBoost = iFriendshipBoost * iBonusMultiplier / iBonusDivisor;
 						}
-
-						iCultureGift = iCultureGift / iBonusDivisor;
-						iFaithGift = iFaithGift / iBonusDivisor;
-
-						iGoldGift = 0;
-						iFoodGift = 0;
-						iUnitGift = 0;
 					} else {
 #endif
 						iGoldGift = /*30*/ GC.getMINOR_CIV_CONTACT_GOLD_OTHER();
@@ -2570,62 +2576,33 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 					}
 					
 		 			// Personality modifiers - friendly = x1.5, hostile = x0.5
-					if (eFakePersonality == MINOR_CIV_PERSONALITY_FRIENDLY) {
-						int iBonusMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_MULTIPLIER();
-						int iBonusDivisor = GC.getMINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_DIVISOR();
-
-						if (iBonusDivisor == 0) {
-							iFriendshipBoost = 0;
-							
-							iCultureGift = 0;
-							iFaithGift = 0;
-							iGoldGift = 0;
-							iFoodGift = 0;
-						} else {
-							iFriendshipBoost = iFriendshipBoost * iBonusMultiplier / iBonusDivisor;
-							
-							iCultureGift = iCultureGift * iBonusMultiplier / iBonusDivisor;
-							iFaithGift = iFaithGift * iBonusMultiplier / iBonusDivisor;
-							iGoldGift = iGoldGift * iBonusMultiplier / iBonusDivisor;
-							iFoodGift = iFoodGift * iBonusMultiplier / iBonusDivisor;
-						}
-
-						int iUnitMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_MULTIPLIER();
-						int iUnitDivisor = GC.getMINOR_CIV_FIRST_CONTACT_FRIENDLY_UNIT_DIVISOR();
-
-						if (iUnitDivisor == 0) {
-							iUnitGift = 0;
-						} else {
-							iUnitGift = iUnitGift * iUnitMultiplier / iUnitDivisor;
-						}
-					} else if (eFakePersonality == MINOR_CIV_PERSONALITY_HOSTILE) {
-						int iBonusMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_MULTIPLIER();
-						int iBonusDivisor = GC.getMINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_DIVISOR();
-
-						if (iBonusDivisor == 0) {
-							iFriendshipBoost = 0;
-							
-							iCultureGift = 0;
-							iFaithGift = 0;
-							iGoldGift = 0;
-							iFoodGift = 0;
-						} else {
-							iFriendshipBoost = iFriendshipBoost * iBonusMultiplier / iBonusDivisor;
-
-							iCultureGift = iCultureGift * iBonusMultiplier / iBonusDivisor;
-							iFaithGift = iFaithGift * iBonusMultiplier / iBonusDivisor;
-							iGoldGift = iGoldGift * iBonusMultiplier / iBonusDivisor;
-							iFoodGift = iFoodGift * iBonusMultiplier / iBonusDivisor;
-						}
-
-						int iUnitMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_MULTIPLIER();
-						int iUnitDivisor = GC.getMINOR_CIV_FIRST_CONTACT_HOSTILE_UNIT_DIVISOR();
-
-						if (iUnitDivisor == 0) {
-							iUnitGift = 0;
-						} else {
-							iUnitGift = iUnitGift * iUnitMultiplier / iUnitDivisor;
-						}
+					int iBonusMultiplier = 1;
+					int iBonusDivisor = 1;
+					if (eFakePersonality == MINOR_CIV_PERSONALITY_FRIENDLY)
+					{
+						iBonusMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_MULTIPLIER();
+						iBonusDivisor = GC.getMINOR_CIV_FIRST_CONTACT_FRIENDLY_BONUS_DIVISOR();
+					}
+					else if(eFakePersonality == MINOR_CIV_PERSONALITY_HOSTILE)
+					{
+						iBonusMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_MULTIPLIER();
+						iBonusDivisor = GC.getMINOR_CIV_FIRST_CONTACT_HOSTILE_BONUS_DIVISOR();
+					}
+					if (iBonusDivisor == 0)
+					{
+						iCultureGift = 0;
+						iFaithGift = 0;
+						iFoodGift = 0;
+						iExtraGoldGift = 0;
+						iFriendshipBoost = 0;
+					}
+					else
+					{
+						iCultureGift = iCultureGift * iBonusMultiplier / iBonusDivisor;
+						iFaithGift = iFaithGift * iBonusMultiplier / iBonusDivisor;
+						iFoodGift = iFoodGift * iBonusMultiplier / iBonusDivisor;
+						iExtraGoldGift = iExtraGoldGift * iBonusMultiplier / iBonusDivisor;
+						iFriendshipBoost = iFriendshipBoost * iBonusMultiplier / iBonusDivisor;
 					}
 				}
 #endif
@@ -2633,10 +2610,9 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 
 #if defined(MOD_GLOBAL_CS_GIFTS)
 			if (MOD_GLOBAL_CS_GIFTS) {
-				CUSTOMLOG("CS Gift: Id %i, Trait %i, Personality %i: %sFriendship=%i, Gold=%i, Culture=%i, Faith=%i, Food=%i, Unit=%i", GetPlayer()->GetID(), eTrait, eRealPersonality, (bFirstMajorCiv ? "First " : ""), iFriendshipBoost, iGoldGift, iCultureGift, iFaithGift, iFoodGift, iUnitGift);
+				CUSTOMLOG("CS Gift: Id %i, Trait %i, Personality %i: %s, Gold=%i, Culture=%i, Faith=%i, Food=%i, ExtraGold=%i Friendship=%i", GetPlayer()->GetID(), eTrait, eRealPersonality, (bFirstMajorCiv ? "First " : ""), iGoldGift, iCultureGift, iFaithGift, iFoodGift, iExtraGoldGift, iFriendshipBoost);
 			}
 #endif
-
 	 		PlayerTypes ePlayer;
  			for(int iPlayerLoop = 0; iPlayerLoop < MAX_MAJOR_CIVS; iPlayerLoop++)
 			{
@@ -2650,71 +2626,19 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 						ChangeFriendshipWithMajor(ePlayer, iFriendshipBoost, /*bFromQuest*/ false);
 
 						// Give the gifts to this team member
-						GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iGoldGift);
+						GET_PLAYER(ePlayer).GetTreasury()->ChangeGold(iGoldGift + iExtraGoldGift);
 						GET_PLAYER(ePlayer).changeJONSCulture(iCultureGift);
 						GET_PLAYER(ePlayer).ChangeFaith(iFaithGift);
 
-						iGift = iGoldGift + iCultureGift + iFaithGift;
+						iGift = iExtraGoldGift + iCultureGift + iFaithGift + iFriendshipBoost;
 
-						// Food and unit gifts only go to the player who actually met the CS
+						// Food gifts only go to the player who actually met the CS
 						if (eMeetingPlayer == ePlayer) {
-							int iBonusMultiplier = GC.getMINOR_CIV_FIRST_CONTACT_PLAYER_MULTIPLIER();
-							int iBonusDivisor = GC.getMINOR_CIV_FIRST_CONTACT_PLAYER_DIVISOR();
-
-							// Give the friendship boost again to this team member (ie the meeting player gets twice the friendship boost)
-							int iExtraFriendship = (iFriendshipBoost * iBonusMultiplier / iBonusDivisor) - iFriendshipBoost;
-							ChangeFriendshipWithMajor(ePlayer, iExtraFriendship, /*bFromQuest*/ false);
-							iFriendshipBoost = iFriendshipBoost + iExtraFriendship;  // Need this adjusting for the popup dialog
-
 							CvPlayer* pPlayer = &GET_PLAYER(ePlayer);
-							if (eTrait == MINOR_CIV_TRAIT_MILITARISTIC) {
-								if (iUnitGift > 0) {
-									if (GC.getGame().getJonRandNum(100, "Minor Civ AI: Decide if we give a unit to the meeting player") < iUnitGift) {
-										CvUnit* pUnit = DoSpawnUnit(ePlayer, true, true);
-										if (pUnit != NULL) {
-#if defined(MOD_UNITS_XP_TIMES_100)
-											pUnit->changeExperienceTimes100(100 * (pPlayer->GetCurrentEra() * GC.getMINOR_CIV_FIRST_CONTACT_XP_PER_ERA() + GC.getGame().getJonRandNum(GC.getMINOR_CIV_FIRST_CONTACT_XP_RANDOM(), "Minor Civ AI: Random XP for unit")));
-#else
-											pUnit->changeExperience(pPlayer->GetCurrentEra() * GC.getMINOR_CIV_FIRST_CONTACT_XP_PER_ERA() + GC.getGame().getJonRandNum(GC.getMINOR_CIV_FIRST_CONTACT_XP_RANDOM(), "Minor Civ AI: Random XP for unit"));
-#endif
-											iGift = pUnit->getUnitType();
-										}
-									}
-								}
-							} else if (eTrait == MINOR_CIV_TRAIT_MARITIME && pPlayer->getCapitalCity() != NULL) {
+							if (iFoodGift > 0 && pPlayer->getCapitalCity() != NULL)
+							{
 								iGift = iGift + iFoodGift;
-
-								if (iFoodGift > 0) {
-									CvCity* pMinorCapital = GetPlayer()->getCapitalCity();
-									CvPlot* pPlot = (pMinorCapital == NULL) ? GetPlayer()->getStartingPlot() : pMinorCapital->plot();
-
-									CvCity* pBestCity = NULL;
-
-									if (pPlayer->GetCurrentEra() < GC.getInfoTypeForString("ERA_MEDIEVAL") && pPlayer->getCapitalCity()->plot()->getArea() == pPlot->getArea()) {
-										// Pre-Medieval and on the same landmass, just add the food to the capital
-										pBestCity = pPlayer->getCapitalCity();
-									} else {
-										// Ripped from CvPlayer::receiveGoody()
-										int iDistance;
-										int iBestCityDistance = -1;
-
-										CvCity* pLoopCity;
-										int iLoop;
-										// Find the closest City to us
-										for (pLoopCity = pPlayer->firstCity(&iLoop); pLoopCity != NULL; pLoopCity = pPlayer->nextCity(&iLoop)) {
-											iDistance = plotDistance(pPlot->getX(), pPlot->getY(), pLoopCity->getX(), pLoopCity->getY());
-
-											if (iBestCityDistance == -1 || iDistance < iBestCityDistance) {
-												iBestCityDistance = iDistance;
-												pBestCity = pLoopCity;
-											}
-										}
-									}
-
-									if (pBestCity != NULL) {
-										pBestCity->changeFood(iFoodGift);
-									}
-								}
+								pPlayer->getCapitalCity()->changeFood(iFoodGift);
 							}
 						}
 					} else {
@@ -2763,14 +2687,14 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 							 *
 							 * Updated assignments of members of popupInfo
 							 *   Data1 is the player id (unchanged)
-							 *   Data2 is the gift "value" (Gold/Culture/Faith/Food amount, UnitId)
-							 *   Data3 is the friendship boost
+							 *   Data2 is the base gold gift value
+							 *   Data3 is the gift "value" (ExtraGold/Culture/Faith/Food/friendship amount) boost
 							 *   Option1 is first met (unchanged)
 							 *   Option2 is nil (unchanged)
 							 *   Text is suffix for the TXT_KEY_ to format with
 							 */
 							if (MOD_GLOBAL_CS_GIFTS) {
-								CvPopupInfo kPopupInfo(BUTTONPOPUP_CITY_STATE_GREETING, GetPlayer()->GetID(), iGift, iFriendshipBoost, 0, bFirstMajorCiv);
+								CvPopupInfo kPopupInfo(BUTTONPOPUP_CITY_STATE_GREETING, GetPlayer()->GetID(), iGoldGift, iGift, 0, bFirstMajorCiv);
 								strcpy_s(kPopupInfo.szText, szTxtKeySuffix);
 								GC.GetEngineUserInterface()->AddPopup(kPopupInfo);
 							} else {
@@ -2801,7 +2725,7 @@ void CvMinorCivAI::DoFirstContactWithMajor(TeamTypes eTeam, bool bSuppressMessag
 					if (MOD_GLOBAL_CS_GIFTS && MOD_EVENTS_MINORS_GIFTS)
 					{
 						// Send an event with the details
-						GAMEEVENTINVOKE_HOOK(GAMEEVENT_MinorGift, GetPlayer()->GetID(), ePlayer, iGift, iFriendshipBoost, 0, bFirstMajorCiv, false, szTxtKeySuffix);
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_MinorGift, GetPlayer()->GetID(), ePlayer, iGoldGift, iGift, 0, bFirstMajorCiv, false, szTxtKeySuffix);
 					}
 #endif
 				}
