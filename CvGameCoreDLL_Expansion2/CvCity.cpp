@@ -15071,8 +15071,8 @@ int CvCity::GetCityStateTradeRouteYieldModifier(YieldTypes eIndex) const
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
-	int iFriendOrAllyCityStates = GET_PLAYER(m_eOwner).GetTrade()->GetNumberOfFriendOrAllyCityStateTradeRoutes();
-	return m_aiCityStateTradeRouteYieldModifier[eIndex]* iFriendOrAllyCityStates;
+	int iCityStatesYield = GET_PLAYER(m_eOwner).GetTrade()->GetNumberOfCityStateTradeRoutes();
+	return m_aiCityStateTradeRouteYieldModifier[eIndex]* iCityStatesYield;
 }
 void CvCity::ChangeCityStateTradeRouteYieldModifier(YieldTypes eIndex, int iChange)
 {

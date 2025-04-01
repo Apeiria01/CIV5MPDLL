@@ -707,7 +707,7 @@
 			<Text>[NEWLINE][ICON_BULLET]城邦商路全局修正: {1_Num}%</Text>
 		</Row>
 		<Row Tag="TXT_KEY_YIELDMODIFIER_MINOR_TRADE">
-			<Text>[NEWLINE][ICON_BULLET]朋友或同盟城邦商路修正: {1_Num}%</Text>
+			<Text>[NEWLINE][ICON_BULLET]城邦商路修正: {1_Num}%</Text>
 		</Row>
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ADJACENT_FEATURE">
 			<Text>[NEWLINE][ICON_BULLET]臨近地貌修正: {1_Num}%</Text>

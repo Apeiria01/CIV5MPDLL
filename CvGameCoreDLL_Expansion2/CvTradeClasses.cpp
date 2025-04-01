@@ -3230,39 +3230,6 @@ int CvPlayerTrade::GetNumberOfCityStateTradeRoutes()
 
 	return iNumConnections;
 }
-int CvPlayerTrade::GetNumberOfFriendOrAllyCityStateTradeRoutes()  
-{  
-    CvGameTrade* pTrade = GC.getGame().GetGameTrade();  
-    int FriendCityStateCount = 0;  
-    int AllyCityStateCount = 0;    
-    for (uint ui = 0; ui < pTrade->m_aTradeConnections.size(); ui++)  
-    {  
-        TradeConnection* pConnection = &(pTrade->m_aTradeConnections[ui]);    
-        if (pConnection->m_eOriginOwner == m_pPlayer->GetID())  
-        {  
-            if (GET_PLAYER(pConnection->m_eDestOwner).isMinorCiv())  
-            {  
-                CvMinorCivAI* pMinorCivAI = GET_PLAYER(pConnection->m_eDestOwner).GetMinorCivAI();  
-                
-                if (pMinorCivAI) 
-                {  
-                    bool bFriends = pMinorCivAI->IsFriends(m_pPlayer->GetID());  
-                    bool bAllies = pMinorCivAI->IsAllies(m_pPlayer->GetID());  
-
-                    if (bFriends && !bAllies)  
-                    {  
-                        FriendCityStateCount++;  
-                    }  
-                    else if (bAllies)  
-                    {  
-                        AllyCityStateCount++;     
-                    }  
-                }  
-            }  
-        }  
-    }  
-    return FriendCityStateCount + (AllyCityStateCount * 2);  
-}  
 //	--------------------------------------------------------------------------------
 bool CvPlayerTrade::IsPreviousTradeRoute(CvCity* pOriginCity, CvCity* pDestCity, DomainTypes eDomain, TradeConnectionType eConnectionType)
 {
