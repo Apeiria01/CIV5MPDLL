@@ -3864,11 +3864,17 @@ int CvLuaUnit::lGetDamageFixValueToUnit(lua_State* L)
 	if(bIsAttack)
 	{
 		iResult += pkUnit->GetAttackInflictDamageChange();
+		iResult += pkUnit->GetAttackInflictDamageChangeMaxHPPercent() * pkOtherUnit->GetMaxHitPoints() / 100;
 		iResult += pkUnit->GetOriginalCapitalDamageFixTotal();
 
 		int iSpecialDamageFix = pkUnit->GetOriginalCapitalSpecialDamageFixTotal();
 		iSpecialDamageFix = pkOtherUnit->getDomainType() == DOMAIN_LAND ? iSpecialDamageFix : iSpecialDamageFix / 2;
 		iResult += iSpecialDamageFix;
+	}
+	else
+	{
+		iResult += pkUnit->GetDefenseInflictDamageChange();
+		iResult += pkUnit->GetDefenseInflictDamageChangeMaxHPPercent() * pkOtherUnit->GetMaxHitPoints() / 100;
 	}
 
 	auto* targetPlot = bIsAttack ? pkOtherUnit->plot() : pkUnit->plot();
