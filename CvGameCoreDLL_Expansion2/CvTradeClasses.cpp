@@ -11,6 +11,8 @@
 #include "CvGameCoreUtils.h" 
 #include "CvInfosSerializationHelper.h" 
 #include "CvCitySpecializationAI.h"
+#include "CvMinorCivAI.h"
+#include "CvPlayer.h"
 
 #include "CvBarbarians.h"
 
@@ -3228,7 +3230,6 @@ int CvPlayerTrade::GetNumberOfCityStateTradeRoutes()
 
 	return iNumConnections;
 }
-
 //	--------------------------------------------------------------------------------
 bool CvPlayerTrade::IsPreviousTradeRoute(CvCity* pOriginCity, CvCity* pDestCity, DomainTypes eDomain, TradeConnectionType eConnectionType)
 {

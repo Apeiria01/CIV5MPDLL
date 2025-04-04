@@ -408,6 +408,8 @@ public:
 	int* GetYieldChangePerEraArray() const;
 	int GetYieldModifierChangePerEra(int i) const;
 	int* GetYieldModifierChangePerEraArray() const;
+	int GetCityStateTradeRouteChangeYieldModifier(int i) const;
+	int* GetCityStateTradeRouteChangeYieldModifierArray() const;
 	int GetYieldChangePerPop(int i) const;
 	int* GetYieldChangePerPopArray() const;
 	int GetYieldChangePerReligion(int i) const;
@@ -900,6 +902,7 @@ private:
 	int* m_piYieldChange;
 	int* m_piYieldChangePerEra;
 	int* m_piYieldModifierChangePerEra;
+	int* m_piCityStateTradeRouteChangeYieldModifier;
 	int* m_piYieldChangePerPop;
 	int* m_piYieldChangePerReligion;
 	int* m_piYieldModifier;
