@@ -339,3 +339,5 @@ CREATE TABLE "Promotion_RouteMovementChanges" (
 	'RouteType'	text no null references Routes(Type),
 	'MovementChange'	integer no null
 );
+
+ALTER TABLE GameSpeeds ADD COLUMN 'SetterExtraPercent' INTEGER DEFAULT 0;

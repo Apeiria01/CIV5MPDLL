@@ -989,6 +989,7 @@ public:
 
 	int GetDealDuration() const;
 	int getGrowthPercent() const;
+	int getSetterExtraPercent() const;
 	int getTrainPercent() const;
 	int getConstructPercent() const;
 	int getCreatePercent() const;
@@ -1031,6 +1032,7 @@ public:
 protected:
 	int m_iDealDuration;
 	int m_iGrowthPercent;
+	int m_iSetterExtraPercent;
 	int m_iTrainPercent;
 	int m_iConstructPercent;
 	int m_iCreatePercent;

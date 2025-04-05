@@ -29876,7 +29876,8 @@ int CvPlayer::getNewCityProductionValue() const
 
 	CvGame& kGame = GC.getGame();
 
-	iValue += (GC.getADVANCED_START_CITY_COST() * kGame.getGameSpeedInfo().getGrowthPercent()) / 100;
+	int iSetterPercent = kGame.getGameSpeedInfo().getGrowthPercent() + kGame.getGameSpeedInfo().getSetterExtraPercent();
+	iValue += (GC.getADVANCED_START_CITY_COST() * iSetterPercent) / 100;
 
 	int iPopulation = GC.getINITIAL_CITY_POPULATION() + kGame.getStartEraInfo().getFreePopulation();
 	for(int i = 1; i <= iPopulation; ++i)
