@@ -455,6 +455,8 @@ CvPlayer::CvPlayer() :
 
 #if defined(MOD_ROG_CORE)
 	, m_aiDomainFreeExperiencePerGreatWorkGlobal()
+	, m_aiDomainFreeExperiencesPerTurnGlobal()
+	, m_aiDomainEnemyCombatModifierGlobal()
 	, m_piDomainFreeExperience()
 	, m_piUnitTypePrmoteHealGlobal()
 #endif
@@ -474,6 +476,7 @@ CvPlayer::CvPlayer() :
 	, m_aiCapitalYieldPerPopChange("CvPlayer::m_aiCapitalYieldPerPopChange", m_syncArchive)
 	, m_aiYieldPerPopChange("CvPlayer::m_aiYieldPerPopChange", m_syncArchive)
 	, m_aiSeaPlotYield("CvPlayer::m_aiSeaPlotYield", m_syncArchive)
+	, m_aiRiverPlotYield("CvPlayer::m_aiRiverPlotYield", m_syncArchive)
 	, m_aiYieldFromProcessModifierGlobal("CvPlayer::m_aiYieldFromProcessModifierGlobal", m_syncArchive)
 	, m_aiCityLoveKingDayYieldMod("CvPlayer::m_aiCityLoveKingDayYieldMod", m_syncArchive)
 	, m_aiYieldRateModifier("CvPlayer::m_aiYieldRateModifier", m_syncArchive)
@@ -1336,6 +1339,10 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 #if defined(MOD_ROG_CORE)
 	m_aiDomainFreeExperiencePerGreatWorkGlobal.clear();
 	m_aiDomainFreeExperiencePerGreatWorkGlobal.resize(NUM_DOMAIN_TYPES, 0);
+	m_aiDomainFreeExperiencesPerTurnGlobal.clear();
+	m_aiDomainFreeExperiencesPerTurnGlobal.resize(NUM_DOMAIN_TYPES, 0);
+	m_aiDomainEnemyCombatModifierGlobal.clear();
+	m_aiDomainEnemyCombatModifierGlobal.resize(NUM_DOMAIN_TYPES, 0);
 
 	m_piDomainFreeExperience.clear();
 	m_piUnitTypePrmoteHealGlobal.clear();
@@ -1397,6 +1404,9 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 
 	m_aiSeaPlotYield.clear();
 	m_aiSeaPlotYield.resize(NUM_YIELD_TYPES, 0);
+
+	m_aiRiverPlotYield.clear();
+	m_aiRiverPlotYield.resize(NUM_YIELD_TYPES, 0);
 
 	m_aiYieldFromProcessModifierGlobal.clear();
 	m_aiYieldFromProcessModifierGlobal.resize(NUM_YIELD_TYPES, 0);
@@ -8729,14 +8739,11 @@ bool CvPlayer::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestV
 		return false;
 	}
 
-	for(iI = 0; iI < GC.getNUM_BUILDING_AND_TECH_PREREQS(); iI++)
+	for(const auto& iTech : pBuildingInfo.GetPrereqAndTechs())
 	{
-		if(pBuildingInfo.GetPrereqAndTechs(iI) != NO_TECH)
+		if(!currentTeam.GetTeamTechs()->HasTech((TechTypes)iTech))
 		{
-			if(!(currentTeam.GetTeamTechs()->HasTech((TechTypes)(pBuildingInfo.GetPrereqAndTechs(iI)))))
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 
@@ -10012,6 +10019,16 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 			{
 				ChangeDomainFreeExperiencePerGreatWorkGlobal(eDomain, iNewValue);
 			}
+			iNewValue = pBuildingInfo->GetDomainFreeExperiencesPerTurnGlobal(iDomains);
+			if (iNewValue > 0)
+			{
+				ChangeDomainFreeExperiencesPerTurnGlobal(eDomain, iNewValue);
+			}
+			iNewValue = pBuildingInfo->GetDomainEnemyCombatModifierGlobal(iDomains);
+			if (iNewValue != 0)
+			{
+				ChangeDomainEnemyCombatModifierGlobal(eDomain, iNewValue);
+			}
 			iNewValue = pBuildingInfo->GetDomainFreeExperienceGlobal(iDomains);
 			if (iNewValue > 0)
 			{
@@ -10231,6 +10248,7 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 		{
 			changeSpecialistExtraYield(((SpecialistTypes)iI), ((YieldTypes)iJ), (pBuildingInfo->GetSpecialistYieldChange(iI, iJ) * iChange));
 		}
+		changeRiverPlotYield((YieldTypes)iJ, (pBuildingInfo->GetRiverPlotYieldChangeGlobalArray()[iJ] * iChange));
 
 	}
 
@@ -17660,6 +17678,66 @@ void CvPlayer::ChangeDomainFreeExperiencePerGreatWorkGlobal(DomainTypes eIndex, 
 	m_aiDomainFreeExperiencePerGreatWorkGlobal[eIndex] += iChange;
 }
 
+int CvPlayer::GetDomainFreeExperiencesPerPopGlobal(DomainTypes eIndex)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	int iValue = 0;
+	
+	if( getNumCities() >= 1)
+	{
+		CvCity* pLoopCity;
+		int iLoop;
+		for(pLoopCity = firstCity(&iLoop); pLoopCity != NULL; pLoopCity = nextCity(&iLoop))
+		{
+			if(pLoopCity->GetDomainFreeExperiencesPerPopGlobal((DomainTypes)eIndex) > 0)
+			{
+				iValue += pLoopCity->GetDomainFreeExperiencesPerPopGlobal((DomainTypes)eIndex) * pLoopCity->getPopulation() / 100;
+			}
+		}
+	}
+	return iValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetDomainFreeExperiencesPerTurnGlobal(DomainTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	return m_aiDomainFreeExperiencesPerTurnGlobal[eIndex];
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvPlayer::ChangeDomainFreeExperiencesPerTurnGlobal(DomainTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	m_aiDomainFreeExperiencesPerTurnGlobal[eIndex] += iChange;
+}
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetDomainEnemyCombatModifierGlobal(DomainTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	return m_aiDomainEnemyCombatModifierGlobal[eIndex];
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvPlayer::ChangeDomainEnemyCombatModifierGlobal(DomainTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_DOMAIN_TYPES, "eIndex expected to be < NUM_DOMAIN_TYPES");
+	m_aiDomainEnemyCombatModifierGlobal[eIndex] += iChange;
+}
+
 //	--------------------------------------------------------------------------------
 int CvPlayer::GetDomainFreeExperience(DomainTypes eIndex) const
 {
@@ -21277,6 +21355,29 @@ void CvPlayer::changeSeaPlotYield(YieldTypes eIndex, int iChange)
 	if(iChange != 0)
 	{
 		m_aiSeaPlotYield.setAt(eIndex, m_aiSeaPlotYield[eIndex] + iChange);
+
+		updateYield();
+	}
+}
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::getRiverPlotYield(YieldTypes eIndex) const
+{
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex is expected to be within maximum bounds (invalid Index)");
+	return m_aiRiverPlotYield[eIndex];
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvPlayer::changeRiverPlotYield(YieldTypes eIndex, int iChange)
+{
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex is expected to be within maximum bounds (invalid Index)");
+
+	if(iChange != 0)
+	{
+		m_aiRiverPlotYield.setAt(eIndex, m_aiRiverPlotYield[eIndex] + iChange);
 
 		updateYield();
 	}
@@ -26497,10 +26598,9 @@ int CvPlayer::getAdvancedStartTechCost(TechTypes eTech, bool bAdd)
 						{
 							return -1;
 						}
-
-						for(int iI = 0; iI < GC.getNUM_BUILDING_AND_TECH_PREREQS(); iI++)
+						for(const auto& iTech : pkBuildingInfo->GetPrereqAndTechs())
 						{
-							if(pkBuildingInfo->GetPrereqAndTechs(iI) == eTech)
+							if(iTech == eTech)
 							{
 								return -1;
 							}
@@ -27162,6 +27262,7 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	int iNumCitiesFreeFoodBuilding = pPolicy->GetNumCitiesFreeFoodBuilding();
 
 	int iInstanceFoodThresholdPercent = pPolicy->GetInstantFoodThresholdPercent();
+	int iInstantFoodKeptPercent = pPolicy->GetInstantFoodKeptPercent();
 
 #ifdef MOD_GLOBAL_CORRUPTION
 	for (size_t i = 0; i < GC.getNumCorruptionLevel(); i++)
@@ -27334,6 +27435,10 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 		if (iInstanceFoodThresholdPercent > 0 && iChange > 0)
 		{
 			pLoopCity->changeFoodTimes100(iInstanceFoodThresholdPercent * pLoopCity->growthThreshold());
+		}
+		if(iInstantFoodKeptPercent > 0 && iChange > 0)
+		{
+			pLoopCity->setFoodKept(iInstantFoodKeptPercent * pLoopCity->growthThreshold() / 100);
 		}
 	}
 
@@ -28291,6 +28396,8 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iCSFriends;
 #if defined(MOD_ROG_CORE)
 	kStream >> m_aiDomainFreeExperiencePerGreatWorkGlobal;
+	kStream >> m_aiDomainFreeExperiencesPerTurnGlobal;
+	kStream >> m_aiDomainEnemyCombatModifierGlobal;
 	kStream >> m_piDomainFreeExperience;
 	kStream >> m_piUnitTypePrmoteHealGlobal;
 #endif
@@ -28314,6 +28421,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_aiCapitalYieldPerPopChange;
 	kStream >> m_aiYieldPerPopChange;
 	kStream >> m_aiSeaPlotYield;
+	kStream >> m_aiRiverPlotYield;
 	kStream >> m_aiCityLoveKingDayYieldMod;
 	kStream >> m_aiYieldRateModifier;
 	kStream >> m_aiCapitalYieldRateModifier;
@@ -29041,6 +29149,8 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iCSFriends;
 #if defined(MOD_ROG_CORE)
 	kStream << m_aiDomainFreeExperiencePerGreatWorkGlobal;
+	kStream << m_aiDomainFreeExperiencesPerTurnGlobal;
+	kStream << m_aiDomainEnemyCombatModifierGlobal;
 	kStream << m_piDomainFreeExperience;
 	kStream << m_piUnitTypePrmoteHealGlobal;
 #endif
@@ -29064,6 +29174,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_aiCapitalYieldPerPopChange;
 	kStream << m_aiYieldPerPopChange;
 	kStream << m_aiSeaPlotYield;
+	kStream << m_aiRiverPlotYield;
 	kStream << m_aiCityLoveKingDayYieldMod;
 	kStream << m_aiYieldRateModifier;
 	kStream << m_aiCapitalYieldRateModifier;
@@ -29765,7 +29876,8 @@ int CvPlayer::getNewCityProductionValue() const
 
 	CvGame& kGame = GC.getGame();
 
-	iValue += (GC.getADVANCED_START_CITY_COST() * kGame.getGameSpeedInfo().getGrowthPercent()) / 100;
+	int iSetterPercent = kGame.getGameSpeedInfo().getGrowthPercent() + kGame.getGameSpeedInfo().getSetterExtraPercent();
+	iValue += (GC.getADVANCED_START_CITY_COST() * iSetterPercent) / 100;
 
 	int iPopulation = GC.getINITIAL_CITY_POPULATION() + kGame.getStartEraInfo().getFreePopulation();
 	for(int i = 1; i <= iPopulation; ++i)

@@ -520,6 +520,9 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(GetNuclearWinterNaturalReduction);
 	Method(ChangeNuclearWinterNaturalReduction);
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	Method(IsPlotExceedMaxBuild, PlayerTypes, int);
+#endif
 	Method(DoOptionalUCCode);
 	Method(CheckDllVersion);
 }
@@ -3530,6 +3533,16 @@ int CvLuaGame::lChangeNuclearWinterProcess(lua_State* L)
 }
 LUAAPIIMPL(Game, GetNuclearWinterNaturalReduction)
 LUAAPIIMPL(Game, ChangeNuclearWinterNaturalReduction)
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+int CvLuaGame::lIsPlotExceedMaxBuild(lua_State* L)
+{
+	const PlayerTypes ePlayer = static_cast<PlayerTypes>(luaL_checkint(L, 1));
+	const int iIndex = luaL_checkint(L, 2);
+	CvPlot *pPlot = GC.getMap().plotByIndex(iIndex);
+	lua_pushboolean(L, GC.getGame().IsPlotExceedMaxBuild(ePlayer, pPlot));
+	return 1;
+}
 #endif
 
 int CvLuaGame::lDoOptionalUCCode(lua_State* L)

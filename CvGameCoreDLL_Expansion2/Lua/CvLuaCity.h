@@ -408,6 +408,8 @@ protected:
 	static int lGetBaseYieldRate(lua_State* L);
 	static int lGetYieldRateInfoTool(lua_State* L);
 	LUAAPIEXTN(GetBaseYieldRateFromProjects, int, iYield);
+	LUAAPIEXTN(GetYieldPerEra, int, iYield);
+	static int lGetTradeRouteFromTheCityYieldsPerEra(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS) && defined(MOD_GLOBAL_GREATWORK_YIELDTYPES)
 	LUAAPIEXTN(GetBaseYieldRateFromGreatWorks, int, iYield);
 #endif

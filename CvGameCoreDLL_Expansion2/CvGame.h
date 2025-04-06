@@ -80,6 +80,11 @@ public:
 	int GetNuclearWinterYieldMultiplier(YieldTypes eIndex);
 	int GetYieldFromNuclearWinter(YieldTypes eIndex);
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	bool IsPlotExceedMaxBuild(PlayerTypes ePlayer, CvPlot *pPlot) const;
+	void IncreasePlotBuildNum(PlayerTypes ePlayer, CvPlot *pPlot);
+	void DoPlotBuildNumTurn();
+#endif
 
 	void updateCitySight(bool bIncrement);
 	void updateSelectionList();
@@ -516,17 +521,9 @@ public:
 	void SetBarbarianReleaseTurn(int iValue);
 
 	UnitTypes GetRandomSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged);
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 	UnitTypes GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged, bool bIncludeShips);
-#else
-	UnitTypes GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged);
-#endif
 #if defined(MOD_GLOBAL_CS_GIFTS)
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 	UnitTypes GetCsGiftSpawnUnitType(PlayerTypes ePlayer, bool bIncludeShips);
-#else
-	UnitTypes GetCsGiftSpawnUnitType(PlayerTypes ePlayer);
-#endif
 #endif
 	UnitTypes GetRandomUniqueUnitType(bool bIncludeCivsInGame, bool bIncludeStartEra, bool bIncludeOldEras, bool bIncludeRanged);
 
@@ -703,6 +700,9 @@ protected:
 	int m_iNuclearWinterProcess;
 	int m_iNuclearWinterNaturalReduction;
 	int m_iNuclearWinterLevelIndex;
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	std::tr1::unordered_map<int, int> m_mapPlotBuildNum;
 #endif
 
 	unsigned int m_uiInitialTime;

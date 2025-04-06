@@ -455,6 +455,9 @@ protected:
 	LUAAPIEXTN(GetNuclearWinterNaturalReduction, int);
 	LUAAPIEXTN(ChangeNuclearWinterNaturalReduction, void, iChange);
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	LUAAPIEXTN(IsPlotExceedMaxBuild, PlayerTypes, int);
+#endif
 	LUAAPIEXTN(DoOptionalUCCode, void);
 	LUAAPIEXTN(CheckDllVersion, bool, iVersion);
 };

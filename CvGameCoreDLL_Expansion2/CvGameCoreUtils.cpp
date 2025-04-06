@@ -643,9 +643,9 @@ bool isTechRequiredForBuilding(TechTypes eTech, BuildingTypes eBuilding)
 			return true;
 		}
 
-		for(int iI = 0; iI < GC.getNUM_BUILDING_AND_TECH_PREREQS(); iI++)
+		for(const auto& iTech : info->GetPrereqAndTechs())
 		{
-			if(info->GetPrereqAndTechs(iI) == eTech)
+			if(iTech == eTech)
 			{
 				return true;
 			}

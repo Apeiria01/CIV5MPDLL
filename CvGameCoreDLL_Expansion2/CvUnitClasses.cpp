@@ -16,9 +16,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_iProductionCost(0),
 	m_iFaithCost(0),
 	m_bRequiresFaithPurchaseEnabled(false),
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 	m_bNoMinorGifts(false),
-#endif
 	m_bPurchaseOnly(false),
 	m_bMoveAfterPurchase(false),
 #if defined(MOD_GLOBAL_MOVE_AFTER_UPGRADE)
@@ -219,11 +217,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_iProductionCost = kResults.GetInt("Cost");
 	m_iFaithCost = kResults.GetInt("FaithCost");
 	m_bRequiresFaithPurchaseEnabled = kResults.GetBool("RequiresFaithPurchaseEnabled");
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
-	if (MOD_GLOBAL_EXCLUDE_FROM_GIFTS) {
-		m_bNoMinorGifts = kResults.GetBool("NoMinorGifts");
-	}
-#endif
+	m_bNoMinorGifts = kResults.GetBool("NoMinorGifts");
 	m_bPurchaseOnly = kResults.GetBool("PurchaseOnly");
 	m_bMoveAfterPurchase = kResults.GetBool("MoveAfterPurchase");
 #if defined(MOD_GLOBAL_MOVE_AFTER_UPGRADE)
@@ -613,13 +607,11 @@ bool CvUnitEntry::IsRequiresFaithPurchaseEnabled() const
 	return m_bRequiresFaithPurchaseEnabled;
 }
 
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 /// Can City States gift this unit?
 bool CvUnitEntry::IsNoMinorGifts() const
 {
 	return m_bNoMinorGifts;
 }
-#endif
 
 /// Do we need to purchase this unit (i.e. can't be built)?
 bool CvUnitEntry::IsPurchaseOnly() const

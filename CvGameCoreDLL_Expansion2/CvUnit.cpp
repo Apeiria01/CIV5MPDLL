@@ -211,6 +211,7 @@ CvUnit::CvUnit() :
 	, m_iAlwaysHealCount("CvUnit::m_iAlwaysHealCount", m_syncArchive)
 	, m_iHealOutsideFriendlyCount("CvUnit::m_iHealOutsideFriendlyCount", m_syncArchive)
 	, m_iHillsDoubleMoveCount("CvUnit::m_iHillsDoubleMoveCount", m_syncArchive)
+	, m_iRiverDoubleMoveCount("CvUnit::m_iRiverDoubleMoveCount", m_syncArchive)
 	, m_iImmuneToFirstStrikesCount("CvUnit::m_iImmuneToFirstStrikesCount", m_syncArchive)
 	, m_iExtraVisibilityRange("CvUnit::m_iExtraVisibilityRange", m_syncArchive)
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
@@ -576,6 +577,7 @@ CvUnit::CvUnit() :
 	, m_iMapLayer(DEFAULT_UNIT_MAP_LAYER)
 	, m_iNumGoodyHutsPopped(0)
 	, m_iLastGameTurnAtFullHealth(-1)
+	, m_iRouteMovementChanges("CvUnit::m_iRouteMovementChanges", m_syncArchive)
 {
 	initPromotions();
 	OBJECT_ALLOCATED
@@ -1213,6 +1215,7 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iAlwaysHealCount = 0;
 	m_iHealOutsideFriendlyCount = 0;
 	m_iHillsDoubleMoveCount = 0;
+	m_iRiverDoubleMoveCount = 0;
 	m_iImmuneToFirstStrikesCount = 0;
 	m_iExtraVisibilityRange = 0;
 #if defined(MOD_PROMOTIONS_VARIABLE_RECON)
@@ -1739,6 +1742,12 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 			m_iCombatModPerAdjacentUnitCombatDefenseMod.setAt(i, 0);
 		}
 
+		m_iRouteMovementChanges.clear();
+		m_iRouteMovementChanges.resize(GC.getNumUnitCombatClassInfos());
+		for(int i = 0; i < GC.getNumRouteInfos(); i++)
+		{
+			m_iRouteMovementChanges.setAt(i, 0);
+		}
 
 		// Migrated in from CvSelectionGroup
 		m_iMissionAIX = INVALID_PLOT_COORD;
@@ -1841,6 +1850,7 @@ void CvUnit::uninitInfos()
 	m_iCombatModPerAdjacentUnitCombatModifier.clear();
 	m_iCombatModPerAdjacentUnitCombatAttackMod.clear();
 	m_iCombatModPerAdjacentUnitCombatDefenseMod.clear();
+	m_iRouteMovementChanges.clear();
 }
 
 
@@ -2906,7 +2916,16 @@ void CvUnit::doTurn()
 				}
 			}
 		}
-
+		if(!IsCivilianUnit() && plot())
+		{
+			CvCity* pCity = plot()->getPlotCity();
+			if (pCity)
+			{
+				int itempexp = itempexp = pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
+				if (itempexp > 0) iTotalxp += itempexp;
+			}
+			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
+		}
 		if (iTotalxp > 0)
 		{
 #if defined(MOD_UNITS_XP_TIMES_100)
@@ -2914,6 +2933,7 @@ void CvUnit::doTurn()
 #else
 			changeExperience(iTotalxp);
 #endif
+			testPromotionReady();
 		}
 		if (iTotalMove > 0)
 		{
@@ -3960,10 +3980,10 @@ bool CvUnit::canMoveInto(const CvPlot& plot, byte bMoveFlags) const
 
 	// Added in Civ 5: Destination plots can't allow stacked Units of the same type
 #if defined(MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS)
-	if((bMoveFlags & MOVEFLAG_DESTINATION) && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || !IsCivilianUnit()))
-#else
-	if(bMoveFlags & MOVEFLAG_DESTINATION)
+	// This can cause problems when there are others units in the city we want to attack,  --Qingyin
+	//if((bMoveFlags & MOVEFLAG_DESTINATION) && (!MOD_GLOBAL_BREAK_CIVILIAN_RESTRICTIONS || !IsCivilianUnit()))
 #endif
+	if(bMoveFlags & MOVEFLAG_DESTINATION)
 	{
 		// Don't let another player's unit inside someone's city
 		if(!(bMoveFlags & MOVEFLAG_ATTACK) && !(bMoveFlags & MOVEFLAG_DECLARE_WAR))
@@ -12862,6 +12882,9 @@ bool CvUnit::build(BuildTypes eBuild)
 #endif
 
 	finishMoves(); // needs to be at bottom because movesLeft() can affect workRate()...
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	GC.getGame().IncreasePlotBuildNum(getOwner(), pPlot);
+#endif
 
 	if(bFinished)
 	{
@@ -14775,6 +14798,9 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 	iTempModifier = getExtraCombatPercent();
 	iModifier += iTempModifier;
 
+	// Building combat modifier
+	iModifier += GetCombatModifierFromBuilding();
+
 	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
 	CvGameReligions* pReligions = GC.getGame().GetGameReligions();
 	ReligionTypes eFoundedReligion = pReligions->GetFounderBenefitsReligion(kPlayer.GetID());
@@ -15943,6 +15969,9 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 	// Extra combat percent
 	iModifier = getExtraCombatPercent();
+
+	// Building combat modifier
+	iModifier += GetCombatModifierFromBuilding();
 
 	// Kamikaze attack
 	if(getKamikazePercent() != 0)
@@ -19281,6 +19310,35 @@ int CvUnit::GetRangeSuppressModifier(const CvUnit* pOtherUnit) const
 }
 
 //	--------------------------------------------------------------------------------
+int CvUnit::GetCombatModifierFromBuilding() const
+{
+    VALIDATE_OBJECT
+	if (IsCivilianUnit() || !plot()) return 0;
+
+    CvCity* pCity = plot()->getWorkingCity();
+    if (!pCity) return 0;
+
+    const DomainTypes eDomain = getDomainType();
+    int iModifier = 0;
+
+    const PlayerTypes eCityOwner = pCity->getOwner();
+    const TeamTypes eCityTeam = GET_PLAYER(eCityOwner).getTeam();
+    const TeamTypes eUnitTeam = getTeam();
+
+    if (GET_TEAM(eUnitTeam).isAtWar(eCityTeam)) 
+	{
+        iModifier += pCity->GetDomainEnemyCombatModifier(eDomain);
+        iModifier += GET_PLAYER(eCityOwner).GetDomainEnemyCombatModifierGlobal(eDomain);
+    }
+
+    else if (eUnitTeam == eCityTeam) {
+        iModifier += pCity->GetDomainFriendsCombatModifierLocal(eDomain);
+    }
+
+    return iModifier;
+}
+
+//	--------------------------------------------------------------------------------
 /// Get extra cost for unit maintenance in Gold from promotions
 int CvUnit::GetPromotionMaintenanceCost() const
 {
@@ -19489,7 +19547,24 @@ void CvUnit::changeNumOriginalCapitalDefenseMod(int iValue)
 		}
 }
 #endif
+//	--------------------------------------------------------------------------------
+int CvUnit::getRouteMovementChanges(RouteTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < GC.getNumRouteInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
+	return m_iRouteMovementChanges[eIndex];
+}
 
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeRouteMovementChanges(RouteTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < GC.getNumRouteInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
+	m_iRouteMovementChanges.setAt(eIndex, m_iRouteMovementChanges[eIndex] + iChange);
+}
 
 
 
@@ -22583,6 +22658,29 @@ void CvUnit::changeHillsDoubleMoveCount(int iChange)
 	CvAssert(getHillsDoubleMoveCount() >= 0);
 }
 
+//	--------------------------------------------------------------------------------
+int CvUnit::getRiverDoubleMoveCount() const
+{
+	VALIDATE_OBJECT
+	return m_iRiverDoubleMoveCount;
+}
+
+
+//	--------------------------------------------------------------------------------
+bool CvUnit::isRiverDoubleMove() const
+{
+	VALIDATE_OBJECT
+	return (getRiverDoubleMoveCount() > 0);
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvUnit::changeRiverDoubleMoveCount(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iRiverDoubleMoveCount = (m_iRiverDoubleMoveCount + iChange);
+	CvAssert(getRiverDoubleMoveCount() >= 0);
+}
 
 //	--------------------------------------------------------------------------------
 int CvUnit::getImmuneToFirstStrikesCount() const
@@ -26218,6 +26316,7 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		changeAlwaysHealCount((thisPromotion.IsAlwaysHeal()) ? iChange : 0);
 		changeHealOutsideFriendlyCount((thisPromotion.IsHealOutsideFriendly()) ? iChange : 0);
 		changeHillsDoubleMoveCount((thisPromotion.IsHillsDoubleMove()) ? iChange : 0);
+		changeRiverDoubleMoveCount((thisPromotion.IsRiverDoubleMove()) ? iChange : 0);
 		changeIgnoreTerrainCostCount((thisPromotion.IsIgnoreTerrainCost()) ? iChange : 0);
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 		changeIgnoreTerrainDamageCount((thisPromotion.IsIgnoreTerrainDamage()) ? iChange : 0);
@@ -26602,6 +26701,11 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 			changeCombatModPerAdjacentUnitCombatModifier(((UnitCombatTypes)iI), (thisPromotion.GetCombatModPerAdjacentUnitCombatModifierPercent(iI) * iChange));
 			changeCombatModPerAdjacentUnitCombatAttackMod(((UnitCombatTypes)iI), (thisPromotion.GetCombatModPerAdjacentUnitCombatAttackModifier(iI) * iChange));
 			changeCombatModPerAdjacentUnitCombatDefenseMod(((UnitCombatTypes)iI), (thisPromotion.GetCombatModPerAdjacentUnitCombatDefenseModifier(iI) * iChange));
+		}
+
+		for(iI = 0; iI < GC.getNumRouteInfos(); iI++)
+		{
+			changeRouteMovementChanges(((RouteTypes)iI), (thisPromotion.GetRouteMovementChanges(iI) * iChange));
 		}
 
 		for(iI = 0; iI < GC.getNumUnitClassInfos(); iI++)

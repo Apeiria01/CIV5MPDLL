@@ -652,6 +652,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 #endif
 
 	Method(GetExtraCombatPercent);
+	Method(GetCombatModifierFromBuilding);
 	Method(GetFriendlyLandsModifier);
 	Method(GetFriendlyLandsAttackModifier);
 	Method(GetOutsideFriendlyLandsModifier);
@@ -3863,11 +3864,17 @@ int CvLuaUnit::lGetDamageFixValueToUnit(lua_State* L)
 	if(bIsAttack)
 	{
 		iResult += pkUnit->GetAttackInflictDamageChange();
+		iResult += pkUnit->GetAttackInflictDamageChangeMaxHPPercent() * pkOtherUnit->GetMaxHitPoints() / 100;
 		iResult += pkUnit->GetOriginalCapitalDamageFixTotal();
 
 		int iSpecialDamageFix = pkUnit->GetOriginalCapitalSpecialDamageFixTotal();
 		iSpecialDamageFix = pkOtherUnit->getDomainType() == DOMAIN_LAND ? iSpecialDamageFix : iSpecialDamageFix / 2;
 		iResult += iSpecialDamageFix;
+	}
+	else
+	{
+		iResult += pkUnit->GetDefenseInflictDamageChange();
+		iResult += pkUnit->GetDefenseInflictDamageChangeMaxHPPercent() * pkOtherUnit->GetMaxHitPoints() / 100;
 	}
 
 	auto* targetPlot = bIsAttack ? pkOtherUnit->plot() : pkUnit->plot();
@@ -5525,6 +5532,16 @@ int CvLuaUnit::lGetExtraCombatPercent(lua_State* L)
 	CvUnit* pkUnit = GetInstance(L);
 
 	const int iResult = pkUnit->getExtraCombatPercent();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+//------------------------------------------------------------------------------
+//int GetCombatModifierFromBuilding();
+int CvLuaUnit::lGetCombatModifierFromBuilding(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetCombatModifierFromBuilding();
 	lua_pushinteger(L, iResult);
 	return 1;
 }

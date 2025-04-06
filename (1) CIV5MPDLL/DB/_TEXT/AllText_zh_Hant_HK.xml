@@ -626,7 +626,12 @@
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_PROJECTS">
 			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} 來自已完成計劃</Text>
 		</Row>
-
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ERA">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} 来自時代</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_PER_ERA">
+			<Text>[NEWLINE][ICON_BULLET]時代修正: {1_Num}%</Text>
+		</Row>
 
 		<Row Tag="TXT_KEY_VOLCAN_EVENT_TITLE">
 			<Text>火山爆發！</Text>

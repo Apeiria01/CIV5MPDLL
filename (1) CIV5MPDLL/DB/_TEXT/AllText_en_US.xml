@@ -624,6 +624,12 @@
 		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_PROJECTS">
 			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Projects</Text>
 		</Row>
+		<Row Tag="TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_ERA">
+			<Text>[NEWLINE][ICON_BULLET]{1_Num}{2_IconString} from Eras</Text>
+		</Row>
+		<Row Tag="TXT_KEY_PRODMOD_YIELD_PER_ERA">
+			<Text>[NEWLINE][ICON_BULLET]Eras Modifier: {1_Num}%</Text>
+		</Row>
 
 		<Row Tag="TXT_KEY_VOLCAN_EVENT_TITLE">
 			<Text>Volcanic eruptions！</Text>

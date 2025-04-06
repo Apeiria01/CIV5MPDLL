@@ -2832,6 +2832,9 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 	{
 		return false;
 	}
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	if(!bTestVisible && GC.getGame().IsPlotExceedMaxBuild(ePlayer, const_cast<CvPlot*>(this))) return false;
+#endif
 
 	bValid = false;
 
@@ -3152,7 +3155,8 @@ int CvPlot::getBuildTime(BuildTypes eBuild, PlayerTypes ePlayer) const
 	}
 
 	// Repair is either 3 turns or the original build time, whichever is shorter
-	if(GC.getBuildInfo(eBuild)->isRepair())
+	// When not in our plot, cannot be shorter
+	if(GC.getBuildInfo(eBuild)->isRepair() && (!MOD_NO_FASTER_REPAIR_OUTSIDE || getOwner() == ePlayer))
 	{
 		RouteTypes eRoute = getRouteType();
 

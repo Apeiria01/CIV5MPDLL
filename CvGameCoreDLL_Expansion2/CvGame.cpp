@@ -1028,6 +1028,9 @@ void CvGame::uninit()
 	m_iNuclearWinterNaturalReduction = 1;
 	m_iNuclearWinterLevelIndex = NO_NUCLEAR_WINTER;
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	m_mapPlotBuildNum.clear();
+#endif
 
 	m_uiInitialTime = 0;
 
@@ -1931,6 +1934,30 @@ int CvGame::GetYieldFromNuclearWinter(YieldTypes eIndex)
 		iYield /= 100;
 	}
 	return iYield;
+}
+#endif
+//	--------------------------------------------------------------------------------
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+bool CvGame::IsPlotExceedMaxBuild(PlayerTypes ePlayer, CvPlot *pPlot) const
+{
+	if(pPlot == nullptr || !GET_PLAYER(ePlayer).isHuman()) return false;
+	int iMaxBuild = pPlot->getOwner() == ePlayer ? 0 : GC.getNUM_OUTSIZE_PLOT_MAX_BUILD();
+	if(iMaxBuild <= 0) return false;
+
+	const auto& it = m_mapPlotBuildNum.find(pPlot->GetPlotIndex());
+	if(it == m_mapPlotBuildNum.end()) return false;
+
+	return it->second >= iMaxBuild;
+}
+void CvGame::IncreasePlotBuildNum(PlayerTypes ePlayer, CvPlot *pPlot)
+{
+	if(pPlot == nullptr || GC.getNUM_OUTSIZE_PLOT_MAX_BUILD() <= 0 || !GET_PLAYER(ePlayer).isHuman()) return;
+
+	m_mapPlotBuildNum[pPlot->GetPlotIndex()]++;
+}
+void CvGame::DoPlotBuildNumTurn()
+{
+	m_mapPlotBuildNum.clear();
 }
 #endif
 //	--------------------------------------------------------------------------------
@@ -7877,6 +7904,9 @@ void CvGame::doTurn()
 #if defined(MOD_NUCLEAR_WINTER_FOR_SP)
 	DoNuclearWinterTurn();
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	DoPlotBuildNumTurn();
+#endif
 
 	// Victory stuff
 	testVictory();
@@ -7988,10 +8018,8 @@ UnitTypes CvGame::GetRandomSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, 
 			if(!bValid)
 				continue;
 
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 			// Exclude if this unit is invalid for Minor Gifts
-			if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+			if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 			// Avoid Recon units
 			if(pkUnitInfo->GetDefaultUnitAIType() == UNITAI_EXPLORE)
@@ -8038,11 +8066,7 @@ UnitTypes CvGame::GetRandomSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, 
 
 //	--------------------------------------------------------------------------------
 /// Pick a random a Unit type that is ranked by unit power and restricted to units available to ePlayer's technology
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged, bool bIncludeShips)
-#else
-UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bIncludeUUs, bool bIncludeRanged)
-#endif
 {
 	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
 	CvAssertMsg(ePlayer < MAX_CIV_PLAYERS, "ePlayer is expected to be within maximum bounds (invalid Index)");
@@ -8126,10 +8150,8 @@ UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bInclude
 			}
 		}
 
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 		// Exclude if this unit is invalid for Minor Gifts
-		if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+		if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 		// Avoid Recon units
 		if(pkUnitInfo->GetDefaultUnitAIType() == UNITAI_EXPLORE)
@@ -8166,11 +8188,7 @@ UnitTypes CvGame::GetCompetitiveSpawnUnitType(PlayerTypes ePlayer, bool bInclude
 #if defined(MOD_GLOBAL_CS_GIFTS)
 //	--------------------------------------------------------------------------------
 /// Pick a random a Unit type that is ranked by unit power and restricted to recon units available to ePlayer's technology
-#if defined(MOD_GLOBAL_CS_GIFT_SHIPS)
 UnitTypes CvGame::GetCsGiftSpawnUnitType(PlayerTypes ePlayer, bool bIncludeShips)
-#else
-UnitTypes CvGame::GetCsGiftSpawnUnitType(PlayerTypes ePlayer)
-#endif
 {
 	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
 	CvAssertMsg(ePlayer < MAX_CIV_PLAYERS, "ePlayer is expected to be within maximum bounds (invalid Index)");
@@ -8205,10 +8223,8 @@ UnitTypes CvGame::GetCsGiftSpawnUnitType(PlayerTypes ePlayer)
 		// Exclude unique units
 		if (eLoopUnit != pkUnitClassInfo->getDefaultUnitIndex()) continue;
 
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 		// Exclude if this unit is invalid for Minor Gifts
-		if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+		if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 		// Must be able to train this thing
 		if (!GET_PLAYER(ePlayer).canTrain(eLoopUnit, false, false, false, /*bIgnoreUniqueUnitStatus*/ true)) continue;
@@ -8296,10 +8312,8 @@ UnitTypes CvGame::GetRandomUniqueUnitType(bool bIncludeCivsInGame, bool bInclude
 		if(eLoopUnit == pkUnitClassInfo->getDefaultUnitIndex())
 			continue;
 		
-#if defined(MOD_GLOBAL_EXCLUDE_FROM_GIFTS)
 		// Exclude if this unit is invalid for Minor Gifts
-		if(MOD_GLOBAL_EXCLUDE_FROM_GIFTS && pkUnitInfo->IsNoMinorGifts()) continue;
-#endif
+		if(pkUnitInfo->IsNoMinorGifts()) continue;
 
 		// Is it a unique unit from a civ that is in our game?
 		if (!bIncludeCivsInGame)
@@ -9782,6 +9796,9 @@ void CvGame::Read(FDataStream& kStream)
 	kStream >> m_iNuclearWinterProcess;
 	kStream >> m_iNuclearWinterLevelIndex;
 #endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	kStream >> m_mapPlotBuildNum;
+#endif
 
 	// m_uiInitialTime not saved
 
@@ -10023,6 +10040,9 @@ void CvGame::Write(FDataStream& kStream) const
 #if defined(MOD_NUCLEAR_WINTER_FOR_SP)
 	kStream << m_iNuclearWinterProcess;
 	kStream << m_iNuclearWinterLevelIndex;
+#endif
+#if defined(MOD_GLOBAL_MAX_PLOT_BUILD)
+	kStream << m_mapPlotBuildNum;
 #endif
 
 	// m_uiInitialTime not saved

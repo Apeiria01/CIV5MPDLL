@@ -249,8 +249,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_bAllowsFoodTradeRoutes(false),
 	m_bAllowsProductionTradeRoutes(false),
 	m_bNullifyInfluenceModifier(false),
-	m_piLockedBuildingClasses(NULL),
-	m_piPrereqAndTechs(NULL),
 	m_piResourceQuantityRequirements(NULL),
 	m_piResourceQuantity(NULL),
 	m_piResourceCultureChanges(NULL),
@@ -258,9 +256,12 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_piProductionTraits(NULL),
 	m_piSeaPlotYieldChange(NULL),
 	m_piRiverPlotYieldChange(NULL),
+	m_piRiverPlotYieldChangeGlobal(NULL),
 	m_piLakePlotYieldChange(NULL),
 	m_piSeaResourceYieldChange(NULL),
 	m_piYieldChange(NULL),
+	m_piYieldChangePerEra(NULL),
+	m_piYieldModifierChangePerEra(NULL),
 	m_piYieldChangePerPop(NULL),
 	m_piYieldChangePerReligion(NULL),
 	m_piYieldModifier(NULL),
@@ -272,6 +273,13 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_piUnitCombatProductionModifiers(NULL),
 	m_piDomainFreeExperience(NULL),
 	m_piDomainFreeExperiencePerGreatWork(NULL),
+	m_piDomainFreeExperiencesPerPop(NULL),
+	m_piDomainFreeExperiencesPerPopGlobal(NULL),
+	m_piDomainFreeExperiencesPerTurn(NULL),
+	m_piDomainFreeExperiencesPerTurnGlobal(NULL),
+	m_piDomainEnemyCombatModifier(NULL),
+	m_piDomainEnemyCombatModifierGlobal(NULL),
+	m_piDomainFriendsCombatModifierLocal(NULL),
 
 #if defined(MOD_ROG_CORE)
 	m_piYieldFromConstruction(NULL),
@@ -313,6 +321,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_piEmpireResourceOrs(NULL),
     m_piLocalFeatureOrs(NULL),
 	m_piLocalFeatureAnds(NULL),
+	m_piLocalPlotAnds(NULL),
 
 	m_paiHurryModifier(NULL),
 	m_paiHurryModifierLocal(NULL),
@@ -380,8 +389,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 /// Destructor
 CvBuildingEntry::~CvBuildingEntry(void)
 {
-	SAFE_DELETE_ARRAY(m_piLockedBuildingClasses);
-	SAFE_DELETE_ARRAY(m_piPrereqAndTechs);
 	SAFE_DELETE_ARRAY(m_piResourceQuantityRequirements);
 	SAFE_DELETE_ARRAY(m_piResourceQuantity);
 	SAFE_DELETE_ARRAY(m_piResourceCultureChanges);
@@ -389,9 +396,12 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piProductionTraits);
 	SAFE_DELETE_ARRAY(m_piSeaPlotYieldChange);
 	SAFE_DELETE_ARRAY(m_piRiverPlotYieldChange);
+	SAFE_DELETE_ARRAY(m_piRiverPlotYieldChangeGlobal);
 	SAFE_DELETE_ARRAY(m_piLakePlotYieldChange);
 	SAFE_DELETE_ARRAY(m_piSeaResourceYieldChange);
 	SAFE_DELETE_ARRAY(m_piYieldChange);
+	SAFE_DELETE_ARRAY(m_piYieldChangePerEra);
+	SAFE_DELETE_ARRAY(m_piYieldModifierChangePerEra);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerPop);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerReligion);
 	SAFE_DELETE_ARRAY(m_piYieldModifier);
@@ -403,7 +413,13 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piUnitCombatProductionModifiers);
 	SAFE_DELETE_ARRAY(m_piDomainFreeExperience);
 	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencePerGreatWork);
-
+	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencesPerPop);
+	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencesPerPopGlobal);
+	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencesPerTurn);
+	SAFE_DELETE_ARRAY(m_piDomainFreeExperiencesPerTurnGlobal);
+	SAFE_DELETE_ARRAY(m_piDomainEnemyCombatModifier);
+	SAFE_DELETE_ARRAY(m_piDomainEnemyCombatModifierGlobal);
+	SAFE_DELETE_ARRAY(m_piDomainFriendsCombatModifierLocal);
 #if defined(MOD_ROG_CORE)
 	SAFE_DELETE_ARRAY(m_piYieldFromConstruction);
 	SAFE_DELETE_ARRAY(m_piYieldFromUnitProduction);
@@ -425,13 +441,6 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piDomainProductionModifier);
 	SAFE_DELETE_ARRAY(m_piPrereqNumOfBuildingClass);
 	SAFE_DELETE_ARRAY(m_piFlavorValue);
-	SAFE_DELETE_ARRAY(m_piLocalResourceAnds);
-	SAFE_DELETE_ARRAY(m_piLocalResourceOrs);
-
-	SAFE_DELETE_ARRAY(m_piEmpireResourceAnds);
-	SAFE_DELETE_ARRAY(m_piEmpireResourceOrs);
-	SAFE_DELETE_ARRAY(m_piLocalFeatureOrs);
-	SAFE_DELETE_ARRAY(m_piLocalFeatureAnds);
 
 	SAFE_DELETE_ARRAY(m_paiHurryModifier);
 	SAFE_DELETE_ARRAY(m_paiHurryModifierLocal);
@@ -862,9 +871,12 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	
 	kUtility.SetYields(m_piSeaPlotYieldChange, "Building_SeaPlotYieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piRiverPlotYieldChange, "Building_RiverPlotYieldChanges", "BuildingType", szBuildingType);
+	kUtility.SetYields(m_piRiverPlotYieldChangeGlobal, "Building_RiverPlotYieldChangesGlobal", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piLakePlotYieldChange, "Building_LakePlotYieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piSeaResourceYieldChange, "Building_SeaResourceYieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChange, "Building_YieldChanges", "BuildingType", szBuildingType);
+	kUtility.SetYields(m_piYieldChangePerEra, "Building_YieldChangesPerEra", "BuildingType", szBuildingType);
+	kUtility.SetYields(m_piYieldModifierChangePerEra, "Building_YieldModifiersChangesPerEra", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerPop, "Building_YieldChangesPerPop", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerReligion, "Building_YieldChangesPerReligion", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldModifier, "Building_YieldModifiers", "BuildingType", szBuildingType);
@@ -900,6 +912,13 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.PopulateArrayByValue(m_piDomainFreeExperience, "Domains", "Building_DomainFreeExperiences", "DomainType", "BuildingType", szBuildingType, "Experience", 0, NUM_DOMAIN_TYPES);
 	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencePerGreatWork, "Domains", "Building_DomainFreeExperiencePerGreatWork", "DomainType", "BuildingType", szBuildingType, "Experience", 0, NUM_DOMAIN_TYPES);
 	kUtility.PopulateArrayByValue(m_piDomainProductionModifier, "Domains", "Building_DomainProductionModifiers", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencesPerPop, "Domains", "Building_DomainFreeExperiencesPerPop", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencesPerPopGlobal, "Domains", "Building_DomainFreeExperiencesPerPopGlobal", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencesPerTurn, "Domains", "Building_DomainFreeExperiencesPerTurn", "DomainType", "BuildingType", szBuildingType, "Value", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainFreeExperiencesPerTurnGlobal, "Domains", "Building_DomainFreeExperiencesPerTurnGlobal", "DomainType", "BuildingType", szBuildingType, "Value", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainEnemyCombatModifier, "Domains", "Building_DomainEnemyCombatModifier", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainEnemyCombatModifierGlobal, "Domains", "Building_DomainEnemyCombatModifierGlobal", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
+	kUtility.PopulateArrayByValue(m_piDomainFriendsCombatModifierLocal, "Domains", "Building_DomainFriendsCombatModifierLocal", "DomainType", "BuildingType", szBuildingType, "Modifier", 0, NUM_DOMAIN_TYPES);
 
 
 #if defined(MOD_ROG_CORE)
@@ -927,6 +946,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.PopulateArrayByExistence(m_piEmpireResourceOrs, "Resources", "Building_EmpireResourceOrs", "ResourceType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piLocalFeatureOrs, "Features", "Building_LocalFeatureOrs", "FeatureType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piLocalFeatureAnds, "Features", "Building_LocalFeatureAnds", "FeatureType", "BuildingType", szBuildingType);
+	kUtility.PopulateArrayByExistence(m_piLocalPlotAnds, "Plots", "Building_LocalPlotAnds", "PlotType", "BuildingType", szBuildingType);
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
 	kUtility.SetYields(m_piInstantYield, "Building_InstantYield", "BuildingType", szBuildingType);
 	{
@@ -1854,6 +1874,34 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 			if (yieldType >= 0 && yieldType < NUM_YIELD_TYPES)
 			{
 				m_aTradeRouteFromTheCityYields[yieldType] = yieldValue;
+			}
+		}
+
+		pResults->Reset();
+	}
+
+	// int GetTradeRouteFromTheCityYieldsPerEra(YieldTypes eYieldTypes);
+	{
+		for (size_t i = 0; i < NUM_YIELD_TYPES; i++)
+		{
+			m_aTradeRouteFromTheCityYieldsPerEra[i] = 0;
+		}
+
+		std::string strKey("Building_TradeRouteFromTheCityYieldsPerEra");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == nullptr)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select YieldType, YieldValue from Building_TradeRouteFromTheCityYieldsPerEra where BuildingType = ?");
+		}
+		pResults->Bind(1, szBuildingType);
+
+		while (pResults->Step())
+		{
+			const auto yieldType = (YieldTypes) GC.getInfoTypeForString(pResults->GetText(0));
+			const int yieldValue = pResults->GetInt(1);
+			if (yieldType >= 0 && yieldType < NUM_YIELD_TYPES)
+			{
+				m_aTradeRouteFromTheCityYieldsPerEra[yieldType] = yieldValue;
 			}
 		}
 
@@ -3137,6 +3185,14 @@ bool CvBuildingEntry::IsScienceBuilding() const
 	{
 		bRtnValue = true;
 	}
+	else if(GetYieldChangePerEra(YIELD_SCIENCE) > 0)
+	{
+		bRtnValue = true;
+	}
+	else if(GetYieldModifierChangePerEra(YIELD_SCIENCE) > 0)
+	{
+		bRtnValue = true;
+	}
 	else if(GetYieldChangePerPop(YIELD_SCIENCE) > 0)
 	{
 		bRtnValue = true;
@@ -3220,6 +3276,33 @@ int CvBuildingEntry::GetYieldChange(int i) const
 int* CvBuildingEntry::GetYieldChangeArray() const
 {
 	return m_piYieldChange;
+}
+
+/// Change to yield by type per era
+int CvBuildingEntry::GetYieldChangePerEra(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldChangePerEra ? m_piYieldChangePerEra[i] : -1;
+}
+
+/// Array of yield changes per era
+int* CvBuildingEntry::GetYieldChangePerEraArray() const
+{
+	return m_piYieldChangePerEra;
+}
+/// Change to yieldModifier by type per era
+int CvBuildingEntry::GetYieldModifierChangePerEra(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piYieldModifierChangePerEra ? m_piYieldModifierChangePerEra[i] : -1;
+}
+
+/// Array of yieldModifier changes per era
+int* CvBuildingEntry::GetYieldModifierChangePerEraArray() const
+{
+	return m_piYieldModifierChangePerEra;
 }
 
 /// Change to yield by type
@@ -3510,6 +3593,20 @@ int* CvBuildingEntry::GetRiverPlotYieldChangeArray() const
 	return m_piRiverPlotYieldChange;
 }
 
+/// Global River plot yield changes by type
+int CvBuildingEntry::GetRiverPlotYieldChangeGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piRiverPlotYieldChangeGlobal ? m_piRiverPlotYieldChangeGlobal[i] : -1;
+}
+
+/// Array of Global river plot yield changes
+int* CvBuildingEntry::GetRiverPlotYieldChangeGlobalArray() const
+{
+	return m_piRiverPlotYieldChangeGlobal;
+}
+
 /// Lake plot yield changes by type
 int CvBuildingEntry::GetLakePlotYieldChange(int i) const
 {
@@ -3570,6 +3667,59 @@ int CvBuildingEntry::GetDomainFreeExperiencePerGreatWork(int i) const
 	return m_piDomainFreeExperiencePerGreatWork ? m_piDomainFreeExperiencePerGreatWork[i] : -1;
 }
 
+/// Free experience gained for units in this domain from pops
+int CvBuildingEntry::GetDomainFreeExperiencesPerPop(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainFreeExperiencesPerPop ? m_piDomainFreeExperiencesPerPop[i] : -1;
+}
+
+int CvBuildingEntry::GetDomainFreeExperiencesPerPopGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainFreeExperiencesPerPopGlobal ? m_piDomainFreeExperiencesPerPopGlobal[i] : -1;
+}
+
+/// Free experience unit gained when doturn
+int CvBuildingEntry::GetDomainFreeExperiencesPerTurn(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainFreeExperiencesPerTurn ? m_piDomainFreeExperiencesPerTurn[i] : -1;
+}
+
+int CvBuildingEntry::GetDomainFreeExperiencesPerTurnGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainFreeExperiencesPerTurnGlobal ? m_piDomainFreeExperiencesPerTurnGlobal[i] : -1;
+}
+
+/// Enemy combat punishment from this building
+int CvBuildingEntry::GetDomainEnemyCombatModifier(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainEnemyCombatModifier ? m_piDomainEnemyCombatModifier[i] : -1;
+}
+
+int CvBuildingEntry::GetDomainEnemyCombatModifierGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainEnemyCombatModifierGlobal ? m_piDomainEnemyCombatModifierGlobal[i] : -1;
+}
+
+/// Our units' combat bonus in this city from this building
+int CvBuildingEntry::GetDomainFriendsCombatModifierLocal(int i) const
+{
+	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piDomainFriendsCombatModifierLocal ? m_piDomainFriendsCombatModifierLocal[i] : -1;
+}
+
 #if defined(MOD_ROG_CORE)
 /// Free experience gained for units in this domain for each Great Work in this building
 int CvBuildingEntry::GetDomainFreeExperiencePerGreatWorkGlobal(int i) const
@@ -3622,22 +3772,6 @@ int CvBuildingEntry::GetDomainProductionModifier(int i) const
 	CvAssertMsg(i < NUM_DOMAIN_TYPES, "Index out of bounds");
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_piDomainProductionModifier ? m_piDomainProductionModifier[i] : -1;
-}
-
-/// BuildingClasses that may no longer be constructed after this Building is built in a City
-int CvBuildingEntry::GetLockedBuildingClasses(int i) const
-{
-	CvAssertMsg(i < GC.getNumBuildingClassInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLockedBuildingClasses ? m_piLockedBuildingClasses[i] : -1;
-}
-
-/// Prerequisite techs with AND
-int CvBuildingEntry::GetPrereqAndTechs(int i) const
-{
-	CvAssertMsg(i < GC.getNUM_BUILDING_AND_TECH_PREREQS(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piPrereqAndTechs ? m_piPrereqAndTechs[i] : -1;
 }
 
 /// Resources consumed to construct
@@ -3696,57 +3830,52 @@ int CvBuildingEntry::GetFlavorValue(int i) const
 	return m_piFlavorValue ? m_piFlavorValue[i] : 0;
 }
 
+
+/// BuildingClasses that may no longer be constructed after this Building is built in a City
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetLockedBuildingClasses() const
+{
+	return m_piLockedBuildingClasses;
+}
+/// Prerequisite techs with AND
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetPrereqAndTechs() const
+{
+	return m_piPrereqAndTechs;
+}
 /// Prerequisite resources with AND
-int CvBuildingEntry::GetLocalResourceAnd(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetLocalResourceAnd() const
 {
-	CvAssertMsg(i < GC.getNUM_BUILDING_RESOURCE_PREREQS(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalResourceAnds ? m_piLocalResourceAnds[i] : -1;
+	return m_piLocalResourceAnds;
 }
-
 /// Prerequisite resources with OR
-int CvBuildingEntry::GetLocalResourceOr(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetLocalResourceOr() const
 {
-	CvAssertMsg(i < GC.getNUM_BUILDING_RESOURCE_PREREQS(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalResourceOrs ? m_piLocalResourceOrs[i] : -1;
+	return m_piLocalResourceOrs;
 }
-
-
-
-
 /// Prerequisite Feature with AND
-int CvBuildingEntry::GetEmpireResourceAnd(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetEmpireResourceAnd() const
 {
-	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piEmpireResourceAnds ? m_piEmpireResourceAnds[i] : -1;
+	return m_piEmpireResourceAnds;
 }
-
 /// Prerequisite resources with OR
-int CvBuildingEntry::GetEmpireResourceOr(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetEmpireResourceOr() const
 {
-	CvAssertMsg(i < GC.getNumResourceInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piEmpireResourceOrs ? m_piEmpireResourceOrs[i] : -1;
+	return m_piEmpireResourceOrs;
 }
-
-
 /// Prerequisite Feature with AND
-int CvBuildingEntry::GetFeatureAnd(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetFeatureAnd() const
 {
-	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalFeatureAnds ? m_piLocalFeatureAnds[i] : -1;
+	return m_piLocalFeatureAnds;
 }
 /// Prerequisite Feature with OR
-int CvBuildingEntry::GetFeatureOr(int i) const
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetFeatureOr() const
 {
-	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_piLocalFeatureOrs ? m_piLocalFeatureOrs[i] : -1;
+	return m_piLocalFeatureOrs;
 }
-
+/// Prerequisite Plot with AND
+const std::tr1::unordered_set<int>& CvBuildingEntry::GetPlotAnd() const
+{
+	return m_piLocalPlotAnds;
+}
 
 /// Modifier to Hurry cost
 int CvBuildingEntry::GetHurryModifier(int i) const
@@ -4426,6 +4555,16 @@ int CvBuildingEntry::GetTradeRouteFromTheCityYields(YieldTypes eYieldTypes) cons
 	}
 
 	return m_aTradeRouteFromTheCityYields[eYieldTypes];
+}
+
+int CvBuildingEntry::GetTradeRouteFromTheCityYieldsPerEra(YieldTypes eYieldTypes) const
+{
+	if (eYieldTypes < 0 || eYieldTypes >= NUM_YIELD_TYPES)
+	{
+		return 0;
+	}
+
+	return m_aTradeRouteFromTheCityYieldsPerEra[eYieldTypes];
 }
 
 //This building can only be built in capital
