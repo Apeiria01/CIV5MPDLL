@@ -116,6 +116,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_bFightWellDamaged(false),
 	m_iNearbyUnitPromotionBonus(0),
 	m_iNearbyUnitPromotionBonusRange(0),
+	m_iNearbyUnitPromotionBonusMax(0),
 	m_iCombatBonusFromNearbyUnitPromotion(NO_PROMOTION),
 	m_iAOEDamageOnKill(0),
 	m_iAOEDamageOnPillage(0),
@@ -506,6 +507,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 #if defined(MOD_ROG_CORE)
 	m_iNearbyUnitPromotionBonus = kResults.GetInt("NearbyUnitPromotionBonus");
 	m_iNearbyUnitPromotionBonusRange = kResults.GetInt("NearbyUnitPromotionBonusRange");
+	m_iNearbyUnitPromotionBonusMax = kResults.GetInt("NearbyUnitPromotionBonusMax");
 	const char* szTextVal = kResults.GetText("CombatBonusFromNearbyUnitPromotion");
 	if (szTextVal) {
 		m_iCombatBonusFromNearbyUnitPromotion = (PromotionTypes)GC.getInfoTypeForString(szTextVal, true);
@@ -2314,6 +2316,10 @@ PromotionTypes CvPromotionEntry::GetCombatBonusFromNearbyUnitPromotion() const
 int CvPromotionEntry::GetNearbyUnitPromotionBonusRange() const
 {
 	return m_iNearbyUnitPromotionBonusRange;
+}
+int CvPromotionEntry::GetNearbyUnitPromotionBonusMax() const
+{
+	return m_iNearbyUnitPromotionBonusMax;
 }
 /// Bonus from this Unit Promotion
 int CvPromotionEntry::GetNearbyUnitPromotionBonus() const

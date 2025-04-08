@@ -152,6 +152,7 @@ public:
 #if defined(MOD_ROG_CORE)
 	PromotionTypes GetCombatBonusFromNearbyUnitPromotion() const;
 	int GetNearbyUnitPromotionBonusRange() const;
+	int GetNearbyUnitPromotionBonusMax() const;
 	int GetNearbyUnitPromotionBonus() const;
 #endif
 
@@ -726,6 +727,7 @@ protected:
 	int m_iNearNumEnemyDefenseMod;
 	int m_iNearbyUnitPromotionBonus;
 	int m_iNearbyUnitPromotionBonusRange;
+	int m_iNearbyUnitPromotionBonusMax;
 	PromotionTypes m_iCombatBonusFromNearbyUnitPromotion;
 	int m_iAOEDamageOnKill;
 	int m_iAOEDamageOnPillage;
