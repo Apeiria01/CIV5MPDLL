@@ -7658,7 +7658,7 @@ void CvPlayer::receiveGoody(CvPlot* pPlot, GoodyTypes eGoody, CvUnit* pUnit)
 		if(pUnit != NULL)
 		{
 			eUpgradeUnitClass = (UnitClassTypes) pUnit->getUnitInfo().GetGoodyHutUpgradeUnitClass();
-			eUpgradeUnit = (UnitTypes) getCivilizationInfo().getCivilizationUnits(eUpgradeUnitClass);
+			eUpgradeUnit = GetCivUnit(eUpgradeUnitClass);
 		}
 		
 		if(eUpgradeUnit != NO_UNIT)

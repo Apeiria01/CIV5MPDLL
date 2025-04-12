@@ -686,16 +686,6 @@ public:
 	int GetStrengthModifierFromExtraHappiness() const;
 #endif
 
-#if defined(MOD_ROG_CORE)
-	int getNearbyUnitPromotionBonus() const;
-	void SetNearbyUnitPromotionBonus(int iCombatBonus);
-	int getNearbyUnitPromotionBonusRange() const;
-	void SetNearbyUnitPromotionBonusRange(int iBonusRange);
-
-	PromotionTypes getCombatBonusFromNearbyUnitPromotion() const;
-	void SetCombatBonusFromNearbyUnitPromotion(PromotionTypes ePromotion);
-#endif
-
 	bool canIntercept() const;
 	int GetAirInterceptRange() const;
 
@@ -1292,8 +1282,16 @@ public:
 #endif
 
 #if defined(MOD_ROG_CORE)
+	int getNearbyUnitPromotionBonus() const;
+	void SetNearbyUnitPromotionBonus(int iCombatBonus);
+	int getNearbyUnitPromotionBonusRange() const;
+	void SetNearbyUnitPromotionBonusRange(int iBonusRange);
+	int getNearbyUnitPromotionBonusMax() const;
+	void SetNearbyUnitPromotionBonusMax(int iBonusMax);
+	PromotionTypes getCombatBonusFromNearbyUnitPromotion() const;
+	void SetCombatBonusFromNearbyUnitPromotion(PromotionTypes ePromotion);
+
 	int GetNearbyUnitPromotionModifierFromUnitPromotion() const;
-	int GetNearbyUnitPromotionModifier(PromotionTypes ePromotion, int iUnitPromotionRange, int iUnitPromotionModifierconst) const;
 #endif
 
 	bool IsGreatGeneral() const;
@@ -2322,6 +2320,7 @@ protected:
 
 	FAutoVariable<int, CvUnit> m_iNearbyUnitPromotionBonus;
 	FAutoVariable<int, CvUnit> m_iNearbyUnitPromotionBonusRange;
+	FAutoVariable<int, CvUnit> m_iNearbyUnitPromotionBonusMax;
 
 	FAutoVariable<PromotionTypes, CvUnit>  m_iCombatBonusFromNearbyUnitPromotion;
 #endif

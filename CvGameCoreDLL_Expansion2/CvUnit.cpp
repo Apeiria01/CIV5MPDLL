@@ -312,6 +312,7 @@ CvUnit::CvUnit() :
 #if defined(MOD_ROG_CORE)
 		, m_iCombatBonusFromNearbyUnitPromotion("CvUnit::m_iCombatBonusFromNearbyUnitPromotion", m_syncArchive)
 		, m_iNearbyUnitPromotionBonusRange("CvUnit::m_iNearbyUnitPromotionBonusRange", m_syncArchive)
+		, m_iNearbyUnitPromotionBonusMax("CvUnit::m_iNearbyUnitPromotionBonusMax", m_syncArchive)
 		, m_iNearbyUnitPromotionBonus("CvUnit::m_iNearbyUnitPromotionBonus", m_syncArchive)
 #endif
 		, m_iStrongerDamaged("CvUnit::m_iStrongerDamaged", m_syncArchive)
@@ -1313,6 +1314,7 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 #if defined(MOD_ROG_CORE)
 	m_iNearbyUnitPromotionBonus = 0;
 	m_iNearbyUnitPromotionBonusRange = 0;
+	m_iNearbyUnitPromotionBonusMax = 0;
 	m_iCombatBonusFromNearbyUnitPromotion = NO_PROMOTION;
 	m_iMeleeDefenseModifier = 0;
 	m_iAoEDamageOnMove = 0;
@@ -15222,76 +15224,44 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 		iModifier += iTempModifier;
 	}
 
-	// GoldenAge modifier always applies for attack
-
-
-
 	// spy modifier always applies for  attack
-	int iSpy;
-	int iSpyAttackModValue;
-
-	int iWork;
-	int iWorkAttackModValue;
-
-	int iWonder;
-	int iWonderAttackModValue;
-
-
-	int iBonus;
-	if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+	int iNumSpyAttackMod = GetNumSpyAttackMod();
+	if (iNumSpyAttackMod > 0)
 	{
-		iSpy = kPlayer.GetEspionage()->GetNumSpies();
-		iSpyAttackModValue = GetNumSpyAttackMod();
-		iTempModifier = (iSpy * iSpyAttackModValue);
-		iModifier += iTempModifier;
+		int iSpy = kPlayer.GetEspionage()->GetNumSpies();
+		iModifier += iSpy * iNumSpyAttackMod;
 	}
 
-
-	if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+	int iNumWorkAttackMod = GetNumWorkAttackMod();
+	if (iNumWorkAttackMod > 0)
 	{
-		iWork = kPlayer.GetCulture()->GetNumGreatWorks();
-		iWorkAttackModValue = GetNumWorkAttackMod();
-		iTempModifier = (iWork * iWorkAttackModValue);
-		iModifier += iTempModifier;
+		int iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+		iModifier += iWork * iNumWorkAttackMod;
 	}
 
-
-
-	if (kPlayer.GetNumWorldWonders() > 0)
+	int iNumWonderAttackMod = GetNumWonderAttackMod();
+	if (iNumWonderAttackMod > 0)
 	{
-		iWonder = kPlayer.GetNumWorldWonders();
-		iWonderAttackModValue = GetNumWonderAttackMod();
-		iTempModifier = (iWonder * iWonderAttackModValue);
-		iModifier += iTempModifier;
+		int iWonder = kPlayer.GetNumWorldWonders();
+		iModifier += iWonder * iNumWonderAttackMod;
 	}
 
 
 	if (GetCurrHitPoints() > 0)
 	{
-		
-		iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
-		if (iBonus > 100)
-		{
-			iBonus = 100;
-		}
+		int iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
+		if (iBonus > 100) iBonus = 100;
 		iTempModifier = (iBonus * GetCurrentHitPointAttackMod());
 		iModifier += iTempModifier;
 	}
 
 
 	// near enemy
-	int iNumAdjacentEnemy = GetNumEnemyAdjacent();
-	if (iNumAdjacentEnemy > 0)
+	int iEnemyModifier = GetNearNumEnemyAttackMod();
+	if (iEnemyModifier != 0)
 	{
-		int iEnemyModifier = GetNearNumEnemyAttackMod();
-		if (iEnemyModifier > 0)
-		{
-			iTempModifier = GetNearNumEnemyAttackMod() * iNumAdjacentEnemy;
-		}
-
-		iModifier += iTempModifier;
+		iModifier += GetNearNumEnemyAttackMod() * GetNumEnemyAdjacent();
 	}
-
 #endif
 
 	// Damage modifier always applies for melee attack
@@ -15491,12 +15461,10 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 			iModifier += attackBelow50HealthModifier();
 
 
-		int iSpyStayAttackModValue;
-
-		if (GET_TEAM(getTeam()).HasSpyAtTeam(pDefender->getTeam()))
+		int iNumSpyStayAttackMod = GetNumSpyStayAttackMod();
+		if (iNumSpyStayAttackMod != 0 && GET_TEAM(getTeam()).HasSpyAtTeam(pDefender->getTeam()))
 		{
-			iSpyStayAttackModValue = GetNumSpyStayAttackMod();
-			iModifier += iSpyStayAttackModValue;
+			iModifier += iNumSpyStayAttackMod;
 		}
 
 		//Heavy charge without escape
@@ -15662,69 +15630,41 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 
 
 #if defined(MOD_ROG_CORE)
-	// spy modifier always applies for  attack
-	int iSpy;
-	int iSpyDefenseModValue;
-
-	int iWork;
-	int iWorkDefenseModValue;
-
-	int iWonder;
-	int iWonderDefenseModValue;
-
-
-
-	int iBonus;
-
-	if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+	int iNumSpyDefenseMod = GetNumSpyDefenseMod();
+	if (iNumSpyDefenseMod > 0)
 	{
-		iSpy = kPlayer.GetEspionage()->GetNumSpies();
-		iSpyDefenseModValue = GetNumSpyDefenseMod();
-		iTempModifier = (iSpy * iSpyDefenseModValue);
-		iModifier += iTempModifier;
+		int iSpy = kPlayer.GetEspionage()->GetNumSpies();
+		iModifier += iSpy * iNumSpyDefenseMod;
 	}
 
-
-	if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+	int iNumWorkDefenseMod = GetNumWorkDefenseMod();
+	if (iNumWorkDefenseMod > 0)
 	{
-		iWork = kPlayer.GetCulture()->GetNumGreatWorks();
-		iWorkDefenseModValue = GetNumWorkDefenseMod();
-		iTempModifier = (iWork * iWorkDefenseModValue);
-		iModifier += iTempModifier;
+		int iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+		iModifier += iWork * iNumWorkDefenseMod;
 	}
 
-	if (kPlayer.GetNumWorldWonders() > 0)
+	int iNumWonderDefenseMod = GetNumWonderDefenseMod();
+	if (iNumWonderDefenseMod > 0)
 	{
-		iWonder = kPlayer.GetNumWorldWonders();
-		iWonderDefenseModValue = GetNumWonderDefenseMod();
-		iTempModifier = (iWonder * iWonderDefenseModValue);
-		iModifier += iTempModifier;
+		int iWonder = kPlayer.GetNumWorldWonders();
+		iModifier += iWonder * iNumWonderDefenseMod;
 	}
 
 
 	if (GetCurrHitPoints() > 0)
 	{
-		
-		iBonus = (GetMaxHitPoints()- GetCurrHitPoints());
-	  if (iBonus >100)
-	  {
-		  iBonus=100;
-	  }
+		int iBonus = (GetMaxHitPoints()- GetCurrHitPoints());
+		if (iBonus > 100) iBonus = 100;
 		iTempModifier = (iBonus * GetCurrentHitPointDefenseMod());
 		iModifier += iTempModifier;
 	}
 
 	// near enemy
-	int iNumAdjacentEnemy = GetNumEnemyAdjacent();
-	if (iNumAdjacentEnemy > 0)
+	int iEnemyModifier = GetNearNumEnemyDefenseMod();
+	if (iEnemyModifier != 0)
 	{
-		int iEnemyModifier = GetNearNumEnemyDefenseMod();
-		if (iEnemyModifier > 0)
-		{
-			iTempModifier = GetNearNumEnemyDefenseMod() * iNumAdjacentEnemy;
-		}
-
-		iModifier += iTempModifier;
+		iModifier += iEnemyModifier * GetNumEnemyAdjacent();
 	}
 #endif
 
@@ -15824,13 +15764,11 @@ int CvUnit::GetMaxDefenseStrength(const CvPlot* pInPlot, const CvUnit* pAttacker
 			else
 				iModifier += attackBelow50HealthModifier();
 
-			int iSpyStayDefenseModValue;
-			if (GET_TEAM(getTeam()).HasSpyAtTeam(pAttacker->getTeam()))
+			int iNumSpyStayDefenseMod = GetNumSpyStayDefenseMod();
+			if (iNumSpyStayDefenseMod != 0 && GET_TEAM(getTeam()).HasSpyAtTeam(pAttacker->getTeam()))
 			{
-				iSpyStayDefenseModValue = GetNumSpyStayDefenseMod();
-				iModifier += iSpyStayDefenseModValue;
+				iModifier += iNumSpyStayDefenseMod;
 			}
-
 		}
 #endif
 
@@ -16139,14 +16077,11 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			else
 				iModifier += attackBelow50HealthModifier();
 
-			int iSpyStayAttackModValue;
-
-			if (GET_TEAM(getTeam()).HasSpyAtTeam(pOtherUnit->getTeam()))
+			int iNumSpyStayAttackMod = GetNumSpyStayAttackMod();
+			if (iNumSpyStayAttackMod != 0 && GET_TEAM(getTeam()).HasSpyAtTeam(pOtherUnit->getTeam()))
 			{
-				iSpyStayAttackModValue = GetNumSpyStayAttackMod();
-				iModifier += iSpyStayAttackModValue;
+				iModifier += iNumSpyStayAttackMod;
 			}
-
 
 			//bonus for attacking same unit over and over in a turn?
 			int iTempModifier = getMultiAttackBonus();
@@ -16339,11 +16274,10 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			iModifier += domainDefense(pOtherUnit->getDomainType());
 
 #if defined(MOD_ROG_CORE)
-			int iSpyStayDefenseModValue;
-			if (GET_TEAM(getTeam()).HasSpyAtTeam(pOtherUnit->getTeam()))
+			int iNumSpyStayDefenseMod = GetNumSpyStayDefenseMod();
+			if (iNumSpyStayDefenseMod != 0 && GET_TEAM(getTeam()).HasSpyAtTeam(pOtherUnit->getTeam()))
 			{
-				iSpyStayDefenseModValue = GetNumSpyStayDefenseMod();
-				iModifier += iSpyStayDefenseModValue;
+				iModifier += iNumSpyStayDefenseMod;
 			}
 #endif
 
@@ -16479,69 +16413,40 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		}
 
 		// spy modifier always applies for  attack
-		int iSpy;
-		int iSpyAttackModValue;
-
-		int iWork;
-		int iWorkAttackModValue;
-
-		int iWonder;
-		int iWonderAttackModValue;
-
+		int iNumSpyAttackMod = GetNumSpyAttackMod();
+		if (iNumSpyAttackMod > 0)
+		{
+			int iSpy = kPlayer.GetEspionage()->GetNumSpies();
+			iModifier += iSpy * iNumSpyAttackMod;
+		}
 	
-
-		int iBonus;
-
-		if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+		int iNumWorkAttackMod = GetNumWorkAttackMod();
+		if (iNumWorkAttackMod > 0)
 		{
-			iSpy = kPlayer.GetEspionage()->GetNumSpies();
-			iSpyAttackModValue = GetNumSpyAttackMod();
-			iTempModifier = (iSpy * iSpyAttackModValue);
-			iModifier += iTempModifier;
+			int iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+			iModifier += iWork * iNumWorkAttackMod;
 		}
 
-
-		if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+		int iNumWonderAttackMod = GetNumWonderAttackMod();
+		if (iNumWonderAttackMod > 0)
 		{
-			iWork = kPlayer.GetCulture()->GetNumGreatWorks();
-			iWorkAttackModValue = GetNumWorkAttackMod();
-			iTempModifier = (iWork * iWorkAttackModValue);
-			iModifier += iTempModifier;
-		}
-
-
-
-		if (kPlayer.GetNumWorldWonders() > 0)
-		{
-			iWonder = kPlayer.GetNumWorldWonders();
-			iWonderAttackModValue = GetNumWonderAttackMod();
-			iTempModifier = (iWonder * iWonderAttackModValue);
-			iModifier += iTempModifier;
+			int iWonder = kPlayer.GetNumWorldWonders();
+			iModifier += iWonder * iNumWonderAttackMod;
 		}
 
 		if (GetCurrHitPoints() > 0)
 		{
-			iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
-			if (iBonus > 100)
-			{
-				iBonus = 100;
-			}
+			int iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
+			if (iBonus > 100) iBonus = 100;
 			iTempModifier = (iBonus * GetCurrentHitPointAttackMod());
 			iModifier += iTempModifier;
 		}
 
-
 		// near enemy
-		int iNumAdjacentEnemy = GetNumEnemyAdjacent();
-		if (iNumAdjacentEnemy > 0)
+		int iEnemyModifier = GetNearNumEnemyAttackMod();
+		if (iEnemyModifier != 0)
 		{
-			int iEnemyModifier = GetNearNumEnemyAttackMod();
-			if (iEnemyModifier > 0)
-			{
-				iTempModifier = GetNearNumEnemyAttackMod() * iNumAdjacentEnemy;
-			}
-
-			iModifier += iTempModifier;
+			iModifier += GetNearNumEnemyAttackMod() * GetNumEnemyAdjacent();
 		}
 #endif
 
@@ -16675,66 +16580,41 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 #if defined(MOD_ROG_CORE)
 		// spy modifier always applies for  attack
-		int iSpy;
-		int iSpyDefenseModValue;
-
-		int iWork;
-		int iWorkDefenseModValue;
-
-		int iWonder;
-		int iWonderDefenseModValue;
-
-		int iBonus;
-
-		if (kPlayer.GetEspionage()->GetNumSpies() > 0)
+		int iNumSpyDefenseMod = GetNumSpyDefenseMod();
+		if (iNumSpyDefenseMod > 0)
 		{
-			iSpy = kPlayer.GetEspionage()->GetNumSpies();
-			iSpyDefenseModValue = GetNumSpyDefenseMod();
-			iTempModifier = (iSpy * iSpyDefenseModValue);
-			iModifier += iTempModifier;
+			int iSpy = kPlayer.GetEspionage()->GetNumSpies();
+			iModifier += iSpy * iNumSpyDefenseMod;
 		}
 
-
-		if (kPlayer.GetCulture()->GetNumGreatWorks() > 0)
+		int iNumWorkDefenseMod = GetNumWorkDefenseMod();
+		if (iNumWorkDefenseMod > 0)
 		{
-			iWork = kPlayer.GetCulture()->GetNumGreatWorks();
-			iWorkDefenseModValue = GetNumWorkDefenseMod();
-			iTempModifier = (iWork * iWorkDefenseModValue);
-			iModifier += iTempModifier;
+			int iWork = kPlayer.GetCulture()->GetNumGreatWorks();
+			iModifier += iWork * iNumWorkDefenseMod;
 		}
 
-		if (kPlayer.GetNumWorldWonders() > 0)
+		int iNumWonderDefenseMod = GetNumWonderDefenseMod();
+		if (iNumWonderDefenseMod > 0)
 		{
-			iWonder = kPlayer.GetNumWorldWonders();
-			iWonderDefenseModValue = GetNumWonderDefenseMod();
-			iTempModifier = (iWonder * iWonderDefenseModValue);
-			iModifier += iTempModifier;
+			int iWonder = kPlayer.GetNumWorldWonders();
+			iModifier += iWonder * iNumWonderDefenseMod;
 		}
 
 
 		if (GetCurrHitPoints() > 0)
 		{
-			
-			iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
-			if (iBonus > 100)
-			{
-				iBonus = 100;
-			}
+			int iBonus = (GetMaxHitPoints() - GetCurrHitPoints());
+			if (iBonus > 100) iBonus = 100;
 			iTempModifier = (iBonus * GetCurrentHitPointDefenseMod());
 			iModifier += iTempModifier;
 		}
 
 		// near enemy
-		int iNumAdjacentEnemy = GetNumEnemyAdjacent();
-		if (iNumAdjacentEnemy > 0)
+		int iEnemyModifier = GetNearNumEnemyDefenseMod();
+		if (iEnemyModifier != 0)
 		{
-			int iEnemyModifier = GetNearNumEnemyDefenseMod();
-			if (iEnemyModifier > 0)
-			{
-				iTempModifier = GetNearNumEnemyDefenseMod() * iNumAdjacentEnemy;
-			}
-
-			iModifier += iTempModifier;
+			iModifier += iEnemyModifier * GetNumEnemyAdjacent();
 		}
 #endif
 
@@ -18251,39 +18131,6 @@ int CvUnit::GetStrengthModifierFromExtraHappiness() const
 	return mod;
 }
 #endif
-
-#if defined(MOD_ROG_CORE)
-int CvUnit::getNearbyUnitPromotionBonus() const
-{
-	return m_iNearbyUnitPromotionBonus;
-}
-
-void CvUnit::SetNearbyUnitPromotionBonus(int iCombatBonus)
-{
-	m_iNearbyUnitPromotionBonus = iCombatBonus;
-}
-
-int CvUnit::getNearbyUnitPromotionBonusRange() const
-{
-	return m_iNearbyUnitPromotionBonusRange;
-}
-
-void CvUnit::SetNearbyUnitPromotionBonusRange(int iBonusRange)
-{
-	m_iNearbyUnitPromotionBonusRange = iBonusRange;
-}
-
-PromotionTypes CvUnit::getCombatBonusFromNearbyUnitPromotion() const
-{
-	return (PromotionTypes)m_iCombatBonusFromNearbyUnitPromotion;
-}
-
-void CvUnit::SetCombatBonusFromNearbyUnitPromotion(PromotionTypes ePromotion)
-{
-	m_iCombatBonusFromNearbyUnitPromotion = ePromotion;
-}
-#endif
-
 
 int CvUnit::GetAirInterceptRange() const
 {
@@ -24197,47 +24044,77 @@ int CvUnit::GetNearbyImprovementModifier()const
 
 
 #if defined(MOD_ROG_CORE)
-int CvUnit::GetNearbyUnitPromotionModifierFromUnitPromotion() const
+int CvUnit::getNearbyUnitPromotionBonus() const
 {
-	return GetNearbyUnitPromotionModifier(getCombatBonusFromNearbyUnitPromotion(), getNearbyUnitPromotionBonusRange(), getNearbyUnitPromotionBonus());
+	return m_iNearbyUnitPromotionBonus;
+}
+void CvUnit::SetNearbyUnitPromotionBonus(int iCombatBonus)
+{
+	m_iNearbyUnitPromotionBonus = iCombatBonus;
 }
 
-int CvUnit::GetNearbyUnitPromotionModifier(PromotionTypes ePromotion, int iUnitPromotionRange, int iUnitPromotionModifier) const
+int CvUnit::getNearbyUnitPromotionBonusRange() const
 {
-	if (iUnitPromotionModifier != 0)
+	return m_iNearbyUnitPromotionBonusRange;
+}
+
+void CvUnit::SetNearbyUnitPromotionBonusRange(int iBonusRange)
+{
+	m_iNearbyUnitPromotionBonusRange = iBonusRange;
+}
+int CvUnit::getNearbyUnitPromotionBonusMax() const
+{
+	return m_iNearbyUnitPromotionBonusMax;
+}
+void CvUnit::SetNearbyUnitPromotionBonusMax(int iBonusMax)
+{
+	m_iNearbyUnitPromotionBonusMax = iBonusMax;
+}
+
+PromotionTypes CvUnit::getCombatBonusFromNearbyUnitPromotion() const
+{
+	return (PromotionTypes)m_iCombatBonusFromNearbyUnitPromotion;
+}
+void CvUnit::SetCombatBonusFromNearbyUnitPromotion(PromotionTypes ePromotion)
+{
+	m_iCombatBonusFromNearbyUnitPromotion = ePromotion;
+}
+
+int CvUnit::GetNearbyUnitPromotionModifierFromUnitPromotion() const
+{
+	const PromotionTypes ePromotion = getCombatBonusFromNearbyUnitPromotion();
+	if (ePromotion == NO_PROMOTION) return 0;
+
+	const int iUnitPromotionModifier = getNearbyUnitPromotionBonus();
+	if (iUnitPromotionModifier == 0) return 0;
+
+	const int iUnitPromotionRange = getNearbyUnitPromotionBonusRange();
+	const int iUnitPromotionModifierMax = getNearbyUnitPromotionBonusMax() <= 0 ? iUnitPromotionModifier : getNearbyUnitPromotionBonusMax();
+	int iTotalModifier = 0;
+
+	CvPlot* pLoopPlot = nullptr;
+	// Look around this Unit to see if there's a nearby Unit Promotion that will give us the modifier
+	for (int iX = -iUnitPromotionRange; iX <= iUnitPromotionRange; iX++)
 	{
-
-
-		CvPlot* pLoopPlot;
-		//CvPlot* pLoopPlot = NULL;
-		// 
-		// Look around this Unit to see if there's a nearby Unit Promotion that will give us the modifier
-		for (int iX = -iUnitPromotionRange; iX <= iUnitPromotionRange; iX++)
+		for (int iY = -iUnitPromotionRange; iY <= iUnitPromotionRange; iY++)
 		{
-			for (int iY = -iUnitPromotionRange; iY <= iUnitPromotionRange; iY++)
+			pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iX, iY, iUnitPromotionRange);
+			if (pLoopPlot == nullptr || pLoopPlot->getNumUnits() == 0) continue;
+			for (int iK = 0; iK < pLoopPlot->getNumUnits(); iK++)
 			{
-				pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iX, iY, iUnitPromotionRange);
-				if (pLoopPlot != NULL && pLoopPlot->getNumUnits() != 0)
-				{
-					for (int iK = 0; iK < pLoopPlot->getNumUnits(); iK++)
-					{
-						CvUnit* pLoopUnit = pLoopPlot->getUnitByIndex(iK);
-						if (pLoopUnit != NULL)
-						{
-							if ( pLoopUnit->isHasPromotion(ePromotion) && (pLoopUnit != this))
-							{
-								if (GET_PLAYER(pLoopUnit->getOwner()).getTeam() == GET_PLAYER(getOwner()).getTeam())
-								{
-									return iUnitPromotionModifier;
-								}
-							}
-						}
-					}
-				}
+				CvUnit* pLoopUnit = pLoopPlot->getUnitByIndex(iK);
+				if (pLoopUnit == nullptr) continue;
+				if (!pLoopUnit->isHasPromotion(ePromotion) || pLoopUnit == this) continue;
+				if (GET_PLAYER(pLoopUnit->getOwner()).getTeam() != GET_PLAYER(getOwner()).getTeam()) continue;
+
+				iTotalModifier += iUnitPromotionModifier;
+				if(iTotalModifier >= iUnitPromotionModifierMax) return std::min(iTotalModifier, iUnitPromotionModifierMax);
 			}
 		}
 	}
-	return 0;
+
+	// After loop, iTotalModifier < iUnitPromotionModifierMax
+	return iTotalModifier;
 }
 #endif
 
@@ -26378,11 +26255,22 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeIsFightWellDamaged(thisPromotion.IsFightWellDamaged() ? iChange : 0);
 
 #if defined(MOD_ROG_CORE)
-		if (MOD_ROG_CORE) {
-			if (thisPromotion.GetNearbyUnitPromotionBonus() > 0) {
+		if (thisPromotion.GetNearbyUnitPromotionBonus() > 0)
+		{
+			if(iChange > 0)
+			{
 				SetNearbyUnitPromotionBonus(thisPromotion.GetNearbyUnitPromotionBonus());
 				SetNearbyUnitPromotionBonusRange(thisPromotion.GetNearbyUnitPromotionBonusRange());
+				SetNearbyUnitPromotionBonusMax(thisPromotion.GetNearbyUnitPromotionBonusMax());
 				SetCombatBonusFromNearbyUnitPromotion(thisPromotion.GetCombatBonusFromNearbyUnitPromotion());
+			}
+			else
+			{
+				// TODO: make it more flexible and correct
+				SetNearbyUnitPromotionBonus(0);
+				SetNearbyUnitPromotionBonusRange(0);
+				SetNearbyUnitPromotionBonusMax(0);
+				SetCombatBonusFromNearbyUnitPromotion(NO_PROMOTION);
 			}
 		}
 #endif
