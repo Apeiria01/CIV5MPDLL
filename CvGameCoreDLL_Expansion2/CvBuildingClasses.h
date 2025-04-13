@@ -505,7 +505,10 @@ public:
 
 	int GetHurryModifier(int i) const;
 	int GetHurryModifierLocal(int i) const;
-	bool IsBuildingClassNeededInCity(int i) const;
+	const std::tr1::unordered_set<int>& GetBuildingClassesNeededInCity() const;
+	const std::tr1::unordered_set<int>& GetBuildingClassesNeededGlobal() const;
+	const std::tr1::unordered_set<int>& GetBuildingsNeededInCity() const;
+	const std::tr1::unordered_set<int>& GetBuildingsNeededGlobal() const;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	int GetCityDefenseModifierGlobal() const;
 	int GetUnitMaxExperienceLocal() const;
@@ -519,7 +522,6 @@ public:
 	int GetTradeRouteLandGoldBonusGlobal() const;
 	bool IsAnyWater() const;
 	bool IsRiverOrCoastal() const;
-	bool IsBuildingClassNeededGlobal(int i) const;
 #endif
 	int GetNumFreeUnit() const;
 	int GetNumFreeUnitTotal() const;
@@ -973,7 +975,10 @@ private:
 	std::pair<UnitClassTypes, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
 #endif 
 
-	bool* m_pbBuildingClassNeededInCity;
+	std::tr1::unordered_set<int> m_setBuildingClassesNeededInCity;
+	std::tr1::unordered_set<int> m_setBuildingClassesNeededGlobal;
+	std::tr1::unordered_set<int> m_setBuildingsNeededInCity;
+	std::tr1::unordered_set<int> m_setBuildingsNeededGlobal;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	int m_iCityDefenseModifierGlobal;
 	int m_iUnitMaxExperienceLocal;
@@ -987,7 +992,6 @@ private:
 	int m_iTradeRouteLandGoldBonusGlobal;
 	bool m_bAnyWater;
 	bool m_bRiverOrCoastal;
-	bool* m_pbBuildingClassNeededGlobal;
 #endif
 	int m_iNumFreeUnit;
 	int m_iNumFreeUnitTotal;

@@ -3509,24 +3509,21 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 		return false;
 
 	// Does this city have prereq buildings?
-	for(iI = 0; iI < iNumBuildingClassInfos; iI++)
+	for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededInCity())
 	{
-		CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo((BuildingClassTypes)iI);
-		if(!pkBuildingClassInfo)
-		{
-			continue;
-		}
-
-		if(pkBuildingInfo->IsBuildingClassNeededInCity(iI) && GetNumBuildingClass((BuildingClassTypes)iI) <= 0)
-		{
-			return false;
-		}
-#if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
-		if(pkBuildingInfo->IsBuildingClassNeededGlobal(iI) && kPlayer.getBuildingClassCount((BuildingClassTypes)iI) <= 0)
-		{
-			return false;
-		}
-#endif
+		if(GetNumBuildingClass((BuildingClassTypes)iBuildingClass) <= 0) return false;
+	}
+	for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededGlobal())
+	{
+		if(kPlayer.getBuildingClassCount((BuildingClassTypes)iBuildingClass) <= 0) return false;
+	}
+	for(auto iBuilding : pkBuildingInfo->GetBuildingsNeededInCity())
+	{
+		if(GetCityBuildings()->GetNumBuilding((BuildingTypes)iBuilding) <= 0) return false;
+	}
+	for (auto iBuilding : pkBuildingInfo->GetBuildingsNeededGlobal())
+	{
+		if (kPlayer.countNumBuildings((BuildingTypes)iBuilding) <= 0) return false;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -18866,26 +18863,21 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 				}
 
 				// Does this city have prereq buildings?
-				int iNumBuildingClassInfos = GC.getNumBuildingClassInfos();
-				BuildingTypes ePrereqBuilding = NO_BUILDING;
-				for(int iI = 0; iI < iNumBuildingClassInfos; iI++)
+				for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededInCity())
 				{
-					CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo((BuildingClassTypes)iI);
-					if(!pkBuildingClassInfo)
-					{
-						continue;
-					}
-
-					if(pkBuildingInfo->IsBuildingClassNeededInCity(iI) && GetNumBuildingClass((BuildingClassTypes)iI) <= 0)
-					{
-						return false;
-					}
-#if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
-					if(pkBuildingInfo->IsBuildingClassNeededGlobal(iI) && kPlayer.getBuildingClassCount((BuildingClassTypes)iI) <= 0)
-					{
-						return false;
-					}
-#endif
+					if(GetNumBuildingClass((BuildingClassTypes)iBuildingClass) <= 0) return false;
+				}
+				for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededGlobal())
+				{
+					if(kPlayer.getBuildingClassCount((BuildingClassTypes)iBuildingClass) <= 0) return false;
+				}
+				for(auto iBuilding : pkBuildingInfo->GetBuildingsNeededInCity())
+				{
+					if(GetCityBuildings()->GetNumBuilding((BuildingTypes)iBuilding) <= 0) return false;
+				}
+				for (auto iBuilding : pkBuildingInfo->GetBuildingsNeededGlobal())
+				{
+					if (kPlayer.countNumBuildings((BuildingTypes)iBuilding) <= 0) return false;
 				}
 #if !defined(MOD_BUGFIX_MINOR)
 			}
