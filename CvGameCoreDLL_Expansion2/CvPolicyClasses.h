@@ -700,6 +700,7 @@ public:
 
 	// Accessor Functions (Arrays)
 	int GetPolicyBranchDisables(int i) const;
+	bool IsLockedByCivilization(int i) const;
 
 private:
 	int m_iEraPrereq;
@@ -717,6 +718,7 @@ private:
 
 	// Arrays
 	int* m_piPolicyBranchDisables;
+	std::tr1::unordered_set<int> m_setPolicyBranchCivilizationLocked;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -3160,6 +3160,7 @@ bool CvPolicyBranchEntry::CacheResults(Database::Results& kResults, CvDatabaseUt
 
 		pResults->Reset();
 	}
+	kUtility.PopulateArrayByExistence(m_setPolicyBranchCivilizationLocked, "Civilizations", "PolicyBranch_CivilizationLocked", "CivilizationType", "PolicyBranchType", szPolicyBranchType);
 
 	return true;
 }
@@ -3198,6 +3199,12 @@ int CvPolicyBranchEntry::GetSecondAdopterFreePolicies() const
 int CvPolicyBranchEntry::GetPolicyBranchDisables(int i) const
 {
 	return m_piPolicyBranchDisables ? m_piPolicyBranchDisables[i] : -1;
+}
+
+/// Policy Branches disabled for special Civilization
+bool CvPolicyBranchEntry::IsLockedByCivilization(int i) const
+{
+	return m_setPolicyBranchCivilizationLocked.size() > 0 && m_setPolicyBranchCivilizationLocked.count(i) > 0;
 }
 
 /// Are policies in this branch unlocked by buying lower-level prereq policies?
@@ -4361,6 +4368,11 @@ bool CvPlayerPolicies::CanUnlockPolicyBranch(PolicyBranchTypes eBranchType)
 	{
 		// Ideology branches unlocked through a direct call to SetPolicyBranchUnlocked()
 		if (pkBranchEntry->IsPurchaseByLevel())
+		{
+			return false;
+		}
+
+		if (pkBranchEntry->IsLockedByCivilization(GetPlayer()->getCivilizationType()))
 		{
 			return false;
 		}
