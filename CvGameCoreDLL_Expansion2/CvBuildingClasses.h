@@ -494,21 +494,21 @@ public:
 	int GetFlavorValue(int i) const;
 	
 	const std::tr1::unordered_set<int>& GetLockedBuildingClasses() const;
-	const std::tr1::unordered_set<int>& GetPrereqAndTechs() const;
-	const std::tr1::unordered_set<int>& GetLocalResourceAnd() const;
-	const std::tr1::unordered_set<int>& GetLocalResourceOr() const;
-	const std::tr1::unordered_set<int>& GetEmpireResourceAnd() const;
-	const std::tr1::unordered_set<int>& GetEmpireResourceOr() const;
-	const std::tr1::unordered_set<int>& GetFeatureOr() const;
-	const std::tr1::unordered_set<int>& GetFeatureAnd() const;
-	const std::tr1::unordered_set<int>& GetPlotAnd() const;
+	const std::vector<int>& GetPrereqAndTechs() const;
+	const std::vector<int>& GetLocalResourceAnd() const;
+	const std::vector<int>& GetLocalResourceOr() const;
+	const std::vector<int>& GetEmpireResourceAnd() const;
+	const std::vector<int>& GetEmpireResourceOr() const;
+	const std::vector<int>& GetFeatureOr() const;
+	const std::vector<int>& GetFeatureAnd() const;
+	const std::vector<int>& GetPlotAnd() const;
 
 	int GetHurryModifier(int i) const;
 	int GetHurryModifierLocal(int i) const;
-	const std::tr1::unordered_set<int>& GetBuildingClassesNeededInCity() const;
-	const std::tr1::unordered_set<int>& GetBuildingClassesNeededGlobal() const;
-	const std::tr1::unordered_set<int>& GetBuildingsNeededInCity() const;
-	const std::tr1::unordered_set<int>& GetBuildingsNeededGlobal() const;
+	const std::vector<int>& GetBuildingClassesNeededInCity() const;
+	const std::vector<int>& GetBuildingClassesNeededGlobal() const;
+	const std::vector<int>& GetBuildingsNeededInCity() const;
+	const std::vector<int>& GetBuildingsNeededGlobal() const;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	int GetCityDefenseModifierGlobal() const;
 	int GetUnitMaxExperienceLocal() const;
@@ -958,14 +958,14 @@ private:
 	int* m_piFlavorValue;
 
 	std::tr1::unordered_set<int> m_piLockedBuildingClasses;
-	std::tr1::unordered_set<int> m_piPrereqAndTechs;
-	std::tr1::unordered_set<int> m_piLocalResourceAnds;
-	std::tr1::unordered_set<int> m_piLocalResourceOrs;
-	std::tr1::unordered_set<int> m_piEmpireResourceAnds;
-	std::tr1::unordered_set<int> m_piEmpireResourceOrs;
-	std::tr1::unordered_set<int> m_piLocalFeatureOrs;
-	std::tr1::unordered_set<int> m_piLocalFeatureAnds;
-	std::tr1::unordered_set<int> m_piLocalPlotAnds;
+	std::vector<int> m_piPrereqAndTechs;
+	std::vector<int> m_piLocalResourceAnds;
+	std::vector<int> m_piLocalResourceOrs;
+	std::vector<int> m_piEmpireResourceAnds;
+	std::vector<int> m_piEmpireResourceOrs;
+	std::vector<int> m_piLocalFeatureOrs;
+	std::vector<int> m_piLocalFeatureAnds;
+	std::vector<int> m_piLocalPlotAnds;
 
 	int* m_paiHurryModifier;
 	int* m_paiHurryModifierLocal;
@@ -975,10 +975,10 @@ private:
 	std::pair<UnitClassTypes, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
 #endif 
 
-	std::tr1::unordered_set<int> m_setBuildingClassesNeededInCity;
-	std::tr1::unordered_set<int> m_setBuildingClassesNeededGlobal;
-	std::tr1::unordered_set<int> m_setBuildingsNeededInCity;
-	std::tr1::unordered_set<int> m_setBuildingsNeededGlobal;
+	std::vector<int> m_setBuildingClassesNeededInCity;
+	std::vector<int> m_setBuildingClassesNeededGlobal;
+	std::vector<int> m_setBuildingsNeededInCity;
+	std::vector<int> m_setBuildingsNeededGlobal;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	int m_iCityDefenseModifierGlobal;
 	int m_iUnitMaxExperienceLocal;

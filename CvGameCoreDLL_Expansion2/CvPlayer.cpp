@@ -8739,7 +8739,7 @@ bool CvPlayer::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestV
 		return false;
 	}
 
-	for(const auto& iTech : pBuildingInfo.GetPrereqAndTechs())
+	for(auto iTech : pBuildingInfo.GetPrereqAndTechs())
 	{
 		if(!currentTeam.GetTeamTechs()->HasTech((TechTypes)iTech))
 		{
@@ -26602,7 +26602,7 @@ int CvPlayer::getAdvancedStartTechCost(TechTypes eTech, bool bAdd)
 						{
 							return -1;
 						}
-						for(const auto& iTech : pkBuildingInfo->GetPrereqAndTechs())
+						for(auto iTech : pkBuildingInfo->GetPrereqAndTechs())
 						{
 							if(iTech == eTech)
 							{

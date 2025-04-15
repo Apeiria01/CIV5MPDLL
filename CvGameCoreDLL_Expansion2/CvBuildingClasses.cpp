@@ -3831,42 +3831,42 @@ const std::tr1::unordered_set<int>& CvBuildingEntry::GetLockedBuildingClasses() 
 	return m_piLockedBuildingClasses;
 }
 /// Prerequisite techs with AND
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetPrereqAndTechs() const
+const std::vector<int>& CvBuildingEntry::GetPrereqAndTechs() const
 {
 	return m_piPrereqAndTechs;
 }
 /// Prerequisite resources with AND
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetLocalResourceAnd() const
+const std::vector<int>& CvBuildingEntry::GetLocalResourceAnd() const
 {
 	return m_piLocalResourceAnds;
 }
 /// Prerequisite resources with OR
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetLocalResourceOr() const
+const std::vector<int>& CvBuildingEntry::GetLocalResourceOr() const
 {
 	return m_piLocalResourceOrs;
 }
 /// Prerequisite Feature with AND
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetEmpireResourceAnd() const
+const std::vector<int>& CvBuildingEntry::GetEmpireResourceAnd() const
 {
 	return m_piEmpireResourceAnds;
 }
 /// Prerequisite resources with OR
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetEmpireResourceOr() const
+const std::vector<int>& CvBuildingEntry::GetEmpireResourceOr() const
 {
 	return m_piEmpireResourceOrs;
 }
 /// Prerequisite Feature with AND
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetFeatureAnd() const
+const std::vector<int>& CvBuildingEntry::GetFeatureAnd() const
 {
 	return m_piLocalFeatureAnds;
 }
 /// Prerequisite Feature with OR
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetFeatureOr() const
+const std::vector<int>& CvBuildingEntry::GetFeatureOr() const
 {
 	return m_piLocalFeatureOrs;
 }
 /// Prerequisite Plot with AND
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetPlotAnd() const
+const std::vector<int>& CvBuildingEntry::GetPlotAnd() const
 {
 	return m_piLocalPlotAnds;
 }
@@ -4117,22 +4117,22 @@ int CvBuildingEntry::GetSpecificGreatPersonRateModifier(int i) const
 #endif
 
 /// Can it only built if there is a building of this class in the city?
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetBuildingClassesNeededInCity() const
+const std::vector<int>& CvBuildingEntry::GetBuildingClassesNeededInCity() const
 {
 	return m_setBuildingClassesNeededInCity;
 }
 /// Can it only built if there is a building of this class Global?
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetBuildingClassesNeededGlobal() const
+const std::vector<int>& CvBuildingEntry::GetBuildingClassesNeededGlobal() const
 {
 	return m_setBuildingClassesNeededGlobal;
 }
 /// Can it only built if there is a building in the city?
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetBuildingsNeededInCity() const
+const std::vector<int>& CvBuildingEntry::GetBuildingsNeededInCity() const
 {
 	return m_setBuildingsNeededInCity;
 }
 /// Can it only built if there is a building Global?
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetBuildingsNeededGlobal() const
+const std::vector<int>& CvBuildingEntry::GetBuildingsNeededGlobal() const
 {
 	return m_setBuildingsNeededGlobal;
 }

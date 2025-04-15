@@ -4126,7 +4126,7 @@ bool CvCity::IsBuildingLocalResourceValid(BuildingTypes eBuilding, bool bTestVis
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for(const auto& iResource : pkBuildingInfo->GetLocalResourceAnd())
+	for(auto iResource : pkBuildingInfo->GetLocalResourceAnd())
 	{
 		eResource = (ResourceTypes)iResource;
 
@@ -4149,7 +4149,7 @@ bool CvCity::IsBuildingLocalResourceValid(BuildingTypes eBuilding, bool bTestVis
 	int iOrResources = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (const auto& iResource : pkBuildingInfo->GetLocalResourceOr())
+	for (auto iResource : pkBuildingInfo->GetLocalResourceOr())
 	{
 		eResource = (ResourceTypes)iResource;
 
@@ -4191,7 +4191,7 @@ bool CvCity::IsBuildingEmpireResourceValid(BuildingTypes eBuilding, CvString* to
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for (const auto& iResource : pkBuildingInfo->GetEmpireResourceAnd())
+	for (auto iResource : pkBuildingInfo->GetEmpireResourceAnd())
 	{
 		ResourceTypes eResource = (ResourceTypes)iResource;
 
@@ -4216,7 +4216,7 @@ bool CvCity::IsBuildingEmpireResourceValid(BuildingTypes eBuilding, CvString* to
 	int iOrResources = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (const auto& iResource : pkBuildingInfo->GetEmpireResourceAnd())
+	for (auto iResource : pkBuildingInfo->GetEmpireResourceOr())
 	{
 		ResourceTypes eResource = (ResourceTypes)iResource;
 
@@ -4252,7 +4252,7 @@ bool CvCity::IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSi
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for (const auto& iFeature : pkBuildingInfo->GetFeatureAnd())
+	for (auto iFeature : pkBuildingInfo->GetFeatureAnd())
 	{
 		FeatureTypes eFeature = (FeatureTypes)iFeature;
 
@@ -4275,7 +4275,7 @@ bool CvCity::IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSi
 	int iOrFeatures = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (const auto& iFeature : pkBuildingInfo->GetFeatureOr())
+	for (auto iFeature : pkBuildingInfo->GetFeatureOr())
 	{
 		FeatureTypes eFeature = (FeatureTypes)iFeature;
 
@@ -4346,7 +4346,7 @@ bool CvCity::IsBuildingPlotValid(BuildingTypes eBuilding, CvString* toolTipSink)
 		return false;
 
 	// ANDs: City must have ALL of these plots
-	for (const auto& iPlot : pkBuildingInfo->GetPlotAnd())
+	for (auto iPlot : pkBuildingInfo->GetPlotAnd())
 	{
 		PlotTypes ePlot = (PlotTypes)iPlot;
 		// Doesn't require a Plot in this AND slot
