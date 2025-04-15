@@ -143,7 +143,6 @@ public:
 	int GetEnhancedYieldTech() const;
 	int GetTechEnhancedTourism() const;
 	int GetGoldMaintenance() const;
-	int GetMutuallyExclusiveGroup() const;
 	int GetReplacementBuildingClass() const;
 	int GetPrereqAndTech() const;
 	int GetTechNoPrereqClasses() const;
@@ -492,8 +491,8 @@ public:
 	int GetProductionTraits(int i) const;
 	int GetPrereqNumOfBuildingClass(int i) const;
 	int GetFlavorValue(int i) const;
-	
-	const std::tr1::unordered_set<int>& GetLockedBuildingClasses() const;
+
+	const std::vector<int>& GetLockedByBuildings() const;
 	const std::vector<int>& GetPrereqAndTechs() const;
 	const std::vector<int>& GetLocalResourceAnd() const;
 	const std::vector<int>& GetLocalResourceOr() const;
@@ -633,7 +632,6 @@ private:
 	int m_iEnhancedYieldTech;
 	int m_iTechEnhancedTourism;
 	int m_iGoldMaintenance;
-	int m_iMutuallyExclusiveGroup;
 	int m_iReplacementBuildingClass;
 	int m_iPrereqAndTech;
 	int m_iTechNoPrereqClasses;
@@ -957,7 +955,7 @@ private:
 	int* m_piPrereqNumOfBuildingClass;
 	int* m_piFlavorValue;
 
-	std::tr1::unordered_set<int> m_piLockedBuildingClasses;
+	std::vector<int> m_piLockedByBuildings;
 	std::vector<int> m_piPrereqAndTechs;
 	std::vector<int> m_piLocalResourceAnds;
 	std::vector<int> m_piLocalResourceOrs;

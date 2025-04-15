@@ -34,7 +34,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iEnhancedYieldTech(NO_TECH),
 	m_iTechEnhancedTourism(0),
 	m_iGoldMaintenance(0),
-	m_iMutuallyExclusiveGroup(0),
 	m_iReplacementBuildingClass(NO_BUILDINGCLASS),
 	m_iPrereqAndTech(NO_TECH),
 	m_iTechNoPrereqClasses(NO_TECH),
@@ -523,7 +522,6 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 	//Basic Properties
 	m_iGoldMaintenance = kResults.GetInt("GoldMaintenance");
-	m_iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
 	m_bTeamShare = kResults.GetBool("TeamShare");
 	m_bWater = kResults.GetBool("Water");
 	m_bRiver = kResults.GetBool("River");
@@ -931,7 +929,6 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.PopulateArrayByExistence(m_setBuildingsNeededGlobal, "Buildings", "Building_BuildingsNeededGlobal", "PreBuildingType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByValue(m_paiBuildingClassHappiness, "BuildingClasses", "Building_BuildingClassHappiness", "BuildingClassType", "BuildingType", szBuildingType, "Happiness");
 
-	kUtility.PopulateArrayByExistence(m_piLockedBuildingClasses, "BuildingClasses", "Building_LockedBuildingClasses", "BuildingClassType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piPrereqAndTechs, "Technologies", "Building_TechAndPrereqs", "TechType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piLocalResourceAnds, "Resources", "Building_LocalResourceAnds", "ResourceType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piLocalResourceOrs, "Resources", "Building_LocalResourceOrs", "ResourceType", "BuildingType", szBuildingType);
@@ -941,6 +938,34 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.PopulateArrayByExistence(m_piLocalFeatureOrs, "Features", "Building_LocalFeatureOrs", "FeatureType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piLocalFeatureAnds, "Features", "Building_LocalFeatureAnds", "FeatureType", "BuildingType", szBuildingType);
 	kUtility.PopulateArrayByExistence(m_piLocalPlotAnds, "Plots", "Building_LocalPlotAnds", "PlotType", "BuildingType", szBuildingType);
+	
+	// Building Locked By Buildings
+	// Read both table Building_LockedBuildingClasses and column MutuallyExclusiveGroup and expect to be more effective
+	{
+		std::string strKey("Building_LockedBuildingClasses");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		const char* szBuildingClass = kResults.GetText("BuildingClass");
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select t2.ID from Building_LockedBuildingClasses t1 inner join Buildings t2 on t1.BuildingType = t2.Type where t1.BuildingClassType = ?");
+		}
+
+		pResults->Bind(1, szBuildingClass);
+		while(pResults->Step()) m_piLockedByBuildings.push_back(pResults->GetInt(0));
+	}
+	{
+		std::string strKey("Buildings.MutuallyExclusiveGroup");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		int iGroup = kResults.GetInt("MutuallyExclusiveGroup");
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select ID from Buildings where MutuallyExclusiveGroup != -1 and MutuallyExclusiveGroup = ? and Type != ?");
+		}
+
+		pResults->Bind(1, iGroup);
+		pResults->Bind(2, szBuildingType);
+		while(pResults->Step()) m_piLockedByBuildings.push_back(pResults->GetInt(0));
+	}
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
 	kUtility.SetYields(m_piInstantYield, "Building_InstantYield", "BuildingType", szBuildingType);
 	{
@@ -2002,12 +2027,6 @@ int CvBuildingEntry::GetTechEnhancedTourism() const
 int CvBuildingEntry::GetGoldMaintenance() const
 {
 	return m_iGoldMaintenance;
-}
-
-/// Only one Building from each Group may be constructed in a City
-int CvBuildingEntry::GetMutuallyExclusiveGroup() const
-{
-	return m_iMutuallyExclusiveGroup;
 }
 
 /// Upgraded version of this building
@@ -3824,11 +3843,10 @@ int CvBuildingEntry::GetFlavorValue(int i) const
 	return m_piFlavorValue ? m_piFlavorValue[i] : 0;
 }
 
-
-/// BuildingClasses that may no longer be constructed after this Building is built in a City
-const std::tr1::unordered_set<int>& CvBuildingEntry::GetLockedBuildingClasses() const
+/// Prerequisite Buildings with OR
+const std::vector<int>& CvBuildingEntry::GetLockedByBuildings() const
 {
-	return m_piLockedBuildingClasses;
+	return m_piLockedByBuildings;
 }
 /// Prerequisite techs with AND
 const std::vector<int>& CvBuildingEntry::GetPrereqAndTechs() const

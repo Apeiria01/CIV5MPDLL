@@ -3574,38 +3574,10 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 		}
 	}
 
-	// Locked Buildings (Mutually Exclusive Buildings?) - not quite sure how this works
-	for(iI = 0; iI < iNumBuildingClassInfos; iI++)
+	for(auto iBuilding : pkBuildingInfo->GetLockedByBuildings())
 	{
-		if(pkBuildingInfo->GetLockedBuildingClasses().count(iI) > 0 && GetNumBuildingClass((BuildingClassTypes)iI) > 0)
-		{
-			return false;
-		}
+		if(m_pCityBuildings->GetNumBuilding((BuildingTypes)iBuilding) > 0) return false;
 	}
-
-	// Mutually Exclusive Buildings 2
-	if(pkBuildingInfo->GetMutuallyExclusiveGroup() != -1)
-	{
-		int iNumBuildingInfos = GC.getNumBuildingInfos();
-		for(iI = 0; iI < iNumBuildingInfos; iI++)
-		{
-			const BuildingTypes eBuildingLoop = static_cast<BuildingTypes>(iI);
-
-			CvBuildingEntry* pkLoopBuilding = GC.getBuildingInfo(eBuildingLoop);
-			if(pkLoopBuilding)
-			{
-				// Buildings are in a Mutually Exclusive Group, so only one is allowed
-				if(pkLoopBuilding->GetMutuallyExclusiveGroup() == pkBuildingInfo->GetMutuallyExclusiveGroup())
-				{
-					if(m_pCityBuildings->GetNumBuilding(eBuildingLoop) > 0)
-					{
-						return false;
-					}
-				}
-			}
-		}
-	}
-
 
 	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
 	if(pkScriptSystem)
