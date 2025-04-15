@@ -3311,21 +3311,14 @@ bool CvCity::canTrain(UnitTypes eUnit, bool bContinue, bool bTestVisible, bool b
 		}
 
 		// See if there are any BuildingClass requirements
-		const int iNumBuildingClassInfos = GC.getNumBuildingClassInfos();
-		CvCivilizationInfo& thisCivilization = getCivilizationInfo();
-		for(int iBuildingClassLoop = 0; iBuildingClassLoop < iNumBuildingClassInfos; iBuildingClassLoop++)
+		for(auto iBuildingClass : thisUnitInfo.GetBuildingClassRequireds())
 		{
-			const BuildingClassTypes eBuildingClass = (BuildingClassTypes) iBuildingClassLoop;
+			const BuildingClassTypes eBuildingClass = (BuildingClassTypes) iBuildingClass;
 			CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
-			if(!pkBuildingClassInfo)
+			if(!pkBuildingClassInfo) continue;
+			if(GetNumBuildingClass(eBuildingClass) <= 0)
 			{
-				continue;
-			}
-
-			// Requires Building
-			if(thisUnitInfo.GetBuildingClassRequireds(eBuildingClass) && GetNumBuildingClass(eBuildingClass) <= 0)
-			{
-				const BuildingTypes ePrereqBuilding = (BuildingTypes)(thisCivilization.getCivilizationBuildings(eBuildingClass));
+				const BuildingTypes ePrereqBuilding = GET_PLAYER(getOwner()).GetCivBuilding(eBuildingClass);
 				CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(ePrereqBuilding);
 				if(pkBuildingInfo)
 				{
