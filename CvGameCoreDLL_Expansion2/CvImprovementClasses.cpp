@@ -203,6 +203,7 @@ CvImprovementEntry::CvImprovementEntry(void):
 #if defined(MOD_ROG_CORE)
 	m_ppiFeatureYieldChanges(NULL),
 #endif
+	m_ppiTerrainYieldChanges(NULL),
 
 	m_ppiTechYieldChanges(NULL),
 	m_ppiTechNoFreshWaterYieldChanges(NULL),
@@ -267,6 +268,10 @@ CvImprovementEntry::~CvImprovementEntry(void)
 		CvDatabaseUtility::SafeDelete2DArray(m_ppiFeatureYieldChanges);
 	}
 #endif
+	if (m_ppiTerrainYieldChanges != nullptr)
+	{
+		CvDatabaseUtility::SafeDelete2DArray(m_ppiTerrainYieldChanges);
+	}
 
 
 	if(m_paImprovementResource != NULL)
@@ -956,6 +961,36 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 		pResults->Reset();
 	}
 #endif
+	//TerrainYieldChanges
+	{
+		const int iNumTerrains = kUtility.MaxRows("Terrains");
+		CvAssertMsg(iNumTerrains > 0, "Num Terrain Infos <= 0");
+		kUtility.Initialize2DArray(m_ppiTerrainYieldChanges, iNumTerrains, iNumYields);
+
+		std::string strKey = "Terrain - TerrainYieldChanges";
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Yields.ID as YieldID, Terrains.ID as TerrainID, Yield from Improvement_TerrainYieldChanges inner join Yields on YieldType = Yields.Type inner join Terrains on TerrainType = Terrains.Type where ImprovementType = ?");
+		}
+
+		pResults->Bind(1, szImprovementType, lenImprovementType, false);
+
+		while (pResults->Step())
+		{
+			const int yield_idx = pResults->GetInt(0);
+			CvAssert(yield_idx > -1);
+
+			const int terrain_idx = pResults->GetInt(1);
+			CvAssert(terrain_idx > -1);
+
+			const int yield = pResults->GetInt(2);
+
+			m_ppiTerrainYieldChanges[terrain_idx][yield_idx] = yield;
+		}
+
+		pResults->Reset();
+	}
 
 	//TechYieldChanges
 	{
@@ -1847,7 +1882,6 @@ int CvImprovementEntry::GetAdjacentFeatureYieldChanges(int i, int j) const
 #if defined(MOD_ROG_CORE)
 int CvImprovementEntry::GetFeatureYieldChanges(int i, int j) const
 {
-	if (!MOD_ROG_CORE) return 0;
 	CvAssertMsg(i < GC.getNumFeatureInfos(), "Index out of bounds");
 	CvAssertMsg(i > -1, "Index out of bounds");
 	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
@@ -1855,6 +1889,15 @@ int CvImprovementEntry::GetFeatureYieldChanges(int i, int j) const
 	return m_ppiFeatureYieldChanges[i][j];
 }
 #endif
+
+int CvImprovementEntry::GetTerrainYieldChanges(int i, int j) const
+{
+	CvAssertMsg(i < GC.getNumTerrainInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	CvAssertMsg(j < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(j > -1, "Index out of bounds");
+	return m_ppiTerrainYieldChanges[i][j];
+}
 
 /// How much a tech improves the yield of this improvement
 int CvImprovementEntry::GetTechYieldChanges(int i, int j) const

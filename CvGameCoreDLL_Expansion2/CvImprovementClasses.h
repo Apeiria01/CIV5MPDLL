@@ -221,6 +221,7 @@ public:
 #if defined(MOD_ROG_CORE)
 	int GetFeatureYieldChanges(int i, int j) const;
 #endif
+	int GetTerrainYieldChanges(int i, int j) const;
 	int GetTechYieldChanges(int i, int j) const;
 	int* GetTechYieldChangesArray(int i);
 	int GetTechNoFreshWaterYieldChanges(int i, int j) const;
@@ -427,6 +428,7 @@ protected:
 #if defined(MOD_ROG_CORE)
 	int** m_ppiFeatureYieldChanges;
 #endif
+	int** m_ppiTerrainYieldChanges;
 
 	int** m_ppiTechYieldChanges;
 	int** m_ppiTechNoFreshWaterYieldChanges;

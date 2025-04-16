@@ -9181,7 +9181,11 @@ int CvPlot::calculateImprovementYieldChange(ImprovementTypes eImprovement, Yield
 	{
 		iYield += pImprovement->GetFeatureYieldChanges(getFeatureType(), eYield);
 	}
-#endif	
+#endif
+	if (getTerrainType() != NO_TERRAIN)
+	{
+		iYield += pImprovement->GetTerrainYieldChanges(getTerrainType(), eYield);
+	}
 	
 	// Check to see if there's a bonus to apply before doing any looping
 	if(pImprovement->GetAdjacentCityYieldChange(eYield) > 0)
