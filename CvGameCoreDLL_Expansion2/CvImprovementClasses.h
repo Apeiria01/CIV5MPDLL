@@ -112,9 +112,7 @@ public:
 #endif
 
 	bool IsHillsMakesValid() const;
-#if defined(MOD_GLOBAL_ALPINE_PASSES)
 	bool IsMountainsMakesValid() const;
-#endif
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool IsMakesPassable() const;
 #endif
@@ -129,6 +127,8 @@ public:
 	bool IsRiverSideMakesValid() const;
 	bool IsNoFreshWater() const;
 	bool IsFreshWater() const;
+	bool IsNoFeature() const;
+	bool IsNoRemove() const;
 	int GetNumWaterPlotMakesValid() const;
 #if defined(MOD_API_EXTENSIONS)
 	bool IsAddsFreshWater() const;
@@ -339,9 +339,7 @@ protected:
 #endif
 
 	bool m_bHillsMakesValid;
-#if defined(MOD_GLOBAL_ALPINE_PASSES)
 	bool m_bMountainsMakesValid;
-#endif
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 	bool m_bMakesPassable;
 #endif
@@ -356,6 +354,8 @@ protected:
 	bool m_bRiverSideMakesValid;
 	bool m_bNoFreshWater;
 	bool m_bIsFreshWater;
+	bool m_bNoFeature;
+	bool m_bNoRemove;
 	int m_iNumWaterPlotMakesValid;
 #if defined(MOD_API_EXTENSIONS)
 	bool m_bAddsFreshWater;

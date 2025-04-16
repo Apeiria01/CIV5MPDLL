@@ -142,6 +142,8 @@ CvImprovementEntry::CvImprovementEntry(void):
 	m_bRiverSideMakesValid(false),
 	m_bNoFreshWater(false),
 	m_bIsFreshWater(false),
+	m_bNoFeature(false),
+	m_bNoRemove(false),
 	m_iNumWaterPlotMakesValid(0),
 #if defined(MOD_API_EXTENSIONS)
 	m_bAddsFreshWater(false),
@@ -349,6 +351,8 @@ bool CvImprovementEntry::CacheResults(Database::Results& kResults, CvDatabaseUti
 	m_bRiverSideMakesValid = kResults.GetBool("RiverSideMakesValid");
 	m_bNoFreshWater = kResults.GetBool("NoFreshWater");
 	m_bIsFreshWater = kResults.GetBool("IsFreshWater");
+	m_bNoFeature = kResults.GetBool("NoFeature");
+	m_bNoRemove = kResults.GetBool("NoRemove");
 	m_iNumWaterPlotMakesValid = kResults.GetInt("NumWaterPlotMakesValid");
 #if defined(MOD_API_EXTENSIONS)
 	if (MOD_API_EXTENSIONS) {
@@ -1362,13 +1366,11 @@ bool CvImprovementEntry::IsHillsMakesValid() const
 	return m_bHillsMakesValid;
 }
 
-#if defined(MOD_GLOBAL_ALPINE_PASSES)
 /// Requires mountains to be constructed
 bool CvImprovementEntry::IsMountainsMakesValid() const
 {
 	return m_bMountainsMakesValid;
 }
-#endif
 
 #if defined(MOD_GLOBAL_PASSABLE_FORTS)
 /// Permits the tile to be passed by ships
@@ -1420,6 +1422,16 @@ bool CvImprovementEntry::IsNoFreshWater() const
 bool CvImprovementEntry::IsFreshWater() const
 {
 	return m_bIsFreshWater;
+}
+
+bool CvImprovementEntry::IsNoFeature() const
+{
+	return m_bNoFeature;
+}
+
+bool CvImprovementEntry::IsNoRemove() const
+{
+	return m_bNoRemove;
 }
 
 int CvImprovementEntry::GetNumWaterPlotMakesValid() const

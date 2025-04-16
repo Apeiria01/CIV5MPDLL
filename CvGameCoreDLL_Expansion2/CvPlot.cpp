@@ -2557,9 +2557,6 @@ bool CvPlot::canHaveImprovement(ImprovementTypes eImprovement, TeamTypes eTeam, 
 	int iI;
 
 	CvAssertMsg(eImprovement != NO_IMPROVEMENT, "Improvement is not assigned a valid value");
-#if !defined(MOD_GLOBAL_ALPINE_PASSES)
-	CvAssertMsg(getTerrainType() != NO_TERRAIN, "TerrainType is not assigned a valid value");
-#endif
 
 	CvImprovementEntry* pkImprovementInfo = GC.getImprovementInfo(eImprovement);
 	if(pkImprovementInfo == NULL)
@@ -2567,13 +2564,7 @@ bool CvPlot::canHaveImprovement(ImprovementTypes eImprovement, TeamTypes eTeam, 
 		return false;
 	}
 
-#if defined(MOD_GLOBAL_ALPINE_PASSES)
-	if (MOD_GLOBAL_ALPINE_PASSES && pkImprovementInfo->IsMountainsMakesValid() && isMountain()) {
-		return true;
-	}
-
 	CvAssertMsg(getTerrainType() != NO_TERRAIN, "TerrainType is not assigned a valid value");
-#endif
 
 	bValid = false;
 
@@ -2582,7 +2573,7 @@ bool CvPlot::canHaveImprovement(ImprovementTypes eImprovement, TeamTypes eTeam, 
 		return false;
 	}
 
-	if(isImpassable() || isMountain())
+	if((isImpassable() || isMountain()) && !pkImprovementInfo->IsMountainsMakesValid())
 	{
 		return false;
 	}
@@ -2655,6 +2646,17 @@ bool CvPlot::canHaveImprovement(ImprovementTypes eImprovement, TeamTypes eTeam, 
 		return false;
 	}
 
+	if(pkImprovementInfo->IsNoFeature() && getFeatureType() != NO_FEATURE)
+	{
+		return false;
+	}
+
+	if(getImprovementType() != NO_IMPROVEMENT)
+	{
+		CvImprovementEntry* pkNowImprovementInfo = GC.getImprovementInfo(getImprovementType());
+		if(pkNowImprovementInfo && pkNowImprovementInfo->IsNoRemove()) return false;
+	}
+
 	if(pkImprovementInfo->IsRequiresImprovement())
 	{
 		if (getImprovementType() == NO_IMPROVEMENT)
@@ -2670,6 +2672,11 @@ bool CvPlot::canHaveImprovement(ImprovementTypes eImprovement, TeamTypes eTeam, 
 	if(pkImprovementInfo->IsCoastal() && !isCoastalLand())
 	{
 		return false;
+	}
+
+	if (pkImprovementInfo->IsMountainsMakesValid() && isMountain())
+	{
+		bValid = true;
 	}
 
 	if(pkImprovementInfo->IsHillsMakesValid() && isHills())
