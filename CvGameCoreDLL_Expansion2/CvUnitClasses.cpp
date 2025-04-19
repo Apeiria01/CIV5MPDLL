@@ -152,7 +152,6 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_pbBuilds(NULL),
 	m_pbGreatPeoples(NULL),
 	m_pbBuildings(NULL),
-	m_pbBuildingClassRequireds(NULL),
 	m_piTechCombatStrength(NULL),
 	m_piTechRangedCombatStrength(NULL),
 	m_bUnitTechUpgrade(false),
@@ -189,7 +188,6 @@ CvUnitEntry::~CvUnitEntry(void)
 	SAFE_DELETE_ARRAY(m_pbBuilds);
 	SAFE_DELETE_ARRAY(m_pbGreatPeoples);
 	SAFE_DELETE_ARRAY(m_pbBuildings);
-	SAFE_DELETE_ARRAY(m_pbBuildingClassRequireds);
 	SAFE_DELETE_ARRAY(m_piPrereqAndTechs);
 	SAFE_DELETE_ARRAY(m_piResourceQuantityRequirements);
 	SAFE_DELETE_ARRAY(m_piProductionTraits);
@@ -457,7 +455,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	kUtility.PopulateArrayByExistence(m_pbBuilds, "Builds", "Unit_Builds", "BuildType", "UnitType", szUnitType);
 	kUtility.PopulateArrayByExistence(m_pbGreatPeoples, "Specialists", "Unit_GreatPersons", "GreatPersonType", "UnitType", szUnitType);
 	kUtility.PopulateArrayByExistence(m_pbBuildings, "Buildings", "Unit_Buildings", "BuildingType", "UnitType", szUnitType);
-	kUtility.PopulateArrayByExistence(m_pbBuildingClassRequireds, "BuildingClasses", "Unit_BuildingClassRequireds", "BuildingClassType", "UnitType", szUnitType);
+	kUtility.PopulateArrayByExistence(m_vBuildingClassRequireds, "BuildingClasses", "Unit_BuildingClassRequireds", "BuildingClassType", "UnitType", szUnitType);
 
 	kUtility.PopulateArrayByValue(m_piTechCombatStrength, "Technologies", "Unit_TechCombatStrength", "TechType", "UnitType", szUnitType, "CombatStrength");
 	kUtility.PopulateArrayByValue(m_piTechRangedCombatStrength, "Technologies", "Unit_TechRangedCombatStrength", "TechType", "UnitType", szUnitType, "RangedCombatStrength");
@@ -1391,11 +1389,9 @@ bool CvUnitEntry::GetBuildings(int i) const
 }
 
 /// Does this Unit need a certain BuildingClass in this City to train?
-bool CvUnitEntry::GetBuildingClassRequireds(int i) const
+const std::vector<int> CvUnitEntry::GetBuildingClassRequireds() const
 {
-	CvAssertMsg(i < GC.getNumBuildingClassInfos(), "Index out of bounds");
-	CvAssertMsg(i > -1, "Index out of bounds");
-	return m_pbBuildingClassRequireds ? m_pbBuildingClassRequireds[i] : false;
+	return m_vBuildingClassRequireds;
 }
 
 /// Does this Unit get a new combat strength when reaching a new Era?

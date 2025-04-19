@@ -206,7 +206,7 @@ public:
 	bool GetBuilds(int i) const;
 	bool GetGreatPeoples(int i) const;
 	bool GetBuildings(int i) const;
-	bool GetBuildingClassRequireds(int i) const;
+	const std::vector<int> GetBuildingClassRequireds() const;
 	int GetTechCombatStrength(int i) const;
 	int GetTechRangedCombatStrength(int i) const;
 	bool IsUnitTechUpgrade() const;
@@ -403,7 +403,7 @@ private:
 	bool* m_pbBuilds;
 	bool* m_pbGreatPeoples;
 	bool* m_pbBuildings;
-	bool* m_pbBuildingClassRequireds;
+	std::vector<int> m_vBuildingClassRequireds;
 	int* m_piTechCombatStrength;
 	int* m_piTechRangedCombatStrength;
 	bool m_bUnitTechUpgrade;

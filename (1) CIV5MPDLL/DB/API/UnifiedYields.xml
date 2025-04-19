@@ -507,6 +507,13 @@
 		<Column name="Yield" type="integer"/>
 	</Table>
 
+	<Table name="Improvement_TerrainYieldChanges">
+		<Column name="ImprovementType" type="text" reference="Improvements(Type)"/>
+		<Column name="TerrainType" type="text" reference="Terrains(Type)"/>
+		<Column name="YieldType" type="text" reference="Yields(Type)"/>
+		<Column name="Yield" type="integer"/>
+	</Table>
+
 	<Table name="Plot_AdjacentFeatureYieldChanges">
 		<Column name="PlotType" type="text" reference="Plots(Type)"/>
 		<Column name="FeatureType" type="text" reference="Features(Type)"/>

@@ -254,6 +254,8 @@ ALTER TABLE Improvements ADD COLUMN 'RequiredAdjacentImprovement' TEXT DEFAULT N
 ALTER TABLE Improvements ADD COLUMN 'RequiredAdjacentCity' BOOLEAN DEFAULT 0;
 ALTER TABLE Improvements ADD COLUMN 'RemoveWhenSetNoFuture' BOOLEAN DEFAULT 0;
 ALTER TABLE Improvements ADD COLUMN 'NumWaterPlotMakesValid' INTEGER DEFAULT 0;
+ALTER TABLE Improvements ADD COLUMN 'NoFeature' BOOLEAN DEFAULT 0;
+ALTER TABLE Improvements ADD COLUMN 'NoRemove' BOOLEAN DEFAULT 0;
 ALTER TABLE Units ADD COLUMN 'BarbarianCanTrait' BOOLEAN DEFAULT false;
 ALTER TABLE Units ADD COLUMN 'BarbarianTraitTechObsolete' BOOLEAN DEFAULT false;
 

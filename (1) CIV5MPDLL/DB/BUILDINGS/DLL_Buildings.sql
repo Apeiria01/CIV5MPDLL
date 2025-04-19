@@ -16,6 +16,14 @@ ALTER TABLE Buildings ADD COLUMN 'AnyWater' BOOLEAN DEFAULT 0;
 ALTER TABLE Buildings ADD COLUMN 'RiverOrCoastal' BOOLEAN DEFAULT 0;
 alter table Buildings add column `MinNumReligions` int not null default 0;
 
+CREATE TABLE Building_BuildingsNeededInCity(
+	BuildingType text references Buildings(Type),
+	PreBuildingType text references Buildings(Type)
+);
+CREATE TABLE Building_BuildingsNeededGlobal(
+	BuildingType text references Buildings(Type),
+	PreBuildingType text references Buildings(Type)
+);
 CREATE TABLE Building_ClassesNeededGlobal(
 	'BuildingType' text , 
 	'BuildingClassType' text , 

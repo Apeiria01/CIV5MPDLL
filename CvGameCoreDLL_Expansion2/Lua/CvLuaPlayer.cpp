@@ -1383,6 +1383,8 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetNumTechsKnown);
 	Method(GetFreeBuildingCount);
 	Method(ChangeFreeBuildingCount);
+
+	Method(GetMilitaryPromiseTurnLeft);
 }
 //------------------------------------------------------------------------------
 void CvLuaPlayer::HandleMissingInstance(lua_State* L)
@@ -12962,4 +12964,19 @@ int CvLuaPlayer::lChangeFreeBuildingCount(lua_State* L)
 	int iNum = lua_tointeger(L, 3);
 	pkPlayer->changeFreeBuildingCount(eBuildingTypes, iNum);
 	return 0;
+}
+
+int CvLuaPlayer::lGetMilitaryPromiseTurnLeft(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	PlayerTypes eTargetPlayer = (PlayerTypes)lua_tointeger(L, 2);
+	if (pkPlayer->GetDiplomacyAI()->IsPlayerMadeMilitaryPromise(eTargetPlayer))
+	{
+		lua_pushinteger(L, 20 - pkPlayer->GetDiplomacyAI()->GetPlayerMilitaryPromiseCounter(eTargetPlayer));
+	}
+	else
+	{
+		lua_pushinteger(L, -1);
+	}
+	return 1;
 }

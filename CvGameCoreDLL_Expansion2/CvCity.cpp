@@ -3311,21 +3311,14 @@ bool CvCity::canTrain(UnitTypes eUnit, bool bContinue, bool bTestVisible, bool b
 		}
 
 		// See if there are any BuildingClass requirements
-		const int iNumBuildingClassInfos = GC.getNumBuildingClassInfos();
-		CvCivilizationInfo& thisCivilization = getCivilizationInfo();
-		for(int iBuildingClassLoop = 0; iBuildingClassLoop < iNumBuildingClassInfos; iBuildingClassLoop++)
+		for(auto iBuildingClass : thisUnitInfo.GetBuildingClassRequireds())
 		{
-			const BuildingClassTypes eBuildingClass = (BuildingClassTypes) iBuildingClassLoop;
+			const BuildingClassTypes eBuildingClass = (BuildingClassTypes) iBuildingClass;
 			CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
-			if(!pkBuildingClassInfo)
+			if(!pkBuildingClassInfo) continue;
+			if(GetNumBuildingClass(eBuildingClass) <= 0)
 			{
-				continue;
-			}
-
-			// Requires Building
-			if(thisUnitInfo.GetBuildingClassRequireds(eBuildingClass) && GetNumBuildingClass(eBuildingClass) <= 0)
-			{
-				const BuildingTypes ePrereqBuilding = (BuildingTypes)(thisCivilization.getCivilizationBuildings(eBuildingClass));
+				const BuildingTypes ePrereqBuilding = GET_PLAYER(getOwner()).GetCivBuilding(eBuildingClass);
 				CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(ePrereqBuilding);
 				if(pkBuildingInfo)
 				{
@@ -3509,24 +3502,21 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 		return false;
 
 	// Does this city have prereq buildings?
-	for(iI = 0; iI < iNumBuildingClassInfos; iI++)
+	for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededInCity())
 	{
-		CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo((BuildingClassTypes)iI);
-		if(!pkBuildingClassInfo)
-		{
-			continue;
-		}
-
-		if(pkBuildingInfo->IsBuildingClassNeededInCity(iI) && GetNumBuildingClass((BuildingClassTypes)iI) <= 0)
-		{
-			return false;
-		}
-#if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
-		if(pkBuildingInfo->IsBuildingClassNeededGlobal(iI) && kPlayer.getBuildingClassCount((BuildingClassTypes)iI) <= 0)
-		{
-			return false;
-		}
-#endif
+		if(GetNumBuildingClass((BuildingClassTypes)iBuildingClass) <= 0) return false;
+	}
+	for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededGlobal())
+	{
+		if(kPlayer.getBuildingClassCount((BuildingClassTypes)iBuildingClass) <= 0) return false;
+	}
+	for(auto iBuilding : pkBuildingInfo->GetBuildingsNeededInCity())
+	{
+		if(GetCityBuildings()->GetNumBuilding((BuildingTypes)iBuilding) <= 0) return false;
+	}
+	for (auto iBuilding : pkBuildingInfo->GetBuildingsNeededGlobal())
+	{
+		if (kPlayer.countNumBuildings((BuildingTypes)iBuilding) <= 0) return false;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -3577,38 +3567,10 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 		}
 	}
 
-	// Locked Buildings (Mutually Exclusive Buildings?) - not quite sure how this works
-	for(iI = 0; iI < iNumBuildingClassInfos; iI++)
+	for(auto iBuilding : pkBuildingInfo->GetLockedByBuildings())
 	{
-		if(pkBuildingInfo->GetLockedBuildingClasses().count(iI) > 0 && GetNumBuildingClass((BuildingClassTypes)iI) > 0)
-		{
-			return false;
-		}
+		if(m_pCityBuildings->GetNumBuilding((BuildingTypes)iBuilding) > 0) return false;
 	}
-
-	// Mutually Exclusive Buildings 2
-	if(pkBuildingInfo->GetMutuallyExclusiveGroup() != -1)
-	{
-		int iNumBuildingInfos = GC.getNumBuildingInfos();
-		for(iI = 0; iI < iNumBuildingInfos; iI++)
-		{
-			const BuildingTypes eBuildingLoop = static_cast<BuildingTypes>(iI);
-
-			CvBuildingEntry* pkLoopBuilding = GC.getBuildingInfo(eBuildingLoop);
-			if(pkLoopBuilding)
-			{
-				// Buildings are in a Mutually Exclusive Group, so only one is allowed
-				if(pkLoopBuilding->GetMutuallyExclusiveGroup() == pkBuildingInfo->GetMutuallyExclusiveGroup())
-				{
-					if(m_pCityBuildings->GetNumBuilding(eBuildingLoop) > 0)
-					{
-						return false;
-					}
-				}
-			}
-		}
-	}
-
 
 	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
 	if(pkScriptSystem)
@@ -4129,7 +4091,7 @@ bool CvCity::IsBuildingLocalResourceValid(BuildingTypes eBuilding, bool bTestVis
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for(const auto& iResource : pkBuildingInfo->GetLocalResourceAnd())
+	for(auto iResource : pkBuildingInfo->GetLocalResourceAnd())
 	{
 		eResource = (ResourceTypes)iResource;
 
@@ -4152,7 +4114,7 @@ bool CvCity::IsBuildingLocalResourceValid(BuildingTypes eBuilding, bool bTestVis
 	int iOrResources = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (const auto& iResource : pkBuildingInfo->GetLocalResourceOr())
+	for (auto iResource : pkBuildingInfo->GetLocalResourceOr())
 	{
 		eResource = (ResourceTypes)iResource;
 
@@ -4194,7 +4156,7 @@ bool CvCity::IsBuildingEmpireResourceValid(BuildingTypes eBuilding, CvString* to
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for (const auto& iResource : pkBuildingInfo->GetEmpireResourceAnd())
+	for (auto iResource : pkBuildingInfo->GetEmpireResourceAnd())
 	{
 		ResourceTypes eResource = (ResourceTypes)iResource;
 
@@ -4219,7 +4181,7 @@ bool CvCity::IsBuildingEmpireResourceValid(BuildingTypes eBuilding, CvString* to
 	int iOrResources = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (const auto& iResource : pkBuildingInfo->GetEmpireResourceAnd())
+	for (auto iResource : pkBuildingInfo->GetEmpireResourceOr())
 	{
 		ResourceTypes eResource = (ResourceTypes)iResource;
 
@@ -4255,7 +4217,7 @@ bool CvCity::IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSi
 		return false;
 
 	// ANDs: City must have ALL of these nearby
-	for (const auto& iFeature : pkBuildingInfo->GetFeatureAnd())
+	for (auto iFeature : pkBuildingInfo->GetFeatureAnd())
 	{
 		FeatureTypes eFeature = (FeatureTypes)iFeature;
 
@@ -4278,7 +4240,7 @@ bool CvCity::IsBuildingFeatureValid(BuildingTypes eBuilding, CvString* toolTipSi
 	int iOrFeatures = 0;
 
 	// ORs: City must have ONE of these nearby
-	for (const auto& iFeature : pkBuildingInfo->GetFeatureOr())
+	for (auto iFeature : pkBuildingInfo->GetFeatureOr())
 	{
 		FeatureTypes eFeature = (FeatureTypes)iFeature;
 
@@ -4349,7 +4311,7 @@ bool CvCity::IsBuildingPlotValid(BuildingTypes eBuilding, CvString* toolTipSink)
 		return false;
 
 	// ANDs: City must have ALL of these plots
-	for (const auto& iPlot : pkBuildingInfo->GetPlotAnd())
+	for (auto iPlot : pkBuildingInfo->GetPlotAnd())
 	{
 		PlotTypes ePlot = (PlotTypes)iPlot;
 		// Doesn't require a Plot in this AND slot
@@ -18888,26 +18850,21 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 				}
 
 				// Does this city have prereq buildings?
-				int iNumBuildingClassInfos = GC.getNumBuildingClassInfos();
-				BuildingTypes ePrereqBuilding = NO_BUILDING;
-				for(int iI = 0; iI < iNumBuildingClassInfos; iI++)
+				for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededInCity())
 				{
-					CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo((BuildingClassTypes)iI);
-					if(!pkBuildingClassInfo)
-					{
-						continue;
-					}
-
-					if(pkBuildingInfo->IsBuildingClassNeededInCity(iI) && GetNumBuildingClass((BuildingClassTypes)iI) <= 0)
-					{
-						return false;
-					}
-#if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
-					if(pkBuildingInfo->IsBuildingClassNeededGlobal(iI) && kPlayer.getBuildingClassCount((BuildingClassTypes)iI) <= 0)
-					{
-						return false;
-					}
-#endif
+					if(GetNumBuildingClass((BuildingClassTypes)iBuildingClass) <= 0) return false;
+				}
+				for(auto iBuildingClass : pkBuildingInfo->GetBuildingClassesNeededGlobal())
+				{
+					if(kPlayer.getBuildingClassCount((BuildingClassTypes)iBuildingClass) <= 0) return false;
+				}
+				for(auto iBuilding : pkBuildingInfo->GetBuildingsNeededInCity())
+				{
+					if(GetCityBuildings()->GetNumBuilding((BuildingTypes)iBuilding) <= 0) return false;
+				}
+				for (auto iBuilding : pkBuildingInfo->GetBuildingsNeededGlobal())
+				{
+					if (kPlayer.countNumBuildings((BuildingTypes)iBuilding) <= 0) return false;
 				}
 #if !defined(MOD_BUGFIX_MINOR)
 			}

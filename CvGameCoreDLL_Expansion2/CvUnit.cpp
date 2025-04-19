@@ -15895,10 +15895,18 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 	CvGameReligions* pReligions = GC.getGame().GetGameReligions();
 	ReligionTypes eFoundedReligion = pReligions->GetFounderBenefitsReligion(kPlayer.GetID());
 
-	//int iStr = isRangedSupportFire() ? GetBaseCombatStrength() / 2 : GetBaseRangedCombatStrength();
+	int iStr = 0;
 
-	//fix wrong SupportFire damage
-	int iStr = isRangedSupportFire() ? GetBaseCombatStrength() * (1 + GetRangedSupportFireMod() / 100) / 2 : GetBaseRangedCombatStrength();
+	//fake ranged unit (impi)
+	if (isRangedSupportFire())
+	{
+		iStr = GetBaseCombatStrength() / 2;
+		iStr *= (100 + GetRangedSupportFireMod()) / 100;
+	}
+	else
+	{
+		iStr = GetBaseRangedCombatStrength();
+	}
 
 	if(iStr == 0)
 	{

@@ -100,3 +100,8 @@ alter table Policies add column CapitalTradeRouteGoldChange integer default 0;
 alter table Policies add column CapitalTradeRouteRangeChange integer default 0;
 alter table Policies add column RiggingElectionInfluenceModifier integer default 0;
 alter table Policies add column SpyLevelUpWhenRigging boolean default 0;
+
+create table PolicyBranch_CivilizationLocked (
+    PolicyBranchType TEXT REFERENCES PolicyBranchTypes(Type),
+    CivilizationType TEXT REFERENCES Civilizations(Type)
+);

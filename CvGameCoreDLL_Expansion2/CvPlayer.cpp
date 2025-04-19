@@ -8739,7 +8739,7 @@ bool CvPlayer::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestV
 		return false;
 	}
 
-	for(const auto& iTech : pBuildingInfo.GetPrereqAndTechs())
+	for(auto iTech : pBuildingInfo.GetPrereqAndTechs())
 	{
 		if(!currentTeam.GetTeamTechs()->HasTech((TechTypes)iTech))
 		{
@@ -26261,29 +26261,33 @@ int CvPlayer::getAdvancedStartBuildingCost(BuildingTypes eBuilding, bool bAdd, C
 				{
 					if(pCity->GetCityBuildings()->GetNumBuilding(eBuildingLoop) > 0)
 					{
-						// Loop through present Building's requirements
-						for(int iBuildingClassPrereqLoop = 0; iBuildingClassPrereqLoop < GC.getNumBuildingClassInfos(); iBuildingClassPrereqLoop++)
+						// Check present Building's requirements
+						for(auto iBuildingClass : pkBuildingLoopInfo->GetBuildingClassesNeededInCity())
 						{
-							const BuildingClassTypes eBuildingClass = static_cast<BuildingClassTypes>(iBuildingClassPrereqLoop);
-							CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
-							if(pkBuildingClassInfo)
+							if(eBuilding == (BuildingTypes)getCivilizationInfo().getCivilizationBuildings(iBuildingClass))
 							{
-								if(pkBuildingLoopInfo->IsBuildingClassNeededInCity(iBuildingClassPrereqLoop))
-								{
-									if((BuildingTypes)(getCivilizationInfo().getCivilizationBuildings(iBuildingClassPrereqLoop)) == eBuilding)
-									{
-										return -1;
-									}
-								}
-#if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
-								if(pkBuildingLoopInfo->IsBuildingClassNeededGlobal(iBuildingClassPrereqLoop))
-								{
-									if((BuildingTypes)(getCivilizationInfo().getCivilizationBuildings(iBuildingClassPrereqLoop)) == eBuilding && getNumBuildings(eBuilding) == 1)
-									{
-										return -1;
-									}
-								}
-#endif
+								return -1;
+							}
+						}
+						for(auto iBuildingClass : pkBuildingLoopInfo->GetBuildingClassesNeededGlobal())
+						{
+							if(eBuilding == (BuildingTypes)getCivilizationInfo().getCivilizationBuildings(iBuildingClass))
+							{
+								return -1;
+							}
+						}
+						for(auto iBuilding : pkBuildingLoopInfo->GetBuildingsNeededInCity())
+						{
+							if(eBuilding == (BuildingTypes)iBuilding)
+							{
+								return -1;
+							}
+						}
+						for (auto iBuilding : pkBuildingLoopInfo->GetBuildingsNeededGlobal())
+						{
+							if(eBuilding == (BuildingTypes)iBuilding)
+							{
+								return -1;
 							}
 						}
 					}
@@ -26598,7 +26602,7 @@ int CvPlayer::getAdvancedStartTechCost(TechTypes eTech, bool bAdd)
 						{
 							return -1;
 						}
-						for(const auto& iTech : pkBuildingInfo->GetPrereqAndTechs())
+						for(auto iTech : pkBuildingInfo->GetPrereqAndTechs())
 						{
 							if(iTech == eTech)
 							{

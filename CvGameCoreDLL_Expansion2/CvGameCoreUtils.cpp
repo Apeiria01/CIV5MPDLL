@@ -643,7 +643,7 @@ bool isTechRequiredForBuilding(TechTypes eTech, BuildingTypes eBuilding)
 			return true;
 		}
 
-		for(const auto& iTech : info->GetPrereqAndTechs())
+		for(auto iTech : info->GetPrereqAndTechs())
 		{
 			if(iTech == eTech)
 			{
