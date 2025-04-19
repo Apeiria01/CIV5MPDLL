@@ -1296,6 +1296,8 @@ protected:
 	LUAAPIEXTN(GetNumTechsKnown, int);
 	LUAAPIEXTN(GetFreeBuildingCount, int);
 	LUAAPIEXTN(ChangeFreeBuildingCount, void, BuildingTypes, int);
+
+	LUAAPIEXTN(GetMilitaryPromiseTurnLeft, int, ePlayer);
 };
 
 #endif //CVLUAPLAYER_H
