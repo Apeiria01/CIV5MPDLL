@@ -1915,9 +1915,7 @@ void CvUnit::convert(CvUnit* pUnit, bool bIsUpgrade)
 				}
 
 				// if we get this due to a policy or wonder
-
-
-				else if (GET_PLAYER(getOwner()).IsFreePromotion(ePromotion) && (::IsPromotionValidForUnit(ePromotion, *pUnit)))
+				else if (GET_PLAYER(getOwner()).IsFreePromotion(ePromotion) && (::IsPromotionValidForUnit(ePromotion, *this)))
 				{
 					bGivePromotion = true;
 				}
