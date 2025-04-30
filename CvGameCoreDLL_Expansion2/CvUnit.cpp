@@ -484,6 +484,7 @@ CvUnit::CvUnit() :
 	, m_iOriginalCapitalSpecialDamageFix(0)
 	, m_iMultipleInitExperence(0)
 	, m_iLostAllMovesAttackCity(0)
+	, m_iReligionOwnership(0)
 	, m_iUnitAttackFaithBonus(0)
 	, m_iCityAttackFaithBonus(0)
 	, m_iCarrierEXPGivenModifier(0)
@@ -1488,6 +1489,7 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iOriginalCapitalSpecialDamageFix = 0;
 	m_iMultipleInitExperence = 0;
 	m_iLostAllMovesAttackCity = 0;
+	m_iReligionOwnership = 0;
 	m_iUnitAttackFaithBonus = 0;
 	m_iCityAttackFaithBonus = 0;
 	m_iCarrierEXPGivenModifier = 0;
@@ -7310,6 +7312,15 @@ void CvUnit::ChangeLostAllMovesAttackCity(int iValue)
 const int CvUnit::GetLostAllMovesAttackCity() const
 {
 	return m_iLostAllMovesAttackCity;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeReligionOwnership(int iValue)
+{
+	m_iReligionOwnership += iValue;
+}
+const int CvUnit::GetReligionOwnership() const
+{
+	return m_iReligionOwnership;
 }
 //	--------------------------------------------------------------------------------
 void CvUnit::ChangeUnitAttackFaithBonus(int iValue)
@@ -26425,6 +26436,7 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeOriginalCapitalSpecialDamageFix((thisPromotion.GetOriginalCapitalSpecialDamageFix()) * iChange);
 		ChangeMultipleInitExperence((thisPromotion.GetMultipleInitExperence()) * iChange);
 		ChangeLostAllMovesAttackCity((thisPromotion.GetLostAllMovesAttackCity()) * iChange);
+		ChangeReligionOwnership((thisPromotion.GetReligionOwnership()) * iChange);
 		ChangeUnitAttackFaithBonus((thisPromotion.GetUnitAttackFaithBonus()) * iChange);
 		ChangeCityAttackFaithBonus((thisPromotion.GetCityAttackFaithBonus()) * iChange);
 		ChangeCarrierEXPGivenModifier((thisPromotion.GetCarrierEXPGivenModifier()) * iChange);
@@ -27028,6 +27040,7 @@ void CvUnit::read(FDataStream& kStream)
 	kStream >> m_iOriginalCapitalSpecialDamageFix;
 	kStream >> m_iMultipleInitExperence;
 	kStream >> m_iLostAllMovesAttackCity;
+	kStream >> m_iReligionOwnership;
 	kStream >> m_iUnitAttackFaithBonus;
 	kStream >> m_iCityAttackFaithBonus;
 	kStream >> m_iCarrierEXPGivenModifier;
@@ -27448,6 +27461,7 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iOriginalCapitalSpecialDamageFix;
 	kStream << m_iMultipleInitExperence;
 	kStream << m_iLostAllMovesAttackCity;
+	kStream << m_iReligionOwnership;
 	kStream << m_iUnitAttackFaithBonus;
 	kStream << m_iCityAttackFaithBonus;
 	kStream << m_iCarrierEXPGivenModifier;

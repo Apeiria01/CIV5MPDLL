@@ -212,6 +212,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iOriginalCapitalSpecialDamageFix(0),
 	m_iMultipleInitExperence(0),
 	m_iLostAllMovesAttackCity(0),
+	m_iReligionOwnership(0),
 	m_iUnitAttackFaithBonus(0),
 	m_iCityAttackFaithBonus(0),
 	m_iCarrierEXPGivenModifier(0),
@@ -770,6 +771,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iOriginalCapitalSpecialDamageFix = kResults.GetInt("OriginalCapitalSpecialDamageFix");
 	m_iMultipleInitExperence = kResults.GetInt("MultipleInitExperence");
 	m_iLostAllMovesAttackCity = kResults.GetInt("LostAllMovesAttackCity");
+	m_iReligionOwnership = kResults.GetInt("ReligionOwnership");
 	m_iUnitAttackFaithBonus = kResults.GetInt("UnitAttackFaithBonus");
 	m_iCityAttackFaithBonus = kResults.GetInt("CityAttackFaithBonus");
 	m_iCarrierEXPGivenModifier = kResults.GetInt("CarrierEXPGivenModifier");
@@ -2638,6 +2640,11 @@ int CvPromotionEntry::GetMultipleInitExperence() const
 int CvPromotionEntry::GetLostAllMovesAttackCity() const
 {
 	return m_iLostAllMovesAttackCity;
+}
+/// Accessor: Attacking the religion of one's own country, cities belonging to one's own country
+int CvPromotionEntry::GetReligionOwnership() const
+{
+	return m_iReligionOwnership;
 }
 
 /// Accessor: faith earned from damage on an attacked unit

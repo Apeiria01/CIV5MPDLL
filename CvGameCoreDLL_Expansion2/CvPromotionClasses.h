@@ -270,6 +270,7 @@ public:
 	int GetOriginalCapitalSpecialDamageFix() const;
 	int GetMultipleInitExperence() const;
 	int GetLostAllMovesAttackCity() const;
+	int GetReligionOwnership() const;
 	int GetUnitAttackFaithBonus() const;
 	int GetCityAttackFaithBonus() const;
 	int GetCarrierEXPGivenModifier() const;
@@ -648,6 +649,7 @@ protected:
 	int m_iOriginalCapitalSpecialDamageFix;
 	int m_iMultipleInitExperence;
 	int m_iLostAllMovesAttackCity;
+	int m_iReligionOwnership;
 	int m_iUnitAttackFaithBonus;
 	int m_iCityAttackFaithBonus;
 	int m_iCarrierEXPGivenModifier;
