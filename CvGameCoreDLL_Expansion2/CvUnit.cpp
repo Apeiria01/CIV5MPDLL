@@ -7312,6 +7312,11 @@ const int CvUnit::GetLostAllMovesAttackCity() const
 	return m_iLostAllMovesAttackCity;
 }
 //	--------------------------------------------------------------------------------
+bool CvUnit::IsReligionOwnership() const
+{
+    return m_bReligionOwnership;
+}
+//	--------------------------------------------------------------------------------
 void CvUnit::ChangeUnitAttackFaithBonus(int iValue)
 {
 	m_iUnitAttackFaithBonus += iValue;

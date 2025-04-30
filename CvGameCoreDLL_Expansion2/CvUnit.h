@@ -1985,6 +1985,7 @@ public:
 	bool IsArmee() const;
 
 	bool IsNoTroops() const;
+	bool IsReligionOwnership() const;
 
 	bool IsCanEstablishCorps() const;
 	void ChangeNumEstablishCorps(int iValue);
@@ -2262,6 +2263,7 @@ protected:
 	int m_iRangedFlankAttackModifier;
 	int m_iRangedFlankAttackModifierPercent;
 	int m_iMutuallyExclusiveGroup;
+	bool m_bReligionOwnership;
 	FAutoVariable<int, CvUnit> m_iExtraOpenDefensePercent;
 	FAutoVariable<int, CvUnit> m_iExtraRoughDefensePercent;
 	FAutoVariable<int, CvUnit> m_iPillageChange;

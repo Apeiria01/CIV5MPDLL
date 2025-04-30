@@ -414,6 +414,9 @@
 		<Row Tag="TXT_KEY_NOTIFICATION_ATTACKING_CITY_LOST_MOVEMENT">
 			<Text>你的{@1_name}攻击城市后失去了所有[ICON_MOVES]移动力！</Text>
 		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_CITY_CONVERTED_BY_FAITH">
+			<Text>我们的{1_Religion}信仰已完全感化{1_CityName}，该城现已加入您的文明！</Text>
+		</Row>
 
 		<Row Tag="TXT_KEY_PRODMOD_YIELD_RESOURCE_BUFF">
 			<Text>

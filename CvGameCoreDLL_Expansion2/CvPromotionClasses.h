@@ -344,6 +344,7 @@ public:
 	bool IsGGFromBarbarians() const;
 #endif
 	bool IsRoughTerrainEndsTurn() const;
+	bool IsReligionOwnership() const;
 	bool IsHoveringUnit() const;
 	bool IsFlatMovementCost() const;
 	bool IsCanMoveImpassable() const;
@@ -824,6 +825,7 @@ protected:
 	bool m_bGGFromBarbarians;
 #endif
 	bool m_bRoughTerrainEndsTurn;
+	bool m_bReligionOwnership;
 	bool m_bHoveringUnit;
 	bool m_bFlatMovementCost;
 	bool m_bCanMoveImpassable;

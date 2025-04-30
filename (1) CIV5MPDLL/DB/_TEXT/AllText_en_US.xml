@@ -414,6 +414,9 @@
 		<Row Tag="TXT_KEY_NOTIFICATION_ATTACKING_CITY_LOST_MOVEMENT">
 			<Text>Your {@1_name} consumed all its [ICON_MOVES] Movements after attacking the enemy city!</Text>
 		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_CITY_CONVERTED_BY_FAITH">
+			<Text>Our {1_Religion} faith has been fully transformed {1_CityName} and the city has now joined your civilization！</Text>
+		</Row>
 
 		<Row Tag="TXT_KEY_PRODMOD_YIELD_RESOURCE_BUFF">
 			<Text>

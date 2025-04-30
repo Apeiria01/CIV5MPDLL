@@ -1362,6 +1362,41 @@ void CvUnitCombat::ResolveRangedUnitVsCombat(const CvCombatInfo& kCombatInfo, ui
 			CvAssert_Debug(pCity != NULL);
 			if(pCity)
 			{
+				if(pkAttacker && 
+				pkAttacker->IsReligionOwnership() && !pCity->isBarbarian())                
+				{
+					ReligionTypes eCityReligion = pCity->GetCityReligions()->GetReligiousMajority();
+					const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eCityReligion,pCity->getOwner());
+					if(pReligion && 
+					pReligion->m_eFounder == pkAttacker->getOwner() && 
+					pCity->getOwner() != pkAttacker->getOwner())      
+					{
+						CvPlayerAI& kAttackerPlayer = GET_PLAYER(pkAttacker->getOwner());
+						kAttackerPlayer.acquireCity(pCity, 
+							false,   
+							true,    
+							true,   
+							true,    
+							true     
+						);
+						if(pCity->GetResistanceTurns() > 0) {
+							pCity->ChangeResistanceTurns(-pCity->GetResistanceTurns());
+						}
+						pCity->SetOccupied(false);
+						if(kAttackerPlayer.GetID() == GC.getGame().getActivePlayer()) {
+							CvString strMsg = GetLocalizedText("TXT_KEY_NOTIFICATION_CITY_CONVERTED_BY_FAITH", 
+								pCity->getNameKey(), 
+								pReligion->GetName());
+							GC.GetEngineUserInterface()->AddMessage(uiParentEventID, 
+								kAttackerPlayer.GetID(), 
+								true, 
+								GC.getEVENT_MESSAGE_TIME(), 
+								strMsg);
+						}
+						BATTLE_FINISHED(false);
+						return;
+					}
+				}
 				if(pkAttacker)
 				{
 					if(pkAttacker->isSuicide())
@@ -1593,6 +1628,41 @@ void CvUnitCombat::ResolveCityMeleeCombat(const CvCombatInfo& kCombatInfo, uint 
 			}
 		}
 #endif	
+		if(pkAttacker->IsReligionOwnership() && !pkDefender->isBarbarian() && pkDefender->getOwner() != pkAttacker->getOwner())
+		{
+		ReligionTypes eCityReligion = pkDefender->GetCityReligions()->GetReligiousMajority();
+		if(eCityReligion != NO_RELIGION)
+		{
+			const CvReligion* pReligion = GC.getGame().GetGameReligions()->GetReligion(eCityReligion, pkDefender->getOwner());
+			if(pReligion && pReligion->m_eFounder == pkAttacker->getOwner())
+			{
+				CvPlayerAI& kAttackerPlayer = GET_PLAYER(pkAttacker->getOwner());
+				kAttackerPlayer.acquireCity(pkDefender, 
+					false,   
+					true,    
+					true,    
+					true,    
+					true     
+				);
+				if(pkDefender->GetResistanceTurns() > 0) {
+					pkDefender->ChangeResistanceTurns(-pkDefender->GetResistanceTurns());
+				}
+				pkDefender->SetOccupied(false);
+				if(kAttackerPlayer.GetID() == GC.getGame().getActivePlayer()) {
+					CvString strMsg = GetLocalizedText("TXT_KEY_NOTIFICATION_CITY_CONVERTED_BY_FAITH", 
+						pkDefender->getNameKey(), 
+						pReligion->GetName());
+					GC.GetEngineUserInterface()->AddMessage(uiParentEventID, 
+						kAttackerPlayer.GetID(), 
+						true, 
+						GC.getEVENT_MESSAGE_TIME(), 
+						strMsg);
+				}
+				BATTLE_FINISHED(false);
+				return; 
+			}
+		}
+		}
 #if defined(MOD_API_UNIT_STATS)
 		pkAttacker->changeDamage(iDefenderDamageInflicted, pkDefender->getOwner(), pkDefender->GetID());
 #else

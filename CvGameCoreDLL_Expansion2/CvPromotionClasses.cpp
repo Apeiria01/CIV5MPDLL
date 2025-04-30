@@ -304,6 +304,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_bHealOnPillage(false),
 	m_bHealIfDefeatExcludesBarbarians(false),
 	m_bEmbarkedAllWater(false),
+	m_bReligionOwnership(false),
 #if defined(MOD_PROMOTIONS_DEEP_WATER_EMBARKATION)
 	m_bEmbarkedDeepWater(false),
 #endif
@@ -537,6 +538,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 #if defined(MOD_ROG_CORE)
 	m_iAoEDamageOnMove = kResults.GetInt("AoEDamageOnMove");
+	m_bReligionOwnership = kResults.GetInt("ReligionOwnership");
 	m_iForcedDamageValue = kResults.GetInt("ForcedDamageValue");
 	m_iChangeDamageValue = kResults.GetInt("ChangeDamageValue");
 	m_iAttackFullyHealedMod = kResults.GetInt("AttackFullyHealedMod");
@@ -3050,6 +3052,11 @@ bool CvPromotionEntry::IsRangeAttackIgnoreLOS() const
 bool CvPromotionEntry::IsFreePillageMoves() const
 {
 	return m_bFreePillageMoves;
+}
+/// Accessor: Attacking the religion of one's own country, cities belonging to one's own country
+bool CvPromotionEntry::IsReligionOwnership() const
+{
+	return m_bReligionOwnership;
 }
 
 /// Accessor: When pillaging, does the unit heal?

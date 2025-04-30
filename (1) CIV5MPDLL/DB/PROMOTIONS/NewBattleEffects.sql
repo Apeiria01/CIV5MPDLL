@@ -37,3 +37,4 @@ alter table UnitPromotions add column 'HeavyChargeAddMoves' integer not null def
 alter table UnitPromotions add column 'HeavyChargeExtraDamage' integer not null default 0;
 alter table UnitPromotions add column 'HeavyChargeCollateralFixed' integer not null default 0;
 alter table UnitPromotions add column 'HeavyChargeCollateralPercent' integer not null default 0;
+ALTER TABLE UnitPromotions ADD COLUMN ReligionOwnership boolean not null default 0;
