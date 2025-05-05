@@ -243,6 +243,7 @@ CvUnit::CvUnit() :
 	, m_iRangedAttackModifier("CvUnit::m_iRangedAttackModifier", m_syncArchive)
 	, m_iRangeSuppressModifier("CvUnit::m_iRangeSuppressModifier", m_syncArchive)
 	, m_iPromotionMaintenanceCost("CvUnit::m_iPromotionMaintenanceCost", m_syncArchive)
+	, m_iFreeExpPerTurn("CvUnit::m_iFreeExpPerTurn", m_syncArchive)
 	, m_iInterceptionDamageMod("CvUnit::m_iInterceptionDamageMod", m_syncArchive)
 	, m_iAirSweepDamageMod("CvUnit::m_iAirSweepDamageMod", m_syncArchive)
 	, m_iInterceptionCombatModifier("CvUnit::m_iInterceptionCombatModifier", m_syncArchive)
@@ -1246,6 +1247,7 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iRangedAttackModifier = 0;
 	m_iRangeSuppressModifier = 0;
 	m_iPromotionMaintenanceCost = 0;
+	m_iFreeExpPerTurn = 0;
 	m_iInterceptionDamageMod = 0;
 	m_iAirSweepDamageMod = 0;
 	m_iInterceptionCombatModifier = 0;
@@ -2925,6 +2927,7 @@ void CvUnit::doTurn()
 				if (itempexp > 0) iTotalxp += itempexp;
 			}
 			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
+			iTotalxp += GetFreeExpPerTurn();
 		}
 		if (iTotalxp > 0)
 		{
@@ -19210,6 +19213,23 @@ void CvUnit::ChangePromotionMaintenanceCost(int iValue)
 	}
 }
 
+/// Get extra exp per turn from promotions
+int CvUnit::GetFreeExpPerTurn() const
+{
+	VALIDATE_OBJECT
+	return m_iFreeExpPerTurn;
+}
+
+/// Change extra exp per turn from promotions
+void CvUnit::ChangeFreeExpPerTurn(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iFreeExpPerTurn += iValue;
+	}
+}
+
 //	--------------------------------------------------------------------------------
 int CvUnit::GetInterceptionDamageMod() const
 {
@@ -26458,6 +26478,7 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeRangedAttackModifier(thisPromotion.GetRangedAttackModifier() * iChange);
 		ChangeRangeSuppressModifier(thisPromotion.GetRangeSuppressModifier() * iChange);
 		if(thisPromotion.GetMaintenanceCost() > 0) ChangePromotionMaintenanceCost(thisPromotion.GetMaintenanceCost() * iChange);
+		ChangeFreeExpPerTurn(thisPromotion.GetFreeExpPerTurn() * iChange);
 		ChangeInterceptionCombatModifier(thisPromotion.GetInterceptionCombatModifier() * iChange);
 		ChangeInterceptionDamageMod(thisPromotion.GetInterceptionDamageMod() * iChange);
 		ChangeAirSweepDamageMod(thisPromotion.GetAirSweepDamageMod() * iChange);

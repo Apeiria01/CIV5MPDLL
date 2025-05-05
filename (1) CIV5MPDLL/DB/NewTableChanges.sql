@@ -345,3 +345,5 @@ CREATE TABLE "Promotion_RouteMovementChanges" (
 );
 
 ALTER TABLE GameSpeeds ADD COLUMN 'SetterExtraPercent' INTEGER DEFAULT 0;
+
+ALTER TABLE UnitPromotions ADD COLUMN 'FreeExpPerTurn' INTEGER DEFAULT 0;

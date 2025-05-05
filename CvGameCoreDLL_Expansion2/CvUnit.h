@@ -799,6 +799,8 @@ public:
 	int GetCombatModifierFromBuilding() const;
 	int GetPromotionMaintenanceCost() const;
 	void ChangePromotionMaintenanceCost(int iValue);
+	int GetFreeExpPerTurn() const;
+	void ChangeFreeExpPerTurn(int iValue);
 	int GetInterceptionDamageMod() const;
 	void ChangeInterceptionDamageMod(int iValue);
 	int GetAirSweepDamageMod() const;
@@ -2236,6 +2238,7 @@ protected:
 	FAutoVariable<int, CvUnit> m_iRangedAttackModifier;
 	FAutoVariable<int, CvUnit> m_iRangeSuppressModifier;
 	FAutoVariable<int, CvUnit> m_iPromotionMaintenanceCost;
+	FAutoVariable<int, CvUnit> m_iFreeExpPerTurn;
 	FAutoVariable<int, CvUnit> m_iInterceptionDamageMod;
 	FAutoVariable<int, CvUnit> m_iAirSweepDamageMod;
 	FAutoVariable<int, CvUnit> m_iInterceptionCombatModifier;

@@ -32,6 +32,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iRangedAttackModifier(0),
 	m_iRangeSuppressModifier(0),
 	m_iMaintenanceCost(0),
+	m_iFreeExpPerTurn(0),
 	m_iInterceptionDamageMod(0),
 	m_iAirSweepDamageMod(0),
 	m_iInterceptionCombatModifier(0),
@@ -658,6 +659,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iRangedAttackModifier = kResults.GetInt("RangedAttackModifier");
 	m_iRangeSuppressModifier = kResults.GetInt("RangeSuppressModifier");
 	m_iMaintenanceCost = kResults.GetInt("MaintenanceCost");
+	m_iFreeExpPerTurn = kResults.GetInt("FreeExpPerTurn");
 	m_iInterceptionDamageMod = kResults.GetInt("InterceptionDamageMod");
 	m_iAirSweepDamageMod = kResults.GetInt("AirSweepDamageMod");
 	m_iInterceptionCombatModifier = kResults.GetInt("InterceptionCombatModifier");
@@ -1736,6 +1738,12 @@ int CvPromotionEntry::GetRangeSuppressModifier() const
 int CvPromotionEntry::GetMaintenanceCost() const
 {
 	return m_iMaintenanceCost;
+}
+
+///Promotion give unit exp num per turn
+int CvPromotionEntry::GetFreeExpPerTurn() const
+{
+	return m_iFreeExpPerTurn;
 }
 
 /// How much damage reduce mod when intercepting
