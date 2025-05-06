@@ -91,3 +91,4 @@ CREATE TABLE Belief_YieldModifierPerFollowerTimes100 (
     YieldType TEXT REFERENCES Yields(Type),
     Modifier INTEGER DEFAULT 0
 );
+ALTER TABLE Beliefs ADD COLUMN 'BarbarianOccupiedReligionCity' BOOLEAN DEFAULT 0;

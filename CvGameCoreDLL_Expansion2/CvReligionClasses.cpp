@@ -4639,6 +4639,29 @@ void CvCityReligions::CityConvertsReligion(ReligionTypes eMajority, ReligionType
 		PlayerTypes eOwnerPlayer = m_pCity->getOwner();
 		CvPlayerAI& kOwnerPlayer = GET_PLAYER(eOwnerPlayer);
 		const ReligionTypes eOwnerPlayerReligion = kOwnerPlayer.GetReligions()->GetReligionCreatedByPlayer();
+		const CvReligion* pkReligion = GC.getGame().GetGameReligions()->GetReligion(eMajority, eResponsibleParty);  
+        CvGame& kGame = GC.getGame();
+		if (!kGame.isOption(GAMEOPTION_NO_BARBARIANS)) 
+		{
+			if (pkReligion != NULL &&   
+				pkReligion->m_Beliefs.IsBarbarianOccupiedReligionCity() &&   
+				pkReligion->m_eFounder != eOwnerPlayer)  
+			{  
+				CvPlayerAI& kBarbarianPlayer = GET_PLAYER(BARBARIAN_PLAYER);  
+				kBarbarianPlayer.acquireCity(m_pCity,   
+					false,  
+					true,    
+					true,    
+					false,   
+					true     
+				);  
+				if (m_pCity->GetResistanceTurns() > 0)   
+				{  
+					m_pCity->ChangeResistanceTurns(-m_pCity->GetResistanceTurns());  
+				}  
+				m_pCity->SetOccupied(false);  
+			}
+		}
 
 		if(eOwnerPlayer != eResponsibleParty && eMajority != eOldMajority && pNewReligion->m_eFounder != eOwnerPlayer
 			&& eOwnerPlayerReligion > RELIGION_PANTHEON)

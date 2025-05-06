@@ -89,6 +89,7 @@ CvBeliefEntry::CvBeliefEntry() :
 	m_bReformer(false),
 	m_bRequiresPeace(false),
 	m_bConvertsBarbarians(false),
+	m_bBarbarianOccupiedReligionCity(false),
 	m_bFaithPurchaseAllGreatPeople(false),
 
 	m_eObsoleteEra(NO_ERA),
@@ -444,7 +445,11 @@ bool CvBeliefEntry::RequiresPeace() const
 {
 	return m_bRequiresPeace;
 }
-
+/// Accessor:This belief causes converted cities to automatically rebel and become barbarian cities.
+bool CvBeliefEntry::BarbarianOccupiedReligionCity() const
+{
+	return m_bBarbarianOccupiedReligionCity;
+}
 /// Accessor: is this a belief that allows your missionaries to convert adjacent barbarians?
 bool CvBeliefEntry::ConvertsBarbarians() const
 {
@@ -1030,6 +1035,7 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_bReformer						  = kResults.GetBool("Reformation");
 	m_bRequiresPeace				  = kResults.GetBool("RequiresPeace");
 	m_bConvertsBarbarians			  = kResults.GetBool("ConvertsBarbarians");
+	m_bBarbarianOccupiedReligionCity			  = kResults.GetBool("BarbarianOccupiedReligionCity");
 	m_bFaithPurchaseAllGreatPeople	  = kResults.GetBool("FaithPurchaseAllGreatPeople");
 #if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
 	m_bGreatPersonPointsCapital	  	  = kResults.GetBool("GreatPersonPointsCapital");
@@ -2637,7 +2643,21 @@ bool CvReligionBeliefs::IsFaithPurchaseAllGreatPeople() const
 
 	return false;
 }
+///Is it allowed for religious cities to be occupied by barbarians
+bool CvReligionBeliefs::IsBarbarianOccupiedReligionCity() const
+{
+	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
 
+	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
+	{
+		if (pBeliefs->GetEntry(*i)->BarbarianOccupiedReligionCity())
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
 /// Serialization read
 void CvReligionBeliefs::Read(FDataStream& kStream)
 {
