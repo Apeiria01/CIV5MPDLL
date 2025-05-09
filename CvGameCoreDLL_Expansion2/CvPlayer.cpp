@@ -7425,8 +7425,12 @@ void CvPlayer::receiveGoody(CvPlot* pPlot, GoodyTypes eGoody, CvUnit* pUnit)
 		// Enough so still get a pantheon if 3 civs pop this in same turn
 		iFaith = GC.getGame().GetGameReligions()->GetMinimumFaithNextPantheon() + 2 * GC.getRELIGION_GAME_FAITH_DELTA_NEXT_PANTHEON();
 		int iDivisor = /*10*/ GC.getGOLD_PURCHASE_VISIBLE_DIVISOR();
-		iFaith /= iDivisor;
-		iFaith *= iDivisor;
+		// fix zero
+		if(iFaith > iDivisor)
+		{
+			iFaith /= iDivisor;
+			iFaith *= iDivisor;
+		}
 		ChangeFaith(iFaith);
 		strBuffer += GetLocalizedText("TXT_KEY_MISC_RECEIVED_FAITH", iFaith);
 	}
@@ -7437,8 +7441,12 @@ void CvPlayer::receiveGoody(CvPlot* pPlot, GoodyTypes eGoody, CvUnit* pUnit)
 	{
 		iFaith = GetReligions()->GetCostNextProphet(false /*bIncludeBeliefDiscounts*/, true /*bAdjustForSpeedDifficulty*/) * iProphetPercent / 100;
 		int iDivisor = /*10*/ GC.getGOLD_PURCHASE_VISIBLE_DIVISOR();
-		iFaith /= iDivisor;
-		iFaith *= iDivisor;
+		// fix zero
+		if(iFaith > iDivisor)
+		{
+			iFaith /= iDivisor;
+			iFaith *= iDivisor;
+		}
 		ChangeFaith(iFaith);
 		strBuffer += GetLocalizedText("TXT_KEY_MISC_RECEIVED_FAITH", iFaith);
 	}
