@@ -195,6 +195,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_bAuraPromotionNoSelf(false),
 #endif
 	m_bIncludeBuild(false),
+	m_bIncludeProvideCombat(false),
 #if defined(MOD_PROMOTION_NEW_EFFECT_FOR_SP)
 	m_iMeleeAttackModifier(0),
 	m_iCaptureEmenyExtraMax(0),
@@ -359,6 +360,7 @@ CvPromotionEntry::CvPromotionEntry():
 
 	m_pbUnitType(NULL),
 	m_pbBuildType(NULL),
+	m_pbProvideCombatType(NULL),
 
 
 
@@ -412,6 +414,8 @@ CvPromotionEntry::~CvPromotionEntry(void)
 
 	SAFE_DELETE_ARRAY(m_pbUnitType);
 	SAFE_DELETE_ARRAY(m_pbBuildType);
+	SAFE_DELETE_ARRAY(m_pbProvideCombatType);
+
 
 
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
@@ -1419,6 +1423,32 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			CvAssert(iBuild < iNumBuildTypes);
 			m_pbBuildType[iBuild] = true;
 			m_bIncludeBuild = true;
+		}
+
+		pResults->Reset();
+	}
+	//Promotion_ProvideCombatType （only for check promotion valid）
+	{
+		kUtility.InitializeArray(m_pbProvideCombatType, iNumUnitCombatClasses, false);
+
+		std::string sqlKey = "m_pbProvideCombatType";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == NULL) {
+			const char* szSQL = 
+				"SELECT UnitCombatInfos.ID FROM Promotion_ProvideCombatType INNER JOIN UnitCombatInfos ON UnitCombatInfos.Type = ProvidedCombatType WHERE PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step()) {
+			const int iProvideCombat= (UnitTypes)pResults->GetInt(0);
+			CvAssert(iProvideCombat < iNumUnitCombatClasses);
+			m_pbProvideCombatType[iProvideCombat] = true;
+			m_bIncludeProvideCombat = true;
 		}
 
 		pResults->Reset();
@@ -3610,6 +3640,24 @@ bool CvPromotionEntry::IsIncludeBuild() const
 	return m_bIncludeBuild;
 }
 
+/// Returns the  Provided Combat type that this promotion give
+bool CvPromotionEntry::GetProvideCombatType(int i) const
+{
+	CvAssertMsg(i < GC.getNumUnitCombatInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+
+	if (i > -1 && i < GC.getNumUnitCombatClassInfos() && m_pbProvideCombatType)
+	{
+		bool bresult = m_pbProvideCombatType[i];
+		return bresult;
+	}
+
+	return false;
+}
+bool CvPromotionEntry::IsIncludeProvideCombat() const
+{
+	return m_bIncludeProvideCombat;
+}
 
 /// Returns the civilian unit type that this promotion is available for
 bool CvPromotionEntry::GetCivilianUnitType(int i) const

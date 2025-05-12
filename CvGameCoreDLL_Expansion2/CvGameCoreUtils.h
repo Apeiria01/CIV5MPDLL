@@ -395,7 +395,7 @@ bool IsPromotionValidForUnitPromotionAnds(CvPromotionEntry* pPromotionInfo, CvUn
 bool IsPromotionValidForUnitPromotionExclusion(CvPromotionEntry* pPromotionInfo, CvUnit& pUnit);
 bool IsPromotionValidForUnit(PromotionTypes ePromotion, CvUnit& pUnit);
 
-bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq=false);
+bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq=false, const CvUnit* pUnit = nullptr);
 
 int getPopulationAsset(int iPopulation);
 int getLandPlotsAsset(int iLandPlots);

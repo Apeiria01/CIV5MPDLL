@@ -562,6 +562,7 @@ CvUnit::CvUnit() :
 	, m_extraUnitCombatModifier("CvUnit::m_extraUnitCombatModifier", m_syncArchive/*, true*/)
 	, m_unitClassModifier()
 	, m_piGetPromotionBuilds()
+	, m_piGetPromotionProvideCombats()
 	, m_iCombatModPerAdjacentUnitCombatModifier("CvUnit::m_iCombatModPerAdjacentUnitCombatModifier", m_syncArchive/*, true*/)
 	, m_iCombatModPerAdjacentUnitCombatAttackMod("CvUnit::m_iCombatModPerAdjacentUnitCombatAttackMod", m_syncArchive/*, true*/)
     , m_iCombatModPerAdjacentUnitCombatDefenseMod("CvUnit::m_iCombatModPerAdjacentUnitCombatDefenseMod", m_syncArchive/*, true*/)
@@ -1849,6 +1850,7 @@ void CvUnit::uninitInfos()
 	m_extraUnitCombatModifier.clear();
 	m_unitClassModifier.clear();
 	m_piGetPromotionBuilds.clear();
+	m_piGetPromotionProvideCombats.clear();
 
 	m_aiNumTimesAttackedThisTurn.clear();
 	m_iCombatModPerAdjacentUnitCombatModifier.clear();
@@ -6709,7 +6711,26 @@ bool CvUnit::IsPromotionBuilds(BuildTypes eIndex) const
 	if (it != m_piGetPromotionBuilds.end()) return it->second > 0;
 	else return false;
 }
-
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangePromotionProvideCombats(UnitCombatTypes eIndex,int iChange)
+{
+	CvAssertMsg(eIndex < GC.getNumUnitCombatClassInfos(), "Index out of bounds");
+	CvAssertMsg(eIndex > -1, "Index out of bounds");
+	m_piGetPromotionProvideCombats[eIndex] += iChange;
+	if (m_piGetPromotionProvideCombats[eIndex] == 0)
+	{
+		m_piGetPromotionProvideCombats.erase(eIndex);
+	}
+}
+/// This unitcombat provided by its promotions?
+bool CvUnit::IsPromotionProvideCombats(UnitCombatTypes eIndex) const
+{
+	CvAssertMsg(i < GC.getNumUnitCombatClassInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	auto it = m_piGetPromotionProvideCombats.find(eIndex);
+	if (it != m_piGetPromotionProvideCombats.end()) return it->second > 0;
+	else return false;
+}
 //	--------------------------------------------------------------------------------
 void CvUnit::ChangeMoveUsedAttackMod(int iValue)
 {
@@ -26046,7 +26067,7 @@ bool CvUnit::isPromotionValid(PromotionTypes ePromotion) const
 		return false;
 	}
 
-	if(!::isPromotionValid(ePromotion, getUnitType(), true))
+	if(!::isPromotionValid(ePromotion, getUnitType(), true, false, this))
 		return false;
 
 	// Insta-heal - must be damaged
@@ -26794,6 +26815,14 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 				ChangePromotionBuilds((BuildTypes)i, iChange);
 			}
 		}
+		if(thisPromotion.IsIncludeProvideCombat())
+		{
+			for(int i = 0; i < GC.getNumUnitCombatClassInfos(); i++)
+			{
+				if (!thisPromotion.GetProvideCombatType(i)) continue;
+				ChangePromotionProvideCombats((UnitCombatTypes)i, iChange);
+			}
+		}
 
 #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
@@ -26802,6 +26831,25 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		}
 #endif
 	}
+}
+
+
+//	--------------------------------------------------------------------------------
+bool CvUnit::isPromotionValidForProvidedUnitCombatType(PromotionTypes ePromotion) const
+{
+	VALIDATE_OBJECT
+
+	CvPromotionEntry* promotionInfo = GC.getPromotionInfo(ePromotion);
+	if(promotionInfo == NULL)
+	{
+		return false;
+	}
+	for (int i = 0; i < GC.getNumUnitCombatClassInfos(); i++) 
+    {
+		if(IsPromotionProvideCombats((UnitCombatTypes)i) && promotionInfo->GetUnitCombatClass((UnitCombatTypes)i))
+		return true;
+	}
+	return false;
 }
 
 
@@ -27004,6 +27052,7 @@ void CvUnit::read(FDataStream& kStream)
 
 	SERIALIZE_READ_UNORDERED_MAP(kStream, m_unitClassModifier);
 	SERIALIZE_READ_UNORDERED_MAP(kStream, m_piGetPromotionBuilds);
+	SERIALIZE_READ_UNORDERED_MAP(kStream, m_piGetPromotionProvideCombats);
 
 	kStream >> m_bIgnoreDangerWakeup;
 
@@ -27429,6 +27478,7 @@ void CvUnit::write(FDataStream& kStream) const
 
 	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_unitClassModifier);
 	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_piGetPromotionBuilds);
+	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_piGetPromotionProvideCombats);
 
 	// slewis - move to autovariable when saves are broken
 	kStream << m_bIgnoreDangerWakeup;

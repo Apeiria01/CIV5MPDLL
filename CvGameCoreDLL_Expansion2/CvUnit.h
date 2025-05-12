@@ -1580,6 +1580,7 @@ public:
 	bool isPromotionValid(PromotionTypes ePromotion) const;
 	bool isHasPromotion(PromotionTypes eIndex) const;
 	void setHasPromotion(PromotionTypes eIndex, bool bNewValue);
+	bool isPromotionValidForProvidedUnitCombatType(PromotionTypes ePromotion) const;
 
 	int getSubUnitCount() const;
 	int getSubUnitsAlive() const;
@@ -2137,6 +2138,9 @@ public:
 
 	void ChangePromotionBuilds(BuildTypes eIndex,int iChange);
     bool IsPromotionBuilds(BuildTypes eIndex) const;
+
+	void ChangePromotionProvideCombats(UnitCombatTypes eIndex,int iChange);
+    bool IsPromotionProvideCombats(UnitCombatTypes eIndex) const;
 protected:
 	const MissionQueueNode* HeadMissionQueueNode() const;
 	MissionQueueNode* HeadMissionQueueNode();
@@ -2512,6 +2516,7 @@ protected:
 	FAutoVariable<std::vector<int>, CvUnit> m_extraUnitCombatModifier;
 	std::tr1::unordered_map<int, int> m_unitClassModifier;
 	std::tr1::unordered_map<int, int> m_piGetPromotionBuilds;
+	std::tr1::unordered_map<int, int> m_piGetPromotionProvideCombats;
 
 	int m_iMissionTimer;
 	FAutoVariable<int, CvUnit> m_iMissionAIX;

@@ -253,6 +253,7 @@ public:
 	bool GetDomainAuraValid(int i) const;
 #endif
 	bool IsIncludeBuild() const;
+	bool IsIncludeProvideCombat() const;
 #if defined(MOD_PROMOTION_NEW_EFFECT_FOR_SP)
 	int GetMeleeAttackModifier() const;
 	int GetCaptureEmenyExtraMax() const;
@@ -427,6 +428,7 @@ public:
 	bool GetUnitType(int i) const;
 #endif
 	bool GetBuildType(int i) const;
+	bool GetProvideCombatType(int i) const;
 
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	bool IsUnitNaming(int i) const;
@@ -632,6 +634,7 @@ protected:
 	bool* m_pbDomainAuraValid;
 #endif
 	bool m_bIncludeBuild;
+	bool m_bIncludeProvideCombat;
 #if defined(MOD_PROMOTION_NEW_EFFECT_FOR_SP)
 	int m_iMeleeAttackModifier;
 	int m_iCaptureEmenyExtraMax;
@@ -906,6 +909,7 @@ protected:
 	std::vector<int> m_vPromotionExclusionAny;
 	bool* m_pbUnitType;
 	bool* m_pbBuildType;
+	bool* m_pbProvideCombatType;
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)
 	bool* m_pbUnitName;
 #endif

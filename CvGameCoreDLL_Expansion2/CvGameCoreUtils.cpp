@@ -448,7 +448,7 @@ bool IsPromotionValidForUnit(PromotionTypes ePromotion, CvUnit& pUnit)
 #endif
 }
 
-bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq)
+bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, bool bTestingPrereq, const CvUnit* pUnit)
 {
 	CvUnitEntry* unitInfo = GC.getUnitInfo(eUnit);
 	CvPromotionEntry* promotionInfo = GC.getPromotionInfo(ePromotion);
@@ -475,8 +475,9 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 	}
 
 	// Is this a valid Promotion for the UnitCombatType?
-	if(!::IsPromotionValidForUnitCombatType(ePromotion, eUnit))
-	{
+	bool bBaseCombatValid = ::IsPromotionValidForUnitCombatType(ePromotion, eUnit);
+	bool bProvidedCombatValid = (pUnit != nullptr) ? pUnit->isPromotionValidForProvidedUnitCombatType(ePromotion) : false;
+	if (!bBaseCombatValid && !bProvidedCombatValid) {
 		return false;
 	}
 
@@ -513,7 +514,7 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 	{
 		for(int Ii=0; Ii < pPrereqAnds.size(); Ii++)
 		{
-			if(!isPromotionValid((PromotionTypes)pPrereqAnds[Ii], eUnit, bLeader, true))
+			if(!isPromotionValid((PromotionTypes)pPrereqAnds[Ii], eUnit, bLeader, true, pUnit))
 			{
 				return false;
 			}
@@ -523,7 +524,7 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 	// Promotion Prereqs
 	if(NO_PROMOTION != promotionInfo->GetPrereqPromotion())
 	{
-		if(!isPromotionValid((PromotionTypes)promotionInfo->GetPrereqPromotion(), eUnit, bLeader, true))
+		if(!isPromotionValid((PromotionTypes)promotionInfo->GetPrereqPromotion(), eUnit, bLeader, true, pUnit))
 		{
 			return false;
 		}
@@ -535,7 +536,7 @@ bool isPromotionValid(PromotionTypes ePromotion, UnitTypes eUnit, bool bLeader, 
 	{
 		PromotionTypes ePrereq = (PromotionTypes)iPrereq;
 		if (ePrereq == NO_PROMOTION) continue;
-		if (isPromotionValid(ePrereq, eUnit, bLeader, true))
+		if (isPromotionValid(ePrereq, eUnit, bLeader, true, pUnit))
 		{
 			bValid = true;
 			break;
