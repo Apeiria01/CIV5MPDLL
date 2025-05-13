@@ -2137,6 +2137,9 @@ public:
 
 	void ChangePromotionBuilds(BuildTypes eIndex,int iChange);
     bool IsPromotionBuilds(BuildTypes eIndex) const;
+
+	void ChangeUnitCombatsPromotionValid(UnitCombatTypes eIndex,int iChange);
+    const std::tr1::unordered_map<int, int>& GetUnitCombatsPromotionValid() const;
 protected:
 	const MissionQueueNode* HeadMissionQueueNode() const;
 	MissionQueueNode* HeadMissionQueueNode();
@@ -2512,6 +2515,7 @@ protected:
 	FAutoVariable<std::vector<int>, CvUnit> m_extraUnitCombatModifier;
 	std::tr1::unordered_map<int, int> m_unitClassModifier;
 	std::tr1::unordered_map<int, int> m_piGetPromotionBuilds;
+	std::tr1::unordered_map<int, int> m_mapUnitCombatsPromotionValid;
 
 	int m_iMissionTimer;
 	FAutoVariable<int, CvUnit> m_iMissionAIX;

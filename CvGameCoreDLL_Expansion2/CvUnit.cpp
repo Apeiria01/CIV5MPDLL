@@ -1849,6 +1849,7 @@ void CvUnit::uninitInfos()
 	m_extraUnitCombatModifier.clear();
 	m_unitClassModifier.clear();
 	m_piGetPromotionBuilds.clear();
+	m_mapUnitCombatsPromotionValid.clear();
 
 	m_aiNumTimesAttackedThisTurn.clear();
 	m_iCombatModPerAdjacentUnitCombatModifier.clear();
@@ -6708,6 +6709,23 @@ bool CvUnit::IsPromotionBuilds(BuildTypes eIndex) const
 	auto it = m_piGetPromotionBuilds.find(eIndex);
 	if (it != m_piGetPromotionBuilds.end()) return it->second > 0;
 	else return false;
+}
+
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeUnitCombatsPromotionValid(UnitCombatTypes eIndex,int iChange)
+{
+	CvAssertMsg(eIndex < GC.getNumUnitCombatClassInfos(), "Index out of bounds");
+	CvAssertMsg(eIndex > -1, "Index out of bounds");
+	m_mapUnitCombatsPromotionValid[eIndex] += iChange;
+	if (m_mapUnitCombatsPromotionValid[eIndex] == 0)
+	{
+		m_mapUnitCombatsPromotionValid.erase(eIndex);
+	}
+}
+/// This unitcombat provided by its promotions?
+const std::tr1::unordered_map<int, int>& CvUnit::GetUnitCombatsPromotionValid() const
+{
+	return m_mapUnitCombatsPromotionValid;
 }
 
 //	--------------------------------------------------------------------------------
@@ -26046,7 +26064,7 @@ bool CvUnit::isPromotionValid(PromotionTypes ePromotion) const
 		return false;
 	}
 
-	if(!::isPromotionValid(ePromotion, getUnitType(), true))
+	if(!::isPromotionValid(ePromotion, getUnitType(), true, false, this))
 		return false;
 
 	// Insta-heal - must be damaged
@@ -26794,6 +26812,10 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 				ChangePromotionBuilds((BuildTypes)i, iChange);
 			}
 		}
+		for(auto iCombatType : thisPromotion.GetUnitCombatsPromotionValid())
+		{
+			ChangeUnitCombatsPromotionValid((UnitCombatTypes)iCombatType, iChange);
+		}
 
 #if defined(MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 		if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
@@ -27004,6 +27026,7 @@ void CvUnit::read(FDataStream& kStream)
 
 	SERIALIZE_READ_UNORDERED_MAP(kStream, m_unitClassModifier);
 	SERIALIZE_READ_UNORDERED_MAP(kStream, m_piGetPromotionBuilds);
+	kStream >> m_mapUnitCombatsPromotionValid;
 
 	kStream >> m_bIgnoreDangerWakeup;
 
@@ -27429,6 +27452,7 @@ void CvUnit::write(FDataStream& kStream) const
 
 	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_unitClassModifier);
 	SERIALIZE_WRITE_UNORDERED_MAP(kStream, m_piGetPromotionBuilds);
+	kStream << m_mapUnitCombatsPromotionValid;
 
 	// slewis - move to autovariable when saves are broken
 	kStream << m_bIgnoreDangerWakeup;

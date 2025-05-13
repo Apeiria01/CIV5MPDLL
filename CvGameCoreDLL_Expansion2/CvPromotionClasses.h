@@ -423,6 +423,7 @@ public:
 	const std::vector<int>& GetPromotionPrereqOrs() const;
 	const std::vector<int>& GetPromotionPrereqAnds() const;
 	const std::vector<int>& GetPromotionExclusionAny() const;
+	const std::vector<int>& GetUnitCombatsPromotionValid() const;
 #if defined(MOD_ROG_CORE)
 	bool GetUnitType(int i) const;
 #endif
@@ -904,6 +905,7 @@ protected:
 	std::vector<int> m_vPromotionPrereqOrs;
 	std::vector<int> m_vPromotionPrereqAnds;
 	std::vector<int> m_vPromotionExclusionAny;
+	std::vector<int> m_vUnitCombatsPromotionValid;
 	bool* m_pbUnitType;
 	bool* m_pbBuildType;
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)

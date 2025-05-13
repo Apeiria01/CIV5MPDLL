@@ -1484,6 +1484,29 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 		pResults->Reset();
 	}
+	//Promotion_UnitCombatsPromotionValid(only for check promotion valid)
+	{
+		m_vUnitCombatsPromotionValid.clear();
+
+		std::string sqlKey = "m_vUnitCombatsPromotionValid";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == NULL) {
+			const char* szSQL = "SELECT UnitCombatInfos.ID FROM Promotion_UnitCombatsPromotionValid INNER JOIN UnitCombatInfos ON UnitCombatInfos.Type = UnitCombatType WHERE PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step()) {
+			const int iUnitCombatsPromotionValid = (UnitCombatTypes)pResults->GetInt(0);
+			CvAssert(iUnitCombatsPromotionValid < iNumUnitCombatClasses);
+			m_vUnitCombatsPromotionValid.push_back(iUnitCombatsPromotionValid);
+		}
+
+		pResults->Reset();
+	}
 
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	//UnitPromotions_Promotions
@@ -3573,8 +3596,11 @@ const std::vector<int>& CvPromotionEntry::GetPromotionExclusionAny() const
 {
 	return m_vPromotionExclusionAny;
 }
-
-
+/// Returns the Valid CombatType Promotions this Promotion given
+const std::vector<int>& CvPromotionEntry::GetUnitCombatsPromotionValid() const
+{
+	return m_vUnitCombatsPromotionValid;
+}
 
 /// Returns the  unit type that this promotion is available for
 bool CvPromotionEntry::GetUnitType(int i) const
