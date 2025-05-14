@@ -293,7 +293,6 @@ CvPlayer::CvPlayer() :
 	, m_viTradeRouteDomainExtraRange("CvPlayer::m_viTradeRouteDomainExtraRange", m_syncArchive)
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	, m_iCityDefenseModifierGlobal(0)
-	, m_iCityStateTradeRouteProductionModifierGlobal(0)
 	, m_iLandmarksTourismPercentGlobal(0)
 	, m_iGreatWorksTourismModifierGlobal(0)
 	, m_iTradeRouteSeaGoldBonusGlobal(0)
@@ -1088,15 +1087,14 @@ void CvPlayer::uninit()
 	m_iHappinessPerPolicy = 0;
 	m_iWaterBuildSpeedModifier = 0;
 	m_vSettlerProductionEraModifier.clear();
-	m_vSettlerProductionEraModifier.resize(GC.getNumEraInfos(), 0);
 #endif
 	m_iNullifyInfluenceModifier = 0;
 	m_iNumTradeRouteBonus = 0;
 	m_viTradeRouteDomainExtraRange.clear();
-	m_viTradeRouteDomainExtraRange.resize(NUM_DOMAIN_TYPES, 0);
 #if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
 	m_iTradeRouteSeaGoldBonusGlobal = 0;
 	m_iTradeRouteLandGoldBonusGlobal = 0;
+	m_vCityStateTradeRouteYieldModifierGlobal.clear();
 #endif
 	m_iImprovementCostModifier = 0;
 	m_iImprovementUpgradeRateModifier = 0;
@@ -1371,6 +1369,11 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 	m_aiYieldFromPillage.clear();
 	m_aiYieldFromPillage.resize(NUM_YIELD_TYPES, 0);
 #endif
+	m_vSettlerProductionEraModifier.clear();
+	m_vSettlerProductionEraModifier.resize(GC.getNumEraInfos(), 0);
+	m_viTradeRouteDomainExtraRange.clear();
+	m_viTradeRouteDomainExtraRange.resize(NUM_DOMAIN_TYPES, 0);
+
 	m_aiPolicyModifiers.clear();
 	m_aiPolicyModifiers.resize(NUM_POLICY_MODIFIER_TYPE, 0);
 
@@ -1417,7 +1420,8 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 	m_aiYieldRateModifier.clear();
 	m_aiYieldRateModifier.resize(NUM_YIELD_TYPES, 0);
 
-
+	m_vCityStateTradeRouteYieldModifierGlobal.clear();
+	m_vCityStateTradeRouteYieldModifierGlobal.resize(NUM_YIELD_TYPES, 0);
 
 #ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	m_aiGoldenAgeYieldRateModifier.clear();
@@ -10180,7 +10184,6 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	changeCityDefenseModifierGlobal(pBuildingInfo->GetCityDefenseModifierGlobal() * iChange);
-	changeCityStateTradeRouteProductionModifierGlobal(pBuildingInfo->GetCityStateTradeRouteProductionModifierGlobal() * iChange);
 	changeLandmarksTourismPercentGlobal(pBuildingInfo->GetLandmarksTourismPercentGlobal() * iChange);
 	changeGreatWorksTourismModifierGlobal(pBuildingInfo->GetGreatWorksTourismModifierGlobal() * iChange);
 	changeTradeRouteSeaGoldBonusGlobal(pBuildingInfo->GetTradeRouteSeaGoldBonusGlobal() * iChange);
@@ -10188,10 +10191,10 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 #endif
 
 #ifdef MOD_GLOBAL_CORRUPTION
-		if (MOD_GLOBAL_CORRUPTION)
-		{
-			ChangeCorruptionPolicyCostModifier(pBuildingInfo->GetCorruptionPolicyCostModifier() * iChange);
-		}
+	if (MOD_GLOBAL_CORRUPTION)
+	{
+		ChangeCorruptionPolicyCostModifier(pBuildingInfo->GetCorruptionPolicyCostModifier() * iChange);
+	}
 #endif
 
 
@@ -10215,7 +10218,7 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 			ChangeYieldFromProcessModifierGlobal((YieldTypes)iI, (pBuildingInfo->GetYieldFromProcessModifierGlobal((YieldTypes)iI) * iChange));
 		}
 
-
+		ChangeCityStateTradeRouteYieldModifierGlobal((YieldTypes)iI, pBuildingInfo->GetCityStateTradeRouteYieldModifierGlobal((YieldTypes)iI) * iChange);
 
 #if defined(MOD_ROG_CORE)
 		ChangeYieldFromPillage(((YieldTypes)iI), (pBuildingInfo->GetYieldFromPillageGlobal(iI) * iChange));
@@ -10281,14 +10284,14 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	if (iOldEspionageSpeedModifier != GetEspionageSpeedModifier())
 	{
 		int iLoop;
-			for (uint ui = 0; ui < MAX_MAJOR_CIVS; ui++)
+		for (uint ui = 0; ui < MAX_MAJOR_CIVS; ui++)
+		{
+			PlayerTypes ePlayer = (PlayerTypes)ui;
+			for (CvCity* pLoopCity = GET_PLAYER(ePlayer).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(ePlayer).nextCity(&iLoop))
 			{
-				PlayerTypes ePlayer = (PlayerTypes)ui;
-				for (CvCity* pLoopCity = GET_PLAYER(ePlayer).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(ePlayer).nextCity(&iLoop))
-				{
-					GetEspionage()->UpdateCity(pLoopCity);
-				}
+				GetEspionage()->UpdateCity(pLoopCity);
 			}
+		}
 	}
 
 
@@ -16995,20 +16998,19 @@ void CvPlayer::changeCityDefenseModifierGlobal(int iChange)
 
 
 //	--------------------------------------------------------------------------------
-int CvPlayer::getCityStateTradeRouteProductionModifierGlobal() const
+int CvPlayer::GetCityStateTradeRouteYieldModifierGlobal(YieldTypes eYield) const
 {
-	if(m_iCityStateTradeRouteProductionModifierGlobal != 0)
+	if(m_vCityStateTradeRouteYieldModifierGlobal[eYield] != 0)
 	{
 		int iCityStates = GetTrade()->GetNumberOfCityStateTradeRoutes();
-		return m_iCityStateTradeRouteProductionModifierGlobal * iCityStates;
+		return m_vCityStateTradeRouteYieldModifierGlobal[eYield] * iCityStates;
 	}
 	return 0;
 }
-void CvPlayer::changeCityStateTradeRouteProductionModifierGlobal(int iChange)
+void CvPlayer::ChangeCityStateTradeRouteYieldModifierGlobal(YieldTypes eYield, int iChange)
 {
-	m_iCityStateTradeRouteProductionModifierGlobal += iChange;
+	m_vCityStateTradeRouteYieldModifierGlobal[eYield] += iChange;
 }
-
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getLandmarksTourismPercentGlobal() const
@@ -28183,11 +28185,11 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_viTradeRouteDomainExtraRange;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	kStream >> m_iCityDefenseModifierGlobal;
-	kStream >> m_iCityStateTradeRouteProductionModifierGlobal;
 	kStream >> m_iLandmarksTourismPercentGlobal;
 	kStream >> m_iGreatWorksTourismModifierGlobal;
 	kStream >> m_iTradeRouteSeaGoldBonusGlobal;
 	kStream >> m_iTradeRouteLandGoldBonusGlobal;
+	kStream >> m_vCityStateTradeRouteYieldModifierGlobal;
 #endif
 	kStream >> m_iImprovementCostModifier;
 	kStream >> m_iImprovementUpgradeRateModifier;
@@ -28982,11 +28984,11 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_viTradeRouteDomainExtraRange;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	kStream << m_iCityDefenseModifierGlobal;
-	kStream << m_iCityStateTradeRouteProductionModifierGlobal;
 	kStream << m_iLandmarksTourismPercentGlobal;
 	kStream << m_iGreatWorksTourismModifierGlobal;
 	kStream << m_iTradeRouteSeaGoldBonusGlobal;
 	kStream << m_iTradeRouteLandGoldBonusGlobal;
+	kStream << m_vCityStateTradeRouteYieldModifierGlobal;
 #endif
 	kStream << m_iImprovementCostModifier;
 	kStream << m_iImprovementUpgradeRateModifier;

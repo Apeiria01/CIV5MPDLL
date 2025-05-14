@@ -344,7 +344,6 @@ public:
 	int GetTradeRouteSeaGoldBonus() const;
 	int GetTradeRouteLandDistanceModifier() const;
 	int GetTradeRouteLandGoldBonus() const;
-	int GetCityStateTradeRouteProductionModifier() const;
 	int GetGreatScientistBeakerModifier() const;
 	int GetExtraLeagueVotes() const;
 	int GetPreferredDisplayPosition() const;
@@ -407,6 +406,8 @@ public:
 	int* GetYieldChangePerEraArray() const;
 	int GetYieldModifierChangePerEra(int i) const;
 	int* GetYieldModifierChangePerEraArray() const;
+	int GetCityStateTradeRouteYieldModifier(int i) const;
+	int GetCityStateTradeRouteYieldModifierGlobal(int i) const;
 	int GetYieldChangePerPop(int i) const;
 	int* GetYieldChangePerPopArray() const;
 	int GetYieldChangePerReligion(int i) const;
@@ -514,7 +515,6 @@ public:
 	int GetExtraSellRefund() const;
 	int GetExtraSellRefundModifierPerEra() const;
 	int GetMinNumReligions() const;
-	int GetCityStateTradeRouteProductionModifierGlobal() const;
 	int GetLandmarksTourismPercentGlobal() const;
 	int GetGreatWorksTourismModifierGlobal() const;
 	int GetTradeRouteSeaGoldBonusGlobal() const;
@@ -831,7 +831,6 @@ private:
 	int m_iTradeRouteSeaGoldBonus;
 	int m_iTradeRouteLandDistanceModifier;
 	int m_iTradeRouteLandGoldBonus;
-	int m_iCityStateTradeRouteProductionModifier;
 	int m_iGreatScientistBeakerModifier;
 	int m_iExtraLeagueVotes;
 	int m_iPreferredDisplayPosition;
@@ -900,6 +899,8 @@ private:
 	int* m_piYieldChange;
 	int* m_piYieldChangePerEra;
 	int* m_piYieldModifierChangePerEra;
+	int* m_piCityStateTradeRouteYieldModifier;
+	int* m_piCityStateTradeRouteYieldModifierGlobal;
 	int* m_piYieldChangePerPop;
 	int* m_piYieldChangePerReligion;
 	int* m_piYieldModifier;
@@ -983,7 +984,6 @@ private:
 	int m_iExtraSellRefund;
 	int m_iExtraSellRefundModifierPerEra;
 	int m_iMinNumReligions;
-	int m_iCityStateTradeRouteProductionModifierGlobal;
 	int m_iLandmarksTourismPercentGlobal;
 	int m_iGreatWorksTourismModifierGlobal;
 	int m_iTradeRouteSeaGoldBonusGlobal;
@@ -1192,9 +1192,6 @@ public:
 	int GetNumBuildingsFromFaith() const;
 	void ChangeNumBuildingsFromFaith(int iChange);
 
-	int GetCityStateTradeRouteProductionModifier() const;
-	void ChangeCityStateTradeRouteProductionModifier(int iChange);
-
 	int GetBuildingProductionModifier() const;
 	void ChangeBuildingProductionModifier(int iChange);
 
@@ -1226,7 +1223,6 @@ private:
 	int m_iGreatWorksTourismModifier;
 
 	int m_iNumBuildingsFromFaith;
-	int m_iCityStateTradeRouteProductionModifier;
 
 	bool m_bSoldBuildingThisTurn;
 
