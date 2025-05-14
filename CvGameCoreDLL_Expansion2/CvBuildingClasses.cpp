@@ -121,7 +121,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iTradeRouteSeaGoldBonus(0),
 	m_iTradeRouteLandDistanceModifier(0),
 	m_iTradeRouteLandGoldBonus(0),
-	m_iCityStateTradeRouteProductionModifier(0),
 #ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
 	m_iGoldenAgeUnitCombatModifier(0),
 	m_iGoldenAgeMeterMod(0),
@@ -261,6 +260,8 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_piYieldChange(NULL),
 	m_piYieldChangePerEra(NULL),
 	m_piYieldModifierChangePerEra(NULL),
+	m_piCityStateTradeRouteYieldModifier(NULL),
+	m_piCityStateTradeRouteYieldModifierGlobal(NULL),
 	m_piYieldChangePerPop(NULL),
 	m_piYieldChangePerReligion(NULL),
 	m_piYieldModifier(NULL),
@@ -330,7 +331,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iExtraSellRefund(0),
 	m_iExtraSellRefundModifierPerEra(0),
 	m_iMinNumReligions(0),
-	m_iCityStateTradeRouteProductionModifierGlobal(0),
 	m_iLandmarksTourismPercentGlobal(0),
 	m_iGreatWorksTourismModifierGlobal(0),
 	m_iTradeRouteSeaGoldBonusGlobal(0),
@@ -399,6 +399,8 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	SAFE_DELETE_ARRAY(m_piYieldChange);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerEra);
 	SAFE_DELETE_ARRAY(m_piYieldModifierChangePerEra);
+	SAFE_DELETE_ARRAY(m_piCityStateTradeRouteYieldModifier);
+	SAFE_DELETE_ARRAY(m_piCityStateTradeRouteYieldModifierGlobal);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerPop);
 	SAFE_DELETE_ARRAY(m_piYieldChangePerReligion);
 	SAFE_DELETE_ARRAY(m_piYieldModifier);
@@ -579,7 +581,6 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iExtraSellRefund = kResults.GetInt("ExtraSellRefund");
 	m_iExtraSellRefundModifierPerEra = kResults.GetInt("ExtraSellRefundModifierPerEra");
 	m_iMinNumReligions = kResults.GetInt("MinNumReligions");
-	m_iCityStateTradeRouteProductionModifierGlobal = kResults.GetInt("CityStateTradeRouteProductionModifierGlobal");
 	m_iLandmarksTourismPercentGlobal = kResults.GetInt("LandmarksTourismPercentGlobal");
 	m_iGreatWorksTourismModifierGlobal = kResults.GetInt("GreatWorksTourismModifierGlobal");
 	m_iTradeRouteSeaGoldBonusGlobal = kResults.GetInt("TradeRouteSeaGoldBonusGlobal");
@@ -698,7 +699,6 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iTradeRouteSeaGoldBonus = kResults.GetInt("TradeRouteSeaGoldBonus");
 	m_iTradeRouteLandDistanceModifier = kResults.GetInt("TradeRouteLandDistanceModifier");
 	m_iTradeRouteLandGoldBonus = kResults.GetInt("TradeRouteLandGoldBonus");
-	m_iCityStateTradeRouteProductionModifier = kResults.GetInt("CityStateTradeRouteProductionModifier");
 #ifdef MOD_BUILDINGS_GOLDEN_AGE_EXTEND
 	m_iGoldenAgeUnitCombatModifier = kResults.GetInt("GoldenAgeUnitCombatModifier");
 	m_iGoldenAgeMeterMod = kResults.GetInt("GoldenAgeMeterMod");
@@ -869,6 +869,10 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	kUtility.SetYields(m_piYieldChange, "Building_YieldChanges", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerEra, "Building_YieldChangesPerEra", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldModifierChangePerEra, "Building_YieldModifiersChangesPerEra", "BuildingType", szBuildingType);
+	kUtility.SetYields(m_piCityStateTradeRouteYieldModifier, "Building_CityStateTradeRouteYieldModifiers", "BuildingType", szBuildingType);
+	m_piCityStateTradeRouteYieldModifier[YIELD_PRODUCTION] += kResults.GetInt("CityStateTradeRouteProductionModifier");
+	kUtility.SetYields(m_piCityStateTradeRouteYieldModifierGlobal, "Building_CityStateTradeRouteYieldModifiersGlobal", "BuildingType", szBuildingType);
+	m_piCityStateTradeRouteYieldModifierGlobal[YIELD_PRODUCTION] += kResults.GetInt("CityStateTradeRouteProductionModifierGlobal");
 	kUtility.SetYields(m_piYieldChangePerPop, "Building_YieldChangesPerPop", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldChangePerReligion, "Building_YieldChangesPerReligion", "BuildingType", szBuildingType);
 	kUtility.SetYields(m_piYieldModifier, "Building_YieldModifiers", "BuildingType", szBuildingType);
@@ -2849,11 +2853,6 @@ int CvBuildingEntry::GetTradeRouteLandGoldBonus() const
 	return m_iTradeRouteLandGoldBonus;
 }
 
-int CvBuildingEntry::GetCityStateTradeRouteProductionModifier() const
-{
-	return m_iCityStateTradeRouteProductionModifier;
-}
-
 int CvBuildingEntry::GetGreatScientistBeakerModifier() const
 {
 	return m_iGreatScientistBeakerModifier;
@@ -3206,6 +3205,14 @@ bool CvBuildingEntry::IsScienceBuilding() const
 	{
 		bRtnValue = true;
 	}
+	else if(GetCityStateTradeRouteYieldModifier(YIELD_SCIENCE) > 0)
+	{
+		bRtnValue = true;
+	}
+	else if(GetCityStateTradeRouteYieldModifierGlobal(YIELD_SCIENCE) > 0)
+	{
+		bRtnValue = true;
+	}
 	else if(GetYieldChangePerPop(YIELD_SCIENCE) > 0)
 	{
 		bRtnValue = true;
@@ -3316,6 +3323,21 @@ int CvBuildingEntry::GetYieldModifierChangePerEra(int i) const
 int* CvBuildingEntry::GetYieldModifierChangePerEraArray() const
 {
 	return m_piYieldModifierChangePerEra;
+}
+/// Change to yieldModifier by type City State TradeRoute
+int CvBuildingEntry::GetCityStateTradeRouteYieldModifier(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piCityStateTradeRouteYieldModifier ? m_piCityStateTradeRouteYieldModifier[i] : -1;
+}
+
+/// Change to yieldModifier Global by type City State TradeRoute
+int CvBuildingEntry::GetCityStateTradeRouteYieldModifierGlobal(int i) const
+{
+	CvAssertMsg(i < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piCityStateTradeRouteYieldModifierGlobal ? m_piCityStateTradeRouteYieldModifierGlobal[i] : -1;
 }
 
 /// Change to yield by type
@@ -4181,11 +4203,6 @@ int CvBuildingEntry::GetMinNumReligions() const
 	return m_iMinNumReligions;
 }
 
-int CvBuildingEntry::GetCityStateTradeRouteProductionModifierGlobal() const
-{
-	return m_iCityStateTradeRouteProductionModifierGlobal;
-}
-
 int CvBuildingEntry::GetLandmarksTourismPercentGlobal() const
 {
 	return m_iLandmarksTourismPercentGlobal;
@@ -4662,7 +4679,6 @@ CvCityBuildings::CvCityBuildings():
 	m_iLandmarksTourismPercent(0),
 	m_iGreatWorksTourismModifier(0),
 	m_iNumBuildingsFromFaith(0),
-	m_iCityStateTradeRouteProductionModifier(0),
 	m_bSoldBuildingThisTurn(false),
 	m_pBuildings(NULL),
 	m_pCity(NULL)
@@ -4736,7 +4752,6 @@ void CvCityBuildings::Reset()
 	m_iLandmarksTourismPercent = 0;
 	m_iGreatWorksTourismModifier = 0;
 	m_iNumBuildingsFromFaith = 0;
-	m_iCityStateTradeRouteProductionModifier = 0;
 
 	m_bSoldBuildingThisTurn = false;
 
@@ -4769,7 +4784,6 @@ void CvCityBuildings::Read(FDataStream& kStream)
 	kStream >> m_iLandmarksTourismPercent;
 	kStream >> m_iGreatWorksTourismModifier;
 	kStream >> m_iNumBuildingsFromFaith;
-	kStream >> m_iCityStateTradeRouteProductionModifier;
 
 	kStream >> m_bSoldBuildingThisTurn;
 
@@ -4802,7 +4816,6 @@ void CvCityBuildings::Write(FDataStream& kStream)
 	kStream << m_iLandmarksTourismPercent;
 	kStream << m_iGreatWorksTourismModifier;
 	kStream << m_iNumBuildingsFromFaith;
-	kStream << m_iCityStateTradeRouteProductionModifier;
 	kStream << m_bSoldBuildingThisTurn;
 
 #ifdef _MSC_VER
@@ -5920,25 +5933,6 @@ void CvCityBuildings::ChangeNumBuildingsFromFaith(int iChange)
 	if(iChange != 0)
 	{
 		m_iNumBuildingsFromFaith = (m_iNumBuildingsFromFaith + iChange);
-	}
-}
-
-/// Accessor: What is the production modifier for each city state trade route?
-int CvCityBuildings::GetCityStateTradeRouteProductionModifier() const
-{
-	if(m_iCityStateTradeRouteProductionModifier != 0)
-	{
-		int iCityStates = GET_PLAYER(m_pCity->getOwner()).GetTrade()->GetNumberOfCityStateTradeRoutes();
-		return m_iCityStateTradeRouteProductionModifier * iCityStates;
-	}
-	
-	return 0;
-}
-void CvCityBuildings::ChangeCityStateTradeRouteProductionModifier(int iChange)
-{
-	if(iChange != 0)
-	{
-		m_iCityStateTradeRouteProductionModifier = (m_iCityStateTradeRouteProductionModifier + iChange);
 	}
 }
 

@@ -1251,6 +1251,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_aiYieldPerReligion.resize(NUM_YIELD_TYPES);
 	m_aiYieldPerEra.resize(NUM_YIELD_TYPES);
 	m_aiYieldModifierPerEra.resize(NUM_YIELD_TYPES);
+	m_aiCityStateTradeRouteYieldModifier.resize(NUM_YIELD_TYPES);
 	m_aiYieldRateModifier.resize(NUM_YIELD_TYPES);
 	m_aiYieldRateMultiplier.resize(NUM_YIELD_TYPES);
 	m_aiPowerYieldRateModifier.resize(NUM_YIELD_TYPES);
@@ -1278,6 +1279,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		m_aiYieldPerReligion[iI] = 0;
 		m_aiYieldPerEra[iI] = 0;
 		m_aiYieldModifierPerEra[iI] = 0;
+		m_aiCityStateTradeRouteYieldModifier[iI] = 0;
 		m_aiYieldRateModifier.setAt(iI, 0);
 		m_aiYieldRateMultiplier.setAt(iI, 0);
 		m_aiPowerYieldRateModifier.setAt(iI, 0);
@@ -7829,7 +7831,6 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		m_pCityBuildings->ChangeLandmarksTourismPercent(pBuildingInfo->GetLandmarksTourismPercent() * iChange);
 		m_pCityBuildings->ChangeGreatWorksTourismModifier(pBuildingInfo->GetGreatWorksTourismModifier() * iChange);
 		m_pCityBuildings->ChangeNumBuildingsFromFaith((pBuildingInfo->GetFaithCost() > 0 && pBuildingInfo->IsUnlockedByBelief() && pBuildingInfo->GetProductionCost() == -1) ? iChange : 0);
-		m_pCityBuildings->ChangeCityStateTradeRouteProductionModifier(pBuildingInfo->GetCityStateTradeRouteProductionModifier() * iChange);
 		ChangeWonderProductionModifier(pBuildingInfo->GetWonderProductionModifier() * iChange);
 		changeCapturePlunderModifier(pBuildingInfo->GetCapturePlunderModifier() * iChange);
 		ChangeEspionageModifier(pBuildingInfo->GetEspionageModifier() * iChange);
@@ -8091,9 +8092,10 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 			ChangeYieldPerPopTimes100(eYield, pBuildingInfo->GetYieldChangePerPop(eYield) * iChange);
 			ChangeYieldPerReligionTimes100(eYield, pBuildingInfo->GetYieldChangePerReligion(eYield) * iChange);
 			ChangeYieldPerEra(eYield, pBuildingInfo->GetYieldChangePerEra(eYield) * iChange);
-			ChangeYieldModifierPerEra(eYield, (pBuildingInfo->GetYieldModifierChangePerEra(eYield) * iChange));
-			changeYieldRateModifier(eYield, (pBuildingInfo->GetYieldModifier(eYield) * iChange));
-			changeYieldRateMultiplier(eYield, (pBuildingInfo->GetYieldMultiplier(eYield) * iChange));
+			ChangeYieldModifierPerEra(eYield, pBuildingInfo->GetYieldModifierChangePerEra(eYield) * iChange);
+			changeYieldRateModifier(eYield, pBuildingInfo->GetYieldModifier(eYield) * iChange);
+			changeYieldRateMultiplier(eYield, pBuildingInfo->GetYieldMultiplier(eYield) * iChange);
+			ChangeCityStateTradeRouteYieldModifier(eYield, pBuildingInfo->GetCityStateTradeRouteYieldModifier(eYield) * iChange);
 
 			CvPlayerPolicies* pPolicies = GET_PLAYER(getOwner()).GetPlayerPolicies();
 			changeYieldRateModifier(eYield, pPolicies->GetBuildingClassYieldModifier(eBuildingClass, eYield) * iChange);
@@ -13204,25 +13206,17 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 			GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_BELIEF", iTempMod);
 	}
 
-	// Production Yield Rate Modifier from City States
-	iTempMod = GetCityBuildings()->GetCityStateTradeRouteProductionModifier();
-	if(eIndex == YIELD_PRODUCTION && iTempMod > 0)
-	{	
-		iModifier += iTempMod;
-		if(iTempMod != 0 && toolTipSink){
-			GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_MINOR_TRADE_LOCAL", iTempMod);
-		}
-	}
+	// Yield Rate Modifier from City States
+	iTempMod = GetCityStateTradeRouteYieldModifier(eIndex);	
+	iModifier += iTempMod;
+	if(iTempMod != 0 && toolTipSink)
+		GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_MINOR_TRADE_LOCAL", iTempMod);
 
-	// Production Yield Rate Modifier Global from City States
-	iTempMod = owner.getCityStateTradeRouteProductionModifierGlobal();
-	if(eIndex == YIELD_PRODUCTION && iTempMod > 0)
-	{	
-		iModifier += iTempMod;
-		if(iTempMod != 0 && toolTipSink){
-			GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_MINOR_TRADE_GLOBAL", iTempMod);
-		}
-	}
+	// Yield Rate Modifier Global from City States
+	iTempMod = owner.GetCityStateTradeRouteYieldModifierGlobal(eIndex);
+	iModifier += iTempMod;
+	if(iTempMod != 0 && toolTipSink)
+		GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_MINOR_TRADE_GLOBAL", iTempMod);
 
 	// Puppet
 	if(IsPuppet())
@@ -15016,6 +15010,29 @@ void CvCity::ChangeYieldModifierPerEra(YieldTypes eIndex, int iChange)
 	if(iChange != 0)
 	{
 		m_aiYieldModifierPerEra[eIndex] = m_aiYieldModifierPerEra[eIndex] + iChange;
+	}
+}
+
+//	--------------------------------------------------------------------------------
+int CvCity::GetCityStateTradeRouteYieldModifier(YieldTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+	if(m_aiCityStateTradeRouteYieldModifier[eIndex] != 0)
+	{
+		return m_aiCityStateTradeRouteYieldModifier[eIndex] * GET_PLAYER(m_eOwner).GetTrade()->GetNumberOfCityStateTradeRoutes();
+	}
+}
+void CvCity::ChangeCityStateTradeRouteYieldModifier(YieldTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+
+	if(iChange != 0)
+	{
+		m_aiCityStateTradeRouteYieldModifier[eIndex] = m_aiCityStateTradeRouteYieldModifier[eIndex] + iChange;
 	}
 }
 
@@ -20024,6 +20041,7 @@ void CvCity::read(FDataStream& kStream)
 	}
 	kStream >> m_aiYieldPerEra;
 	kStream >> m_aiYieldModifierPerEra;
+	kStream >> m_aiCityStateTradeRouteYieldModifier;
 	kStream >> m_aiYieldRateModifier;
 	kStream >> m_aiYieldRateMultiplier;
 	kStream >> m_aiPowerYieldRateModifier;
@@ -20505,6 +20523,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_aiYieldPerReligion;
 	kStream << m_aiYieldPerEra;
 	kStream << m_aiYieldModifierPerEra;
+	kStream << m_aiCityStateTradeRouteYieldModifier;
 	kStream << m_aiYieldRateModifier;
 	kStream << m_aiYieldRateMultiplier;
 	kStream << m_aiPowerYieldRateModifier;

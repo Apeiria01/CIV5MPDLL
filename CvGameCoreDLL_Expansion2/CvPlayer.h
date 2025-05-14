@@ -891,8 +891,8 @@ public:
 	int getCityDefenseModifierGlobal() const;
 	void changeCityDefenseModifierGlobal(int iChange);
 
-	int getCityStateTradeRouteProductionModifierGlobal() const;
-	void changeCityStateTradeRouteProductionModifierGlobal(int iChange);
+	int GetCityStateTradeRouteYieldModifierGlobal(YieldTypes eYield) const;
+	void ChangeCityStateTradeRouteYieldModifierGlobal(YieldTypes eYield, int iChange);
 
 	int getLandmarksTourismPercentGlobal() const;
 	void changeLandmarksTourismPercentGlobal(int iChange);
@@ -2483,11 +2483,11 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_viTradeRouteDomainExtraRange;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	int m_iCityDefenseModifierGlobal;
-	int m_iCityStateTradeRouteProductionModifierGlobal;
 	int m_iLandmarksTourismPercentGlobal;
 	int m_iGreatWorksTourismModifierGlobal;
 	int m_iTradeRouteSeaGoldBonusGlobal;
 	int m_iTradeRouteLandGoldBonusGlobal;
+	std::vector<int> m_vCityStateTradeRouteYieldModifierGlobal;
 #endif
 	FAutoVariable<int, CvPlayer> m_iImprovementCostModifier;
 	FAutoVariable<int, CvPlayer> m_iImprovementUpgradeRateModifier;
