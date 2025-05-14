@@ -77,6 +77,7 @@ public:
 	bool IsReformationBelief() const;
 	bool RequiresPeace() const;
 	bool ConvertsBarbarians() const;
+	bool BarbarianOccupiedReligionCity() const;
 	bool FaithPurchaseAllGreatPeople() const;
 
 	EraTypes GetObsoleteEra() const;
@@ -241,6 +242,7 @@ protected:
 	bool m_bReformer;
 	bool m_bRequiresPeace;
 	bool m_bConvertsBarbarians;
+	bool m_bBarbarianOccupiedReligionCity;
 	bool m_bFaithPurchaseAllGreatPeople;
 
 	EraTypes m_eObsoleteEra;
@@ -607,6 +609,7 @@ public:
 	bool IsFaithBuyingEnabled(EraTypes eEra) const;
 	bool IsConvertsBarbarians() const;
 	bool IsFaithPurchaseAllGreatPeople() const;
+	bool IsBarbarianOccupiedReligionCity() const;
 
 	// Serialization
 	void Read(FDataStream& kStream);
