@@ -353,3 +353,6 @@ CREATE TABLE Promotion_UnitCombatsPromotionValid (
 	PromotionType text REFERENCES UnitPromotions(Type),
 	UnitCombatType text REFERENCES UnitCombatInfos(Type)
 );
+
+ALTER TABLE UnitPromotions ADD COLUMN 'StayCSInfluencePerTurn' INTEGER DEFAULT 0;
+ALTER TABLE UnitPromotions ADD COLUMN 'StayCSExpPerTurn' INTEGER DEFAULT 0;

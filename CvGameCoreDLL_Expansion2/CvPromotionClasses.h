@@ -53,6 +53,8 @@ public:
 	int  GetRangeSuppressModifier() const;
 	int  GetMaintenanceCost() const;
 	int  GetFreeExpPerTurn() const;
+	int  GetStayCSInfluencePerTurn() const;
+	int  GetStayCSExpPerTurn() const;
 	int  GetInterceptionDamageMod() const;
 	int  GetAirSweepDamageMod() const;
 	int  GetInterceptionCombatModifier() const;
@@ -538,6 +540,8 @@ protected:
 	int m_iRangeSuppressModifier;
 	int m_iMaintenanceCost;
 	int m_iFreeExpPerTurn;
+	int m_iStayCSInfluencePerTurn;
+	int m_iStayCSExpPerTurn;
 	int m_iInterceptionDamageMod;
 	int m_iAirSweepDamageMod;
 	int m_iInterceptionCombatModifier;

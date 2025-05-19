@@ -244,6 +244,8 @@ CvUnit::CvUnit() :
 	, m_iRangeSuppressModifier("CvUnit::m_iRangeSuppressModifier", m_syncArchive)
 	, m_iPromotionMaintenanceCost("CvUnit::m_iPromotionMaintenanceCost", m_syncArchive)
 	, m_iFreeExpPerTurn("CvUnit::m_iFreeExpPerTurn", m_syncArchive)
+	, m_iStayCSInfluencePerTurn("CvUnit::m_iStayCSInfluencePerTurn", m_syncArchive)
+	, m_iStayCSExpPerTurn("CvUnit::m_iStayCSExpPerTurn", m_syncArchive)
 	, m_iInterceptionDamageMod("CvUnit::m_iInterceptionDamageMod", m_syncArchive)
 	, m_iAirSweepDamageMod("CvUnit::m_iAirSweepDamageMod", m_syncArchive)
 	, m_iInterceptionCombatModifier("CvUnit::m_iInterceptionCombatModifier", m_syncArchive)
@@ -1248,6 +1250,8 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iRangeSuppressModifier = 0;
 	m_iPromotionMaintenanceCost = 0;
 	m_iFreeExpPerTurn = 0;
+	m_iStayCSInfluencePerTurn = 0;
+	m_iStayCSExpPerTurn = 0;
 	m_iInterceptionDamageMod = 0;
 	m_iAirSweepDamageMod = 0;
 	m_iInterceptionCombatModifier = 0;
@@ -2919,9 +2923,16 @@ void CvUnit::doTurn()
 				}
 			}
 		}
-		if(!IsCivilianUnit() && plot())
+		CvPlot* pPlot = plot();
+		if((GetStayCSInfluencePerTurn() != 0 || GetStayCSExpPerTurn() != 0) && pPlot && GET_PLAYER(pPlot->getOwner()).isMinorCiv() && !GET_TEAM(pPlot->getTeam()).isAtWar(getTeam()))
 		{
-			CvCity* pCity = plot()->getPlotCity();
+			PlayerTypes eMinor = pPlot->getOwner();
+			GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), GetStayCSInfluencePerTurn());
+			iTotalxp += GetStayCSExpPerTurn();
+		}
+		if(!IsCivilianUnit() && pPlot)
+		{
+			CvCity* pCity = pPlot->getPlotCity();
 			if (pCity)
 			{
 				int itempexp = itempexp = pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
@@ -2984,7 +2995,7 @@ void CvUnit::doTurn()
 		// Do nothing, feature damage is included in with the terrain (mountains) damage taken at the end of the turn
 	} else { 
 #endif
-		FeatureTypes eFeature = plot()->getFeatureType();
+		FeatureTypes eFeature = pPlot->getFeatureType();
 		if(NO_FEATURE != eFeature)
 		{
 			if(0 != GC.getFeatureInfo(eFeature)->getTurnDamage())
@@ -19248,6 +19259,40 @@ void CvUnit::ChangeFreeExpPerTurn(int iValue)
 	}
 }
 
+/// Get influence per turn when in CS
+int CvUnit::GetStayCSInfluencePerTurn() const
+{
+	VALIDATE_OBJECT
+	return m_iStayCSInfluencePerTurn;
+}
+
+/// Change influence per turn when in CS
+void CvUnit::ChangeStayCSInfluencePerTurn(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iStayCSInfluencePerTurn += iValue;
+	}
+}
+
+/// Get exp per turn when in CS
+int CvUnit::GetStayCSExpPerTurn() const
+{
+	VALIDATE_OBJECT
+	return m_iStayCSExpPerTurn;
+}
+
+/// Change exp per turn when in CS
+void CvUnit::ChangeStayCSExpPerTurn(int iValue)
+{
+	VALIDATE_OBJECT
+	if(iValue != 0)
+	{
+		m_iStayCSExpPerTurn += iValue;
+	}
+}
+
 //	--------------------------------------------------------------------------------
 int CvUnit::GetInterceptionDamageMod() const
 {
@@ -26497,6 +26542,8 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeRangeSuppressModifier(thisPromotion.GetRangeSuppressModifier() * iChange);
 		if(thisPromotion.GetMaintenanceCost() > 0) ChangePromotionMaintenanceCost(thisPromotion.GetMaintenanceCost() * iChange);
 		ChangeFreeExpPerTurn(thisPromotion.GetFreeExpPerTurn() * iChange);
+		ChangeStayCSInfluencePerTurn(thisPromotion.GetStayCSInfluencePerTurn() * iChange);
+		ChangeStayCSExpPerTurn(thisPromotion.GetStayCSExpPerTurn() * iChange);
 		ChangeInterceptionCombatModifier(thisPromotion.GetInterceptionCombatModifier() * iChange);
 		ChangeInterceptionDamageMod(thisPromotion.GetInterceptionDamageMod() * iChange);
 		ChangeAirSweepDamageMod(thisPromotion.GetAirSweepDamageMod() * iChange);

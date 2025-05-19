@@ -801,6 +801,10 @@ public:
 	void ChangePromotionMaintenanceCost(int iValue);
 	int GetFreeExpPerTurn() const;
 	void ChangeFreeExpPerTurn(int iValue);
+	int GetStayCSInfluencePerTurn() const;
+	void ChangeStayCSInfluencePerTurn(int iValue);
+	int GetStayCSExpPerTurn() const;
+	void ChangeStayCSExpPerTurn(int iValue);
 	int GetInterceptionDamageMod() const;
 	void ChangeInterceptionDamageMod(int iValue);
 	int GetAirSweepDamageMod() const;
@@ -2242,6 +2246,8 @@ protected:
 	FAutoVariable<int, CvUnit> m_iRangeSuppressModifier;
 	FAutoVariable<int, CvUnit> m_iPromotionMaintenanceCost;
 	FAutoVariable<int, CvUnit> m_iFreeExpPerTurn;
+	FAutoVariable<int, CvUnit> m_iStayCSInfluencePerTurn;
+	FAutoVariable<int, CvUnit> m_iStayCSExpPerTurn;
 	FAutoVariable<int, CvUnit> m_iInterceptionDamageMod;
 	FAutoVariable<int, CvUnit> m_iAirSweepDamageMod;
 	FAutoVariable<int, CvUnit> m_iInterceptionCombatModifier;

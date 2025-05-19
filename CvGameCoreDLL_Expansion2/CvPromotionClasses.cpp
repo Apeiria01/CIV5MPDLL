@@ -33,6 +33,8 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iRangeSuppressModifier(0),
 	m_iMaintenanceCost(0),
 	m_iFreeExpPerTurn(0),
+	m_iStayCSInfluencePerTurn(0),
+	m_iStayCSExpPerTurn(0),
 	m_iInterceptionDamageMod(0),
 	m_iAirSweepDamageMod(0),
 	m_iInterceptionCombatModifier(0),
@@ -660,6 +662,8 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iRangeSuppressModifier = kResults.GetInt("RangeSuppressModifier");
 	m_iMaintenanceCost = kResults.GetInt("MaintenanceCost");
 	m_iFreeExpPerTurn = kResults.GetInt("FreeExpPerTurn");
+	m_iStayCSInfluencePerTurn = kResults.GetInt("StayCSInfluencePerTurn");
+	m_iStayCSExpPerTurn = kResults.GetInt("StayCSExpPerTurn");
 	m_iInterceptionDamageMod = kResults.GetInt("InterceptionDamageMod");
 	m_iAirSweepDamageMod = kResults.GetInt("AirSweepDamageMod");
 	m_iInterceptionCombatModifier = kResults.GetInt("InterceptionCombatModifier");
@@ -1767,6 +1771,18 @@ int CvPromotionEntry::GetMaintenanceCost() const
 int CvPromotionEntry::GetFreeExpPerTurn() const
 {
 	return m_iFreeExpPerTurn;
+}
+
+///When stay in CS get how many influence per turn
+int CvPromotionEntry::GetStayCSInfluencePerTurn() const
+{
+	return m_iStayCSInfluencePerTurn;
+}
+
+///When stay in CS get how many exp per turn
+int CvPromotionEntry::GetStayCSExpPerTurn() const
+{
+	return m_iStayCSExpPerTurn;
 }
 
 /// How much damage reduce mod when intercepting
