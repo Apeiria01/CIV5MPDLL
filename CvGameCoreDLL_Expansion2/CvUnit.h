@@ -663,29 +663,6 @@ public:
 	void SetCombatBonusImprovement(ImprovementTypes eImprovement);
 #endif
 
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	int GetAllyCityStateCombatModifier() const;
-	void SetAllyCityStateCombatModifier(int iCombatBonus);
-	int GetAllyCityStateCombatModifierMax() const;
-	void SetAllyCityStateCombatModifierMax(int iCombatBonusMax);
-	int GetStrengthModifierFromAlly() const;
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	ResourceTypes GetExtraResourceType() const;
-	void SetExtraResourceType(ResourceTypes m_eResourceType);
-	int GetExtraResourceCombatModifier() const;
-	void SetExtraResourceCombatModifier(int iCombatBonus);
-	int GetExtraResourceCombatModifierMax() const;
-	void SetExtraResourceCombatModifierMax(int iCombatBonusMax);
-	int GetStrengthModifierFromExtraResource() const;
-	int GetExtraHappinessCombatModifier() const;
-	void SetExtraHappinessCombatModifier(int iCombatBonus);
-	int GetExtraHappinessCombatModifierMax() const;
-	void SetExtraHappinessCombatModifierMax(int iCombatBonusMax);
-	int GetStrengthModifierFromExtraHappiness() const;
-#endif
-
 	bool canIntercept() const;
 	int GetAirInterceptRange() const;
 
@@ -1285,19 +1262,6 @@ public:
 	int GetNearbyImprovementModifierFromTraits() const;
 	int GetNearbyImprovementModifierFromPromotions() const;
 	int GetNearbyImprovementModifier(ImprovementTypes eBonusImprovement, int iImprovementRange, int iImprovementModifier) const;
-#endif
-
-#if defined(MOD_ROG_CORE)
-	int getNearbyUnitPromotionBonus() const;
-	void SetNearbyUnitPromotionBonus(int iCombatBonus);
-	int getNearbyUnitPromotionBonusRange() const;
-	void SetNearbyUnitPromotionBonusRange(int iBonusRange);
-	int getNearbyUnitPromotionBonusMax() const;
-	void SetNearbyUnitPromotionBonusMax(int iBonusMax);
-	PromotionTypes getCombatBonusFromNearbyUnitPromotion() const;
-	void SetCombatBonusFromNearbyUnitPromotion(PromotionTypes ePromotion);
-
-	int GetNearbyUnitPromotionModifierFromUnitPromotion() const;
 #endif
 
 	bool IsGreatGeneral() const;
@@ -2301,19 +2265,6 @@ protected:
 	FAutoVariable<int, CvUnit> m_iNearbyImprovementCombatBonus;
 	FAutoVariable<int, CvUnit> m_iNearbyImprovementBonusRange;
 	FAutoVariable<ImprovementTypes, CvUnit> m_eCombatBonusImprovement;
-#endif
-
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	FAutoVariable<int, CvUnit> m_iAllyCityStateCombatModifier;
-	FAutoVariable<int, CvUnit> m_iAllyCityStateCombatModifierMax;
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	FAutoVariable<ResourceTypes, CvUnit> m_eExtraResourceType;
-	FAutoVariable<int, CvUnit> m_iExtraResourceCombatModifier;
-	FAutoVariable<int, CvUnit> m_iExtraResourceCombatModifierMax;
-	FAutoVariable<int, CvUnit> m_iExtraHappinessCombatModifier;
-	FAutoVariable<int, CvUnit> m_iExtraHappinessCombatModifierMax;
 #endif
 
 #if defined(MOD_ROG_CORE)

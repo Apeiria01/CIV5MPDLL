@@ -2315,6 +2315,8 @@ void CvGlobals::init()
 
 	m_pLuaEvaluatorManager->Init(this);
 
+	m_pIndependentPromotion = FNEW(CvIndependentPromotionInfo, c_eCiv5GameplayDLL, 0);
+
 	memcpy(m_aiPlotDirectionX, aiPlotDirectionX, sizeof(m_aiPlotDirectionX));
 	memcpy(m_aiPlotDirectionY, aiPlotDirectionY, sizeof(m_aiPlotDirectionY));
 	memcpy(m_aiCityPlotX, aiCityPlotX, sizeof(m_aiCityPlotX));
@@ -2418,6 +2420,8 @@ void CvGlobals::uninit()
 
 	SAFE_DELETE(m_pLuaFormulaEntries);
 	SAFE_DELETE(m_pLuaEvaluatorManager);
+
+	SAFE_DELETE(m_pIndependentPromotion);
 
 	// already deleted outside of the dll, set to null for safety
 	m_pathFinder=NULL;
@@ -4417,6 +4421,11 @@ CvLuaFormula* CvGlobals::GetLuaFormulaEntry(LuaFormulaTypes eFormula)
 lua::EvaluatorManager* CvGlobals::GetLuaEvaluatorManager()
 {
 	return m_pLuaEvaluatorManager;
+}
+
+CvIndependentPromotionInfo* CvGlobals::GetIndependentPromotion()
+{
+	return m_pIndependentPromotion;
 }
 
 CvString*& CvGlobals::getFootstepAudioTags()

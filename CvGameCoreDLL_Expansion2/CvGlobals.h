@@ -171,6 +171,8 @@ class ICvUnit1;
 
 #include "CvLuaFormula.h"
 
+#include "CvIndependentPromotionInfo.h"
+
 class CvGlobals
 {
 public:
@@ -661,6 +663,8 @@ public:
 	CvLuaFormula* GetLuaFormulaEntry(LuaFormulaTypes eFormula);
 
 	lua::EvaluatorManager* GetLuaEvaluatorManager();
+
+	CvIndependentPromotionInfo* GetIndependentPromotion();
 
 	//
 	// Global Types
@@ -8045,6 +8049,8 @@ protected:
 
 	CvLuaFormulaXMLEntries* m_pLuaFormulaEntries;
 	lua::EvaluatorManager* m_pLuaEvaluatorManager;
+
+	CvIndependentPromotionInfo* m_pIndependentPromotion;
 
 	//////////////////////////////////////////////////////////////////////////
 	// GLOBAL TYPES
