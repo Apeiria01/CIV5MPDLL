@@ -15023,6 +15023,7 @@ int CvCity::GetCityStateTradeRouteYieldModifier(YieldTypes eIndex) const
 	{
 		return m_aiCityStateTradeRouteYieldModifier[eIndex] * GET_PLAYER(m_eOwner).GetTrade()->GetNumberOfCityStateTradeRoutes();
 	}
+	return 0;
 }
 void CvCity::ChangeCityStateTradeRouteYieldModifier(YieldTypes eIndex, int iChange)
 {
