@@ -445,7 +445,6 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(IsHigherPopThan);
 	Method(GetForcedDamageValue);
 	Method(GetChangeDamageValue);
-	Method(GetNearbyUnitPromotionModifierFromUnitPromotion);
 	Method(GetNumSpyDefenseMod);
 	Method(GetNumSpyAttackMod);
 	Method(GetNumWorkDefenseMod);
@@ -856,6 +855,11 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetGreatPersonOutputModifierFromGWs);
 	Method(GetStrengthModifierFromExtraResource);
 	Method(GetStrengthModifierFromExtraHappiness);
+	Method(GetNearbyUnitPromotionModifierFromUnitPromotion);
+	Method(GetAllyCityStateCombatModifier);
+	Method(GetHappinessCombatModifier);
+	Method(GetResourceCombatModifier);
+	Method(GetNearbyUnitPromotionBonus);
 	Method(GetBarbarianCombatBonusTotal);
 	Method(IsBatchMark);
 	Method(SetIsBatchMark);
@@ -6010,16 +6014,6 @@ int CvLuaUnit::lIsNearSapper(lua_State* L)
 	return 1;
 }
 
-#if defined(MOD_ROG_CORE)
-//bool GetNearbyUnitClassModifierFromUnitClass();
-int CvLuaUnit::lGetNearbyUnitPromotionModifierFromUnitPromotion(lua_State* L)
-{
-	CvUnit* pkUnit = GetInstance(L);
-	const int bResult = pkUnit->GetNearbyUnitPromotionModifierFromUnitPromotion();
-	lua_pushinteger(L, bResult);
-	return 1;
-}
-#endif
 //------------------------------------------------------------------------------
 //bool GetNearbyImprovementModifier();
 int CvLuaUnit::lGetNearbyImprovementModifier(lua_State* L)
@@ -6754,8 +6748,51 @@ int CvLuaUnit::lGetGreatPersonOutputModifierFromGWs(lua_State* L)
 	return 1;
 }
 
-LUAAPIIMPL(Unit, GetStrengthModifierFromExtraResource)
-LUAAPIIMPL(Unit, GetStrengthModifierFromExtraHappiness)
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetStrengthModifierFromExtraResource(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	lua_pushinteger(L, GC.GetIndependentPromotion()->GetResourceCombatModifier(*pkUnit));
+	return 1;
+}
+int CvLuaUnit::lGetStrengthModifierFromExtraHappiness(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	lua_pushinteger(L, GC.GetIndependentPromotion()->GetHappinessCombatModifier(*pkUnit));
+	return 1;
+}
+int CvLuaUnit::lGetNearbyUnitPromotionModifierFromUnitPromotion(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	lua_pushinteger(L, GC.GetIndependentPromotion()->GetNearbyUnitPromotionBonus(*pkUnit));
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaUnit::lGetAllyCityStateCombatModifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	lua_pushinteger(L, GC.GetIndependentPromotion()->GetAllyCityStateCombatModifier(*pkUnit));
+	return 1;
+}
+int CvLuaUnit::lGetHappinessCombatModifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	lua_pushinteger(L, GC.GetIndependentPromotion()->GetHappinessCombatModifier(*pkUnit));
+	return 1;
+}
+int CvLuaUnit::lGetResourceCombatModifier(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	lua_pushinteger(L, GC.GetIndependentPromotion()->GetResourceCombatModifier(*pkUnit));
+	return 1;
+}
+int CvLuaUnit::lGetNearbyUnitPromotionBonus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	lua_pushinteger(L, GC.GetIndependentPromotion()->GetNearbyUnitPromotionBonus(*pkUnit));
+	return 1;
+}
+//------------------------------------------------------------------------------
 LUAAPIIMPL(Unit, GetBarbarianCombatBonusTotal)
 
 LUAAPIIMPL(Unit, IsBatchMark)

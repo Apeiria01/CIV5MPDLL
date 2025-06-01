@@ -299,19 +299,6 @@ CvUnit::CvUnit() :
 	, m_eCombatBonusImprovement("CvUnit::m_eCombatBonusImprovement", m_syncArchive)
 #endif
 
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	, m_iAllyCityStateCombatModifier("CvUnit::m_iAllyCityStateCombatModifier", m_syncArchive)
-	, m_iAllyCityStateCombatModifierMax("CvUnit::m_iAllyCityStateCombatModifierMax", m_syncArchive)
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	, m_eExtraResourceType("CvUnit::m_eExtraResourceType", m_syncArchive)
-	, m_iExtraResourceCombatModifier("CvUnit::m_iExtraResourceCombatModifier", m_syncArchive)
-	, m_iExtraResourceCombatModifierMax("CvUnit::m_iExtraResourceCombatModifierMax", m_syncArchive)
-	, m_iExtraHappinessCombatModifier("CvUnit::m_iExtraHappinessCombatModifier", m_syncArchive)
-	, m_iExtraHappinessCombatModifierMax("CvUnit::m_iExtraHappinessCombatModifierMax", m_syncArchive)
-#endif
-
 #if defined(MOD_ROG_CORE)
 		, m_iCombatBonusFromNearbyUnitPromotion("CvUnit::m_iCombatBonusFromNearbyUnitPromotion", m_syncArchive)
 		, m_iNearbyUnitPromotionBonusRange("CvUnit::m_iNearbyUnitPromotionBonusRange", m_syncArchive)
@@ -1297,19 +1284,6 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iNearbyImprovementCombatBonus = 0;
 	m_iNearbyImprovementBonusRange = 0;
 	m_eCombatBonusImprovement = NO_IMPROVEMENT;
-#endif
-
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	m_iAllyCityStateCombatModifier = 0;
-	m_iAllyCityStateCombatModifierMax = 0;
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	m_eExtraResourceType = NO_RESOURCE;
-	m_iExtraResourceCombatModifier = 0;
-	m_iExtraResourceCombatModifierMax = 0;
-	m_iExtraHappinessCombatModifier = 0;
-	m_iExtraHappinessCombatModifierMax = 0;
 #endif
 
 #if defined(MOD_DEFENSE_MOVES_BONUS)
@@ -14889,13 +14863,6 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 
 
 #if defined(MOD_ROG_CORE)
-	// UnitClass with combat bonus  nearby
-	int iNearbyUnitClassModifier = GetNearbyUnitPromotionModifierFromUnitPromotion();
-	if (iNearbyUnitClassModifier != 0)
-	{
-		iModifier += iNearbyUnitClassModifier;
-	}
-
 	// Adjacent Friendly military Unit?
 	if (plot()->IsFriendlyUnitAdjacent(getTeam(), /*bCombatUnit*/ true))
 	{
@@ -15130,15 +15097,10 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 
 	iModifier += kPlayer.GetStrengthModifierFromAlly();
 
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	iModifier += GetStrengthModifierFromAlly();
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	iModifier += GetStrengthModifierFromExtraResource();
-	iModifier += GetStrengthModifierFromExtraHappiness();
-#endif
-
+	iModifier += GC.GetIndependentPromotion()->GetAllyCityStateCombatModifier(*this);
+	iModifier += GC.GetIndependentPromotion()->GetHappinessCombatModifier(*this);
+	iModifier += GC.GetIndependentPromotion()->GetResourceCombatModifier(*this);
+	iModifier += GC.GetIndependentPromotion()->GetNearbyUnitPromotionBonus(*this);
 
 	return iModifier;
 }
@@ -16047,16 +16009,6 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		iModifier += iNearbyImprovementModifier;
 	}
 
-#if defined(MOD_ROG_CORE)
-	// UnitClass with combat bonus  nearby
-	int iNearbyUnitClassModifier = GetNearbyUnitPromotionModifierFromUnitPromotion();
-	if (iNearbyUnitClassModifier != 0)
-	{
-		iModifier += iNearbyUnitClassModifier;
-	}
-	
-#endif
-
 	if(kPlayer.isGoldenAge())
 	{
 		// Our empire fights well in Golden Ages?
@@ -16694,15 +16646,10 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 
 	iModifier += kPlayer.GetStrengthModifierFromAlly();
 
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	iModifier += GetStrengthModifierFromAlly();
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	iModifier += GetStrengthModifierFromExtraResource();
-	iModifier += GetStrengthModifierFromExtraHappiness();
-#endif
-
+	iModifier += GC.GetIndependentPromotion()->GetAllyCityStateCombatModifier(*this);
+	iModifier += GC.GetIndependentPromotion()->GetHappinessCombatModifier(*this);
+	iModifier += GC.GetIndependentPromotion()->GetResourceCombatModifier(*this);
+	iModifier += GC.GetIndependentPromotion()->GetNearbyUnitPromotionBonus(*this);
 
 	iCombat = (iStr * (iModifier + 100));
 
@@ -18041,132 +17988,6 @@ ImprovementTypes CvUnit::GetCombatBonusImprovement() const
 void CvUnit::SetCombatBonusImprovement(ImprovementTypes eImprovement)
 {
 	m_eCombatBonusImprovement = eImprovement;
-}
-#endif
-
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-int CvUnit::GetAllyCityStateCombatModifier() const
-{
-	VALIDATE_OBJECT
-	return m_iAllyCityStateCombatModifier;
-}
-void CvUnit::SetAllyCityStateCombatModifier(int iCombatBonus)
-{
-	VALIDATE_OBJECT
-	m_iAllyCityStateCombatModifier = iCombatBonus;
-}
-int CvUnit::GetAllyCityStateCombatModifierMax() const
-{
-	VALIDATE_OBJECT
-	return m_iAllyCityStateCombatModifierMax;
-}
-void CvUnit::SetAllyCityStateCombatModifierMax(int iCombatBonusMax)
-{
-	VALIDATE_OBJECT
-	m_iAllyCityStateCombatModifierMax = iCombatBonusMax;
-}
-int CvUnit::GetStrengthModifierFromAlly() const
-{
-	VALIDATE_OBJECT
-	if (GetAllyCityStateCombatModifier() == 0)
-	{
-		return 0;
-	}
-
-	int mod = GET_PLAYER(getOwner()).GetMinorAllyCount(true) * GetAllyCityStateCombatModifier();
-	if (GetAllyCityStateCombatModifierMax() > -1 && mod > GetAllyCityStateCombatModifierMax())
-	{
-		mod = GetAllyCityStateCombatModifierMax();
-	}
-
-	return mod;
-}
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-ResourceTypes CvUnit::GetExtraResourceType() const
-{
-	VALIDATE_OBJECT
-	return m_eExtraResourceType;
-}
-void CvUnit::SetExtraResourceType(ResourceTypes m_eResourceType)
-{
-	VALIDATE_OBJECT
-	m_eExtraResourceType = m_eResourceType;
-}
-int CvUnit::GetExtraResourceCombatModifier() const
-{
-	VALIDATE_OBJECT
-	return m_iExtraResourceCombatModifier;
-}
-void CvUnit::SetExtraResourceCombatModifier(int iCombatBonus)
-{
-	VALIDATE_OBJECT
-	m_iExtraResourceCombatModifier = iCombatBonus;
-}
-int CvUnit::GetExtraResourceCombatModifierMax() const
-{
-	VALIDATE_OBJECT
-	return m_iExtraResourceCombatModifierMax;
-}
-void CvUnit::SetExtraResourceCombatModifierMax(int iCombatBonusMax)
-{
-	VALIDATE_OBJECT
-	m_iExtraResourceCombatModifierMax = iCombatBonusMax;
-}
-int CvUnit::GetStrengthModifierFromExtraResource() const
-{
-	VALIDATE_OBJECT
-	if (GetExtraResourceCombatModifier() == 0)
-	{
-		return 0;
-	}
-
-	int iUsed = GET_PLAYER(getOwner()).getNumResourceUsed(m_eExtraResourceType);
-	int iTotal = GET_PLAYER(getOwner()).getNumResourceTotal(m_eExtraResourceType, /*bIncludeImport*/ true);
-	int mod = (iTotal - iUsed) * GetExtraResourceCombatModifier();
-	if (mod > 0 && GetExtraResourceCombatModifierMax() > -1 && mod > GetExtraResourceCombatModifierMax())
-	{
-		mod = GetExtraResourceCombatModifierMax();
-	}
-	mod = mod < 0 ? 0 : mod;
-	return mod;
-}
-
-int CvUnit::GetExtraHappinessCombatModifier() const
-{
-	VALIDATE_OBJECT
-	return m_iExtraHappinessCombatModifier;
-}
-void CvUnit::SetExtraHappinessCombatModifier(int iCombatBonus)
-{
-	VALIDATE_OBJECT
-	m_iExtraHappinessCombatModifier = iCombatBonus;
-}
-int CvUnit::GetExtraHappinessCombatModifierMax() const
-{
-	VALIDATE_OBJECT
-	return m_iExtraHappinessCombatModifierMax;
-}
-void CvUnit::SetExtraHappinessCombatModifierMax(int iCombatBonusMax)
-{
-	VALIDATE_OBJECT
-	m_iExtraHappinessCombatModifierMax = iCombatBonusMax;
-}
-int CvUnit::GetStrengthModifierFromExtraHappiness() const
-{
-	VALIDATE_OBJECT
-	if (GetExtraHappinessCombatModifier() == 0)
-	{
-		return 0;
-	}
-	int mod = GET_PLAYER(getOwner()).GetExcessHappiness() * GetExtraHappinessCombatModifier();
-	if (GetExtraHappinessCombatModifierMax() > -1 && mod > GetExtraHappinessCombatModifierMax())
-	{
-		mod = GetExtraHappinessCombatModifierMax();
-	}
-	mod = mod < 0 ? 0 : mod;
-	return mod;
 }
 #endif
 
@@ -24131,83 +23952,6 @@ int CvUnit::GetNearbyImprovementModifier()const
 	return 0;
 }
 
-
-#if defined(MOD_ROG_CORE)
-int CvUnit::getNearbyUnitPromotionBonus() const
-{
-	return m_iNearbyUnitPromotionBonus;
-}
-void CvUnit::SetNearbyUnitPromotionBonus(int iCombatBonus)
-{
-	m_iNearbyUnitPromotionBonus = iCombatBonus;
-}
-
-int CvUnit::getNearbyUnitPromotionBonusRange() const
-{
-	return m_iNearbyUnitPromotionBonusRange;
-}
-
-void CvUnit::SetNearbyUnitPromotionBonusRange(int iBonusRange)
-{
-	m_iNearbyUnitPromotionBonusRange = iBonusRange;
-}
-int CvUnit::getNearbyUnitPromotionBonusMax() const
-{
-	return m_iNearbyUnitPromotionBonusMax;
-}
-void CvUnit::SetNearbyUnitPromotionBonusMax(int iBonusMax)
-{
-	m_iNearbyUnitPromotionBonusMax = iBonusMax;
-}
-
-PromotionTypes CvUnit::getCombatBonusFromNearbyUnitPromotion() const
-{
-	return (PromotionTypes)m_iCombatBonusFromNearbyUnitPromotion;
-}
-void CvUnit::SetCombatBonusFromNearbyUnitPromotion(PromotionTypes ePromotion)
-{
-	m_iCombatBonusFromNearbyUnitPromotion = ePromotion;
-}
-
-int CvUnit::GetNearbyUnitPromotionModifierFromUnitPromotion() const
-{
-	const PromotionTypes ePromotion = getCombatBonusFromNearbyUnitPromotion();
-	if (ePromotion == NO_PROMOTION) return 0;
-
-	const int iUnitPromotionModifier = getNearbyUnitPromotionBonus();
-	if (iUnitPromotionModifier == 0) return 0;
-
-	const int iUnitPromotionRange = getNearbyUnitPromotionBonusRange();
-	const int iUnitPromotionModifierMax = getNearbyUnitPromotionBonusMax() <= 0 ? iUnitPromotionModifier : getNearbyUnitPromotionBonusMax();
-	int iTotalModifier = 0;
-
-	CvPlot* pLoopPlot = nullptr;
-	// Look around this Unit to see if there's a nearby Unit Promotion that will give us the modifier
-	for (int iX = -iUnitPromotionRange; iX <= iUnitPromotionRange; iX++)
-	{
-		for (int iY = -iUnitPromotionRange; iY <= iUnitPromotionRange; iY++)
-		{
-			pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iX, iY, iUnitPromotionRange);
-			if (pLoopPlot == nullptr || pLoopPlot->getNumUnits() == 0) continue;
-			for (int iK = 0; iK < pLoopPlot->getNumUnits(); iK++)
-			{
-				CvUnit* pLoopUnit = pLoopPlot->getUnitByIndex(iK);
-				if (pLoopUnit == nullptr) continue;
-				if (!pLoopUnit->isHasPromotion(ePromotion) || pLoopUnit == this) continue;
-				if (GET_PLAYER(pLoopUnit->getOwner()).getTeam() != GET_PLAYER(getOwner()).getTeam()) continue;
-
-				iTotalModifier += iUnitPromotionModifier;
-				if(iTotalModifier >= iUnitPromotionModifierMax) return std::min(iTotalModifier, iUnitPromotionModifierMax);
-			}
-		}
-	}
-
-	// After loop, iTotalModifier < iUnitPromotionModifierMax
-	return iTotalModifier;
-}
-#endif
-
-
 //	--------------------------------------------------------------------------------
 bool CvUnit::IsGreatGeneral() const
 {
@@ -26300,35 +26044,6 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		}
 #endif
 
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-		if (MOD_PROMOTIONS_ALLYCITYSTATE_BONUS) {
-			if (thisPromotion.GetAllyCityStateCombatModifier() > 0) {
-				SetAllyCityStateCombatModifier(thisPromotion.GetAllyCityStateCombatModifier());
-			}
-			if (thisPromotion.GetAllyCityStateCombatModifierMax() > 0) {
-				SetAllyCityStateCombatModifierMax(thisPromotion.GetAllyCityStateCombatModifierMax());
-			}
-		}
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-		if (MOD_PROMOTIONS_EXTRARES_BONUS) {
-			if (thisPromotion.GetExtraResourceType() != NO_RESOURCE && thisPromotion.GetExtraResourceCombatModifier() > 0) {
-				SetExtraResourceCombatModifier(thisPromotion.GetExtraResourceCombatModifier());
-				SetExtraResourceType(thisPromotion.GetExtraResourceType());
-			}
-			if (thisPromotion.GetExtraResourceCombatModifierMax() > 0) {
-				SetExtraResourceCombatModifierMax(thisPromotion.GetExtraResourceCombatModifierMax());
-			}
-			if (thisPromotion.GetExtraHappinessCombatModifier() > 0) {
-				SetExtraHappinessCombatModifier(thisPromotion.GetExtraHappinessCombatModifier());
-			}
-			if (thisPromotion.GetExtraHappinessCombatModifierMax() > 0) {
-				SetExtraHappinessCombatModifierMax(thisPromotion.GetExtraHappinessCombatModifierMax());
-			}
-		}
-#endif
-
 #if defined(MOD_ROG_CORE)
 		if (MOD_ROG_CORE) {	
 			changeAoEDamageOnMove(thisPromotion.GetAoEDamageOnMove() * iChange);
@@ -26343,26 +26058,6 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeIsStrongerDamaged(thisPromotion.IsStrongerDamaged() ? iChange : 0);
 		ChangeIsFightWellDamaged(thisPromotion.IsFightWellDamaged() ? iChange : 0);
 
-#if defined(MOD_ROG_CORE)
-		if (thisPromotion.GetNearbyUnitPromotionBonus() > 0)
-		{
-			if(iChange > 0)
-			{
-				SetNearbyUnitPromotionBonus(thisPromotion.GetNearbyUnitPromotionBonus());
-				SetNearbyUnitPromotionBonusRange(thisPromotion.GetNearbyUnitPromotionBonusRange());
-				SetNearbyUnitPromotionBonusMax(thisPromotion.GetNearbyUnitPromotionBonusMax());
-				SetCombatBonusFromNearbyUnitPromotion(thisPromotion.GetCombatBonusFromNearbyUnitPromotion());
-			}
-			else
-			{
-				// TODO: make it more flexible and correct
-				SetNearbyUnitPromotionBonus(0);
-				SetNearbyUnitPromotionBonusRange(0);
-				SetNearbyUnitPromotionBonusMax(0);
-				SetCombatBonusFromNearbyUnitPromotion(NO_PROMOTION);
-			}
-		}
-#endif
 		ChangeCaptureDefeatedEnemyChance((thisPromotion.GetCaptureDefeatedEnemyChance()) * iChange);
 		ChangeCannotBeCapturedCount((thisPromotion.CannotBeCaptured()) ? iChange : 0);
 
@@ -27395,22 +27090,10 @@ void CvUnit::read(FDataStream& kStream)
 	}
 #endif
 
-#ifdef MOD_PROMOTIONS_ALLYCITYSTATE_BONUS
-	kStream >> m_iAllyCityStateCombatModifier;
-	kStream >> m_iAllyCityStateCombatModifierMax;
-#endif
 	kStream >> m_iRangeSuppressModifier;
 	kStream >> m_iPromotionMaintenanceCost;
 	kStream >> m_iInterceptionDamageMod;
 	kStream >> m_iAirSweepDamageMod;
-#ifdef MOD_PROMOTIONS_EXTRARES_BONUS
-
-	kStream >> m_eExtraResourceType;
-	kStream >> m_iExtraResourceCombatModifier;
-	kStream >> m_iExtraResourceCombatModifierMax;
-	kStream >> m_iExtraHappinessCombatModifier;
-	kStream >> m_iExtraHappinessCombatModifierMax;
-#endif
 
 	kStream >> m_iAttackInflictDamageChange;
 	kStream >> m_iAttackInflictDamageChangeMaxHPPercent;
@@ -27742,21 +27425,10 @@ void CvUnit::write(FDataStream& kStream) const
 	}
 #endif
 
-#ifdef MOD_PROMOTIONS_ALLYCITYSTATE_BONUS
-	kStream << m_iAllyCityStateCombatModifier;
-	kStream << m_iAllyCityStateCombatModifierMax;
-#endif
 	kStream << m_iRangeSuppressModifier;
 	kStream << m_iPromotionMaintenanceCost;
 	kStream << m_iInterceptionDamageMod;
 	kStream << m_iAirSweepDamageMod;
-#ifdef MOD_PROMOTIONS_EXTRARES_BONUS
-	kStream << m_eExtraResourceType;
-	kStream << m_iExtraResourceCombatModifier;
-	kStream << m_iExtraResourceCombatModifierMax;
-	kStream << m_iExtraHappinessCombatModifier;
-	kStream << m_iExtraHappinessCombatModifierMax;
-#endif
 
 	kStream << m_iAttackInflictDamageChange;
 	kStream << m_iAttackInflictDamageChangeMaxHPPercent;

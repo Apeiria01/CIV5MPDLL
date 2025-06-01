@@ -9,7 +9,7 @@
 		<Column name="Value" type="integer" default="0"/>
 	</Table>
 	
-	 <Table name="Building_SpecialistYieldModifiers">
+	<Table name="Building_SpecialistYieldModifiers">
 		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
 		<Column name="SpecialistType" type="text" reference="Specialists(Type)"/>
 		<Column name="YieldType" type="text" reference="Yields(Type)"/>
@@ -17,7 +17,7 @@
 	</Table>
 
 
-		 <Table name="Building_SpecialistYieldModifiersGlobal">
+	<Table name="Building_SpecialistYieldModifiersGlobal">
 		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
 		<Column name="SpecialistType" type="text" reference="Specialists(Type)"/>
 		<Column name="YieldType" type="text" reference="Yields(Type)"/>
