@@ -7902,9 +7902,11 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 
 #ifdef MOD_GLOBAL_CORRUPTION
 		ChangeCorruptionScoreChangeFromBuilding(pBuildingInfo->GetCorruptionScoreChange() * iChange);
+		ChangeCorruptionScoreChangeGlobalFromBuilding(pBuildingInfo->GetCorruptionScoreChangeGlobal() * iChange);
 		ChangeCorruptionLevelChangeFromBuilding(pBuildingInfo->GetCorruptionLevelChange() * iChange);
 
 		if (pBuildingInfo->GetCorruptionScoreChange() * iChange != 0 || 
+		    pBuildingInfo->GetCorruptionScoreChangeGlobal() * iChange != 0 || 
 			pBuildingInfo->GetCorruptionLevelChange() * iChange != 0)
 		{
 			UpdateCorruption();
@@ -23637,6 +23639,7 @@ int CvCity::CalculateTotalCorruptionScore() const
 	score += CalculateCorruptionScoreFromCoastalBonus();
 	score += CalculateCorruptionScoreFromResource();
 	score += GetCorruptionScoreChangeFromBuilding();
+	score += owner.GetCorruptionScoreChangeGlobalFromBuilding();
 	score += CalculateCorruptionScoreFromTrait();
 	score = std::max(0, score);
 
@@ -23656,6 +23659,15 @@ int CvCity::GetCorruptionScoreModifierFromPolicy() const
 {
 	CvPlayerAI &owner = GET_PLAYER(getOwner());
 	return owner.GetCorruptionScoreModifierFromPolicy();
+}
+int CvCity::GetCorruptionScoreChangeGlobalFromBuilding() const
+{
+	CvPlayerAI &owner = GET_PLAYER(getOwner());
+	return owner.GetCorruptionScoreChangeGlobalFromBuilding();
+}
+void CvCity::ChangeCorruptionScoreChangeGlobalFromBuilding(int value)
+{
+	m_iCorruptionScoreChangeGlobalFromBuilding += value;
 }
 
 int CvCity::CalculateCorruptionScoreFromDistance() const
