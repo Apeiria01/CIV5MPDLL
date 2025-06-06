@@ -134,7 +134,7 @@ int CvIndependentPromotionInfo::GetNearbyUnitPromotionBonus(const CvUnit& pUnit)
 				{
 					CvUnit* pLoopUnit = pLoopPlot->getUnitByIndex(iK);
 					if (pLoopUnit == nullptr) continue;
-					if (!pLoopUnit->isHasPromotion(ePromotion) || pLoopUnit == &pUnit) continue;
+					if (!pLoopUnit->isHasPromotion(eTargetPromotion) || pLoopUnit == &pUnit) continue;
 					if (GET_PLAYER(pLoopUnit->getOwner()).getTeam() != GET_PLAYER(pUnit.getOwner()).getTeam()) continue;
 
 					iThisModifier += iUnitPromotionModifier;
