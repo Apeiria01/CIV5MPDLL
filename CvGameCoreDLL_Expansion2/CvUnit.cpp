@@ -2906,12 +2906,13 @@ void CvUnit::doTurn()
 		}
 		if(!IsCivilianUnit() && pPlot)
 		{
-			CvCity* pCity = pPlot->getPlotCity();
-			if (pCity)
-			{
-				int itempexp = itempexp = pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
-				if (itempexp > 0) iTotalxp += itempexp;
-			}
+                       CvCity* pCity = pPlot->getPlotCity();
+                       if (pCity)
+                       {
+                               int itempexp = pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
+                               if (itempexp > 0)
+                                       iTotalxp += itempexp;
+                       }
 			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
 			iTotalxp += GetFreeExpPerTurn();
 		}
