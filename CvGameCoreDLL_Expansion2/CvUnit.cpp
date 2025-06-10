@@ -2909,8 +2909,7 @@ void CvUnit::doTurn()
 			CvCity* pCity = pPlot->getPlotCity();
 			if (pCity)
 			{
-				int itempexp = itempexp = pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
-				if (itempexp > 0) iTotalxp += itempexp;
+				iTotalxp += pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
 			}
 			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
 			iTotalxp += GetFreeExpPerTurn();
