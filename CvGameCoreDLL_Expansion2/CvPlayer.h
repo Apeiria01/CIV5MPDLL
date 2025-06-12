@@ -1690,6 +1690,8 @@ public:
 
 	int GetResearchTotalCostModifier() const;
 	void ChangeResearchTotalCostModifier(int iChange);
+	int GetResearchTotalCostModifierGoldenAge() const;
+	void ChangeResearchTotalCostModifierGoldenAge(int iChange);
 
 	int GetLiberatedInfluence() const;
 	void SetLiberatedInfluence(int iValue);
@@ -2590,6 +2592,7 @@ protected:
 	int m_iGlobalCityStrengthMod;
 	int m_iGlobalRangedStrikeModifier;
 	int m_iResearchTotalCostModifier;
+	int m_iResearchTotalCostModifierGoldenAge;
 	int m_iLiberatedInfluence;
 	int m_iExtraUnitPlayerInstances;
 	int m_iWaterTileDamageGlobal;
