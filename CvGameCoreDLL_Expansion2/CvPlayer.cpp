@@ -30936,6 +30936,12 @@ CvPlot* CvPlayer::GetBestSettlePlot(CvUnit* pUnit, bool bEscorted, int iArea) co
 			int iValue = pPlot->getFoundValue(eOwner);
 			if(iValue > 5000)
 			{
+				if(MOD_SP_SMART_AI && getCapitalCity())
+				{
+					CvPlot* pCapPlot = getCapitalCity()->plot();
+					iValue = iValue * std::max(100 / plotDistance(pPlot->getX(), pPlot->getY(), pCapPlot->getX(), pCapPlot->getY()), 1);
+				}
+
 				int iSettlerDistance = ::plotDistance(pPlot->getX(), pPlot->getY(), iSettlerX, iSettlerY);
 				int iDistanceDropoff = min(99,(iDistanceDropoffMod * iSettlerDistance) / iEvalDistance);
 				iDistanceDropoff = max(0,iDistanceDropoff);
