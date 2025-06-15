@@ -171,6 +171,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iGlobalCityStrengthMod(0),
 	m_iGlobalRangedStrikeModifier(0),
 	m_iResearchTotalCostModifier(0),
+	m_iResearchTotalCostModifierGoldenAge(0),
 	m_iWaterTileDamage(0),
 	m_iWaterTileMovementReduce(0),
 	m_iWaterTileTurnDamage(0),
@@ -557,6 +558,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iGlobalCityStrengthMod = kResults.GetInt("GlobalCityStrengthMod");
 	m_iGlobalRangedStrikeModifier = kResults.GetInt("GlobalRangedStrikeModifier");
 	m_iResearchTotalCostModifier = kResults.GetInt("ResearchTotalCostModifier");
+	m_iResearchTotalCostModifierGoldenAge = kResults.GetInt("ResearchTotalCostModifierGoldenAge");
 	m_iWaterTileDamage = kResults.GetInt("WaterTileDamage");
 	m_iWaterTileMovementReduce = kResults.GetInt("WaterTileMovementReduce");
 	m_iWaterTileTurnDamage = kResults.GetInt("WaterTileTurnDamage");
@@ -2419,6 +2421,10 @@ int CvBuildingEntry::GetGlobalRangedStrikeModifier() const
 int CvBuildingEntry::GetResearchTotalCostModifier() const
 {
 	return m_iResearchTotalCostModifier;
+}
+int CvBuildingEntry::GetResearchTotalCostModifierGoldenAge() const
+{
+	return m_iResearchTotalCostModifierGoldenAge;
 }
 
 /// Does this Building allow us to Range Strike?

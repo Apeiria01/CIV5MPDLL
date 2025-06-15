@@ -385,6 +385,7 @@ CvPlayer::CvPlayer() :
 	, m_iGlobalCityStrengthMod(0)
 	, m_iGlobalRangedStrikeModifier(0)
 	, m_iResearchTotalCostModifier(0)
+	, m_iResearchTotalCostModifierGoldenAge(0)
 	, m_iLiberatedInfluence(0)
 	, m_iExtraUnitPlayerInstances(0)
 	, m_iWaterTileDamageGlobal(0)
@@ -1179,6 +1180,7 @@ void CvPlayer::uninit()
 	m_iGlobalCityStrengthMod = 0;
 	m_iGlobalRangedStrikeModifier = 0;
 	m_iResearchTotalCostModifier = 0;
+	m_iResearchTotalCostModifierGoldenAge = 0;
 	m_iLiberatedInfluence = 0;
 	m_iExtraUnitPlayerInstances = 0;
 	m_iWaterTileDamageGlobal = 0;
@@ -10070,6 +10072,7 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	ChangeCityStrengthMod(pBuildingInfo->GetGlobalCityStrengthMod()* iChange);
 	ChangeGlobalRangedStrikeModifier(pBuildingInfo->GetGlobalRangedStrikeModifier()* iChange);
 	ChangeResearchTotalCostModifier(pBuildingInfo->GetResearchTotalCostModifier()* iChange);
+	ChangeResearchTotalCostModifierGoldenAge(pBuildingInfo->GetResearchTotalCostModifierGoldenAge()* iChange);
 	ChangeLiberatedInfluence(pBuildingInfo->GetLiberatedInfluence()* iChange);
 	ChangeExtraUnitPlayerInstances(pBuildingInfo->GetExtraUnitPlayerInstances()* iChange);
 	ChangeWaterTileDamageGlobal(pBuildingInfo->GetWaterTileDamageGlobal()* iChange);
@@ -28313,6 +28316,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGlobalCityStrengthMod;
 	kStream >> m_iGlobalRangedStrikeModifier;
 	kStream >> m_iResearchTotalCostModifier;
+	kStream >> m_iResearchTotalCostModifierGoldenAge;
 	kStream >> m_iLiberatedInfluence;
 	kStream >> m_iExtraUnitPlayerInstances;
 	kStream >> m_iWaterTileDamageGlobal;
@@ -29084,6 +29088,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGlobalCityStrengthMod;
 	kStream << m_iGlobalRangedStrikeModifier;
 	kStream << m_iResearchTotalCostModifier;
+	kStream << m_iResearchTotalCostModifierGoldenAge;
 	kStream << m_iLiberatedInfluence;
 	kStream << m_iExtraUnitPlayerInstances;
 	kStream << m_iWaterTileDamageGlobal;
@@ -30144,6 +30149,19 @@ void CvPlayer::ChangeResearchTotalCostModifier(int iChange)
 		m_iResearchTotalCostModifier += iChange;
 	}
 }
+int CvPlayer::GetResearchTotalCostModifierGoldenAge() const
+{
+	return m_iResearchTotalCostModifierGoldenAge;
+}
+
+void CvPlayer::ChangeResearchTotalCostModifierGoldenAge(int iChange)
+{
+	if (iChange != 0)
+	{
+		m_iResearchTotalCostModifierGoldenAge += iChange;
+	}
+}
+
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::GetLiberatedInfluence() const
