@@ -2830,7 +2830,7 @@ void CvUnit::doTurn()
 
 	ClearNumTimesAttackedThisTurn();
 
-	int turndamage = GetTurnDamage()+ (GetMaxHitPoints() * GetTurnDamagePercent());
+	int turndamage = GetTurnDamage()+ (GetMaxHitPoints() * GetTurnDamagePercent()/100);
 	if (0 != turndamage)
 	{
 #if defined(MOD_API_UNIT_STATS)
