@@ -940,7 +940,20 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 			if (eReligion > RELIGION_PANTHEON)
 			{
 				GetReligionData()->SetReligion(eReligion);
-				GetReligionData()->SetSpreadsLeft(getUnitInfo().GetReligionSpreads() + pPlotCity->GetCityBuildings()->GetMissionaryExtraSpreads());
+				int iNumSpreads = getUnitInfo().GetReligionSpreads();
+				// missionary spreads can be buffed but not prophets
+				if (!getUnitInfo().IsFoundReligion())
+				{
+					iNumSpreads += pPlotCity->GetCityBuildings()->GetMissionaryExtraSpreads();
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+					if (MOD_BELIEF_NEW_EFFECT_FOR_SP)
+					{
+						iNumSpreads += pPlotCity->GetReligionExtraMissionarySpreads(eReligion);
+						iNumSpreads += pPlotCity->GetBeliefExtraMissionarySpreads(pPlotCity->GetCityReligions()->GetSecondaryReligionPantheonBelief());
+					}
+#endif
+				}
+				GetReligionData()->SetSpreadsLeft(iNumSpreads);
 				GetReligionData()->SetReligiousStrength(getUnitInfo().GetReligiousStrength());
 			}
 		}
@@ -12302,7 +12315,7 @@ bool CvUnit::canGoldenAge(const CvPlot* pPlot, bool bTestVisible) const
 		return false;
 	}
 
-	// If prophet has  started spreading religion, can't do other functions
+	// If prophet has started spreading religion, can't do other functions
 	if(m_pUnitInfo->IsSpreadReligion() && !m_pUnitInfo->IsGoldenAgeWithSpreaded())
 	{
 		if(GetReligionData()->GetSpreadsLeft() < m_pUnitInfo->GetReligionSpreads())
@@ -12432,7 +12445,7 @@ bool CvUnit::canGivePolicies(const CvPlot* /*pPlot*/, bool /*bTestVisible*/) con
 		return false;
 	}
 
-	// If prophet has  started spreading religion, can't do other functions
+	// If prophet has started spreading religion, can't do other functions
 	if(m_pUnitInfo->IsSpreadReligion() && !m_pUnitInfo->IsGivePoliciesWithSpreaded())
 	{
 		if(GetReligionData()->GetSpreadsLeft() < m_pUnitInfo->GetReligionSpreads())
@@ -12720,7 +12733,7 @@ bool CvUnit::canBuild(const CvPlot* pPlot, BuildTypes eBuild, bool bTestVisible,
 		return false;
 	}
 
-	// If prophet has  started spreading religion, can't do other functions
+	// If prophet has started spreading religion, can't do other functions
 	if(m_pUnitInfo->IsSpreadReligion())
 	{
 		if (GetReligionData()->GetReligion() != NO_RELIGION && GetReligionData()->GetSpreadsLeft() < m_pUnitInfo->GetReligionSpreads())

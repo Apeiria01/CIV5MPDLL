@@ -19163,14 +19163,19 @@ void CvCity::Purchase(UnitTypes eUnitType, BuildingTypes eBuildingType, ProjectT
 			// Missionary strength
 			if(iReligionSpreads > 0 && eReligion > RELIGION_PANTHEON)
 			{
-				pUnit->GetReligionData()->SetSpreadsLeft(iReligionSpreads + GetCityBuildings()->GetMissionaryExtraSpreads());
-#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
-				if (MOD_BELIEF_NEW_EFFECT_FOR_SP)
+				// missionary spreads can be buffed but not prophets
+				if (!pUnit->getUnitInfo().IsFoundReligion())
 				{
-					pUnit->GetReligionData()->SetSpreadsLeft(pUnit->GetReligionData()->GetSpreadsLeft()+GetReligionExtraMissionarySpreads(GetCityReligions()->GetReligiousMajority()));
-					pUnit->GetReligionData()->SetSpreadsLeft(pUnit->GetReligionData()->GetSpreadsLeft()+GetBeliefExtraMissionarySpreads(GetCityReligions()->GetSecondaryReligionPantheonBelief()));
-				}
+					iReligionSpreads += GetCityBuildings()->GetMissionaryExtraSpreads();
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+					if (MOD_BELIEF_NEW_EFFECT_FOR_SP)
+					{
+						iReligionSpreads += GetReligionExtraMissionarySpreads(eReligion);
+						iReligionSpreads += GetBeliefExtraMissionarySpreads(GetCityReligions()->GetSecondaryReligionPantheonBelief());
+					}
 #endif
+				}
+				pUnit->GetReligionData()->SetSpreadsLeft(iReligionSpreads);
 				pUnit->GetReligionData()->SetReligiousStrength(iReligiousStrength);
 			}
 
