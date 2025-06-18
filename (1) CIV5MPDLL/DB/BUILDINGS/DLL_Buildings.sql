@@ -148,3 +148,4 @@ CREATE TABLE Building_CityStateTradeRouteYieldModifiersGlobal (
 	'YieldType' text references Yields(Type),
 	'Yield' integer default 0
 );
+ALTER TABLE Buildings ADD COLUMN 'ResearchTotalCostModifierGoldenAge' INTEGER DEFAULT 0;
