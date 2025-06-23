@@ -663,29 +663,6 @@ public:
 	void SetCombatBonusImprovement(ImprovementTypes eImprovement);
 #endif
 
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	int GetAllyCityStateCombatModifier() const;
-	void SetAllyCityStateCombatModifier(int iCombatBonus);
-	int GetAllyCityStateCombatModifierMax() const;
-	void SetAllyCityStateCombatModifierMax(int iCombatBonusMax);
-	int GetStrengthModifierFromAlly() const;
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	ResourceTypes GetExtraResourceType() const;
-	void SetExtraResourceType(ResourceTypes m_eResourceType);
-	int GetExtraResourceCombatModifier() const;
-	void SetExtraResourceCombatModifier(int iCombatBonus);
-	int GetExtraResourceCombatModifierMax() const;
-	void SetExtraResourceCombatModifierMax(int iCombatBonusMax);
-	int GetStrengthModifierFromExtraResource() const;
-	int GetExtraHappinessCombatModifier() const;
-	void SetExtraHappinessCombatModifier(int iCombatBonus);
-	int GetExtraHappinessCombatModifierMax() const;
-	void SetExtraHappinessCombatModifierMax(int iCombatBonusMax);
-	int GetStrengthModifierFromExtraHappiness() const;
-#endif
-
 	bool canIntercept() const;
 	int GetAirInterceptRange() const;
 
@@ -799,6 +776,12 @@ public:
 	int GetCombatModifierFromBuilding() const;
 	int GetPromotionMaintenanceCost() const;
 	void ChangePromotionMaintenanceCost(int iValue);
+	int GetFreeExpPerTurn() const;
+	void ChangeFreeExpPerTurn(int iValue);
+	int GetStayCSInfluencePerTurn() const;
+	void ChangeStayCSInfluencePerTurn(int iValue);
+	int GetStayCSExpPerTurn() const;
+	void ChangeStayCSExpPerTurn(int iValue);
 	int GetInterceptionDamageMod() const;
 	void ChangeInterceptionDamageMod(int iValue);
 	int GetAirSweepDamageMod() const;
@@ -1279,19 +1262,6 @@ public:
 	int GetNearbyImprovementModifierFromTraits() const;
 	int GetNearbyImprovementModifierFromPromotions() const;
 	int GetNearbyImprovementModifier(ImprovementTypes eBonusImprovement, int iImprovementRange, int iImprovementModifier) const;
-#endif
-
-#if defined(MOD_ROG_CORE)
-	int getNearbyUnitPromotionBonus() const;
-	void SetNearbyUnitPromotionBonus(int iCombatBonus);
-	int getNearbyUnitPromotionBonusRange() const;
-	void SetNearbyUnitPromotionBonusRange(int iBonusRange);
-	int getNearbyUnitPromotionBonusMax() const;
-	void SetNearbyUnitPromotionBonusMax(int iBonusMax);
-	PromotionTypes getCombatBonusFromNearbyUnitPromotion() const;
-	void SetCombatBonusFromNearbyUnitPromotion(PromotionTypes ePromotion);
-
-	int GetNearbyUnitPromotionModifierFromUnitPromotion() const;
 #endif
 
 	bool IsGreatGeneral() const;
@@ -2135,6 +2105,9 @@ public:
 
 	void ChangePromotionBuilds(BuildTypes eIndex,int iChange);
     bool IsPromotionBuilds(BuildTypes eIndex) const;
+
+	void ChangeUnitCombatsPromotionValid(UnitCombatTypes eIndex,int iChange);
+    const std::tr1::unordered_map<int, int>& GetUnitCombatsPromotionValid() const;
 protected:
 	const MissionQueueNode* HeadMissionQueueNode() const;
 	MissionQueueNode* HeadMissionQueueNode();
@@ -2236,6 +2209,9 @@ protected:
 	FAutoVariable<int, CvUnit> m_iRangedAttackModifier;
 	FAutoVariable<int, CvUnit> m_iRangeSuppressModifier;
 	FAutoVariable<int, CvUnit> m_iPromotionMaintenanceCost;
+	FAutoVariable<int, CvUnit> m_iFreeExpPerTurn;
+	FAutoVariable<int, CvUnit> m_iStayCSInfluencePerTurn;
+	FAutoVariable<int, CvUnit> m_iStayCSExpPerTurn;
 	FAutoVariable<int, CvUnit> m_iInterceptionDamageMod;
 	FAutoVariable<int, CvUnit> m_iAirSweepDamageMod;
 	FAutoVariable<int, CvUnit> m_iInterceptionCombatModifier;
@@ -2289,19 +2265,6 @@ protected:
 	FAutoVariable<int, CvUnit> m_iNearbyImprovementCombatBonus;
 	FAutoVariable<int, CvUnit> m_iNearbyImprovementBonusRange;
 	FAutoVariable<ImprovementTypes, CvUnit> m_eCombatBonusImprovement;
-#endif
-
-#if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	FAutoVariable<int, CvUnit> m_iAllyCityStateCombatModifier;
-	FAutoVariable<int, CvUnit> m_iAllyCityStateCombatModifierMax;
-#endif
-
-#if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	FAutoVariable<ResourceTypes, CvUnit> m_eExtraResourceType;
-	FAutoVariable<int, CvUnit> m_iExtraResourceCombatModifier;
-	FAutoVariable<int, CvUnit> m_iExtraResourceCombatModifierMax;
-	FAutoVariable<int, CvUnit> m_iExtraHappinessCombatModifier;
-	FAutoVariable<int, CvUnit> m_iExtraHappinessCombatModifierMax;
 #endif
 
 #if defined(MOD_ROG_CORE)
@@ -2509,6 +2472,7 @@ protected:
 	FAutoVariable<std::vector<int>, CvUnit> m_extraUnitCombatModifier;
 	std::tr1::unordered_map<int, int> m_unitClassModifier;
 	std::tr1::unordered_map<int, int> m_piGetPromotionBuilds;
+	std::tr1::unordered_map<int, int> m_mapUnitCombatsPromotionValid;
 
 	int m_iMissionTimer;
 	FAutoVariable<int, CvUnit> m_iMissionAIX;

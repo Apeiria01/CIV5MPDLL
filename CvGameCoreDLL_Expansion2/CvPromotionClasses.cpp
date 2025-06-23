@@ -32,6 +32,9 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iRangedAttackModifier(0),
 	m_iRangeSuppressModifier(0),
 	m_iMaintenanceCost(0),
+	m_iFreeExpPerTurn(0),
+	m_iStayCSInfluencePerTurn(0),
+	m_iStayCSExpPerTurn(0),
 	m_iInterceptionDamageMod(0),
 	m_iAirSweepDamageMod(0),
 	m_iInterceptionCombatModifier(0),
@@ -478,23 +481,19 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 #endif
 
 #if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	if (MOD_PROMOTIONS_ALLYCITYSTATE_BONUS) {
-		m_iAllyCityStateCombatModifier = kResults.GetInt("AllyCityStateCombatModifier");
-		m_iAllyCityStateCombatModifierMax = kResults.GetInt("AllyCityStateCombatModifierMax");
-	}
+	m_iAllyCityStateCombatModifier = kResults.GetInt("AllyCityStateCombatModifier");
+	m_iAllyCityStateCombatModifierMax = kResults.GetInt("AllyCityStateCombatModifierMax");
 #endif
 
 #if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	if (MOD_PROMOTIONS_EXTRARES_BONUS) {
-		const char* szTextVal = kResults.GetText("ExtraResourceType");
-		if (szTextVal) {
-			m_eExtraResourceType = (ResourceTypes)GC.getInfoTypeForString(szTextVal, true);
-		}
-		m_iExtraResourceCombatModifier = kResults.GetInt("ExtraResourceCombatModifier");
-		m_iExtraResourceCombatModifierMax = kResults.GetInt("ExtraResourceCombatModifierMax");
-		m_iExtraHappinessCombatModifier = kResults.GetInt("ExtraHappinessCombatModifier");
-		m_iExtraHappinessCombatModifierMax = kResults.GetInt("ExtraHappinessCombatModifierMax");
+	const char* szResourceTextVal = kResults.GetText("ExtraResourceType");
+	if (szResourceTextVal) {
+		m_eExtraResourceType = (ResourceTypes)GC.getInfoTypeForString(szResourceTextVal, true);
 	}
+	m_iExtraResourceCombatModifier = kResults.GetInt("ExtraResourceCombatModifier");
+	m_iExtraResourceCombatModifierMax = kResults.GetInt("ExtraResourceCombatModifierMax");
+	m_iExtraHappinessCombatModifier = kResults.GetInt("ExtraHappinessCombatModifier");
+	m_iExtraHappinessCombatModifierMax = kResults.GetInt("ExtraHappinessCombatModifierMax");
 #endif
 
 #if defined(MOD_DEFENSE_MOVES_BONUS)
@@ -508,9 +507,9 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iNearbyUnitPromotionBonus = kResults.GetInt("NearbyUnitPromotionBonus");
 	m_iNearbyUnitPromotionBonusRange = kResults.GetInt("NearbyUnitPromotionBonusRange");
 	m_iNearbyUnitPromotionBonusMax = kResults.GetInt("NearbyUnitPromotionBonusMax");
-	const char* szTextVal = kResults.GetText("CombatBonusFromNearbyUnitPromotion");
-	if (szTextVal) {
-		m_iCombatBonusFromNearbyUnitPromotion = (PromotionTypes)GC.getInfoTypeForString(szTextVal, true);
+	const char* szPromotionTextVal = kResults.GetText("CombatBonusFromNearbyUnitPromotion");
+	if (szPromotionTextVal) {
+		m_iCombatBonusFromNearbyUnitPromotion = (PromotionTypes)GC.getInfoTypeForString(szPromotionTextVal, true);
 	}
 #endif
 
@@ -658,6 +657,9 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iRangedAttackModifier = kResults.GetInt("RangedAttackModifier");
 	m_iRangeSuppressModifier = kResults.GetInt("RangeSuppressModifier");
 	m_iMaintenanceCost = kResults.GetInt("MaintenanceCost");
+	m_iFreeExpPerTurn = kResults.GetInt("FreeExpPerTurn");
+	m_iStayCSInfluencePerTurn = kResults.GetInt("StayCSInfluencePerTurn");
+	m_iStayCSExpPerTurn = kResults.GetInt("StayCSExpPerTurn");
 	m_iInterceptionDamageMod = kResults.GetInt("InterceptionDamageMod");
 	m_iAirSweepDamageMod = kResults.GetInt("AirSweepDamageMod");
 	m_iInterceptionCombatModifier = kResults.GetInt("InterceptionCombatModifier");
@@ -1482,6 +1484,29 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 		pResults->Reset();
 	}
+	//Promotion_UnitCombatsPromotionValid(only for check promotion valid)
+	{
+		m_vUnitCombatsPromotionValid.clear();
+
+		std::string sqlKey = "m_vUnitCombatsPromotionValid";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == NULL) {
+			const char* szSQL = "SELECT UnitCombatInfos.ID FROM Promotion_UnitCombatsPromotionValid INNER JOIN UnitCombatInfos ON UnitCombatInfos.Type = UnitCombatType WHERE PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+
+		while (pResults->Step()) {
+			const int iUnitCombatsPromotionValid = (UnitCombatTypes)pResults->GetInt(0);
+			CvAssert(iUnitCombatsPromotionValid < iNumUnitCombatClasses);
+			m_vUnitCombatsPromotionValid.push_back(iUnitCombatsPromotionValid);
+		}
+
+		pResults->Reset();
+	}
 
 #if defined(MOD_POLICY_FREE_PROMOTION_FOR_PROMOTION)
 	//UnitPromotions_Promotions
@@ -1736,6 +1761,24 @@ int CvPromotionEntry::GetRangeSuppressModifier() const
 int CvPromotionEntry::GetMaintenanceCost() const
 {
 	return m_iMaintenanceCost;
+}
+
+///Promotion give unit exp num per turn
+int CvPromotionEntry::GetFreeExpPerTurn() const
+{
+	return m_iFreeExpPerTurn;
+}
+
+///When stay in CS get how many influence per turn
+int CvPromotionEntry::GetStayCSInfluencePerTurn() const
+{
+	return m_iStayCSInfluencePerTurn;
+}
+
+///When stay in CS get how many exp per turn
+int CvPromotionEntry::GetStayCSExpPerTurn() const
+{
+	return m_iStayCSExpPerTurn;
 }
 
 /// How much damage reduce mod when intercepting
@@ -3565,8 +3608,11 @@ const std::vector<int>& CvPromotionEntry::GetPromotionExclusionAny() const
 {
 	return m_vPromotionExclusionAny;
 }
-
-
+/// Returns the Valid CombatType Promotions this Promotion given
+const std::vector<int>& CvPromotionEntry::GetUnitCombatsPromotionValid() const
+{
+	return m_vUnitCombatsPromotionValid;
+}
 
 /// Returns the  unit type that this promotion is available for
 bool CvPromotionEntry::GetUnitType(int i) const

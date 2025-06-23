@@ -52,6 +52,9 @@ public:
 	int  GetRangedAttackModifier() const;
 	int  GetRangeSuppressModifier() const;
 	int  GetMaintenanceCost() const;
+	int  GetFreeExpPerTurn() const;
+	int  GetStayCSInfluencePerTurn() const;
+	int  GetStayCSExpPerTurn() const;
 	int  GetInterceptionDamageMod() const;
 	int  GetAirSweepDamageMod() const;
 	int  GetInterceptionCombatModifier() const;
@@ -422,6 +425,7 @@ public:
 	const std::vector<int>& GetPromotionPrereqOrs() const;
 	const std::vector<int>& GetPromotionPrereqAnds() const;
 	const std::vector<int>& GetPromotionExclusionAny() const;
+	const std::vector<int>& GetUnitCombatsPromotionValid() const;
 #if defined(MOD_ROG_CORE)
 	bool GetUnitType(int i) const;
 #endif
@@ -535,6 +539,9 @@ protected:
 	int m_iRangedAttackModifier;
 	int m_iRangeSuppressModifier;
 	int m_iMaintenanceCost;
+	int m_iFreeExpPerTurn;
+	int m_iStayCSInfluencePerTurn;
+	int m_iStayCSExpPerTurn;
 	int m_iInterceptionDamageMod;
 	int m_iAirSweepDamageMod;
 	int m_iInterceptionCombatModifier;
@@ -902,6 +909,7 @@ protected:
 	std::vector<int> m_vPromotionPrereqOrs;
 	std::vector<int> m_vPromotionPrereqAnds;
 	std::vector<int> m_vPromotionExclusionAny;
+	std::vector<int> m_vUnitCombatsPromotionValid;
 	bool* m_pbUnitType;
 	bool* m_pbBuildType;
 #if defined(MOD_PROMOTIONS_UNIT_NAMING)

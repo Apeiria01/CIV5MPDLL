@@ -453,7 +453,6 @@ protected:
 	static int lGoldenAgeModTotal(lua_State* L);
 	static int lGetForcedDamageValue(lua_State* L);
 	static int lGetChangeDamageValue(lua_State* L);
-	static int lGetNearbyUnitPromotionModifierFromUnitPromotion(lua_State* L);
 	static int lGetHPHealedIfDefeatEnemyGlobal(lua_State* L);
 	static int lGetNumOriginalCapitalDefenseMod(lua_State* L);
 	static int lGetNumOriginalCapitalAttackMod(lua_State* L);
@@ -782,8 +781,15 @@ protected:
 	static int lGetPlotCorruptionScoreReport(lua_State* L);
 #endif
 	LUAAPIEXTN(GetGreatPersonOutputModifierFromGWs, int);
+	// --TODO: deprecated
 	LUAAPIEXTN(GetStrengthModifierFromExtraResource, int);
 	LUAAPIEXTN(GetStrengthModifierFromExtraHappiness, int);
+	LUAAPIEXTN(GetNearbyUnitPromotionModifierFromUnitPromotion, int);
+	// --TODO: deprecated END
+	LUAAPIEXTN(GetAllyCityStateCombatModifier, int);
+	LUAAPIEXTN(GetHappinessCombatModifier, int);
+	LUAAPIEXTN(GetResourceCombatModifier, int);
+	LUAAPIEXTN(GetNearbyUnitPromotionBonus, int);
 	LUAAPIEXTN(GetBarbarianCombatBonusTotal, int);
 	LUAAPIEXTN(IsBatchMark, bool);
 	LUAAPIEXTN(SetIsBatchMark, void, value);

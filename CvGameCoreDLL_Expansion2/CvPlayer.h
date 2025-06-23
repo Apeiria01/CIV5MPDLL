@@ -891,8 +891,8 @@ public:
 	int getCityDefenseModifierGlobal() const;
 	void changeCityDefenseModifierGlobal(int iChange);
 
-	int getCityStateTradeRouteProductionModifierGlobal() const;
-	void changeCityStateTradeRouteProductionModifierGlobal(int iChange);
+	int GetCityStateTradeRouteYieldModifierGlobal(YieldTypes eYield) const;
+	void ChangeCityStateTradeRouteYieldModifierGlobal(YieldTypes eYield, int iChange);
 
 	int getLandmarksTourismPercentGlobal() const;
 	void changeLandmarksTourismPercentGlobal(int iChange);
@@ -1690,6 +1690,8 @@ public:
 
 	int GetResearchTotalCostModifier() const;
 	void ChangeResearchTotalCostModifier(int iChange);
+	int GetResearchTotalCostModifierGoldenAge() const;
+	void ChangeResearchTotalCostModifierGoldenAge(int iChange);
 
 	int GetLiberatedInfluence() const;
 	void SetLiberatedInfluence(int iValue);
@@ -2483,11 +2485,11 @@ protected:
 	FAutoVariable<std::vector<int>, CvPlayer> m_viTradeRouteDomainExtraRange;
 #if defined(MOD_BUILDING_NEW_EFFECT_FOR_SP)
 	int m_iCityDefenseModifierGlobal;
-	int m_iCityStateTradeRouteProductionModifierGlobal;
 	int m_iLandmarksTourismPercentGlobal;
 	int m_iGreatWorksTourismModifierGlobal;
 	int m_iTradeRouteSeaGoldBonusGlobal;
 	int m_iTradeRouteLandGoldBonusGlobal;
+	std::vector<int> m_vCityStateTradeRouteYieldModifierGlobal;
 #endif
 	FAutoVariable<int, CvPlayer> m_iImprovementCostModifier;
 	FAutoVariable<int, CvPlayer> m_iImprovementUpgradeRateModifier;
@@ -2590,6 +2592,7 @@ protected:
 	int m_iGlobalCityStrengthMod;
 	int m_iGlobalRangedStrikeModifier;
 	int m_iResearchTotalCostModifier;
+	int m_iResearchTotalCostModifierGoldenAge;
 	int m_iLiberatedInfluence;
 	int m_iExtraUnitPlayerInstances;
 	int m_iWaterTileDamageGlobal;
