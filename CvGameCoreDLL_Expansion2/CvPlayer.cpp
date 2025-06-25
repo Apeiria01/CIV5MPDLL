@@ -21739,6 +21739,7 @@ int CvPlayer::GetScienceYieldFromPreviousTurns(int iGameTurn, int iNumPreviousTu
 {
 	// Beakers per turn yield is tracked in replay data, so use that
 	int iSum = 0;
+	int iReplayDataSetIndex = getReplayDataSetIndex("REPLAYDATASET_SCIENCEPERTURN");
 	for (int iI = 0; iI < iNumPreviousTurnsToCount; iI++)
 	{
 		int iTurn = iGameTurn - iI;
@@ -21747,14 +21748,16 @@ int CvPlayer::GetScienceYieldFromPreviousTurns(int iGameTurn, int iNumPreviousTu
 			break;
 		}
 
-		int iTurnScience = getReplayDataValue(getReplayDataSetIndex("REPLAYDATASET_SCIENCEPERTURN"), iTurn);
+		int iTurnScience = getReplayDataValue(iReplayDataSetIndex, iTurn);
 		if (iTurnScience >= 0)
 		{
 			iSum += iTurnScience;
 		}
 		else if (iTurnScience == -1) // No data for this turn (ex. late era start)
 		{
-			iSum += (3 * GetScience());
+			// Qingyin: I don't know why it is 3, but it has caused some problems (SP's Nobel Prize)
+			//iSum += (3 * GetScience());
+			iSum += calculateTotalYield(YIELD_SCIENCE);
 		}
 	}
 

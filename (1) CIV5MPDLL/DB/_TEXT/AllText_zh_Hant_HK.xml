@@ -726,7 +726,7 @@
 			<Text>諾貝爾醫學或生理學獎</Text>
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_MESSAGE">
-			<Text>{1_civ}的大科學家[COLOR_BLUE]{2_person_name}[ENDCOLOR]榮獲新一屆{4_prizeType}，你獲得了+[COLOR_BLUE]{3_research}[ENDCOLOR][ICON_RESEARCH]科學研究！ </Text>
+			<Text>{1_civ}的大科學家[COLOR:33:190:247:255]{2_person_name}[ENDCOLOR]榮獲新一屆{4_prizeType}，你獲得了+[COLOR:33:190:247:255]{3_research}[ENDCOLOR][ICON_RESEARCH]科學研究！ </Text>
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_SUMMARY">
 			<Text>諾貝爾獎得主！ </Text>
