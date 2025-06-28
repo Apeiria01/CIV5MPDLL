@@ -725,7 +725,7 @@
 			<Text>Nobel Prize in Medicine or Physiology</Text>
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_MESSAGE">
-			<Text>{1_civ}'s great scientist [COLOR_BLUE]{2_person_name}[ENDCOLOR] won the new {4_prizeType}, and you won +[COLOR_BLUE]{3_research}[ENDCOLOR][ICON_RESEARCH] scientific research! </Text>
+			<Text>{1_civ}'s great scientist [COLOR:33:190:247:255]{2_person_name}[ENDCOLOR] won the new {4_prizeType}, and you won +[COLOR:33:190:247:255]{3_research}[ENDCOLOR][ICON_RESEARCH] scientific research! </Text>
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_SUMMARY">
 			<Text>Nobel Prize winner! </Text>
