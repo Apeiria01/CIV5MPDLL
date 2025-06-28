@@ -279,7 +279,7 @@ CvCity::CvCity() :
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	, m_iCityAutomatonWorkersChange(0)
 #endif
-
+	, m_bAllowPuppetPurchase()
 	, m_iNukeInterceptionChance(0)
 
 	
@@ -1144,7 +1144,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	m_iCityAutomatonWorkersChange = 0;
 #endif
-
+	m_bAllowPuppetPurchase = false;
 	m_iNukeInterceptionChance = 0;
 
 	m_iMaintenance = 0;
@@ -7742,6 +7742,10 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		}
 #endif
 
+		if (pBuildingInfo->IsAllowsPuppetPurchase())
+		{
+			SetAllowPuppetPurchase(pBuildingInfo->IsAllowsPuppetPurchase() * iChange > 0);
+		}
 
 		changeGreatPeopleRateModifier(pBuildingInfo->GetGreatPeopleRateModifier() * iChange);
 		changeFreeExperience(pBuildingInfo->GetFreeExperience() * iChange);
@@ -8590,7 +8594,19 @@ void CvCity::UpdateReligion(ReligionTypes eNewMajority)
 
 	for(int iYield = 0; iYield < NUM_YIELD_TYPES; iYield++)
 	{
+
 		YieldTypes eYield = (YieldTypes)iYield;
+
+		int iYieldPerReligion = GetYieldPerReligionTimes100(eYield);
+
+		// Player-level yield per religion
+		iYieldPerReligion += GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eYield);
+
+		if (iYieldPerReligion > 0)
+		{
+			ChangeBaseYieldRateFromReligion(eYield, (GetCityReligions()->GetNumReligionsWithFollowers() * iYieldPerReligion) / 100);
+		}
+
 		if(eNewMajority != NO_RELIGION)
 		{
 			if(pReligion)
@@ -11797,6 +11813,19 @@ void CvCity::ChangeMaxAirUnits(int iChange)
 	m_iMaxAirUnits += iChange;
 }
 
+
+void CvCity::SetAllowPuppetPurchase(bool bValue)
+{
+	if (m_bAllowPuppetPurchase != bValue)
+	{
+		m_bAllowPuppetPurchase = bValue;
+	}
+}
+bool CvCity::IsAllowPuppetPurchase() const
+{
+	return m_bAllowPuppetPurchase;
+}
+
 //	--------------------------------------------------------------------------------
 int CvCity::getNukeModifier() const
 {
@@ -13459,6 +13488,9 @@ int CvCity::getBasicYieldRateTimes100(const YieldTypes eIndex, const bool bIgnor
 	iBaseYield += (GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(m_eOwner).getTotalPopulation());
 #endif
 
+	// Player-level yield per religion
+	iBaseYield += GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers();
+
 	int iNonSpecialist = GET_PLAYER(getOwner()).getYieldFromNonSpecialistCitizens(eIndex);
 	if (iNonSpecialist != 0)
 	{
@@ -14045,7 +14077,7 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_POPULATION", iBaseYieldTimes100, YieldIcon);
 	}
 
-	iBaseValue = GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers();
+	iBaseValue = (GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers()) + (GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers());
 	if(iBaseValue != 0)
 	{
 		iBaseYieldTimes100 = iBaseValue;
@@ -14062,6 +14094,7 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 	}
 
 #if defined(MOD_ROG_CORE)
+
 	iBaseValue = (GET_PLAYER(getOwner()).getYieldFromNonSpecialistCitizens(eIndex)) * (getPopulation() - GetCityCitizens()->GetTotalSpecialistCount());
 	if (iBaseValue != 0)
 	{
@@ -14069,6 +14102,8 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 		iBaseYieldTimes100 /= 100;
 		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_NON_SPECIALIST_CITIZENS", iBaseYieldTimes100, YieldIcon);
 	}
+
+
 
 	iBaseValue = (GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(m_eOwner).getTotalPopulation());
 	if(iBaseValue != 0)
@@ -14648,6 +14683,10 @@ void CvCity::ChangeBuildingYieldFromYield(YieldTypes eIndex1, YieldTypes eIndex2
 	ModifierUpdateInsertRemove(m_yieldChanges[eIndex2].forYield, eIndex1, iValue, true);
 }
 
+
+
+
+
 //	--------------------------------------------------------------------------------
 /// Base yield rate from CS Alliances
 int CvCity::GetBaseYieldRateFromCSAlliance(YieldTypes eIndex) const
@@ -14956,7 +14995,7 @@ int CvCity::GetYieldPerReligionTimes100(YieldTypes eIndex) const
 	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
 
-	return m_aiYieldPerReligion[eIndex] + GET_PLAYER(getOwner()).GetYieldChangesPerReligionTimes100(eIndex);
+	return m_aiYieldPerReligion[eIndex];
 }
 
 //	--------------------------------------------------------------------------------
@@ -18623,13 +18662,48 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	// slewis - The Venetian Exception
 	bool bIsPuppet = IsPuppet();
 	bool bVenetianException = false;
-	CvPlayerAI &kPlayer = GET_PLAYER(m_eOwner);
+	bool bPuppetExceptionUnit = false;
+	bool bPuppetExceptionBuilding = false;
+
+	CvPlayerAI& kPlayer = GET_PLAYER(m_eOwner);
+
+	bool bAllowsPuppetPurchase = kPlayer.CanPuppetPurchase();
+	
+
+	if ( bIsPuppet && !bAllowsPuppetPurchase)
+	{
+		if (eUnitType >= 0)
+		{
+			CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eUnitType);
+			if (pkUnitInfo)
+			{
+				if (pkUnitInfo->IsPuppetPurchaseOverride())
+				{
+					bPuppetExceptionUnit = true;
+				}
+			}
+		}
+
+		else if (eBuildingType >= 0)
+		{
+			CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuildingType);
+			if (pkBuildingInfo)
+			{
+				if (pkBuildingInfo->IsPuppetPurchaseOverride())
+				{
+					bPuppetExceptionBuilding = true;
+				}
+			}
+		}
+	}
+
+
 	if (kPlayer.GetPlayerTraits()->IsNoAnnexing() && bIsPuppet)
 	{
 		bVenetianException = true;
 	}
 
-	if (bIsPuppet && !bVenetianException)
+	if (bIsPuppet && !bVenetianException && !bPuppetExceptionBuilding && !bPuppetExceptionUnit && !bAllowsPuppetPurchase)
 	{
 		return false;
 	}
@@ -18664,6 +18738,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 				return false;
 
 			iGoldCost = GetPurchaseCost(eUnitType);
+
+			if (bIsPuppet && !bPuppetExceptionUnit && !bAllowsPuppetPurchase && !bVenetianException)
+			{
+				return false;
+			}
 		}
 		// Building
 		else if(eBuildingType != NO_BUILDING)
@@ -18682,6 +18761,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 			}
 
 			iGoldCost = GetPurchaseCost(eBuildingType);
+
+			if (bIsPuppet && !bPuppetExceptionBuilding && !bAllowsPuppetPurchase && !bVenetianException)
+			{
+				return false;
+			}
 		}
 		// Project
 		else if(eProjectType != NO_PROJECT)
@@ -18732,6 +18816,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 		{
 			iFaithCost = GetFaithPurchaseCost(eUnitType, true);
 			if(iFaithCost < 1)
+			{
+				return false;
+			}
+
+			if (bIsPuppet && !bPuppetExceptionUnit && !bAllowsPuppetPurchase && !bVenetianException)
 			{
 				return false;
 			}
@@ -19905,6 +19994,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iBombardIndirect;
 	kStream >> m_iNumAttacks;
 	kStream >> m_iAttacksMade;
+	kStream >> m_bAllowPuppetPurchase;
 	kStream >> m_iNukeInterceptionChance;
 	kStream >> m_aiYieldPerPopInEmpire;
 	
@@ -20419,6 +20509,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iBombardIndirect;
 	kStream << m_iNumAttacks;
 	kStream << m_iAttacksMade;
+	kStream << m_bAllowPuppetPurchase;
 	kStream << m_iNukeInterceptionChance;
 
 	kStream << m_aiYieldPerPopInEmpire;

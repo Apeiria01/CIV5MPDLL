@@ -1049,7 +1049,7 @@ protected:
 	static int lGetDealValue(lua_State* L);
 	static int lGetDealMyValue(lua_State* L);
 	static int lGetDealTheyreValue(lua_State* L);
-
+	static int lAllowsPuppetPurchase(lua_State* L);
 	static int lMayNotAnnex(lua_State* L);
 
 	//Espionage Methods

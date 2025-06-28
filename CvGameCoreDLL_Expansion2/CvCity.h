@@ -686,6 +686,10 @@ public:
 	int GetMaxAirUnits() const;
 	void ChangeMaxAirUnits(int iChange);
 
+
+	void SetAllowPuppetPurchase(bool bValue);
+	bool IsAllowPuppetPurchase() const;
+
 	int getNukeModifier() const;
 	void changeNukeModifier(int iChange);
 
@@ -1575,7 +1579,7 @@ protected:
 	FAutoVariable<int, CvCity> m_iLandTileMovementReduce;
 	FAutoVariable<int, CvCity> m_iLandTileTurnDamage;
 #endif
-
+	bool m_bAllowPuppetPurchase;
 	int m_iNukeInterceptionChance;
 	FAutoVariable<int, CvCity> m_iNumAttacks;
 	FAutoVariable<int, CvCity> m_iAttacksMade;

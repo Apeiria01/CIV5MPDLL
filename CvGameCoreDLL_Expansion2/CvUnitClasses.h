@@ -180,6 +180,7 @@ public:
 	const char* GetUnitArtInfoTag() const;
 	const bool GetUnitArtInfoCulturalVariation() const;
 	const bool GetUnitArtInfoEraVariation() const;
+	bool IsPuppetPurchaseOverride() const;
 	int GetUnitFlagIconOffset() const;
 	int GetUnitPortraitOffset() const;
 	bool IsBarbarianCanTrait() const;
@@ -367,6 +368,7 @@ private:
 	int m_iProjectPrereq;
 	int m_iSpaceshipProject;
 	int m_iLeaderPromotion;
+	bool m_bPuppetPurchaseOverride;
 	bool m_bTrade;
 	int m_iNumExoticGoods;
 

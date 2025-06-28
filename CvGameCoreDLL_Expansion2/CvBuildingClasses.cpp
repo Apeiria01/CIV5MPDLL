@@ -38,6 +38,8 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iPrereqAndTech(NO_TECH),
 	m_iTechNoPrereqClasses(NO_TECH),
 	m_iPolicyBranchType(NO_POLICY_BRANCH_TYPE),
+	m_bPuppetPurchaseOverride(false),
+	m_bAllowsPuppetPurchase(false),
 	m_iSpecialistType(NO_SPECIALIST),
 	m_iSpecialistCount(0),
 	m_iSpecialistExtraCulture(0),
@@ -841,6 +843,9 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 	szTextVal = kResults.GetText("PolicyBranchType");
 	m_iPolicyBranchType = GC.getInfoTypeForString(szTextVal, true);
+
+	m_bPuppetPurchaseOverride = kResults.GetBool("PuppetPurchaseOverride");
+	m_bAllowsPuppetPurchase = kResults.GetBool("AllowsPuppetPurchase");
 
 	szTextVal = kResults.GetText("SpecialistType");
 	m_iSpecialistType = GC.getInfoTypeForString(szTextVal, true);
@@ -2056,6 +2061,17 @@ int CvBuildingEntry::GetTechNoPrereqClasses() const
 int CvBuildingEntry::GetPolicyBranchType() const
 {
 	return m_iPolicyBranchType;
+}
+
+/// Is this building purchaseable in any city?
+bool CvBuildingEntry::IsPuppetPurchaseOverride() const
+{
+	return m_bPuppetPurchaseOverride;
+}
+/// Does this building unlock purchasing in any city?
+bool CvBuildingEntry::IsAllowsPuppetPurchase() const
+{
+	return m_bAllowsPuppetPurchase;
 }
 
 /// What SpecialistType is allowed by this Building
