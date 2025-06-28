@@ -279,7 +279,7 @@ CvCity::CvCity() :
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	, m_iCityAutomatonWorkersChange(0)
 #endif
-
+	, m_bAllowPuppetPurchase()
 	, m_iNukeInterceptionChance(0)
 
 	
@@ -1144,7 +1144,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	m_iCityAutomatonWorkersChange = 0;
 #endif
-
+	m_bAllowPuppetPurchase = false;
 	m_iNukeInterceptionChance = 0;
 
 	m_iMaintenance = 0;
@@ -7742,6 +7742,10 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		}
 #endif
 
+		if (pBuildingInfo->IsAllowsPuppetPurchase())
+		{
+			SetAllowPuppetPurchase(pBuildingInfo->IsAllowsPuppetPurchase() * iChange > 0);
+		}
 
 		changeGreatPeopleRateModifier(pBuildingInfo->GetGreatPeopleRateModifier() * iChange);
 		changeFreeExperience(pBuildingInfo->GetFreeExperience() * iChange);
@@ -11807,6 +11811,19 @@ void CvCity::ChangeMaxAirUnits(int iChange)
 {
 	VALIDATE_OBJECT
 	m_iMaxAirUnits += iChange;
+}
+
+
+void CvCity::SetAllowPuppetPurchase(bool bValue)
+{
+	if (m_bAllowPuppetPurchase != bValue)
+	{
+		m_bAllowPuppetPurchase = bValue;
+	}
+}
+bool CvCity::IsAllowPuppetPurchase() const
+{
+	return m_bAllowPuppetPurchase;
 }
 
 //	--------------------------------------------------------------------------------
@@ -18645,13 +18662,45 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	// slewis - The Venetian Exception
 	bool bIsPuppet = IsPuppet();
 	bool bVenetianException = false;
+	bool bPuppetExceptionUnit = false;
+	bool bPuppetExceptionBuilding = false;
+	bool bAllowsPuppetPurchase = IsAllowPuppetPurchase();
 	CvPlayerAI &kPlayer = GET_PLAYER(m_eOwner);
+
+	if ( bIsPuppet && !bAllowsPuppetPurchase)
+	{
+		if (eUnitType >= 0)
+		{
+			CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eUnitType);
+			if (pkUnitInfo)
+			{
+				if (pkUnitInfo->IsPuppetPurchaseOverride())
+				{
+					bPuppetExceptionUnit = true;
+				}
+			}
+		}
+
+		else if (eBuildingType >= 0)
+		{
+			CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuildingType);
+			if (pkBuildingInfo)
+			{
+				if (pkBuildingInfo->IsPuppetPurchaseOverride())
+				{
+					bPuppetExceptionBuilding = true;
+				}
+			}
+		}
+	}
+
+
 	if (kPlayer.GetPlayerTraits()->IsNoAnnexing() && bIsPuppet)
 	{
 		bVenetianException = true;
 	}
 
-	if (bIsPuppet && !bVenetianException)
+	if (bIsPuppet && !bVenetianException && !bPuppetExceptionBuilding && !bPuppetExceptionUnit && !bAllowsPuppetPurchase)
 	{
 		return false;
 	}
@@ -18686,6 +18735,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 				return false;
 
 			iGoldCost = GetPurchaseCost(eUnitType);
+
+			if (bIsPuppet && !bPuppetExceptionUnit && !bAllowsPuppetPurchase && !bVenetianException)
+			{
+				return false;
+			}
 		}
 		// Building
 		else if(eBuildingType != NO_BUILDING)
@@ -18704,6 +18758,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 			}
 
 			iGoldCost = GetPurchaseCost(eBuildingType);
+
+			if (bIsPuppet && !bPuppetExceptionBuilding && !bAllowsPuppetPurchase && !bVenetianException)
+			{
+				return false;
+			}
 		}
 		// Project
 		else if(eProjectType != NO_PROJECT)
@@ -18754,6 +18813,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 		{
 			iFaithCost = GetFaithPurchaseCost(eUnitType, true);
 			if(iFaithCost < 1)
+			{
+				return false;
+			}
+
+			if (bIsPuppet && !bPuppetExceptionUnit && !bAllowsPuppetPurchase && !bVenetianException)
 			{
 				return false;
 			}
@@ -19927,6 +19991,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iBombardIndirect;
 	kStream >> m_iNumAttacks;
 	kStream >> m_iAttacksMade;
+	kStream >> m_bAllowPuppetPurchase;
 	kStream >> m_iNukeInterceptionChance;
 	kStream >> m_aiYieldPerPopInEmpire;
 	
@@ -20441,6 +20506,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iBombardIndirect;
 	kStream << m_iNumAttacks;
 	kStream << m_iAttacksMade;
+	kStream << m_bAllowPuppetPurchase;
 	kStream << m_iNukeInterceptionChance;
 
 	kStream << m_aiYieldPerPopInEmpire;

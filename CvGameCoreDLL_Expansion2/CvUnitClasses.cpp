@@ -155,6 +155,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_piTechCombatStrength(NULL),
 	m_piTechRangedCombatStrength(NULL),
 	m_bUnitTechUpgrade(false),
+	m_bPuppetPurchaseOverride(false),
 	m_piPrereqAndTechs(NULL),
 	m_piResourceQuantityRequirements(NULL),
 	m_piProductionTraits(NULL),
@@ -315,6 +316,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_bNoFallout = kResults.GetBool("NoFallout");
 	m_bCaptureWhileEmbarked = kResults.GetBool("CaptureWhileEmbarked");
 	m_bRangeAttackOnlyInDomain = kResults.GetBool("RangeAttackOnlyInDomain");
+	m_bPuppetPurchaseOverride = kResults.GetBool("PuppetPurchaseOverride");
 	m_bTrade = kResults.GetBool("Trade");
 	m_iNumExoticGoods = kResults.GetInt("NumExoticGoods");
 
@@ -1482,6 +1484,16 @@ GreatWorkType CvUnitEntry::GetGreatWorks(int i) const
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return (m_paeGreatWorks) ? m_paeGreatWorks[i] : NO_GREAT_WORK;
 }
+
+
+
+
+/// Can be bough in a puppet city.
+bool CvUnitEntry::IsPuppetPurchaseOverride() const
+{
+	return m_bPuppetPurchaseOverride;
+}
+
 
 /// What flag icon to use
 int CvUnitEntry::GetUnitFlagIconOffset() const
