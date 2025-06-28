@@ -1,3 +1,6 @@
+ALTER TABLE Units ADD PuppetPurchaseOverride boolean DEFAULT 0;
+ALTER TABLE Buildings ADD PuppetPurchaseOverride boolean DEFAULT 0;
+ALTER TABLE Buildings ADD AllowsPuppetPurchase boolean DEFAULT 0;
 ALTER TABLE UnitPromotions ADD COLUMN 'PromotionPrereqOr10' TEXT DEFAULT NULL;
 ALTER TABLE UnitPromotions ADD COLUMN 'PromotionPrereqOr11' TEXT DEFAULT NULL;
 ALTER TABLE UnitPromotions ADD COLUMN 'PromotionPrereqOr12' TEXT DEFAULT NULL;
