@@ -786,6 +786,10 @@ public:
 	void SetProductionBeakerMod(int iValue);
 	void ChangeProductionBeakerMod(int iChange);
 
+	bool CanPuppetPurchase() const;
+	int GetPuppetPurchase() const;
+	void ChangePuppetPurchase(int iValue);
+
 	bool CanAlwaysWeLoveKindDayInGoldenAge() const;
 	int GetAlwaysWeLoveKindDayInGoldenAge() const;
 	void ChangeAlwaysWeLoveKindDayInGoldenAge(int iValue);
@@ -2436,6 +2440,7 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iGreatPeopleThresholdModifier;
 	FAutoVariable<int, CvPlayer> m_iGreatGeneralsThresholdModifier;
 	int m_iGreatAdmiralsThresholdModifier;
+	int m_iPuppetPurchase;
 	int m_iAlwaysWeLoveKindDayInGoldenAge;
 	int m_iNoResistance;
 	int m_iUpgradeAllTerritory;

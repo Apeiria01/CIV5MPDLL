@@ -18664,8 +18664,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	bool bVenetianException = false;
 	bool bPuppetExceptionUnit = false;
 	bool bPuppetExceptionBuilding = false;
-	bool bAllowsPuppetPurchase = IsAllowPuppetPurchase();
-	CvPlayerAI &kPlayer = GET_PLAYER(m_eOwner);
+
+	CvPlayerAI& kPlayer = GET_PLAYER(m_eOwner);
+
+	bool bAllowsPuppetPurchase = kPlayer.CanPuppetPurchase();
+	
 
 	if ( bIsPuppet && !bAllowsPuppetPurchase)
 	{

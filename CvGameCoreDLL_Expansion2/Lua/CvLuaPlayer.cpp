@@ -1141,6 +1141,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetDealValue);
 	Method(GetDealMyValue);
 	Method(GetDealTheyreValue);
+	Method(AllowsPuppetPurchase);
 	Method(MayNotAnnex);
 
 	Method(GetEspionageCityStatus);
@@ -11788,6 +11789,15 @@ int CvLuaPlayer::lGetDealTheyreValue(lua_State* L)
 	int iValueImOffering, iValueTheyreOffering;
 	pkThisPlayer->GetDealAI()->GetDealValue(pkDeal, iValueImOffering, iValueTheyreOffering, false);
 	lua_pushinteger(L, iValueTheyreOffering);
+	return 1;
+}
+
+
+//------------------------------------------------------------------------------
+int CvLuaPlayer::lAllowsPuppetPurchase(lua_State* L)
+{
+	CvPlayerAI* pkThisPlayer = GetInstance(L);
+	lua_pushboolean(L, pkThisPlayer->CanPuppetPurchase());
 	return 1;
 }
 

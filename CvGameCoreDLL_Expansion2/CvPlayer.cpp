@@ -251,6 +251,7 @@ CvPlayer::CvPlayer() :
 	, m_iGreatPeopleThresholdModifier("CvPlayer::m_iGreatPeopleThresholdModifier", m_syncArchive)
 	, m_iGreatGeneralsThresholdModifier("CvPlayer::m_iGreatGeneralsThresholdModifier", m_syncArchive)
 	, m_iGreatAdmiralsThresholdModifier(0)
+	, m_iPuppetPurchase()
 	, m_iAlwaysWeLoveKindDayInGoldenAge()
 	, m_iNoResistance()
 	, m_iUpgradeAllTerritory()
@@ -1045,6 +1046,7 @@ void CvPlayer::uninit()
 	m_iGreatPeopleThresholdModifier = 0;
 	m_iGreatGeneralsThresholdModifier = 0;
 	m_iGreatAdmiralsThresholdModifier = 0;
+	m_iPuppetPurchase = 0;
 	m_iAlwaysWeLoveKindDayInGoldenAge = 0;
 	m_iNoResistance = 0;
 	m_iUpgradeAllTerritory = 0;
@@ -10068,6 +10070,12 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 	}
 #endif
 
+
+	if (pBuildingInfo->IsAllowsPuppetPurchase())
+	{
+		ChangePuppetPurchase(pBuildingInfo->IsAllowsPuppetPurchase()* iChange);
+	}
+
 #if defined(MOD_ROG_CORE)
 	ChangeCityStrengthMod(pBuildingInfo->GetGlobalCityStrengthMod()* iChange);
 	ChangeGlobalRangedStrikeModifier(pBuildingInfo->GetGlobalRangedStrikeModifier()* iChange);
@@ -16320,6 +16328,32 @@ void CvPlayer::ChangeProductionBeakerMod(int iChange)
 {
 	SetProductionBeakerMod(GetProductionBeakerMod() + iChange);
 }
+
+
+
+//	--------------------------------------------------------------------------------
+bool CvPlayer::CanPuppetPurchase() const
+{
+	if (GetPuppetPurchase() > 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetPuppetPurchase() const
+{
+	return m_iPuppetPurchase;
+}
+//	--------------------------------------------------------------------------------
+void CvPlayer::ChangePuppetPurchase(int iChange)
+{
+	m_iPuppetPurchase += iChange;
+}
+
+
 
 
 //	--------------------------------------------------------------------------------
@@ -28127,6 +28161,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGreatPeopleThresholdModifier;
 	kStream >> m_iGreatGeneralsThresholdModifier;
 	kStream >> m_iGreatAdmiralsThresholdModifier;
+	kStream >> m_iPuppetPurchase;
 	kStream >> m_iAlwaysWeLoveKindDayInGoldenAge;
 	kStream >> m_iNoResistance;
 	kStream >> m_iUpgradeAllTerritory;
@@ -28942,6 +28977,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGreatPeopleThresholdModifier;
 	kStream << m_iGreatGeneralsThresholdModifier;
 	kStream << m_iGreatAdmiralsThresholdModifier;
+	kStream << m_iPuppetPurchase;
 	kStream << m_iAlwaysWeLoveKindDayInGoldenAge;
 	kStream << m_iNoResistance;
 	kStream << m_iUpgradeAllTerritory;
