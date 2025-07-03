@@ -881,6 +881,9 @@ public:
 
 	int getSettlerProductionEraModifier(EraTypes eEra) const;
 	void changeSettlerProductionEraModifier(EraTypes eStartEra, int iChange);
+
+	int getBuildSpeedModifier(BuildTypes eBuild) const;
+	void changeBuildSpeedModifier(BuildTypes eBuild, int iChange);
 #endif
 	bool isNullifyInfluenceModifier() const;
 	void changeNullifyInfluenceModifier(int iChange);
@@ -2484,6 +2487,7 @@ protected:
 	int m_iHappinessPerPolicy;
 	int m_iWaterBuildSpeedModifier;
 	std::vector<int> m_vSettlerProductionEraModifier;
+	std::vector<int> m_vBuildSpeedModifier;
 #endif
 	int m_iNullifyInfluenceModifier;
 	int m_iNumTradeRouteBonus;

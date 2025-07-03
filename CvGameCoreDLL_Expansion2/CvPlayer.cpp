@@ -288,6 +288,7 @@ CvPlayer::CvPlayer() :
 	, m_iHappinessPerPolicy(0)
 	, m_iWaterBuildSpeedModifier(0)
 	, m_vSettlerProductionEraModifier()
+	, m_vBuildSpeedModifier()
 #endif
 	, m_iNullifyInfluenceModifier(0)
 	, m_iNumTradeRouteBonus(0)
@@ -1090,6 +1091,7 @@ void CvPlayer::uninit()
 	m_iHappinessPerPolicy = 0;
 	m_iWaterBuildSpeedModifier = 0;
 	m_vSettlerProductionEraModifier.clear();
+	m_vBuildSpeedModifier.clear();
 #endif
 	m_iNullifyInfluenceModifier = 0;
 	m_iNumTradeRouteBonus = 0;
@@ -1375,6 +1377,8 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 #endif
 	m_vSettlerProductionEraModifier.clear();
 	m_vSettlerProductionEraModifier.resize(GC.getNumEraInfos(), 0);
+	m_vBuildSpeedModifier.clear();
+	m_vBuildSpeedModifier.resize(GC.getNumBuildInfos(), 0);
 	m_viTradeRouteDomainExtraRange.clear();
 	m_viTradeRouteDomainExtraRange.resize(NUM_DOMAIN_TYPES, 0);
 
@@ -16978,6 +16982,15 @@ void CvPlayer::changeSettlerProductionEraModifier(EraTypes eStartEra, int iChang
 	}
 }
 
+//	--------------------------------------------------------------------------------
+int CvPlayer::getBuildSpeedModifier(BuildTypes eBuild) const
+{
+	return m_vBuildSpeedModifier[eBuild];
+}
+void CvPlayer::changeBuildSpeedModifier(BuildTypes eBuild, int iChange)
+{
+	m_vBuildSpeedModifier[eBuild] += iChange;
+}
 #endif
 //	--------------------------------------------------------------------------------
 bool CvPlayer::isNullifyInfluenceModifier() const
@@ -27225,6 +27238,13 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 		}
 	}
 
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	for(iI = 0; iI < GC.getNumBuildInfos(); iI++)
+	{
+		changeBuildSpeedModifier((BuildTypes)iI, pPolicy->GetBuildSpeedModifier(iI) * iChange);
+	}
+#endif
+
 	// Free Promotions
 	PromotionTypes ePromotion;
 	for(iI = 0; iI < GC.getNumPromotionInfos(); iI++)
@@ -28218,6 +28238,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iHappinessPerPolicy;
 	kStream >> m_iWaterBuildSpeedModifier;
 	kStream >> m_vSettlerProductionEraModifier;
+	kStream >> m_vBuildSpeedModifier;
 #endif
 	kStream >> m_iNullifyInfluenceModifier;
 	kStream >> m_iNumTradeRouteBonus;
@@ -29019,6 +29040,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iHappinessPerPolicy;
 	kStream << m_iWaterBuildSpeedModifier;
 	kStream << m_vSettlerProductionEraModifier;
+	kStream << m_vBuildSpeedModifier;
 #endif
 	kStream << m_iNullifyInfluenceModifier;
 	kStream << m_iNumTradeRouteBonus;

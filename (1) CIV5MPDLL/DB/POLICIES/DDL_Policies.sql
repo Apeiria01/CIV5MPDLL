@@ -53,6 +53,11 @@ alter table Policies add column InstantFoodThresholdPercent integer not null def
 alter table Policies add column InstantFoodKeptPercent integer not null default 0;
 alter table Policies add column CaptureCityResistanceTurnsChangeFormula text references LuaFormula(Type);
 
+CREATE TABLE Policy_BuildSpeedModifier (
+	PolicyType TEXT REFERENCES Policies(Type),
+	BuildType text REFERENCES Builds(Type),
+	Modifier integer not null
+);
 ALTER TABLE Policies ADD 'WaterBuildSpeedModifier' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD 'SettlerProductionEraModifier' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD 'SettlerProductionStartEra' TEXT DEFAULT NULL REFERENCES Eras(Type);
