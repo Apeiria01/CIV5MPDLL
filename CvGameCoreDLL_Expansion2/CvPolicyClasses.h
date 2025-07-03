@@ -86,6 +86,7 @@ public:
 	int GetSettlerProductionEraModifier() const;
 	int GetSettlerProductionStartEra() const;
 	int GetHappinessPerReligionInCity() const;
+	int GetBuildSpeedModifier(int i) const;
 #endif
 	int GetAllFeatureProduction() const;
 	int GetImprovementCostModifier() const;
@@ -417,6 +418,7 @@ private:
 	int m_iSettlerProductionEraModifier;
 	int m_iSettlerProductionStartEra;
 	int m_iHappinessPerReligionInCity;
+	int* m_piBuildSpeedModifier;
 #endif
 	int m_iAllFeatureProduction;
 	int m_iImprovementCostModifier;
