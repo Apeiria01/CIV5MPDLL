@@ -122,6 +122,9 @@
     <PostBuildEvent>
       <Command>xcopy /Y /I "$(SolutionDir)\BuildOutput\VS2022_$(Configuration)$(Platform)\" "$(SolutionDir)\(1) CIV5MPDLL\DLL"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>..\update_commit_id.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -175,6 +178,9 @@
     <PostBuildEvent>
       <Command>xcopy /Y /I "$(SolutionDir)\BuildOutput\VS2022_$(Configuration)$(Platform)\" "$(SolutionDir)\(1) CIV5MPDLL\DLL"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>..\update_commit_id.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CustomMods.cpp" />
