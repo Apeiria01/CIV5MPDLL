@@ -14379,21 +14379,24 @@ int CvUnit::workRate(bool bMax, BuildTypes eBuild) const
 		iRate = 100;
 	}
 
-#if defined(MOD_ROG_CORE)
-	int Modifiers = 0;
-	if (GetWorkRateMod() != 0)
-	{
-		Modifiers += GetWorkRateMod();
-	}
-
-	iRate *= Modifiers + 100;
-	iRate /= 100;
-#endif
-
-
 	CvPlayerAI& kPlayer = GET_PLAYER(getOwner());
 
 	iRate *= std::max(0, (kPlayer.getWorkerSpeedModifier() + kPlayer.GetPlayerTraits()->GetWorkerSpeedModifier() + 100));
+	iRate /= 100;
+
+	int iMultiplier = 100;
+#if defined(MOD_ROG_CORE)
+	iMultiplier += GetWorkRateMod();
+#endif
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	if(MOD_POLICY_NEW_EFFECT_FOR_SP && GC.getBuildInfo(eBuild)->IsWater())
+	{
+		iMultiplier += kPlayer.getWaterBuildSpeedModifier();
+	}
+#endif
+	iMultiplier += kPlayer.getBuildSpeedModifier(eBuild);
+
+	iRate *= iMultiplier;
 	iRate /= 100;
 
 	if(!kPlayer.isHuman() && !kPlayer.IsAITeammateOfHuman() && !kPlayer.isBarbarian())

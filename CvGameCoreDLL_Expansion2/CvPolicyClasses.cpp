@@ -76,6 +76,7 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_iSettlerProductionEraModifier(0),
 	m_iSettlerProductionStartEra(NO_ERA),
 	m_iHappinessPerReligionInCity(0),
+	m_piBuildSpeedModifier(NULL),
 #endif
 	m_iAllFeatureProduction(0),
 	m_iImprovementCostModifier(0),
@@ -336,6 +337,9 @@ CvPolicyEntry::~CvPolicyEntry(void)
 	{
 		delete m_pFreeUnitClasses;
 	}
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	SAFE_DELETE_ARRAY(m_piBuildSpeedModifier);
+#endif	
 }
 
 /// Read from XML file (pass 1)
@@ -1364,6 +1368,9 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 		
 	}
 #endif
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	kUtility.PopulateArrayByValue(m_piBuildSpeedModifier, "Builds", "Policy_BuildSpeedModifier", "BuildType", "PolicyType", szPolicyType, "Modifier");
+#endif
 
 	return true;
 }
@@ -1678,6 +1685,12 @@ int CvPolicyEntry::GetSettlerProductionStartEra() const
 int CvPolicyEntry::GetHappinessPerReligionInCity() const
 {
 	return m_iHappinessPerReligionInCity;
+}
+int CvPolicyEntry::GetBuildSpeedModifier(int i) const
+{
+	CvAssertMsg(i < GC.getNumBuildInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piBuildSpeedModifier ? m_piBuildSpeedModifier[i] : 0;
 }
 #endif
 /// How much Production does removing ALL Features now give us?
