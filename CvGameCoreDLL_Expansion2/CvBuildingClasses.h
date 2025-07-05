@@ -147,6 +147,7 @@ public:
 	int GetPrereqAndTech() const;
 	int GetTechNoPrereqClasses() const;
 	int GetPolicyBranchType() const;
+	int GetPolicyNeededType() const;
 	int GetSpecialistType() const;
 	int GetSpecialistCount() const;
 	int GetSpecialistExtraCulture() const;
@@ -637,6 +638,7 @@ private:
 	int m_iPrereqAndTech;
 	int m_iTechNoPrereqClasses;
 	int m_iPolicyBranchType;
+	int m_iPolicyNeededType;
 	int m_iSpecialistType;
 	int m_iSpecialistCount;
 	int m_iSpecialistExtraCulture;
