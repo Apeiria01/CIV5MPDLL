@@ -206,6 +206,7 @@ CvPlayer::CvPlayer() :
 	, m_iSpecialPolicyBuildingHappiness("CvPlayer::m_iSpecialPolicyBuildingHappiness", m_syncArchive)
 	, m_iWoundedUnitDamageMod("CvPlayer::m_iWoundedUnitDamageMod", m_syncArchive)
 	, m_iUnitUpgradeCostMod("CvPlayer::m_iUnitUpgradeCostMod", m_syncArchive)
+	, m_iAllowPuppetPurchase("CvPlayer::m_iAllowPuppetPurchase", m_syncArchive)
 	, m_iBarbarianCombatBonus("CvPlayer::m_iBarbarianCombatBonus", m_syncArchive)
 	, m_iAlwaysSeeBarbCampsCount("CvPlayer::m_iAlwaysSeeBarbCampsCount", m_syncArchive)
 	, m_iHappinessFromBuildings("CvPlayer::m_iHappinessFromBuildings", m_syncArchive)
@@ -1000,6 +1001,7 @@ void CvPlayer::uninit()
 	m_iSpecialPolicyBuildingHappiness = 0;
 	m_iWoundedUnitDamageMod = 0;
 	m_iUnitUpgradeCostMod = 0;
+	m_iAllowPuppetPurchase = 0;
 	m_iBarbarianCombatBonus = 0;
 	m_iAlwaysSeeBarbCampsCount = 0;
 	m_iHappinessFromBuildings = 0;
@@ -10069,6 +10071,7 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 #endif
 
 #if defined(MOD_ROG_CORE)
+	ChangeAllowPuppetPurchase(pBuildingInfo->GetAllowsPuppetPurchase()* iChange);
 	ChangeCityStrengthMod(pBuildingInfo->GetGlobalCityStrengthMod()* iChange);
 	ChangeGlobalRangedStrikeModifier(pBuildingInfo->GetGlobalRangedStrikeModifier()* iChange);
 	ChangeResearchTotalCostModifier(pBuildingInfo->GetResearchTotalCostModifier()* iChange);
@@ -14550,6 +14553,29 @@ void CvPlayer::ChangeUnitUpgradeCostMod(int iChange)
 {
 	SetUnitUpgradeCostMod(m_iUnitUpgradeCostMod + iChange);
 }
+
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetAllowPuppetPurchase() const
+{
+	return m_iAllowPuppetPurchase;
+}
+
+void CvPlayer::ChangeAllowPuppetPurchase(int iChange)
+{
+	if (iChange != 0)
+	{
+		m_iAllowPuppetPurchase = m_iAllowPuppetPurchase + iChange;;
+	}	
+}
+
+//	--------------------------------------------------------------------------------
+bool CvPlayer::IsAllowPuppetPurchase() const
+{
+	return m_iAllowPuppetPurchase > 0;
+}
+
+
 
 //	--------------------------------------------------------------------------------
 /// How much of a combat bonus do we get VS Barbarian Units?
@@ -28075,6 +28101,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iSpecialPolicyBuildingHappiness;
 	kStream >> m_iWoundedUnitDamageMod;
 	kStream >> m_iUnitUpgradeCostMod;
+	kStream >> m_iAllowPuppetPurchase;
 	kStream >> m_iBarbarianCombatBonus;
 	kStream >> m_iAlwaysSeeBarbCampsCount;
 	kStream >> m_iHappinessFromBuildings;
@@ -28898,6 +28925,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iSpecialPolicyBuildingHappiness;
 	kStream << m_iWoundedUnitDamageMod;
 	kStream << m_iUnitUpgradeCostMod;
+	kStream << m_iAllowPuppetPurchase;
 	kStream << m_iBarbarianCombatBonus;
 	kStream << m_iAlwaysSeeBarbCampsCount;
 	kStream << m_iHappinessFromBuildings;
