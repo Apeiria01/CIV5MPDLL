@@ -18621,15 +18621,47 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	
 	// Can't purchase anything in a puppeted city
 	// slewis - The Venetian Exception
+	CvPlayerAI& kPlayer = GET_PLAYER(m_eOwner);
 	bool bIsPuppet = IsPuppet();
 	bool bVenetianException = false;
-	CvPlayerAI &kPlayer = GET_PLAYER(m_eOwner);
+	bool bPuppetExceptionUnit = false;
+	bool bPuppetExceptionBuilding = false;
+	bool bAllowsPuppetPurchase = kPlayer.IsAllowPuppetPurchase();
+
+	if (bIsPuppet && !bAllowsPuppetPurchase)
+	{
+		if (eUnitType >= 0)
+		{
+			CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eUnitType);
+			if (pkUnitInfo)
+			{
+				if (pkUnitInfo->IsPuppetPurchaseOverride())
+				{
+					bPuppetExceptionUnit = true;
+				}
+			}
+		}
+		else if (eBuildingType >= 0)
+		{
+			CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuildingType);
+			if (pkBuildingInfo)
+			{
+				if (pkBuildingInfo->IsPuppetPurchaseOverride())
+				{
+					bPuppetExceptionBuilding = true;
+				}
+			}
+		}
+	}
+
+
+
 	if (kPlayer.GetPlayerTraits()->IsNoAnnexing() && bIsPuppet)
 	{
 		bVenetianException = true;
 	}
 
-	if (bIsPuppet && !bVenetianException)
+	if (bIsPuppet && !bVenetianException && !bPuppetExceptionBuilding && !bPuppetExceptionUnit && !bAllowsPuppetPurchase)
 	{
 		return false;
 	}
@@ -18664,6 +18696,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 				return false;
 
 			iGoldCost = GetPurchaseCost(eUnitType);
+
+			if (bIsPuppet && !bPuppetExceptionUnit && !bAllowsPuppetPurchase && !bVenetianException)
+			{
+				return false;
+			}
 		}
 		// Building
 		else if(eBuildingType != NO_BUILDING)
@@ -18682,6 +18719,12 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 			}
 
 			iGoldCost = GetPurchaseCost(eBuildingType);
+
+			if (bIsPuppet && !bPuppetExceptionBuilding && !bAllowsPuppetPurchase && !bVenetianException)
+			{
+				return false;
+			}
+
 		}
 		// Project
 		else if(eProjectType != NO_PROJECT)
@@ -18732,6 +18775,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 		{
 			iFaithCost = GetFaithPurchaseCost(eUnitType, true);
 			if(iFaithCost < 1)
+			{
+				return false;
+			}
+
+			if (bIsPuppet && !bPuppetExceptionUnit && !bAllowsPuppetPurchase && !bVenetianException)
 			{
 				return false;
 			}

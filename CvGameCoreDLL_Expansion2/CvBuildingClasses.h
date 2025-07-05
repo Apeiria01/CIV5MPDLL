@@ -147,6 +147,8 @@ public:
 	int GetPrereqAndTech() const;
 	int GetTechNoPrereqClasses() const;
 	int GetPolicyBranchType() const;
+	bool IsPuppetPurchaseOverride() const;
+	int GetAllowsPuppetPurchase() const;
 	int GetSpecialistType() const;
 	int GetSpecialistCount() const;
 	int GetSpecialistExtraCulture() const;
@@ -637,6 +639,8 @@ private:
 	int m_iPrereqAndTech;
 	int m_iTechNoPrereqClasses;
 	int m_iPolicyBranchType;
+	bool m_bPuppetPurchaseOverride;
+	int m_bAllowsPuppetPurchase;
 	int m_iSpecialistType;
 	int m_iSpecialistCount;
 	int m_iSpecialistExtraCulture;

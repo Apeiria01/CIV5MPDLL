@@ -155,6 +155,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_piTechCombatStrength(NULL),
 	m_piTechRangedCombatStrength(NULL),
 	m_bUnitTechUpgrade(false),
+	m_bPuppetPurchaseOverride(false),
 	m_piPrereqAndTechs(NULL),
 	m_piResourceQuantityRequirements(NULL),
 	m_piProductionTraits(NULL),
@@ -387,6 +388,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 #if defined(MOD_EVENTS_CAN_MOVE_INTO)
 	m_bSendCanMoveIntoEvent = kResults.GetBool("SendCanMoveIntoEvent");
 #endif
+	m_bPuppetPurchaseOverride = kResults.GetBool("PuppetPurchaseOverride");
 	m_bUnitTechUpgrade = kResults.GetBool("UnitTechUpgrade");
 	szTextVal = kResults.GetText("Domain");
 	m_iDomainType = GC.getInfoTypeForString(szTextVal, true);
@@ -1228,6 +1230,12 @@ bool CvUnitEntry::IsSuicide() const
 bool CvUnitEntry::IsNoFallout() const
 {
 	return m_bNoFallout;
+}
+
+/// Can be bough in a puppet city.
+bool CvUnitEntry::IsPuppetPurchaseOverride() const
+{
+	return m_bPuppetPurchaseOverride;
 }
 
 /// Capture this unit even if he's embarked?

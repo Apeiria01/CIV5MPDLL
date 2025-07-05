@@ -209,6 +209,7 @@ public:
 	const std::vector<int> GetBuildingClassRequireds() const;
 	int GetTechCombatStrength(int i) const;
 	int GetTechRangedCombatStrength(int i) const;
+	bool IsPuppetPurchaseOverride() const;
 	bool IsUnitTechUpgrade() const;
 	bool GetFreePromotions(int i) const;
 
@@ -406,6 +407,7 @@ private:
 	std::vector<int> m_vBuildingClassRequireds;
 	int* m_piTechCombatStrength;
 	int* m_piTechRangedCombatStrength;
+	bool m_bPuppetPurchaseOverride;
 	bool m_bUnitTechUpgrade;
 	bool* m_pbFreePromotions;
 

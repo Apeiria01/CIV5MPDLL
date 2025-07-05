@@ -616,6 +616,10 @@ public:
 	void SetUnitUpgradeCostMod(int iValue);
 	void ChangeUnitUpgradeCostMod(int iChange);
 
+	int GetAllowPuppetPurchase() const;
+	void ChangeAllowPuppetPurchase(int iChange);
+	bool IsAllowPuppetPurchase()const;
+
 	int GetBarbarianCombatBonus() const;
 	void SetBarbarianCombatBonus(int iValue);
 	void ChangeBarbarianCombatBonus(int iChange);
@@ -2383,6 +2387,7 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iSpecialPolicyBuildingHappiness;  //unused
 	FAutoVariable<int, CvPlayer> m_iWoundedUnitDamageMod;
 	FAutoVariable<int, CvPlayer> m_iUnitUpgradeCostMod;
+	FAutoVariable<int, CvPlayer> m_iAllowPuppetPurchase;
 	FAutoVariable<int, CvPlayer> m_iBarbarianCombatBonus;
 	FAutoVariable<int, CvPlayer> m_iAlwaysSeeBarbCampsCount;
 	FAutoVariable<int, CvPlayer> m_iHappinessFromBuildings;
