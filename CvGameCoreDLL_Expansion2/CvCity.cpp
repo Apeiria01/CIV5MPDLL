@@ -18621,15 +18621,37 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	
 	// Can't purchase anything in a puppeted city
 	// slewis - The Venetian Exception
+	CvPlayerAI& kPlayer = GET_PLAYER(m_eOwner);
 	bool bIsPuppet = IsPuppet();
 	bool bVenetianException = false;
-	CvPlayerAI &kPlayer = GET_PLAYER(m_eOwner);
+	bool bAllowsPuppetPurchase = kPlayer.IsAllowPuppetPurchase();
+
 	if (kPlayer.GetPlayerTraits()->IsNoAnnexing() && bIsPuppet)
 	{
 		bVenetianException = true;
 	}
 
-	if (bIsPuppet && !bVenetianException)
+	if (bIsPuppet && !bAllowsPuppetPurchase)
+	{
+		if (eUnitType > NO_UNIT)
+		{
+			CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eUnitType);
+			if (pkUnitInfo && pkUnitInfo->IsPuppetPurchaseOverride())
+			{
+				bAllowsPuppetPurchase = true;
+			}
+		}
+		else if (eBuildingType > NO_BUILDING)
+		{
+			CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuildingType);
+			if (pkBuildingInfo && pkBuildingInfo->IsPuppetPurchaseOverride())
+			{
+				bAllowsPuppetPurchase = true;
+			}
+		}
+	}
+
+	if (bIsPuppet && !bVenetianException && !bAllowsPuppetPurchase)
 	{
 		return false;
 	}
