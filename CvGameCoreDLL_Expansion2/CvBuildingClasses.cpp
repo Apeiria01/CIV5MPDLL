@@ -38,6 +38,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iPrereqAndTech(NO_TECH),
 	m_iTechNoPrereqClasses(NO_TECH),
 	m_iPolicyBranchType(NO_POLICY_BRANCH_TYPE),
+	m_iPolicyNeededType(NO_POLICY),
 	m_iSpecialistType(NO_SPECIALIST),
 	m_iSpecialistCount(0),
 	m_iSpecialistExtraCulture(0),
@@ -841,6 +842,9 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 	szTextVal = kResults.GetText("PolicyBranchType");
 	m_iPolicyBranchType = GC.getInfoTypeForString(szTextVal, true);
+
+	szTextVal = kResults.GetText("PolicyNeededType");
+	m_iPolicyNeededType = GC.getInfoTypeForString(szTextVal, true);
 
 	szTextVal = kResults.GetText("SpecialistType");
 	m_iSpecialistType = GC.getInfoTypeForString(szTextVal, true);
@@ -2056,6 +2060,12 @@ int CvBuildingEntry::GetTechNoPrereqClasses() const
 int CvBuildingEntry::GetPolicyBranchType() const
 {
 	return m_iPolicyBranchType;
+}
+
+// Policy  required for this building
+int CvBuildingEntry::GetPolicyNeededType() const
+{
+	return m_iPolicyNeededType;
 }
 
 /// What SpecialistType is allowed by this Building

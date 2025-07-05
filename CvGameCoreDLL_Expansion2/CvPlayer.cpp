@@ -8747,6 +8747,14 @@ bool CvPlayer::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestV
 			return false;
 		}
 	}
+	PolicyTypes ePolicy = (PolicyTypes)pBuildingInfo.GetPolicyNeededType();
+	if (ePolicy != NO_POLICY)
+	{
+		if (!GetPlayerPolicies()->HasPolicy(ePolicy))
+		{
+			return false;
+		}
+	}
 
 	if(!(currentTeam.GetTeamTechs()->HasTech((TechTypes)(pBuildingInfo.GetPrereqAndTech()))))
 	{
