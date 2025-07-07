@@ -14388,13 +14388,16 @@ int CvUnit::workRate(bool bMax, BuildTypes eBuild) const
 #if defined(MOD_ROG_CORE)
 	iMultiplier += GetWorkRateMod();
 #endif
-#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
-	if(MOD_POLICY_NEW_EFFECT_FOR_SP && GC.getBuildInfo(eBuild)->IsWater())
+	if(eBuild != NO_BUILD)
 	{
-		iMultiplier += kPlayer.getWaterBuildSpeedModifier();
-	}
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+		if(MOD_POLICY_NEW_EFFECT_FOR_SP && GC.getBuildInfo(eBuild)->IsWater())
+		{
+			iMultiplier += kPlayer.getWaterBuildSpeedModifier();
+		}
 #endif
-	iMultiplier += kPlayer.getBuildSpeedModifier(eBuild);
+		iMultiplier += kPlayer.getBuildSpeedModifier(eBuild);
+	}
 
 	iRate *= iMultiplier;
 	iRate /= 100;

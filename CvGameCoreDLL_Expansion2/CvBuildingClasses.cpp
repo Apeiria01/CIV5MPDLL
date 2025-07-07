@@ -40,7 +40,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iPolicyBranchType(NO_POLICY_BRANCH_TYPE),
 	m_iPolicyNeededType(NO_POLICY),
 	m_bPuppetPurchaseOverride(false),
-	m_bAllowsPuppetPurchase(0),
+	m_bAllowsPuppetPurchase(false),
 	m_iSpecialistType(NO_SPECIALIST),
 	m_iSpecialistCount(0),
 	m_iSpecialistExtraCulture(0),
@@ -849,7 +849,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iPolicyNeededType = GC.getInfoTypeForString(szTextVal, true);
 
 	m_bPuppetPurchaseOverride = kResults.GetBool("PuppetPurchaseOverride");
-	m_bAllowsPuppetPurchase = kResults.GetInt("AllowsPuppetPurchase");
+	m_bAllowsPuppetPurchase = kResults.GetBool("AllowsPuppetPurchase");
 
 	szTextVal = kResults.GetText("SpecialistType");
 	m_iSpecialistType = GC.getInfoTypeForString(szTextVal, true);

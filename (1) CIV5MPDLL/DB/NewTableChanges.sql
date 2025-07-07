@@ -87,7 +87,7 @@ ALTER TABLE Buildings ADD COLUMN 'CityCollateralDamage' BOOLEAN DEFAULT 0;
 ALTER TABLE Buildings ADD COLUMN 'ExtraUnitPlayerInstances' INTEGER DEFAULT 0;  
 ALTER TABLE Units ADD PuppetPurchaseOverride boolean DEFAULT 0;
 ALTER TABLE Buildings ADD PuppetPurchaseOverride boolean DEFAULT 0;
-ALTER TABLE Buildings ADD AllowsPuppetPurchase INTEGER DEFAULT 0;
+ALTER TABLE Buildings ADD AllowsPuppetPurchase boolean DEFAULT 0;
 ALTER TABLE Technologies ADD COLUMN 'CitySplashDamage' BOOLEAN DEFAULT 0;
 ALTER TABLE Improvements ADD COLUMN 'NearbyFriendHeal' INTEGER DEFAULT 0;
 ALTER TABLE Improvements ADD COLUMN 'ImprovementResource' TEXT DEFAULT NULL;
