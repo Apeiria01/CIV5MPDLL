@@ -1580,6 +1580,11 @@ int CvTraitEntry::GetShareAllyResearchPercent() const
 	return m_iShareAllyResearchPercent;
 }
 
+bool CvTraitEntry::CanPurchaseWonderInGoldenAge() const
+{
+	return m_bCanPurchaseWonderInGoldenAge;
+}
+
 bool CvTraitEntry::CanDiplomaticMarriage() const
 {
 	return m_bCanDiplomaticMarriage;
@@ -2479,6 +2484,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_iOthersTradeBonusModifier = kResults.GetInt("OthersTradeBonusModifier");
 	m_iGoldenAgeGrowThresholdModifier = kResults.GetInt("GoldenAgeGrowThresholdModifier");
 	m_iShareAllyResearchPercent = kResults.GetInt("ShareAllyResearchPercent");
+	m_bCanPurchaseWonderInGoldenAge = kResults.GetBool("CanPurchaseWonderInGoldenAge");
 	m_bCanDiplomaticMarriage = kResults.GetBool("CanDiplomaticMarriage");
 	m_bWLKDCityNoResearchCost = kResults.GetBool("WLKDCityNoResearchCost");
 	m_bGoodyUnitUpgradeFirst = kResults.GetBool("GoodyUnitUpgradeFirst");
@@ -2871,6 +2877,7 @@ void CvPlayerTraits::InitPlayerTraits()
 			m_iOthersTradeBonusModifier = trait->GetOthersTradeBonusModifier();
 			m_iGoldenAgeGrowThresholdModifier = trait->GetGoldenAgeGrowThresholdModifier();
 			m_iShareAllyResearchPercent = trait->GetShareAllyResearchPercent();
+			m_bCanPurchaseWonderInGoldenAge = trait->CanPurchaseWonderInGoldenAge();
 			m_bCanDiplomaticMarriage = trait->CanDiplomaticMarriage();
 			m_bWLKDCityNoResearchCost = trait->IsWLKDCityNoResearchCost();
 			m_bGoodyUnitUpgradeFirst = trait->IsGoodyUnitUpgradeFirst();
@@ -5031,7 +5038,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_iOthersTradeBonusModifier;
 	kStream >> m_iGoldenAgeGrowThresholdModifier;
 	kStream >> m_iShareAllyResearchPercent;
-
+	kStream >> m_bCanPurchaseWonderInGoldenAge;
 	kStream >> m_bCanDiplomaticMarriage;
 	kStream >> m_bWLKDCityNoResearchCost;
 	kStream >> m_bGoodyUnitUpgradeFirst;
@@ -5324,7 +5331,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iOthersTradeBonusModifier;
 	kStream << m_iGoldenAgeGrowThresholdModifier;
 	kStream << m_iShareAllyResearchPercent;
-
+	kStream << m_bCanPurchaseWonderInGoldenAge;
 	kStream << m_bCanDiplomaticMarriage;
 	kStream << m_bWLKDCityNoResearchCost;
 	kStream << m_bGoodyUnitUpgradeFirst;
@@ -5575,6 +5582,10 @@ int CvPlayerTraits::GetGoldenAgeGrowThresholdModifier() const
 int CvPlayerTraits::GetShareAllyResearchPercent() const
 {
 	return m_iShareAllyResearchPercent;
+}
+bool CvPlayerTraits::CanPurchaseWonderInGoldenAge() const
+{
+	return m_bCanPurchaseWonderInGoldenAge;
 }
 bool CvPlayerTraits::CanDiplomaticMarriage() const
 {

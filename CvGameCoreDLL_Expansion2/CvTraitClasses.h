@@ -327,7 +327,7 @@ public:
 	int GetGoldenAgeGrowThresholdModifier() const;
 
 	int GetShareAllyResearchPercent() const;
-
+	bool CanPurchaseWonderInGoldenAge() const;
 	bool CanDiplomaticMarriage() const;
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
@@ -596,7 +596,7 @@ protected:
 	int m_iGoldenAgeGrowThresholdModifier = 0;
 
 	int m_iShareAllyResearchPercent = 0;
-
+	bool m_bCanPurchaseWonderInGoldenAge = false;
 	bool m_bCanDiplomaticMarriage = false;
 private:
 	CvTraitEntry(const CvTraitEntry&);
@@ -1385,7 +1385,7 @@ public:
 	int GetGoldenAgeGrowThresholdModifier() const;
 
 	int GetShareAllyResearchPercent() const;
-
+	bool CanPurchaseWonderInGoldenAge() const;
 	bool CanDiplomaticMarriage() const;
 	bool IsWLKDCityNoResearchCost() const;
 	bool IsGoodyUnitUpgradeFirst() const;
@@ -1668,7 +1668,7 @@ private:
 	int m_iGoldenAgeGrowThresholdModifier = 0;
 
 	int m_iShareAllyResearchPercent = 0;
-
+	bool m_bCanPurchaseWonderInGoldenAge = false;
 	bool m_bCanDiplomaticMarriage = false;
 	bool m_bWLKDCityNoResearchCost = false;
 	bool m_bGoodyUnitUpgradeFirst = false;

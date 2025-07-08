@@ -6203,6 +6203,13 @@ int CvCity::GetPurchaseCost(BuildingTypes eBuilding)
 		return -1;
 
 	int iModifier = pkBuildingInfo->GetHurryCostModifier();
+	int iTempMod = GC.getWONDER_GOLDEN_AGE_PURCHASE_MODIFIER();
+	// Buiding that only World wonder
+	const CvBuildingClassInfo& kbClassInfo = pkBuildingInfo->GetBuildingClassInfo();
+	if (kbClassInfo.getMaxGlobalInstances() == 1 && GET_PLAYER(getOwner()).GetPlayerTraits()->CanPurchaseWonderInGoldenAge() && GET_PLAYER(getOwner()).isGoldenAge() && (iTempMod >1))
+	{
+		iModifier= iModifier+ iTempMod;
+	}
 
 	if(iModifier == -1)
 		return -1;
