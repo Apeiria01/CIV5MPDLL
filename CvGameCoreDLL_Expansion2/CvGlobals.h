@@ -666,6 +666,9 @@ public:
 
 	CvIndependentPromotionInfo* GetIndependentPromotion();
 
+	const std::vector<BuildingTypes>& GetEnableUnitPurchaseBuildings() const;
+	void InitEnableUnitPurchaseBuildings();
+
 	//
 	// Global Types
 	// All type strings are upper case and are kept in this hash map for fast lookup
@@ -8052,6 +8055,8 @@ protected:
 	lua::EvaluatorManager* m_pLuaEvaluatorManager;
 
 	CvIndependentPromotionInfo* m_pIndependentPromotion;
+
+	std::vector<BuildingTypes> m_vEnableUnitPurchaseBuildings;
 
 	//////////////////////////////////////////////////////////////////////////
 	// GLOBAL TYPES

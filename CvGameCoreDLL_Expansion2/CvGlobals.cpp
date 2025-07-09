@@ -4439,6 +4439,27 @@ CvIndependentPromotionInfo* CvGlobals::GetIndependentPromotion()
 	return m_pIndependentPromotion;
 }
 
+const std::vector<BuildingTypes>& CvGlobals::GetEnableUnitPurchaseBuildings() const
+{
+	return m_vEnableUnitPurchaseBuildings;
+}
+void CvGlobals::InitEnableUnitPurchaseBuildings()
+{
+	CvDatabaseUtility kUtility;
+	m_vEnableUnitPurchaseBuildings.clear();
+	std::string strKey("m_vEnableUnitPurchaseBuildings");
+	Database::Results* pResults = kUtility.GetResults(strKey);
+	if(pResults == NULL)
+	{
+		pResults = kUtility.PrepareResults(strKey, "SELECT DISTINCT Buildings.ID from Buildings INNER JOIN Building_EnableUnitPurchase ON Buildings.Type = BuildingType");
+	}
+	while(pResults->Step())
+	{
+		const int iBuildingID = pResults->GetInt(0);
+		m_vEnableUnitPurchaseBuildings.push_back((BuildingTypes)iBuildingID);
+	}
+}
+
 CvString*& CvGlobals::getFootstepAudioTags()
 {
 	return m_paszFootstepAudioTags;

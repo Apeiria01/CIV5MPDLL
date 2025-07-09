@@ -5898,24 +5898,23 @@ int CvCity::GetPurchaseCost(UnitTypes eUnit)
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
 		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
 			CvTeam& owningTeam = GET_TEAM(getTeam());
-			auto vBuildingList = GetCityBuildings()->GetBuildings()->GetBuildingEntries();
+			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
 			int currentMinMod = MAXINT32;
-			for (auto it = vBuildingList.begin(); it != vBuildingList.end(); it++) {
-				auto pBuildingEntry = *it;
-				if (pBuildingEntry && GetCityBuildings()->GetNumBuilding((BuildingTypes)pBuildingEntry->GetID()) > 0 && !owningTeam.isObsoleteBuilding((BuildingTypes)(pBuildingEntry->GetID()))) {
-					int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-					auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-					if (pAllowPurchaseList) {
-						for (int i = 0; i < num; i++) {
-							if (pkUnitInfo->GetUnitClassType() == pAllowPurchaseList[i].first) {
-								if (pAllowPurchaseList[i].second >= 0 && pAllowPurchaseList[i].second < currentMinMod) {
-									currentMinMod = pAllowPurchaseList[i].second;
-									iModifier = currentMinMod;
-								}
-							}
-						}
+			for(auto eBuilding : vBuildingList){
+				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
+
+				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
+				if(!pBuildingEntry) continue;
+				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_GOLD);
+				if (!pAllowPurchaseList) continue;
+
+				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_GOLD);
+				for (int i = 0; i < num; i++){
+					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
+					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
+						currentMinMod = pAllowPurchaseList[i].second;
+						iModifier = currentMinMod;
 					}
-					
 				}
 			}
 		}
@@ -6108,22 +6107,22 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
 		if (iCost <= 0 && MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
 			CvTeam& owningTeam = GET_TEAM(getTeam());
-			auto vBuildingList = GetCityBuildings()->GetBuildings()->GetBuildingEntries();
+			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
 			int currentMinMod = MAXINT32;
-			for (auto it = vBuildingList.begin(); it != vBuildingList.end(); it++) {
-				auto pBuildingEntry = *it;
-				if (pBuildingEntry && GetCityBuildings()->GetNumBuilding((BuildingTypes)pBuildingEntry->GetID()) > 0 && !owningTeam.isObsoleteBuilding((BuildingTypes)(pBuildingEntry->GetID()))) {
-					int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-					auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-					if (pAllowPurchaseList) {
-						for (int i = 0; i < num; i++) {
-							if (pkUnitInfo->GetUnitClassType() == pAllowPurchaseList[i].first) {
-								if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod) {
-									currentMinMod = pAllowPurchaseList[i].second;
-									iCost = currentMinMod;
-								}
-							}
-						}
+			for(auto eBuilding : vBuildingList){
+				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
+
+				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
+				if(!pBuildingEntry) continue;
+				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_FAITH);
+				if (!pAllowPurchaseList) continue;
+
+				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_FAITH);
+				for (int i = 0; i < num; i++){
+					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
+					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
+						currentMinMod = pAllowPurchaseList[i].second;
+						iCost = currentMinMod;
 					}
 				}
 			}
