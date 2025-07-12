@@ -27458,6 +27458,9 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 							iTotalWonders += iBuildingCount;
 						}
 #endif
+						// No Yield Bonus for Obsoleted Building
+						if(GET_TEAM(getTeam()).isObsoleteBuilding(eBuilding)) continue;
+
 						// Building Class Yield Stuff
 						for(iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
 						{
