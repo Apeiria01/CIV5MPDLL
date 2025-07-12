@@ -18508,7 +18508,7 @@ bool CvUnit::isInvisible(TeamTypes eTeam, bool bDebug, bool bCheckCargo) const
 	}
 
 #if defined(MOD_PROMOTION_FEATURE_INVISIBLE)
-	if(IsInvisibleInvalid())
+	if(IsInvisibleInvalid(plot()))
 	{
 		return false;
 	}
@@ -18519,11 +18519,11 @@ bool CvUnit::isInvisible(TeamTypes eTeam, bool bDebug, bool bCheckCargo) const
 
 //	--------------------------------------------------------------------------------
 #if defined(MOD_PROMOTION_FEATURE_INVISIBLE)
-bool CvUnit::IsInvisibleInvalid() const
+bool CvUnit::IsInvisibleInvalid(CvPlot* pPlot) const
 {
-	if(MOD_PROMOTION_FEATURE_INVISIBLE && (GetFeatureInvisible() != -1 || GetFeatureInvisible2() != -1))
+	if(MOD_PROMOTION_FEATURE_INVISIBLE && pPlot && (GetFeatureInvisible() != -1 || GetFeatureInvisible2() != -1))
 	{
-		int thisFeature = (int)plot()->getFeatureType();
+		int thisFeature = pPlot->getFeatureType();
 		if(thisFeature == -1 || (GetFeatureInvisible() != thisFeature && GetFeatureInvisible2() != thisFeature))
 		{
 			return true;
@@ -20533,8 +20533,8 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 		{
 			bool bOldInvisibleVisible = false;
 			if(pOldPlot)
-				bOldInvisibleVisible = pOldPlot->isInvisibleVisible(activeTeam, eInvisoType);
-			bool bNewInvisibleVisible = pNewPlot->isInvisibleVisible(activeTeam, eInvisoType);
+				bOldInvisibleVisible = pOldPlot->isInvisibleVisible(activeTeam, eInvisoType) || IsInvisibleInvalid(pOldPlot);
+			bool bNewInvisibleVisible = pNewPlot->isInvisibleVisible(activeTeam, eInvisoType) || IsInvisibleInvalid(pNewPlot);
 			if(bOldInvisibleVisible != bNewInvisibleVisible)
 			{
 				auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));

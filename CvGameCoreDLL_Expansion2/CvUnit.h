@@ -1435,7 +1435,7 @@ public:
 	const int GetFeatureInvisible() const;
 	const int GetFeatureInvisible2() const;
 	void setFeatureInvisible(int FeatureInvisible, int FeatureInvisible2);
-	bool IsInvisibleInvalid() const;
+	bool IsInvisibleInvalid(CvPlot* pPlot) const;
 #endif
 
 	const CvUnit* getCombatUnit() const;
