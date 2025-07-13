@@ -301,6 +301,7 @@ protected:
 	static int lIsReligionInCity(lua_State* L);
 	static int lIsHolyCityForReligion(lua_State* L);
 	static int lIsHolyCityAnyReligion(lua_State* L);
+	static int lGetReligionFoundedHere(lua_State* L);
 	static int lGetNumFollowers(lua_State* L);
 	static int lGetReligiousMajority(lua_State* L);
 	static int lGetSecondaryReligion(lua_State* L);

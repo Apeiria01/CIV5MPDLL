@@ -428,6 +428,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(IsReligionInCity);
 	Method(IsHolyCityForReligion);
 	Method(IsHolyCityAnyReligion);
+	Method(GetReligionFoundedHere);
 
 	Method(GetNumFollowers);
 	Method(GetReligiousMajority);
@@ -3121,6 +3122,15 @@ int CvLuaCity::lIsHolyCityAnyReligion(lua_State* L)
 	lua_pushboolean(L, bResult);
 	return 1;
 }
+//------------------------------------------------------------------------------
+//ReligionTypes GetReligionFoundedHere() const;
+int CvLuaCity::lGetReligionFoundedHere(lua_State* L)
+{
+    CvCity* pkCity = GetInstance(L);
+    const int iResult = (int)pkCity->GetCityReligions()->GetReligionFoundedHere();
+    lua_pushinteger(L, iResult);
+    return 1;
+} 
 //------------------------------------------------------------------------------
 //int GetNumFollowers(ReligionTypes eReligion) const;
 int CvLuaCity::lGetNumFollowers(lua_State* L)

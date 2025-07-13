@@ -3491,6 +3491,19 @@ bool CvCityReligions::IsHolyCityAnyReligion()
 	return false;
 }
 
+///Return religion founded in this holy city or NO_RELIGION
+ReligionTypes CvCityReligions::GetReligionFoundedHere() const
+{
+    for (const auto& religionStatus : m_ReligionStatus)
+    {
+        if (religionStatus.m_bFoundedHere && religionStatus.m_eReligion > RELIGION_PANTHEON)
+        {
+            return religionStatus.m_eReligion;
+        }
+    }
+    return NO_RELIGION;
+} 
+
 /// Is there a "heretical" religion here that can be stomped out?
 bool CvCityReligions::IsReligionHereOtherThan(ReligionTypes eReligion)
 {
