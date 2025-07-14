@@ -110,3 +110,4 @@ create table PolicyBranch_CivilizationLocked (
     PolicyBranchType TEXT REFERENCES PolicyBranchTypes(Type),
     CivilizationType TEXT REFERENCES Civilizations(Type)
 );
+ALTER TABLE Policies ADD 'ExtraTechCount' INTEGER DEFAULT 0;
