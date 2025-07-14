@@ -5921,8 +5921,12 @@ void CvTeam::setHasTech(TechTypes eIndex, bool bNewValue, PlayerTypes ePlayer, b
 				if (kPlayer.GetPlayerTechs()->IsResearchingTech(eIndex))
 				{
 					kPlayer.popResearch(eIndex);
+	int iMaxTechCount = 1;
+	iMaxTechCount += kPlayer.getPolicyModifiers(POLICYMOD_EXTRA_TECH_COUNT);
 #ifdef MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH
-					if (MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH) {
+					if (MOD_GLOBAL_UNLIMITED_ONE_TURN_TECH) iMaxTechCount += 999;
+					{
+						for (int iTechCount = 0; iTechCount < iMaxTechCount; iTechCount++)
 						if (!kPlayer.isHuman()) {
 							kPlayer.AI_chooseResearch();
 						}
