@@ -27134,6 +27134,7 @@ void CvUnit::read(FDataStream& kStream)
 #ifdef MOD_BATTLE_CAPTURE_NEW_RULE
 	kStream >> m_bIsNewCapture;
 #endif
+	kStream >> m_bIsCheat;
 
 	kStream >> m_iCombatStrengthChangeFromKilledUnits;
 	kStream >> m_iRangedCombatStrengthChangeFromKilledUnits;
@@ -27469,6 +27470,7 @@ void CvUnit::write(FDataStream& kStream) const
 #ifdef MOD_BATTLE_CAPTURE_NEW_RULE
 	kStream << m_bIsNewCapture;
 #endif
+	kStream << m_bIsCheat;
 
 	kStream << m_iCombatStrengthChangeFromKilledUnits;
 	kStream << m_iRangedCombatStrengthChangeFromKilledUnits;
