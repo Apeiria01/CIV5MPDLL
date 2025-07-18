@@ -198,7 +198,6 @@ CvPlayer::CvPlayer() :
 	, m_iEspionageModifier(0)
 	, m_iEspionageSpeedModifier(0)
 	, m_iSpyStartingRank(0)
-	, m_iSpyLevelUpWhenRiggingCount(0)
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	, m_iConversionModifier(0)
 #endif
@@ -985,7 +984,6 @@ void CvPlayer::uninit()
 	m_iEspionageModifier = 0;
 	m_iEspionageSpeedModifier = 0;
 	m_iSpyStartingRank = 0;
-	m_iSpyLevelUpWhenRiggingCount = 0;
 
 	m_iCSAllies = 0;
 	m_iCSFriends = 0;
@@ -14470,17 +14468,6 @@ void CvPlayer::ChangeStartingSpyRank(int iChange)
 	m_iSpyStartingRank = (m_iSpyStartingRank + iChange);
 }
 
-//Can spy level up when after rigging
-int CvPlayer::GetSpyLevelUpWhenRiggingCount() const
-{
-	return m_iSpyLevelUpWhenRiggingCount;
-}
-
-bool CvPlayer::IsSpyLevelUpWhenRigging() const
-{
-	return (GetSpyLevelUpWhenRiggingCount() > 0);
-}
-
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 //	--------------------------------------------------------------------------------
 /// Get the global modifier on the conversion progress rate
@@ -26861,7 +26848,8 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	changePolicyModifiers(POLICYMOD_SHARED_IDEOLOGY_TRADE_CHANGE, pPolicy->GetSharedIdeologyTradeGoldChange() * iChange);
 	changePolicyModifiers(POLICYMOD_RIGGING_ELECTION_MODIFIER, pPolicy->GetRiggingElectionModifier() * iChange);
 	changePolicyModifiers(POLICYMOD_RIGGING_ELECTION_INFLUENCE_MODIFIER, pPolicy->GetRiggingElectionInfluenceModifier() * iChange);
-	changePolicyModifiers(POLICYMOD_SPY_LEVEL_UP_WHEN_RIGGING, pPolicy->IsSpyLevelUpWhenRigging() * iChange);
+	changePolicyModifiers(POLICYMOD_SPY_LEVEL_UP_WHEN_RIGGING, pPolicy->IsSpyLevelUpWhenRigging() ? iChange : 0);
+	changePolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY, pPolicy->IsNoOccupiedUnhappinessGarrisonedCity() ? iChange : 0);
 	changePolicyModifiers(POLICYMOD_MILITARY_UNIT_GIFT_INFLUENCE, pPolicy->GetMilitaryUnitGiftExtraInfluence() * iChange);
 	changePolicyModifiers(POLICYMOD_PROTECTED_MINOR_INFLUENCE, pPolicy->GetProtectedMinorPerTurnInfluence() * iChange);
 	changePolicyModifiers(POLICYMOD_AFRAID_INFLUENCE, pPolicy->GetAfraidMinorPerTurnInfluence() * iChange);
@@ -27350,6 +27338,7 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 
 	bool bGarrisonFreeMaintenance = pPolicy->IsGarrisonFreeMaintenance();
 	bool bCulturePerGarrisonedUnit = pPolicy->GetCulturePerGarrisonedUnit();
+	bool bNoOccupiedUnhappinessGarrisonedCity = pPolicy->IsNoOccupiedUnhappinessGarrisonedCity();
 
 	// Loop through Cities
 
@@ -27420,6 +27409,10 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 					if(bGarrisonFreeMaintenance)
 					{
 						changeExtraUnitCost(-iUnit->getUnitInfo().GetExtraMaintenanceCost() * iChange);
+					}
+					if(bNoOccupiedUnhappinessGarrisonedCity)
+					{
+						pLoopCity->ChangeNoOccupiedUnhappinessCount(iChange);
 					}
 				}
 			}
@@ -28115,7 +28108,6 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iEspionageModifier;
 	kStream >> m_iEspionageSpeedModifier;
 	kStream >> m_iSpyStartingRank;
-	kStream >> m_iSpyLevelUpWhenRiggingCount;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	MOD_SERIALIZE_READ(23, kStream, m_iConversionModifier, 0);
 #endif
@@ -28947,7 +28939,6 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iEspionageModifier;
 	kStream << m_iEspionageSpeedModifier;
 	kStream << m_iSpyStartingRank;
-	kStream << m_iSpyLevelUpWhenRiggingCount;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	MOD_SERIALIZE_WRITE(kStream, m_iConversionModifier);
 #endif

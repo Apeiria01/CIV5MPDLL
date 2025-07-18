@@ -20283,6 +20283,10 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 					{
 						player.changeExtraUnitCost(getUnitInfo().GetExtraMaintenanceCost());
 					}
+					if(player.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0)
+					{
+						pOldPlot->getPlotCity()->ChangeNoOccupiedUnhappinessCount(-1);
+					}	
 				}
 			}
 
@@ -20365,6 +20369,10 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 				if (player.IsGarrisonFreeMaintenance())
 				{
 					player.changeExtraUnitCost(-getUnitInfo().GetExtraMaintenanceCost());
+				}
+				if(player.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0)
+				{
+					pNewPlot->getPlotCity()->ChangeNoOccupiedUnhappinessCount(1);
 				}
 			}
 		}
@@ -20887,7 +20895,9 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 	}
 
 	// Units moving into and out of cities change garrison happiness
-	if(kPlayer.GetHappinessPerGarrisonedUnit() != 0 && ((pNewPlot && pNewPlot->isCity()) || (pOldPlot && pOldPlot->isCity())))
+	bool bUpdateGarrisonedCity = GetBaseCombatStrength(true) > 0 && getDomainType() == DOMAIN_LAND && (pNewPlot && pNewPlot->isCity()) || (pOldPlot && pOldPlot->isCity());
+	bool bUpdateHappiness = kPlayer.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0 || kPlayer.GetHappinessPerGarrisonedUnit() != 0;
+	if(bUpdateGarrisonedCity && bUpdateHappiness)
 	{
 		GET_PLAYER(getOwner()).DoUpdateHappiness();
 	}

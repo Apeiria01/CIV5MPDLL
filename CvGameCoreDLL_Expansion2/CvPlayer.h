@@ -597,7 +597,6 @@ public:
 	int GetStartingSpyRank() const;
 	void ChangeStartingSpyRank(int iChange);
 	int GetSpyLevelUpWhenRiggingCount() const;
-	bool IsSpyLevelUpWhenRigging() const;
 	// END Espionage
 
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
@@ -2399,7 +2398,6 @@ protected:
 	int m_iEspionageModifier;
 	int m_iEspionageSpeedModifier;
 	int m_iSpyStartingRank;
-	int m_iSpyLevelUpWhenRiggingCount;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int m_iConversionModifier;
 #endif
