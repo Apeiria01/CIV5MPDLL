@@ -22685,7 +22685,7 @@ inline static bool MeetCityResourceRequirement(const PolicyResourceInfo& info,  
 {
 	bool okPolicy = (player->HasPolicy(info.ePolicy) && !player->GetPlayerPolicies()->IsPolicyBlocked(info.ePolicy));
 	bool okCoastal = (!info.bMustCoastal || city->isCoastal());
-	bool okCityScale = (info.eCityScale == NO_CITY_SCALE || city->GetScale() == info.eCityScale);
+	bool okCityScale = (info.eCityScale == NO_CITY_SCALE || (info.bLargerScaleValid ? city->GetScale() >= info.eCityScale : city->GetScale() == info.eCityScale));
 	return okPolicy && okCoastal && okCityScale;
 }
 

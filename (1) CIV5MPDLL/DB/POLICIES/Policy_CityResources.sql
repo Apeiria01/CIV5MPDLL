@@ -5,5 +5,6 @@ create table Policy_CityResources (
     
     -- optional conditions
     CityScaleType text null references CityScales(Type),
+    LargerScaleValid boolean not null default 0,
     MustCoastal boolean not null default 0
 );

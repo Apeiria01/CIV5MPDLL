@@ -2502,6 +2502,7 @@ struct PolicyResourceInfo
 	// optional conditions
 	bool bMustCoastal = false;
 	CityScaleTypes eCityScale = NO_CITY_SCALE;
+	bool bLargerScaleValid = false;
 };
 
 inline FDataStream& operator<<(FDataStream& os, const PolicyResourceInfo& kResourceInfo)
@@ -2511,6 +2512,7 @@ inline FDataStream& operator<<(FDataStream& os, const PolicyResourceInfo& kResou
 	os << kResourceInfo.iQuantity;
 	os << kResourceInfo.bMustCoastal;
 	os << (int)kResourceInfo.eCityScale;
+	os << kResourceInfo.bLargerScaleValid;
 	return os;
 }
 
@@ -2521,6 +2523,7 @@ inline FDataStream& operator>>(FDataStream& is, PolicyResourceInfo& kResourceInf
 	is >> kResourceInfo.iQuantity;
 	is >> kResourceInfo.bMustCoastal;
 	is >> (int&)kResourceInfo.eCityScale;
+	is >> kResourceInfo.bLargerScaleValid;
 	return is;
 }
 
