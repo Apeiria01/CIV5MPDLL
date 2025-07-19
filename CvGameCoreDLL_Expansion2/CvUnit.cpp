@@ -20895,11 +20895,15 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 	}
 
 	// Units moving into and out of cities change garrison happiness
-	bool bUpdateGarrisonedCity = GetBaseCombatStrength(true) > 0 && getDomainType() == DOMAIN_LAND && (pNewPlot && pNewPlot->isCity()) || (pOldPlot && pOldPlot->isCity());
-	bool bUpdateHappiness = kPlayer.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0 || kPlayer.GetHappinessPerGarrisonedUnit() != 0;
-	if(bUpdateGarrisonedCity && bUpdateHappiness)
+	if ((pOldCity || pNewCity) && GetBaseCombatStrength(true) > 0 && getDomainType() == DOMAIN_LAND)
 	{
-		GET_PLAYER(getOwner()).DoUpdateHappiness();
+		if(kPlayer.GetHappinessPerGarrisonedUnit() != 0 ||
+		  	(kPlayer.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0 && 
+		  	((pOldCity && pOldCity->IsOccupied() && pOldCity->GetNoOccupiedUnhappinessCount() == 0) || (pNewCity && pNewCity->IsOccupied() && pNewCity->GetNoOccupiedUnhappinessCount() == 1)))
+		)
+		{
+			GET_PLAYER(getOwner()).DoUpdateHappiness();
+		}
 	}
 
 	ICvEngineScriptSystem1* pkScriptSystem = gDLL->GetScriptSystem();
