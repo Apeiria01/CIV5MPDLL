@@ -111,6 +111,7 @@ CvBeliefEntry::CvBeliefEntry() :
 #endif
 	m_piResourceQuantityModifiers(NULL),
 	m_ppiImprovementYieldChanges(NULL),
+	m_ppiImprovementAdjacentCityYieldChanges(NULL),
 	m_ppiBuildingClassYieldChanges(NULL),
 	m_paiBuildingClassHappiness(NULL),
 	m_paiBuildingClassTourism(NULL),
@@ -159,6 +160,7 @@ CvBeliefEntry::~CvBeliefEntry()
 	SAFE_DELETE_ARRAY(m_piExtraFlavorValue);
 	SAFE_DELETE_ARRAY(m_piCivilizationFlavorValue);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementYieldChanges);
+	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementAdjacentCityYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiFeatureYieldChange);
 #if defined(MOD_API_UNIFIED_YIELDS)
@@ -570,6 +572,15 @@ int CvBeliefEntry::GetImprovementYieldChange(ImprovementTypes eIndex1, YieldType
 	CvAssertMsg(eIndex2 < NUM_YIELD_TYPES, "Index out of bounds");
 	CvAssertMsg(eIndex2 > -1, "Index out of bounds");
 	return m_ppiImprovementYieldChanges ? m_ppiImprovementYieldChanges[eIndex1][eIndex2] : 0;
+}
+
+int CvBeliefEntry::GetImprovementAdjacentCityYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const
+{
+	CvAssertMsg(eIndex1 < GC.getNumImprovementInfos(), "Index out of bounds");
+	CvAssertMsg(eIndex1 > -1, "Index out of bounds");
+	CvAssertMsg(eIndex2 < NUM_YIELD_TYPES, "Index out of bounds");
+	CvAssertMsg(eIndex2 > -1, "Index out of bounds");
+	return m_ppiImprovementAdjacentCityYieldChanges ? m_ppiImprovementAdjacentCityYieldChanges[eIndex1][eIndex2] : 0;
 }
 
 /// Yield change for a specific BuildingClass by yield type
@@ -1119,6 +1130,28 @@ bool CvBeliefEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 			m_ppiImprovementYieldChanges[ImprovementID][YieldID] = yield;
 		}
 	}
+	//ImprovementAdjacentCityYieldChanges;
+	{
+		kUtility.Initialize2DArray(m_ppiImprovementAdjacentCityYieldChanges, "Improvements", "Yields");
+
+		std::string strKey("Belief_ImprovementAdjacentCityYieldChanges;");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select Improvements.ID as ImprovementID, Yields.ID as YieldID, Yield from Belief_ImprovementAdjacentCityYieldChanges inner join Improvements on Improvements.Type = ImprovementType inner join Yields on Yields.Type = YieldType where BeliefType = ?");
+		}
+
+		pResults->Bind(1, szBeliefType);
+
+		while(pResults->Step())
+		{
+			const int ImprovementID = pResults->GetInt(0);
+			const int YieldID = pResults->GetInt(1);
+			const int yield = pResults->GetInt(2);
+
+			m_ppiImprovementAdjacentCityYieldChanges[ImprovementID][YieldID] = yield;
+		}
+	}
 
 	//BuildingClassYieldChanges
 	{
@@ -1516,6 +1549,8 @@ CvReligionBeliefs::CvReligionBeliefs(const CvReligionBeliefs& source)
 	m_iCityExtraMissionarySpreads = source.m_iCityExtraMissionarySpreads;
 	m_bAllowYieldPerBirth = source.m_bAllowYieldPerBirth;
 #endif
+	m_vImprovementYieldChanges = source.m_vImprovementYieldChanges;
+	m_vImprovementAdjacentCityYieldChanges = source.m_vImprovementAdjacentCityYieldChanges;
 
 	m_eObsoleteEra = source.m_eObsoleteEra;
 	m_eResourceRevealed = source.m_eResourceRevealed;
@@ -1586,6 +1621,8 @@ void CvReligionBeliefs::Reset()
 	m_iCityExtraMissionarySpreads = 0;
 	m_bAllowYieldPerBirth = false;
 #endif
+	m_vImprovementYieldChanges.resize(GC.getNumImprovementInfos(), vector<int>(NUM_YIELD_TYPES, 0));
+	m_vImprovementAdjacentCityYieldChanges.resize(GC.getNumImprovementInfos(), vector<int>(NUM_YIELD_TYPES, 0));
 
 	m_eObsoleteEra = NO_ERA;
 	m_eResourceRevealed = NO_RESOURCE;
@@ -1666,6 +1703,14 @@ void CvReligionBeliefs::AddBelief(BeliefTypes eBelief, PlayerTypes ePlayer)
 	m_iCityExtraMissionarySpreads += belief->GetCityExtraMissionarySpreads();
 	m_bAllowYieldPerBirth = m_bAllowYieldPerBirth || belief->AllowYieldPerBirth();
 #endif
+	for (int iImprovement = 0; iImprovement < GC.getNumImprovementInfos(); iImprovement++)
+	{
+		for(int iYield = 0; iYield < NUM_YIELD_TYPES; iYield++)
+		{
+			m_vImprovementYieldChanges[iImprovement][iYield] = belief->GetImprovementYieldChange((ImprovementTypes)iImprovement, (YieldTypes)iYield);
+			m_vImprovementAdjacentCityYieldChanges[iImprovement][iYield] = belief->GetImprovementAdjacentCityYieldChange((ImprovementTypes)iImprovement, (YieldTypes)iYield);
+		}
+	}
 
 	m_eObsoleteEra = belief->GetObsoleteEra();
 	m_eResourceRevealed = belief->GetResourceRevealed();
@@ -2088,15 +2133,12 @@ int CvReligionBeliefs::GetResourceQuantityModifier(ResourceTypes eResource) cons
 /// Extra yield from this improvement
 int CvReligionBeliefs::GetImprovementYieldChange(ImprovementTypes eImprovement, YieldTypes eYield) const
 {
-	CvBeliefXMLEntries* pBeliefs = GC.GetGameBeliefs();
-	int rtnValue = 0;
+	return m_vImprovementYieldChanges[eImprovement][eYield];
+}
 
-	for (BeliefList::const_iterator i = m_ReligionBeliefs.begin(); i != m_ReligionBeliefs.end(); i++)
-	{
-		rtnValue += pBeliefs->GetEntry(*i)->GetImprovementYieldChange(eImprovement, eYield);
-	}
-
-	return rtnValue;
+int CvReligionBeliefs::GetImprovementAdjacentCityYieldChange(ImprovementTypes eImprovement, YieldTypes eYield) const
+{
+	return m_vImprovementAdjacentCityYieldChanges[eImprovement][eYield];
 }
 
 /// Get yield change from beliefs for a specific building class
@@ -2694,6 +2736,8 @@ void CvReligionBeliefs::Read(FDataStream& kStream)
 	kStream >> m_iCityExtraMissionarySpreads;
 	kStream >> m_bAllowYieldPerBirth;
 #endif
+	kStream >> m_vImprovementYieldChanges;
+	kStream >> m_vImprovementAdjacentCityYieldChanges;
 
 	kStream >> m_eObsoleteEra;
 	kStream >> m_eResourceRevealed;
@@ -2760,6 +2804,8 @@ void CvReligionBeliefs::Write(FDataStream& kStream) const
 	kStream << m_iCityExtraMissionarySpreads;
 	kStream << m_bAllowYieldPerBirth;
 #endif
+	kStream << m_vImprovementYieldChanges;
+	kStream << m_vImprovementAdjacentCityYieldChanges;
 
 	kStream << m_eObsoleteEra;
 	kStream << m_eResourceRevealed;

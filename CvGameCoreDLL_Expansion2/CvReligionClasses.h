@@ -599,7 +599,7 @@ private:
 	bool BuyAnyAvailableFaithBuilding();
 
 	int ScoreBelief(CvBeliefEntry* pEntry);
-	int ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot);
+	int ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot, const std::vector<ImprovementTypes>& vEnhanceImprovements);
 	int ScoreBeliefAtCity(CvBeliefEntry* pEntry, CvCity* pCity);
 	int ScoreBeliefForPlayer(CvBeliefEntry* pEntry);
 	int BeliefExtraScore(CvBeliefEntry* pEntry);

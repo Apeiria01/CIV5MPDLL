@@ -91,3 +91,10 @@ CREATE TABLE Belief_YieldModifierPerFollowerTimes100 (
     YieldType TEXT REFERENCES Yields(Type),
     Modifier INTEGER DEFAULT 0
 );
+
+create Table Belief_ImprovementAdjacentCityYieldChanges (
+    BeliefType text references Beliefs(Type),
+    ImprovementType text references Improvements(Type),
+    YieldType text references Yields(Type),
+    Yield integer default 0
+);
