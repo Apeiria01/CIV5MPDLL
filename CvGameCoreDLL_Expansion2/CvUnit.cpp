@@ -2429,6 +2429,12 @@ void CvUnit::kill(bool bDelay, PlayerTypes ePlayer /*= NO_PLAYER*/)
 	}
 #endif
 
+	int iTradeRouteIndex = -1;
+	if (isTrade())
+	{
+		iTradeRouteIndex = GC.getGame().GetGameTrade()->GetIndexFromUnitID(GetID(), getOwner());
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	// WARNING: This next statement will delete 'this'
 	// ANYTHING BELOW HERE MUST NOT REFERENCE THE UNIT!
@@ -2436,6 +2442,8 @@ void CvUnit::kill(bool bDelay, PlayerTypes ePlayer /*= NO_PLAYER*/)
 
 	// Update Unit Production Maintenance
 	GET_PLAYER(kCaptureDef.eOldPlayer).UpdateUnitProductionMaintenanceMod();
+
+	if (iTradeRouteIndex >= 0) GC.getGame().GetGameTrade()->EmptyTradeRoute(iTradeRouteIndex);
 
 	// Create the captured unit that will replace this unit (if the capture definition is valid)
 	CvUnit::createCaptureUnit(kCaptureDef);
