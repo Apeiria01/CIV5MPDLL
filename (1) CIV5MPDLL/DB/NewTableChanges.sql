@@ -252,6 +252,8 @@ CREATE TABLE IF NOT EXISTS UnitPromotions_PromotionUpgrade (
 
 ALTER TABLE HandicapInfos ADD StrategicResourceMod INTEGER DEFAULT 100;
 ALTER TABLE HandicapInfos ADD StrategicResourceModPerEra INTEGER DEFAULT 0;
+-- If AIFirstProphetPercent is positive, it overrides AITrainPercent on AI's First Prophet Cost
+ALTER TABLE HandicapInfos ADD AIFirstProphetPercent INTEGER DEFAULT 0;
 
 ALTER TABLE Improvements ADD COLUMN 'RequiredAdjacentImprovement' TEXT DEFAULT NULL REFERENCES Improvements(Type);
 ALTER TABLE Improvements ADD COLUMN 'RequiredAdjacentCity' BOOLEAN DEFAULT 0;

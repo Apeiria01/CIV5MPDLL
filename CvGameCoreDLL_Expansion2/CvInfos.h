@@ -875,6 +875,7 @@ public:
 	int getAIUnhappinessPercent() const;
 	int getAIGrowthPercent() const;
 	int getAITrainPercent() const;
+	int getAIFirstProphetPercent() const;
 	int getAIWorldTrainPercent() const;
 	int getAIConstructPercent() const;
 	int getAIWorldConstructPercent() const;
@@ -947,6 +948,7 @@ protected:
 	int m_iAIUnhappinessPercent;
 	int m_iAIGrowthPercent;
 	int m_iAITrainPercent;
+	int m_iAIFirstProphetPercent;
 	int m_iAIWorldTrainPercent;
 	int m_iAIConstructPercent;
 	int m_iAIWorldConstructPercent;

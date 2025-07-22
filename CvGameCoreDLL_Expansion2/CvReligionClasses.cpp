@@ -2999,7 +2999,14 @@ int CvPlayerReligions::GetCostNextProphet(bool bIncludeBeliefDiscounts, bool bAd
 		// Adjust for difficulty
 		if(!m_pPlayer->isHuman() && !m_pPlayer->IsAITeammateOfHuman() && !m_pPlayer->isBarbarian())
 		{
-			iCost *= GC.getGame().getHandicapInfo().getAITrainPercent();
+			if(GetNumProphetsSpawned(false) == 0 && GC.getGame().getHandicapInfo().getAIFirstProphetPercent() > 0)
+			{
+				iCost *= GC.getGame().getHandicapInfo().getAIFirstProphetPercent();
+			}
+			else
+			{
+				iCost *= GC.getGame().getHandicapInfo().getAITrainPercent();
+			}
 			iCost /= 100;
 		}
 	}

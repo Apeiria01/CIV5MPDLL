@@ -2884,6 +2884,7 @@ CvHandicapInfo::CvHandicapInfo() :
 	m_iAIUnhappinessPercent(0),
 	m_iAIGrowthPercent(0),
 	m_iAITrainPercent(0),
+	m_iAIFirstProphetPercent(0),
 	m_iAIWorldTrainPercent(0),
 	m_iAIConstructPercent(0),
 	m_iAIWorldConstructPercent(0),
@@ -3139,6 +3140,11 @@ int CvHandicapInfo::getAITrainPercent() const
 	return m_iAITrainPercent;
 }
 //------------------------------------------------------------------------------
+int CvHandicapInfo::getAIFirstProphetPercent() const
+{
+	return m_iAIFirstProphetPercent;
+}
+//------------------------------------------------------------------------------
 int CvHandicapInfo::getAIWorldTrainPercent() const
 {
 	return m_iAIWorldTrainPercent;
@@ -3295,6 +3301,7 @@ bool CvHandicapInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility
 	m_iAIUnhappinessPercent = kResults.GetInt("AIUnhappinessPercent");
 	m_iAIGrowthPercent = kResults.GetInt("AIGrowthPercent");
 	m_iAITrainPercent = kResults.GetInt("AITrainPercent");
+	m_iAIFirstProphetPercent = kResults.GetInt("AIFirstProphetPercent");
 	m_iAIWorldTrainPercent = kResults.GetInt("AIWorldTrainPercent");
 	m_iAIConstructPercent = kResults.GetInt("AIConstructPercent");
 	m_iAIWorldConstructPercent = kResults.GetInt("AIWorldConstructPercent");
