@@ -21827,6 +21827,8 @@ void CvPlayer::SetGetsScienceFromPlayer(PlayerTypes ePlayer, bool bNewValue)
 /// Player spending too much cash?
 void CvPlayer::DoDeficit()
 {
+	if(GetPlayerTraits()->IsNoDoDeficit()) return;
+
 	int iNumMilitaryUnits = 0;
 
 	CvUnit* pLoopUnit;
