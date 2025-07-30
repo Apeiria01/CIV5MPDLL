@@ -1707,8 +1707,8 @@ void CvReligionBeliefs::AddBelief(BeliefTypes eBelief, PlayerTypes ePlayer)
 	{
 		for(int iYield = 0; iYield < NUM_YIELD_TYPES; iYield++)
 		{
-			m_vImprovementYieldChanges[iImprovement][iYield] = belief->GetImprovementYieldChange((ImprovementTypes)iImprovement, (YieldTypes)iYield);
-			m_vImprovementAdjacentCityYieldChanges[iImprovement][iYield] = belief->GetImprovementAdjacentCityYieldChange((ImprovementTypes)iImprovement, (YieldTypes)iYield);
+			m_vImprovementYieldChanges[iImprovement][iYield] += belief->GetImprovementYieldChange((ImprovementTypes)iImprovement, (YieldTypes)iYield);
+			m_vImprovementAdjacentCityYieldChanges[iImprovement][iYield] += belief->GetImprovementAdjacentCityYieldChange((ImprovementTypes)iImprovement, (YieldTypes)iYield);
 		}
 	}
 
