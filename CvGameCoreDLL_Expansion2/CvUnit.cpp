@@ -12476,6 +12476,13 @@ int CvUnit::getGivePoliciesCulture()
 
 		// Culture boost based on previous turns
 		int iPreviousTurnsToCount = getUnitInfo().GetBaseCultureTurnsToCount();
+		
+		int iTraitReligionUnitExtraTurns = kPlayer.GetPlayerTraits()->GetOwnedReligionUnitCultureExtraTurns();
+		if(iTraitReligionUnitExtraTurns != 0)
+		{
+			ReligionTypes eReligion = GetReligionData()->GetReligion();
+			if (eReligion != NO_RELIGION && kPlayer.HasReligion(eReligion)) iPreviousTurnsToCount += iTraitReligionUnitExtraTurns;
+		}
 		if (iPreviousTurnsToCount != 0)
 		{
 			// Calculate boost
