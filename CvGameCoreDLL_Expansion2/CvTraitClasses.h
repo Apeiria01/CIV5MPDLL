@@ -269,6 +269,8 @@ public:
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	bool IsFreePromotionUnitClass(const int promotionID, const int unitClassID) const;
 #endif
+	bool IsHasBuildingClassFaithCost() const;
+	int GetBuildingClassFaithCost(int iBuildingClass) const;
 	bool IsObsoleteByTech(TeamTypes eTeam);
 	bool IsEnabledByTech(TeamTypes eTeam);
 #if defined(MOD_TRAITS_OTHER_PREREQS)
@@ -554,6 +556,7 @@ protected:
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	std::multimap<int, int> m_FreePromotionUnitClasses;
 #endif
+	int* m_piBuildingClassFaithCost = nullptr;
 	std::vector<FreeResourceXCities> m_aFreeResourceXCities;
 	std::vector<bool> m_abNoTrainUnitClass;
 
@@ -1292,6 +1295,7 @@ public:
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	bool HasFreePromotionUnitClass(const int promotionID, const int unitClassID) const;
 #endif
+	int GetBuildingClassFaithCost(BuildingClassTypes eBuildingClass) const;
 
 	// Public functions to make trait-based game state changes
 	void AddUniqueLuxuries(CvCity *pCity);
@@ -1594,6 +1598,7 @@ private:
 	std::vector<int> m_aiResourceQuantityModifier;
 	std::vector<bool> m_abNoTrain;
 	FStaticVector<FreeTraitUnit, SAFE_ESTIMATE_NUM_FREE_UNITS, true, c_eCiv5GameplayDLL, 0> m_aFreeTraitUnits;
+	std::vector<int> m_aiBuildingClassFaithCost;
 	std::vector<int> m_aUniqueLuxuryAreas;
 
 	// Maya calendar bonus data

@@ -235,6 +235,35 @@ CvTraitEntry::CvTraitEntry() :
 /// Destructor
 CvTraitEntry::~CvTraitEntry()
 {
+	SAFE_DELETE_ARRAY(m_paiExtraYieldThreshold);
+	SAFE_DELETE_ARRAY(m_paiYieldChange);
+	SAFE_DELETE_ARRAY(m_paiYieldChangeStrategicResources);
+	SAFE_DELETE_ARRAY(m_paiYieldChangeNaturalWonder);
+	SAFE_DELETE_ARRAY(m_paiYieldChangePerTradePartner);
+	SAFE_DELETE_ARRAY(m_paiYieldChangeIncomingTradeRoute);
+	SAFE_DELETE_ARRAY(m_paiYieldModifier);
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	SAFE_DELETE_ARRAY(m_paiGoldenAgeYieldModifier);
+#endif
+	SAFE_DELETE_ARRAY(m_piStrategicResourceQuantityModifier);
+	SAFE_DELETE_ARRAY(m_piResourceQuantityModifiers);
+	SAFE_DELETE_ARRAY(m_piMovesChangeUnitCombats);
+	SAFE_DELETE_ARRAY(m_piMaintenanceModifierUnitCombats);
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piCapitalYieldChanges);
+	SAFE_DELETE_ARRAY(m_piCityYieldChanges);
+	SAFE_DELETE_ARRAY(m_piCoastalCityYieldChanges);
+	SAFE_DELETE_ARRAY(m_piGreatWorkYieldChanges);
+	SAFE_DELETE_ARRAY(m_piYieldFromKills);
+	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
+	SAFE_DELETE_ARRAY(m_piYieldChangeTradeRoute);
+	SAFE_DELETE_ARRAY(m_piYieldChangeWorldWonder);
+#endif
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piGoldenAgeGreatPersonRateModifier);
+#endif
+	SAFE_DELETE_ARRAY(m_piBuildingClassFaithCost);
+
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementYieldChanges);
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiPlotYieldChanges);
@@ -1374,6 +1403,16 @@ bool CvTraitEntry::IsFreePromotionUnitClass(const int promotionID, const int uni
 	return false;
 }
 #endif
+
+bool CvTraitEntry::IsHasBuildingClassFaithCost() const
+{
+	return m_piBuildingClassFaithCost != nullptr;
+}
+int CvTraitEntry::GetBuildingClassFaithCost(int iBuildingClass) const
+{
+	return m_piBuildingClassFaithCost ? m_piBuildingClassFaithCost[iBuildingClass] : 0;
+}
+
 /// Has this trait become obsolete?
 bool CvTraitEntry::IsObsoleteByTech(TeamTypes eTeam)
 {
@@ -1962,6 +2001,28 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 		std::multimap<int,int>(m_FreePromotionUnitClasses).swap(m_FreePromotionUnitClasses);
 	}
 #endif
+
+	{
+		std::string sqlKey = "Trait_BuildingClassFaithCost";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if(pResults == NULL)
+		{
+			const char* szSQL = "select BuildingClasses.ID as BuildingClassID, Cost from Trait_BuildingClassFaithCost inner join BuildingClasses on BuildingClasses.Type = BuildingClassType where TraitType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+
+		pResults->Bind(1, szTraitType);
+
+		while(pResults->Step())
+		{
+			if(!m_piBuildingClassFaithCost) m_piBuildingClassFaithCost = FNEW(int[kUtility.MaxRows("BuildingClasses")], c_eCiv5GameplayDLL, 0);
+			const int BuildingClassID = pResults->GetInt(0);
+			const int iCost = pResults->GetInt(1);
+
+			m_piBuildingClassFaithCost[BuildingClassID] = iCost;
+		}
+		pResults->Reset();
+	}
 
 	//Populate m_MovesChangeUnitCombats
 	{
@@ -2713,6 +2774,14 @@ void CvPlayerTraits::InitPlayerTraits()
 			}
 			m_iTradeRouteLandGoldBonus += trait->GetTradeRouteLandGoldBonus();
 			m_iTradeRouteSeaGoldBonus += trait->GetTradeRouteSeaGoldBonus();
+			if(trait->IsHasBuildingClassFaithCost())
+			{
+				if(m_aiBuildingClassFaithCost.size() < GC.getNumBuildingClassInfos()) m_aiBuildingClassFaithCost.resize(GC.getNumBuildingClassInfos(), 0);
+				for(int iBuildingClassLoop = 0; iBuildingClassLoop < GC.getNumBuildingClassInfos(); iBuildingClassLoop++)
+				{
+					m_aiBuildingClassFaithCost[iBuildingClassLoop] += trait->GetBuildingClassFaithCost(iBuildingClassLoop);
+				}
+			}
 #endif
 
 			for (int i = 0; i < NUM_YIELD_TYPES; i++)
@@ -3143,6 +3212,7 @@ void CvPlayerTraits::Uninit()
 	m_piGoldenAgeGreatPersonRateModifier.clear();
 	m_ppiCityYieldFromUnimprovedFeature.clear();
 #endif
+	m_aiBuildingClassFaithCost.clear();
 	m_ppaaiUnimprovedFeatureYieldChange.clear();
 	m_ppiCityYieldModifierFromAdjacentFeature.clear();
 	m_ppiCityYieldPerAdjacentFeature.clear();
@@ -3435,6 +3505,8 @@ void CvPlayerTraits::Reset()
 		m_piGoldenAgeGreatPersonRateModifier[iGreatPerson] = 0;
 	}
 #endif
+
+	m_aiBuildingClassFaithCost.resize(0);
 
 	for(int iTerrain = 0; iTerrain < GC.getNumTerrainInfos(); iTerrain++)
 	{
@@ -3825,6 +3897,11 @@ bool CvPlayerTraits::HasFreePromotionUnitClass(const int promotionID, const int 
 	return false;
 }
 #endif
+
+int CvPlayerTraits::GetBuildingClassFaithCost(BuildingClassTypes eBuildingClass) const
+{
+	return m_aiBuildingClassFaithCost.size() > eBuildingClass ? m_aiBuildingClassFaithCost[eBuildingClass] : 0;
+}
 
 /// Does each city get a free building?
 BuildingTypes CvPlayerTraits::GetFreeBuilding() const
@@ -4998,6 +5075,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_piGoldenAgeGreatPersonRateModifier;
 	kStream >> m_ppiCityYieldFromUnimprovedFeature;
 #endif
+	kStream >> m_aiBuildingClassFaithCost;
 	kStream >> m_ppaaiUnimprovedFeatureYieldChange;
 	kStream >> m_ppiCityYieldModifierFromAdjacentFeature;
 	kStream >> m_ppiCityYieldPerAdjacentFeature;
@@ -5308,6 +5386,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_piGoldenAgeGreatPersonRateModifier;
 	kStream << m_ppiCityYieldFromUnimprovedFeature;
 #endif
+	kStream << m_aiBuildingClassFaithCost;
 	kStream << m_ppaaiUnimprovedFeatureYieldChange;
 	kStream << m_ppiCityYieldModifierFromAdjacentFeature;
 	kStream << m_ppiCityYieldPerAdjacentFeature;
