@@ -5786,14 +5786,9 @@ int CvUnit::GetCaptureChance(CvUnit *pEnemy)
 	if ((m_iCaptureDefeatedEnemyCount > 0 || m_iCaptureDefeatedEnemyChance > 0) && AreUnitsOfSameType(*pEnemy))
 	{
 #if defined(MOD_GLOBAL_CAPTURE_UNIT_CANNOT_MAX_OUT)
-		CvUnitClassInfo *pkEnemyClassInfo = GC.getUnitClassInfo(pEnemy->getUnitClassType());
-		if (MOD_GLOBAL_CAPTURE_UNIT_CANNOT_MAX_OUT && pkEnemyClassInfo)
+		if(MOD_GLOBAL_CAPTURE_UNIT_CANNOT_MAX_OUT && GET_PLAYER(getOwner()).isUnitClassMaxedOut(pEnemy->getUnitClassType()))
 		{
-			int iMaxPlayerInstances = pkEnemyClassInfo->getMaxPlayerInstances();
-			if(iMaxPlayerInstances > 0 && GET_PLAYER(getOwner()).getUnitClassCount(pEnemy->getUnitClassType()) >= iMaxPlayerInstances)
-			{
-				return 0;
-			}
+			return 0;
 		}
 #endif
 		// Look at ratio of intrinsic combat strengths
