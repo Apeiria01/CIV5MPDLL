@@ -2029,9 +2029,9 @@ public:
 	int GetNumWorldWonders();
 #endif
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	void SetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iValue);
-	void ChangePerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iChange);
-	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const;
+	void SetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iValue);
+	void ChangePerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iChange);
+	int GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType) const;
 #endif
 
 	// for serialization
@@ -2958,7 +2958,7 @@ protected:
 #endif
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierTimes100[NUM_YIELD_TYPES];
 #endif
 
 #ifdef MOD_RESOURCE_EXTRA_BUFF

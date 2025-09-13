@@ -13208,7 +13208,9 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 		if (MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS)
 		{
 			// From traits
-			iTempMod += iFollowers * owner.GetPerMajorReligionFollowerYieldModifier(eIndex);
+			int iReligionFollowerYieldModifierTimes100 = iFollowers * owner.GetPerMajorReligionFollowerYieldModifierTimes100(eIndex);
+			iReligionFollowerYieldModifierTimes100 /= 100;
+			iTempMod += iReligionFollowerYieldModifierTimes100;
 		}
 #endif
 

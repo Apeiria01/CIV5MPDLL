@@ -744,7 +744,7 @@ void CvPlayer::init(PlayerTypes eID)
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
 		for (int i = 0; i < NUM_YIELD_TYPES; i++)
 		{
-			ChangePerMajorReligionFollowerYieldModifier(static_cast<YieldTypes>(i), GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifier(static_cast<YieldTypes>(i)));
+			ChangePerMajorReligionFollowerYieldModifierTimes100(static_cast<YieldTypes>(i), GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifierTimes100(static_cast<YieldTypes>(i)));
 		}
 #endif
 		changeLevelExperienceModifier(GetPlayerTraits()->GetLevelExperienceModifier());
@@ -1476,7 +1476,7 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
 	for (int i = 0; i < NUM_YIELD_TYPES; i++)
 	{
-		m_piPerMajorReligionFollowerYieldModifier[i] = 0;
+		m_piPerMajorReligionFollowerYieldModifierTimes100[i] = 0;
 	}
 #endif
 
@@ -28771,7 +28771,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	}
 
 	kStream >> m_strEmbarkedGraphicOverride;
-	kStream >> m_piPerMajorReligionFollowerYieldModifier;
+	kStream >> m_piPerMajorReligionFollowerYieldModifierTimes100;
 
 	#ifdef MOD_RESOURCE_EXTRA_BUFF
 	kStream >> m_iResourceUnhappinessModifier;
@@ -29474,7 +29474,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	}
 
 	kStream << m_strEmbarkedGraphicOverride;
-	kStream << m_piPerMajorReligionFollowerYieldModifier;
+	kStream << m_piPerMajorReligionFollowerYieldModifierTimes100;
 
 #ifdef MOD_RESOURCE_EXTRA_BUFF
 	kStream << m_iResourceUnhappinessModifier;
@@ -32730,18 +32730,18 @@ int CvPlayer::CountAllWorkedTerrain(TerrainTypes iTerrainType)
 #endif // end of MOD_API_EXTENSIONS
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-void CvPlayer::SetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iValue)
+void CvPlayer::SetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iValue)
 {
-	m_piPerMajorReligionFollowerYieldModifier[eYieldType] = iValue;
+	m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType] = iValue;
 }
 
-void CvPlayer::ChangePerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iChange) {
-	m_piPerMajorReligionFollowerYieldModifier[eYieldType] += iChange;
+void CvPlayer::ChangePerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iChange) {
+	m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType] += iChange;
 }
 
-int CvPlayer::GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const 
+int CvPlayer::GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType) const 
 {
-	return m_piPerMajorReligionFollowerYieldModifier[eYieldType];
+	return m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType];
 }
 
 #endif
