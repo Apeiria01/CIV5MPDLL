@@ -17,6 +17,11 @@ create table Trait_PerMajorReligionFollowerYieldModifierTimes100 (
     YieldType text references Yields(Type),
     Yield int default 0
 );
+create table Trait_PerMajorReligionFollowerYieldModifierMax (
+    TraitType text references Traits(Type),
+    YieldType text references Yields(Type),
+    Max int default 0
+);
 
 ALTER TABLE Traits ADD COLUMN 'CiviliansFreePromotion' TEXT DEFAULT NULL;
 CREATE TABLE Trait_FreePromotionUnitClasses(

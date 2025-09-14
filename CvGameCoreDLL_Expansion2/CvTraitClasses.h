@@ -293,6 +293,7 @@ public:
 	int GetSeaTradeRouteYieldTimes100(const YieldTypes eYield) const;
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
 	int GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYield) const;
+	int GetPerMajorReligionFollowerYieldModifierMax(const YieldTypes eYield) const;
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
@@ -565,6 +566,7 @@ protected:
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
 	int m_piPerMajorReligionFollowerYieldModifierTimes100[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierMax[NUM_YIELD_TYPES];
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
@@ -1344,6 +1346,10 @@ public:
 	{
 		return m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType];
 	}
+	int GetPerMajorReligionFollowerYieldModifierMax(const YieldTypes eYieldType) const
+	{
+		return m_piPerMajorReligionFollowerYieldModifierMax[eYieldType];
+	}
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
@@ -1649,6 +1655,7 @@ private:
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
 	int m_piPerMajorReligionFollowerYieldModifierTimes100[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierMax[NUM_YIELD_TYPES];
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING

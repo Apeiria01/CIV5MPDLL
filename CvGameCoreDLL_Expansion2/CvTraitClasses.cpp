@@ -1537,6 +1537,10 @@ int CvTraitEntry::GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTy
 {
 	return m_piPerMajorReligionFollowerYieldModifierTimes100[eYield];
 }
+int CvTraitEntry::GetPerMajorReligionFollowerYieldModifierMax(const YieldTypes eYield) const
+{
+	return m_piPerMajorReligionFollowerYieldModifierMax[eYield];
+}
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
@@ -2540,6 +2544,27 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 			m_piPerMajorReligionFollowerYieldModifierTimes100[pResults->GetInt(0)] += pResults->GetInt(1);
 		}
 	}
+	{
+		for (int i = 0; i < NUM_YIELD_TYPES; i++)
+		{
+			m_piPerMajorReligionFollowerYieldModifierMax[i] = 0;
+		}
+
+		std::string strKey("Trait_PerMajorReligionFollowerYieldModifierMax");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select t2.ID, t1.Max from Trait_PerMajorReligionFollowerYieldModifierMax t1 inner join Yields t2 on t1.YieldType = t2.Type where t1.TraitType = ?");
+		}
+
+		pResults->Bind(1, szTraitType);
+		while (pResults->Step())
+		{
+			const int eYieldType = pResults->GetInt(0);
+			const int iMax = pResults->GetInt(1);
+			m_piPerMajorReligionFollowerYieldModifierMax[eYieldType] += iMax;
+		}
+	}
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
 	m_iSpreadReligionFromKilledUnitStrengthPercent = kResults.GetInt("SpreadReligionFromKilledUnitStrengthPercent");
@@ -2810,6 +2835,7 @@ void CvPlayerTraits::InitPlayerTraits()
 				for (int i = 0; i < NUM_YIELD_TYPES; i++)
 				{
 					m_piPerMajorReligionFollowerYieldModifierTimes100[i] += trait->GetPerMajorReligionFollowerYieldModifierTimes100(static_cast<YieldTypes>(i));
+					m_piPerMajorReligionFollowerYieldModifierMax[i] += trait->GetPerMajorReligionFollowerYieldModifierMax(static_cast<YieldTypes>(i));
 				}
 			}
 #endif
@@ -3430,6 +3456,7 @@ void CvPlayerTraits::Reset()
 	for (int i = 0; i < NUM_YIELD_TYPES; i++)
 	{
 		m_piPerMajorReligionFollowerYieldModifierTimes100[i] = 0;
+		m_piPerMajorReligionFollowerYieldModifierMax[i] = 0;
 	}
 #endif
 
@@ -5118,6 +5145,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_piSeaTradeRouteYieldPerEraTimes100;
 	kStream >> m_piSeaTradeRouteYieldTimes100;
 	kStream >> m_piPerMajorReligionFollowerYieldModifierTimes100;
+	kStream >> m_piPerMajorReligionFollowerYieldModifierMax;
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
 	kStream >> m_iSpreadReligionFromKilledUnitStrengthPercent;
@@ -5415,6 +5443,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_piSeaTradeRouteYieldPerEraTimes100;
 	kStream << m_piSeaTradeRouteYieldTimes100;
 	kStream << m_piPerMajorReligionFollowerYieldModifierTimes100;
+	kStream << m_piPerMajorReligionFollowerYieldModifierMax;
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
 	kStream << m_iSpreadReligionFromKilledUnitStrengthPercent;

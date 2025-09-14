@@ -13208,8 +13208,12 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 		if (MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS)
 		{
 			// From traits
-			int iReligionFollowerYieldModifierTimes100 = iFollowers * owner.GetPerMajorReligionFollowerYieldModifierTimes100(eIndex);
-			iReligionFollowerYieldModifierTimes100 /= 100;
+			int iReligionFollowerYieldModifierTimes100 = iFollowers * owner.GetPerMajorReligionFollowerYieldModifierTimes100(eIndex) / 100;
+			int iTraitModifierTimes100 = iFollowers * owner.GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifierTimes100(eIndex) / 100;
+			int iMax = owner.GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifierMax(eIndex);
+			if (iMax > 0) iTraitModifierTimes100 = std::min(iMax, iTraitModifierTimes100);
+
+			iReligionFollowerYieldModifierTimes100 += iTraitModifierTimes100;
 			iTempMod += iReligionFollowerYieldModifierTimes100;
 		}
 #endif

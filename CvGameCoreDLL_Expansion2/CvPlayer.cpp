@@ -741,12 +741,6 @@ void CvPlayer::init(PlayerTypes eID)
 		changeGoldPerUnitTimes100(GC.getINITIAL_GOLD_PER_UNIT_TIMES_100());
 
 		ChangeMaxNumBuilders(GC.getDEFAULT_MAX_NUM_BUILDERS());
-#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-		for (int i = 0; i < NUM_YIELD_TYPES; i++)
-		{
-			ChangePerMajorReligionFollowerYieldModifierTimes100(static_cast<YieldTypes>(i), GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifierTimes100(static_cast<YieldTypes>(i)));
-		}
-#endif
 		changeLevelExperienceModifier(GetPlayerTraits()->GetLevelExperienceModifier());
 		changeMaxGlobalBuildingProductionModifier(GetPlayerTraits()->GetMaxGlobalBuildingProductionModifier());
 		changeMaxTeamBuildingProductionModifier(GetPlayerTraits()->GetMaxTeamBuildingProductionModifier());
