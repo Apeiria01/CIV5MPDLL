@@ -148,11 +148,9 @@ CvBuildingEntry::CvBuildingEntry(void):
 #if defined(MOD_MORE_NATURAL_WONDER)
 	m_bImmueVolcanoDamage(false),
 #endif
-#if defined(MOD_API_EXTENSIONS)
 	m_bAddsFreshWater(false),
 	m_bPurchaseOnly(false),
 	m_bHumanOnly(false),
-#endif
 
 	m_bMoveAfterCreated(false),
 
@@ -535,13 +533,10 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 #if defined(MOD_MORE_NATURAL_WONDER)
 	m_bImmueVolcanoDamage = kResults.GetBool("ImmueVolcanoDamage"); 
 #endif
-#if defined(MOD_API_EXTENSIONS)
-	if (MOD_API_EXTENSIONS) {
-		m_bAddsFreshWater = kResults.GetBool("AddsFreshWater");
-		m_bPurchaseOnly = kResults.GetBool("PurchaseOnly");
-		m_bHumanOnly = kResults.GetBool("HumanOnly");
-	}
-#endif
+
+	m_bAddsFreshWater = kResults.GetBool("AddsFreshWater");
+	m_bPurchaseOnly = kResults.GetBool("PurchaseOnly");
+	m_bHumanOnly = kResults.GetBool("HumanOnly");
 
 	m_bMoveAfterCreated = kResults.GetBool("MoveAfterCreated");
 
@@ -3012,7 +3007,6 @@ bool CvBuildingEntry::IsImmueVolcanoDamage() const
 }
 #endif
 
-#if defined(MOD_API_EXTENSIONS)
 /// Does this building add FreshWater?
 bool CvBuildingEntry::IsAddsFreshWater() const
 {
@@ -3029,7 +3023,6 @@ bool CvBuildingEntry::IsHumanOnly() const
 {
 	return m_bHumanOnly;
 }
-#endif
 
 bool CvBuildingEntry::IsMoveAfterCreated() const
 {

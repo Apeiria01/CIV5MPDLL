@@ -414,10 +414,9 @@ public:
 	bool isImmueVolcanoDamage() const;
 #endif
 
-#if defined(MOD_API_EXTENSIONS)
 	void changeAddsFreshWater(int iChange);
 	bool isAddsFreshWater() const;
-#endif
+	
 	void changeExtraAttackOnKill(int iChange);
 	bool isExtraAttackOnKill() const;
 

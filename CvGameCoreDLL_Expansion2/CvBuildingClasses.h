@@ -359,11 +359,9 @@ public:
 #if defined(MOD_MORE_NATURAL_WONDER)
 	bool IsImmueVolcanoDamage() const;
 #endif
-#if defined(MOD_API_EXTENSIONS)
 	bool IsAddsFreshWater() const;
 	bool IsPurchaseOnly() const;
 	bool IsHumanOnly() const;
-#endif
 	bool IsMoveAfterCreated() const;
 	bool IsMountain() const;
 	bool IsHill() const;
@@ -851,11 +849,9 @@ private:
 #if defined(MOD_MORE_NATURAL_WONDER)
 	bool m_bImmueVolcanoDamage;
 #endif
-#if defined(MOD_API_EXTENSIONS)
 	bool m_bAddsFreshWater;
 	bool m_bPurchaseOnly;
 	bool m_bHumanOnly;
-#endif
 	bool m_bMoveAfterCreated;
 	bool m_bMountain;
 	bool m_bHill;
