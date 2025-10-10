@@ -14965,7 +14965,7 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 			}
 
 			// bonus against Higher Pop civs
-			if (pBattlePlot->isCity() &&  GET_PLAYER(pBattlePlot->getOwner()).getTotalPopulation() > GET_PLAYER(getOwner()).getTotalPopulation())
+			if (pBattlePlot->isCity() && GET_PLAYER(pBattlePlot->getOwner()).getTotalPopulation() > GET_PLAYER(getOwner()).getTotalPopulation())
 			{
 				iModifier += GetAntiHigherPopMod();
 			}
@@ -15024,31 +15024,6 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 			}
 		}
 
-		// Trait (player level) bonus against higher tech units
-		iTempModifier = kPlayer.GetPlayerTraits()->GetCombatBonusVsHigherTech();
-		if(iTempModifier > 0)
-		{
-			// Only applies defending friendly territory
-			if(pBattlePlot->getOwner() == getOwner())
-			{
-				// Check tech levels too
-				UnitTypes eMyUnitType = getUnitType();
-				if(pOtherUnit && pOtherUnit->IsHigherTechThan(eMyUnitType))
-				{
-					iModifier += iTempModifier;
-				}
-			}
-		}
-
-		// Trait (player level) bonus against larger civs
-		iTempModifier = kPlayer.GetPlayerTraits()->GetCombatBonusVsLargerCiv();
-		if(iTempModifier > 0)
-		{
-			if(pOtherUnit && pOtherUnit->IsLargerCivThan(this))
-			{
-				iModifier += iTempModifier;
-			}
-		}
 	}
 
 	////////////////////////
@@ -15106,15 +15081,34 @@ int CvUnit::GetGenericMaxStrengthModifier(const CvUnit* pOtherUnit, const CvPlot
 			iModifier += kPlayer.GetPlayerTraits()->GetCityStateCombatModifier();
 		}
 
-
-
 		// bonus against Higher Pop civs
-		if (pOtherUnit && pOtherUnit->IsHigherPopThan(this))
+		iTempModifier = GetAntiHigherPopMod();
+		if (iTempModifier > 0 && pOtherUnit->IsHigherPopThan(this))
 		{
-			iModifier += GetAntiHigherPopMod();
+			iModifier += iTempModifier;
 		}
 
+		// Trait (player level) bonus against higher tech units
+		iTempModifier = kPlayer.GetPlayerTraits()->GetCombatBonusVsHigherTech();
+		if(iTempModifier > 0)
+		{
+			// Only applies defending friendly territory
+			if(pBattlePlot->getOwner() == getOwner())
+			{
+				// Check tech levels too
+				if(pOtherUnit->IsHigherTechThan(getUnitType()))
+				{
+					iModifier += iTempModifier;
+				}
+			}
+		}
 
+		// Trait (player level) bonus against larger civs
+		iTempModifier = kPlayer.GetPlayerTraits()->GetCombatBonusVsLargerCiv();
+		if(iTempModifier > 0 && pOtherUnit->IsLargerCivThan(this))
+		{
+			iModifier += iTempModifier;
+		}
 
 		// OTHER UNIT is a Barbarian
 		if(pOtherUnit->isBarbarian())
@@ -16088,26 +16082,25 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 			iModifier += attackFullyHealedModifier();
 
 #if defined(MOD_ROG_CORE)
+		//More than half (integer division accounting for possible odd Max HP)?
+		if (pOtherUnit->getDamage() < ((pOtherUnit->GetMaxHitPoints() + 1) / 2))
+			iModifier += attackAbove50HealthModifier();
+		else
+			iModifier += attackBelow50HealthModifier();
 
-			//More than half (integer division accounting for possible odd Max HP)?
-			if (pOtherUnit->getDamage() < ((pOtherUnit->GetMaxHitPoints() + 1) / 2))
-				iModifier += attackAbove50HealthModifier();
-			else
-				iModifier += attackBelow50HealthModifier();
+		int iNumSpyStayAttackMod = GetNumSpyStayAttackMod();
+		if (iNumSpyStayAttackMod != 0 && GET_TEAM(getTeam()).HasSpyAtTeam(pOtherUnit->getTeam()))
+		{
+			iModifier += iNumSpyStayAttackMod;
+		}
 
-			int iNumSpyStayAttackMod = GetNumSpyStayAttackMod();
-			if (iNumSpyStayAttackMod != 0 && GET_TEAM(getTeam()).HasSpyAtTeam(pOtherUnit->getTeam()))
-			{
-				iModifier += iNumSpyStayAttackMod;
-			}
-
-			//bonus for attacking same unit over and over in a turn?
-			int iTempModifier = getMultiAttackBonus();
-			if (iTempModifier != 0)
-			{
-				iTempModifier *= pOtherUnit->GetNumTimesAttackedThisTurn(getOwner());
-				iModifier += iTempModifier;
-			}
+		//bonus for attacking same unit over and over in a turn?
+		int iTempModifier = getMultiAttackBonus();
+		if (iTempModifier != 0)
+		{
+			iTempModifier *= pOtherUnit->GetNumTimesAttackedThisTurn(getOwner());
+			iModifier += iTempModifier;
+		}
 #endif
 		iModifier += GetRangeSuppressModifier(pOtherUnit);
 
@@ -16115,6 +16108,35 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		if(GET_PLAYER(pOtherUnit->getOwner()).isMinorCiv())
 		{
 			iModifier += pTraits->GetCityStateCombatModifier();
+		}
+
+		// bonus against Higher Pop civs
+		iTempModifier = GetAntiHigherPopMod();
+		if (iTempModifier > 0 && pOtherUnit->IsHigherPopThan(this))
+		{
+			iModifier += iTempModifier;
+		}
+
+		// Trait (player level) bonus against higher tech units
+		iTempModifier = pTraits->GetCombatBonusVsHigherTech();
+		if(iTempModifier > 0 && pOtherUnit->plot())
+		{
+			// Only applies defending friendly territory
+			if(pOtherUnit->plot()->getOwner() == getOwner())
+			{
+				// Check tech levels too
+				if(pOtherUnit->IsHigherTechThan(getUnitType()))
+				{
+					iModifier += iTempModifier;
+				}
+			}
+		}
+
+		// Trait (player level) bonus against larger civs
+		iTempModifier = pTraits->GetCombatBonusVsLargerCiv();
+		if(iTempModifier > 0 && pOtherUnit->IsLargerCivThan(this))
+		{
+			iModifier += iTempModifier;
 		}
 
 		// OTHER UNIT is a Barbarian
@@ -16333,11 +16355,17 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		iModifier += iTempModifier;
 #endif
 
-
 		// Bonus against city states?
 		if(GET_PLAYER(pCity->getOwner()).isMinorCiv())
 		{
 			iModifier += pTraits->GetCityStateCombatModifier();
+		}
+
+		// bonus against Higher Pop civs
+		iTempModifier = GetAntiHigherPopMod();
+		if (iTempModifier > 0 && GET_PLAYER(pCity->getOwner()).getTotalPopulation() > kPlayer.getTotalPopulation())
+		{
+			iModifier += iTempModifier;
 		}
 	}
 
