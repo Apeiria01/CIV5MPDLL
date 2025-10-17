@@ -597,7 +597,6 @@ public:
 	int GetStartingSpyRank() const;
 	void ChangeStartingSpyRank(int iChange);
 	int GetSpyLevelUpWhenRiggingCount() const;
-	bool IsSpyLevelUpWhenRigging() const;
 	// END Espionage
 
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
@@ -615,6 +614,10 @@ public:
 	int GetUnitUpgradeCostMod() const;
 	void SetUnitUpgradeCostMod(int iValue);
 	void ChangeUnitUpgradeCostMod(int iChange);
+
+	int GetAllowPuppetPurchase() const;
+	void ChangeAllowPuppetPurchase(int iChange);
+	bool IsAllowPuppetPurchase()const;
 
 	int GetBarbarianCombatBonus() const;
 	void SetBarbarianCombatBonus(int iValue);
@@ -877,6 +880,9 @@ public:
 
 	int getSettlerProductionEraModifier(EraTypes eEra) const;
 	void changeSettlerProductionEraModifier(EraTypes eStartEra, int iChange);
+
+	int getBuildSpeedModifier(BuildTypes eBuild) const;
+	void changeBuildSpeedModifier(BuildTypes eBuild, int iChange);
 #endif
 	bool isNullifyInfluenceModifier() const;
 	void changeNullifyInfluenceModifier(int iChange);
@@ -1690,6 +1696,8 @@ public:
 
 	int GetResearchTotalCostModifier() const;
 	void ChangeResearchTotalCostModifier(int iChange);
+	int GetResearchTotalCostModifierGoldenAge() const;
+	void ChangeResearchTotalCostModifierGoldenAge(int iChange);
 
 	int GetLiberatedInfluence() const;
 	void SetLiberatedInfluence(int iValue);
@@ -2021,9 +2029,9 @@ public:
 	int GetNumWorldWonders();
 #endif
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	void SetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iValue);
-	void ChangePerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iChange);
-	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const;
+	void SetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iValue);
+	void ChangePerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iChange);
+	int GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType) const;
 #endif
 
 	// for serialization
@@ -2381,6 +2389,7 @@ protected:
 	FAutoVariable<int, CvPlayer> m_iSpecialPolicyBuildingHappiness;  //unused
 	FAutoVariable<int, CvPlayer> m_iWoundedUnitDamageMod;
 	FAutoVariable<int, CvPlayer> m_iUnitUpgradeCostMod;
+	FAutoVariable<int, CvPlayer> m_iAllowPuppetPurchase;
 	FAutoVariable<int, CvPlayer> m_iBarbarianCombatBonus;
 	FAutoVariable<int, CvPlayer> m_iAlwaysSeeBarbCampsCount;
 	FAutoVariable<int, CvPlayer> m_iHappinessFromBuildings;
@@ -2389,7 +2398,6 @@ protected:
 	int m_iEspionageModifier;
 	int m_iEspionageSpeedModifier;
 	int m_iSpyStartingRank;
-	int m_iSpyLevelUpWhenRiggingCount;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int m_iConversionModifier;
 #endif
@@ -2477,6 +2485,7 @@ protected:
 	int m_iHappinessPerPolicy;
 	int m_iWaterBuildSpeedModifier;
 	std::vector<int> m_vSettlerProductionEraModifier;
+	std::vector<int> m_vBuildSpeedModifier;
 #endif
 	int m_iNullifyInfluenceModifier;
 	int m_iNumTradeRouteBonus;
@@ -2590,6 +2599,7 @@ protected:
 	int m_iGlobalCityStrengthMod;
 	int m_iGlobalRangedStrikeModifier;
 	int m_iResearchTotalCostModifier;
+	int m_iResearchTotalCostModifierGoldenAge;
 	int m_iLiberatedInfluence;
 	int m_iExtraUnitPlayerInstances;
 	int m_iWaterTileDamageGlobal;
@@ -2948,7 +2958,7 @@ protected:
 #endif
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierTimes100[NUM_YIELD_TYPES];
 #endif
 
 #ifdef MOD_RESOURCE_EXTRA_BUFF

@@ -2536,6 +2536,8 @@ int CvPlayerTrade::GetTradeConnectionRiverValueModifierTimes100(const TradeConne
 #else
 					iModifier = 25;
 #endif
+					iModifier *= 100 + pOriginCity->GetTradeRouteRiverBonusModifier();
+					iModifier /= 100;
 				}
 			}
 		}
@@ -2553,6 +2555,8 @@ int CvPlayerTrade::GetTradeConnectionRiverValueModifierTimes100(const TradeConne
 #else
 					iModifier = 25;
 #endif
+					iModifier *= 100 + pDestCity->GetTradeRouteRiverBonusModifier();
+					iModifier /= 100;
 				}
 			}
 		}

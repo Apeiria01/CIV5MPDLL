@@ -8472,6 +8472,11 @@ void CvMinorCivAI::DoSpawnUnit(PlayerTypes eMajor)
 							bUseUniqueUnit = true;
 						}
 					}
+					// Don't exceed the limit num of Unit
+					if(bUseUniqueUnit && GET_PLAYER(eMajor).isUnitClassMaxedOut((UnitClassTypes)pkUnitInfo->GetUnitClassType()))
+					{
+						bUseUniqueUnit = false;
+					}
 				}
 			}
 			

@@ -171,6 +171,8 @@ class ICvUnit1;
 
 #include "CvLuaFormula.h"
 
+#include "CvIndependentPromotionInfo.h"
+
 class CvGlobals
 {
 public:
@@ -661,6 +663,11 @@ public:
 	CvLuaFormula* GetLuaFormulaEntry(LuaFormulaTypes eFormula);
 
 	lua::EvaluatorManager* GetLuaEvaluatorManager();
+
+	CvIndependentPromotionInfo* GetIndependentPromotion();
+
+	const std::vector<BuildingTypes>& GetEnableUnitPurchaseBuildings() const;
+	void InitEnableUnitPurchaseBuildings();
 
 	//
 	// Global Types
@@ -7714,6 +7721,7 @@ public:
 	GD_INT_DEF(TOURISM_START_TECH)
 	GD_INT_DEF(TOURISM_START_ERA)
 	GD_INT_DEF(PUPPET_TOURISM_MODIFIER)
+	GD_INT_DEF(WONDER_GOLDEN_AGE_PURCHASE_MODIFIER)
 	GD_INT_DEF(PUPPET_GOLDEN_AGE_MODIFIER)
 
 #if defined(MOD_API_UNIFIED_YIELDS_MORE)
@@ -8045,6 +8053,10 @@ protected:
 
 	CvLuaFormulaXMLEntries* m_pLuaFormulaEntries;
 	lua::EvaluatorManager* m_pLuaEvaluatorManager;
+
+	CvIndependentPromotionInfo* m_pIndependentPromotion;
+
+	std::vector<BuildingTypes> m_vEnableUnitPurchaseBuildings;
 
 	//////////////////////////////////////////////////////////////////////////
 	// GLOBAL TYPES
@@ -9878,6 +9890,7 @@ protected:
 	GD_INT_DECL(TOURISM_START_TECH);
 	GD_INT_DECL(TOURISM_START_ERA);
 	GD_INT_DECL(PUPPET_TOURISM_MODIFIER);
+	GD_INT_DECL(WONDER_GOLDEN_AGE_PURCHASE_MODIFIER);
 	GD_INT_DECL(PUPPET_GOLDEN_AGE_MODIFIER);
 
 #if defined(MOD_API_UNIFIED_YIELDS_MORE)

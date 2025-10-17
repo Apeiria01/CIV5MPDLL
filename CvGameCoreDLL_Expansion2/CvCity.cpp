@@ -269,6 +269,7 @@ CvCity::CvCity() :
 	, m_iPlotCultureCostModifier("CvCity::m_iPlotCultureCostModifier", m_syncArchive)
 	, m_iPlotBuyCostModifier(0)
 	, m_iUnitMaxExperienceLocal(0)
+	, m_iTradeRouteRiverBonusModifier(0)
 	, m_iSecondCapitalsExtraScore(0)
 	, m_iFoodKeptFromPollution(0)
 	, m_iNumAllowsFoodTradeRoutes(0)
@@ -919,6 +920,7 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 				{
 					kPlayer.changeExtraUnitCost(iUnit->getUnitInfo().GetExtraMaintenanceCost());
 				}
+				if(kPlayer.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0) ChangeNoOccupiedUnhappinessCount(1);
 			}
 		}
 	}
@@ -1134,6 +1136,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iPlotCultureCostModifier = 0;
 	m_iPlotBuyCostModifier = 0;
 	m_iUnitMaxExperienceLocal = 0;
+	m_iTradeRouteRiverBonusModifier = 0;
 	m_iSecondCapitalsExtraScore = 0;
 	m_iFoodKeptFromPollution = 0;
 	m_iNumAllowsFoodTradeRoutes = 0;
@@ -3440,7 +3443,6 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 		return false;
 	}
 
-#if defined(MOD_API_EXTENSIONS)
 	if (!bWillPurchase && pkBuildingInfo->IsPurchaseOnly())
 	{
 		return false;
@@ -3450,7 +3452,6 @@ bool CvCity::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestVis
 	{
 		return false;
 	}
-#endif
 
 	if(m_pCityBuildings->GetNumBuilding(eBuilding) >= GC.getCITY_MAX_NUM_BUILDINGS())
 	{
@@ -5898,24 +5899,23 @@ int CvCity::GetPurchaseCost(UnitTypes eUnit)
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
 		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
 			CvTeam& owningTeam = GET_TEAM(getTeam());
-			auto vBuildingList = GetCityBuildings()->GetBuildings()->GetBuildingEntries();
+			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
 			int currentMinMod = MAXINT32;
-			for (auto it = vBuildingList.begin(); it != vBuildingList.end(); it++) {
-				auto pBuildingEntry = *it;
-				if (pBuildingEntry && GetCityBuildings()->GetNumBuilding((BuildingTypes)pBuildingEntry->GetID()) > 0 && !owningTeam.isObsoleteBuilding((BuildingTypes)(pBuildingEntry->GetID()))) {
-					int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-					auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-					if (pAllowPurchaseList) {
-						for (int i = 0; i < num; i++) {
-							if (pkUnitInfo->GetUnitClassType() == pAllowPurchaseList[i].first) {
-								if (pAllowPurchaseList[i].second >= 0 && pAllowPurchaseList[i].second < currentMinMod) {
-									currentMinMod = pAllowPurchaseList[i].second;
-									iModifier = currentMinMod;
-								}
-							}
-						}
+			for(auto eBuilding : vBuildingList){
+				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
+
+				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
+				if(!pBuildingEntry) continue;
+				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_GOLD);
+				if (!pAllowPurchaseList) continue;
+
+				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_GOLD);
+				for (int i = 0; i < num; i++){
+					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
+					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
+						currentMinMod = pAllowPurchaseList[i].second;
+						iModifier = currentMinMod;
 					}
-					
 				}
 			}
 		}
@@ -6108,22 +6108,22 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
 		if (iCost <= 0 && MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
 			CvTeam& owningTeam = GET_TEAM(getTeam());
-			auto vBuildingList = GetCityBuildings()->GetBuildings()->GetBuildingEntries();
+			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
 			int currentMinMod = MAXINT32;
-			for (auto it = vBuildingList.begin(); it != vBuildingList.end(); it++) {
-				auto pBuildingEntry = *it;
-				if (pBuildingEntry && GetCityBuildings()->GetNumBuilding((BuildingTypes)pBuildingEntry->GetID()) > 0 && !owningTeam.isObsoleteBuilding((BuildingTypes)(pBuildingEntry->GetID()))) {
-					int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-					auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-					if (pAllowPurchaseList) {
-						for (int i = 0; i < num; i++) {
-							if (pkUnitInfo->GetUnitClassType() == pAllowPurchaseList[i].first) {
-								if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod) {
-									currentMinMod = pAllowPurchaseList[i].second;
-									iCost = currentMinMod;
-								}
-							}
-						}
+			for(auto eBuilding : vBuildingList){
+				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
+
+				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
+				if(!pBuildingEntry) continue;
+				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_FAITH);
+				if (!pAllowPurchaseList) continue;
+
+				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_FAITH);
+				for (int i = 0; i < num; i++){
+					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
+					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
+						currentMinMod = pAllowPurchaseList[i].second;
+						iCost = currentMinMod;
 					}
 				}
 			}
@@ -6203,6 +6203,13 @@ int CvCity::GetPurchaseCost(BuildingTypes eBuilding)
 		return -1;
 
 	int iModifier = pkBuildingInfo->GetHurryCostModifier();
+	int iTempMod = GC.getWONDER_GOLDEN_AGE_PURCHASE_MODIFIER();
+	// Buiding that only World wonder
+	const CvBuildingClassInfo& kbClassInfo = pkBuildingInfo->GetBuildingClassInfo();
+	if (kbClassInfo.getMaxGlobalInstances() == 1 && GET_PLAYER(getOwner()).GetPlayerTraits()->CanPurchaseWonderInGoldenAge() && GET_PLAYER(getOwner()).isGoldenAge() && (iTempMod >1))
+	{
+		iModifier= iModifier+ iTempMod;
+	}
 
 	if(iModifier == -1)
 		return -1;
@@ -6249,6 +6256,10 @@ int CvCity::GetFaithPurchaseCost(BuildingTypes eBuilding)
 
 	// Cost goes up in later eras
 	iCost = pkBuildingInfo->GetFaithCost();
+	int iTraitCost = GET_PLAYER(getOwner()).GetPlayerTraits()->GetBuildingClassFaithCost((BuildingClassTypes)pkBuildingInfo->GetBuildingClassType());
+	if(iTraitCost > 0 && iCost > 0) iCost = std::min(iTraitCost, iCost);
+	else if(iTraitCost > 0) iCost = iTraitCost;
+
 	EraTypes eEra = GET_TEAM(GET_PLAYER(getOwner()).getTeam()).GetCurrentEra();
 	int iMultiplier = GC.getEraInfo(eEra)->getFaithCostMultiplier();
 	iCost = iCost * iMultiplier / 100;
@@ -7808,6 +7819,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changePlotCultureCostModifier(pBuildingInfo->GetPlotCultureCostModifier() * iChange);
 		changePlotBuyCostModifier(pBuildingInfo->GetPlotBuyCostModifier() * iChange);
 		ChangeUnitMaxExperienceLocal(pBuildingInfo->GetUnitMaxExperienceLocal() * iChange);
+		ChangeTradeRouteRiverBonusModifier(pBuildingInfo->GetTradeRouteRiverBonusModifier() * iChange);
 		ChangeSecondCapitalsExtraScore(pBuildingInfo->GetSecondCapitalsExtraScore() * iChange);
 		ChangeFoodKeptFromPollution(pBuildingInfo->GetFoodKeptFromPollution() * iChange);
 		ChangeNumAllowsFoodTradeRoutes(pBuildingInfo->AllowsFoodTradeRoutes() ? iChange : 0);
@@ -11113,6 +11125,17 @@ void CvCity::ChangeUnitMaxExperienceLocal(int iChange)
 	m_iUnitMaxExperienceLocal = (m_iUnitMaxExperienceLocal + iChange);
 }
 
+//	--------------------------------------------------------------------------------
+int CvCity::GetTradeRouteRiverBonusModifier() const
+{
+	VALIDATE_OBJECT
+	return m_iTradeRouteRiverBonusModifier;
+}
+void CvCity::ChangeTradeRouteRiverBonusModifier(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iTradeRouteRiverBonusModifier = (m_iTradeRouteRiverBonusModifier + iChange);
+}
 
 //	--------------------------------------------------------------------------------
 int CvCity::GetSecondCapitalsExtraScore() const
@@ -13197,7 +13220,13 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 		if (MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS)
 		{
 			// From traits
-			iTempMod += iFollowers * owner.GetPerMajorReligionFollowerYieldModifier(eIndex);
+			int iReligionFollowerYieldModifierTimes100 = iFollowers * owner.GetPerMajorReligionFollowerYieldModifierTimes100(eIndex) / 100;
+			int iTraitModifierTimes100 = iFollowers * owner.GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifierTimes100(eIndex) / 100;
+			int iMax = owner.GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifierMax(eIndex);
+			if (iMax > 0) iTraitModifierTimes100 = std::min(iMax, iTraitModifierTimes100);
+
+			iReligionFollowerYieldModifierTimes100 += iTraitModifierTimes100;
+			iTempMod += iReligionFollowerYieldModifierTimes100;
 		}
 #endif
 
@@ -15023,6 +15052,7 @@ int CvCity::GetCityStateTradeRouteYieldModifier(YieldTypes eIndex) const
 	{
 		return m_aiCityStateTradeRouteYieldModifier[eIndex] * GET_PLAYER(m_eOwner).GetTrade()->GetNumberOfCityStateTradeRoutes();
 	}
+	return 0;
 }
 void CvCity::ChangeCityStateTradeRouteYieldModifier(YieldTypes eIndex, int iChange)
 {
@@ -18620,15 +18650,37 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	
 	// Can't purchase anything in a puppeted city
 	// slewis - The Venetian Exception
+	CvPlayerAI& kPlayer = GET_PLAYER(m_eOwner);
 	bool bIsPuppet = IsPuppet();
 	bool bVenetianException = false;
-	CvPlayerAI &kPlayer = GET_PLAYER(m_eOwner);
+	bool bAllowsPuppetPurchase = kPlayer.IsAllowPuppetPurchase();
+
 	if (kPlayer.GetPlayerTraits()->IsNoAnnexing() && bIsPuppet)
 	{
 		bVenetianException = true;
 	}
 
-	if (bIsPuppet && !bVenetianException)
+	if (bIsPuppet && !bAllowsPuppetPurchase)
+	{
+		if (eUnitType > NO_UNIT)
+		{
+			CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eUnitType);
+			if (pkUnitInfo && pkUnitInfo->IsPuppetPurchaseOverride())
+			{
+				bAllowsPuppetPurchase = true;
+			}
+		}
+		else if (eBuildingType > NO_BUILDING)
+		{
+			CvBuildingEntry* pkBuildingInfo = GC.getBuildingInfo(eBuildingType);
+			if (pkBuildingInfo && pkBuildingInfo->IsPuppetPurchaseOverride())
+			{
+				bAllowsPuppetPurchase = true;
+			}
+		}
+	}
+
+	if (bIsPuppet && !bVenetianException && !bAllowsPuppetPurchase)
 	{
 		return false;
 	}
@@ -19162,14 +19214,19 @@ void CvCity::Purchase(UnitTypes eUnitType, BuildingTypes eBuildingType, ProjectT
 			// Missionary strength
 			if(iReligionSpreads > 0 && eReligion > RELIGION_PANTHEON)
 			{
-				pUnit->GetReligionData()->SetSpreadsLeft(iReligionSpreads + GetCityBuildings()->GetMissionaryExtraSpreads());
-#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
-				if (MOD_BELIEF_NEW_EFFECT_FOR_SP)
+				// missionary spreads can be buffed but not prophets
+				if (!pUnit->getUnitInfo().IsFoundReligion())
 				{
-					pUnit->GetReligionData()->SetSpreadsLeft(pUnit->GetReligionData()->GetSpreadsLeft()+GetReligionExtraMissionarySpreads(GetCityReligions()->GetReligiousMajority()));
-					pUnit->GetReligionData()->SetSpreadsLeft(pUnit->GetReligionData()->GetSpreadsLeft()+GetBeliefExtraMissionarySpreads(GetCityReligions()->GetSecondaryReligionPantheonBelief()));
-				}
+					iReligionSpreads += GetCityBuildings()->GetMissionaryExtraSpreads();
+#if defined(MOD_BELIEF_NEW_EFFECT_FOR_SP)
+					if (MOD_BELIEF_NEW_EFFECT_FOR_SP)
+					{
+						iReligionSpreads += GetReligionExtraMissionarySpreads(eReligion);
+						iReligionSpreads += GetBeliefExtraMissionarySpreads(GetCityReligions()->GetSecondaryReligionPantheonBelief());
+					}
 #endif
+				}
+				pUnit->GetReligionData()->SetSpreadsLeft(iReligionSpreads);
 				pUnit->GetReligionData()->SetReligiousStrength(iReligiousStrength);
 			}
 
@@ -19875,6 +19932,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iPlotCultureCostModifier;
 	kStream >> m_iPlotBuyCostModifier;
 	kStream >> m_iUnitMaxExperienceLocal;
+	kStream >> m_iTradeRouteRiverBonusModifier;
 	kStream >> m_iSecondCapitalsExtraScore;
 	kStream >> m_iFoodKeptFromPollution;
 	kStream >> m_iNumAllowsFoodTradeRoutes;
@@ -20389,6 +20447,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iPlotCultureCostModifier; // Added for Version 3
 	kStream << m_iPlotBuyCostModifier; // Added for Version 12
 	kStream << m_iUnitMaxExperienceLocal;
+	kStream << m_iTradeRouteRiverBonusModifier;
 	kStream << m_iSecondCapitalsExtraScore;
 	kStream << m_iFoodKeptFromPollution;
 	kStream << m_iNumAllowsFoodTradeRoutes;

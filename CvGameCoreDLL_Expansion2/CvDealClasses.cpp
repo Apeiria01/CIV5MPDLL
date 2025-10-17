@@ -316,10 +316,11 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 	CvTeam* pFromTeam = &GET_TEAM(eFromTeam);
 	CvTeam* pToTeam = &GET_TEAM(eToTeam);
 
-	CvDeal* pRenewDeal = pFromPlayer->GetDiplomacyAI()->GetDealToRenew();
+	int iDealType = 0;
+	CvDeal* pRenewDeal = pFromPlayer->GetDiplomacyAI()->GetDealToRenew(&iDealType);
 	if (!pRenewDeal)
 	{
-		pRenewDeal = pToPlayer->GetDiplomacyAI()->GetDealToRenew();
+		pRenewDeal = pToPlayer->GetDiplomacyAI()->GetDealToRenew(&iDealType);
 	}
 
 	int iGoldAvailable = GetGoldAvailable(ePlayer, eItem);
@@ -388,7 +389,8 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 			int iNumInRenewDeal = 0;
 			int iNumInExistingDeal = 0;
 
-			if (pRenewDeal)
+			// We should not count this in history Deal
+			if (pRenewDeal && iDealType != 0)
 			{
 				// count any that are in the renew deal
 				TradedItemList::iterator it;
@@ -922,18 +924,19 @@ int CvDeal::GetNumResource(PlayerTypes ePlayer, ResourceTypes eResource)
 	int iNumInRenewDeal = 0;
 	int iNumInExistingDeal = 0;
 
-
-	CvDeal* pRenewDeal = GET_PLAYER(ePlayer).GetDiplomacyAI()->GetDealToRenew();
+	int iDealType = 0;
+	CvDeal* pRenewDeal = GET_PLAYER(ePlayer).GetDiplomacyAI()->GetDealToRenew(&iDealType);
 	if (!pRenewDeal)
 	{
 		PlayerTypes eOtherPlayer = GetOtherPlayer(ePlayer);
 		if (eOtherPlayer != NO_PLAYER)
 		{
-			pRenewDeal = GET_PLAYER(eOtherPlayer).GetDiplomacyAI()->GetDealToRenew();
+			pRenewDeal = GET_PLAYER(eOtherPlayer).GetDiplomacyAI()->GetDealToRenew(&iDealType);
 		}
 	}
 
-	if (pRenewDeal)
+	// We should not count this in history Deal
+	if (pRenewDeal && iDealType != 0)
 	{
 		// count any that are in the renew deal
 		TradedItemList::iterator it;

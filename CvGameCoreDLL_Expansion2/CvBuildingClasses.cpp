@@ -38,6 +38,9 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iPrereqAndTech(NO_TECH),
 	m_iTechNoPrereqClasses(NO_TECH),
 	m_iPolicyBranchType(NO_POLICY_BRANCH_TYPE),
+	m_iPolicyNeededType(NO_POLICY),
+	m_bPuppetPurchaseOverride(false),
+	m_bAllowsPuppetPurchase(false),
 	m_iSpecialistType(NO_SPECIALIST),
 	m_iSpecialistCount(0),
 	m_iSpecialistExtraCulture(0),
@@ -145,11 +148,9 @@ CvBuildingEntry::CvBuildingEntry(void):
 #if defined(MOD_MORE_NATURAL_WONDER)
 	m_bImmueVolcanoDamage(false),
 #endif
-#if defined(MOD_API_EXTENSIONS)
 	m_bAddsFreshWater(false),
 	m_bPurchaseOnly(false),
 	m_bHumanOnly(false),
-#endif
 
 	m_bMoveAfterCreated(false),
 
@@ -171,6 +172,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iGlobalCityStrengthMod(0),
 	m_iGlobalRangedStrikeModifier(0),
 	m_iResearchTotalCostModifier(0),
+	m_iResearchTotalCostModifierGoldenAge(0),
 	m_iWaterTileDamage(0),
 	m_iWaterTileMovementReduce(0),
 	m_iWaterTileTurnDamage(0),
@@ -333,6 +335,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iMinNumReligions(0),
 	m_iLandmarksTourismPercentGlobal(0),
 	m_iGreatWorksTourismModifierGlobal(0),
+	m_iTradeRouteRiverBonusModifier(0),
 	m_iTradeRouteSeaGoldBonusGlobal(0),
 	m_iTradeRouteLandGoldBonusGlobal(0),
 	m_bAnyWater(false),
@@ -531,13 +534,10 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 #if defined(MOD_MORE_NATURAL_WONDER)
 	m_bImmueVolcanoDamage = kResults.GetBool("ImmueVolcanoDamage"); 
 #endif
-#if defined(MOD_API_EXTENSIONS)
-	if (MOD_API_EXTENSIONS) {
-		m_bAddsFreshWater = kResults.GetBool("AddsFreshWater");
-		m_bPurchaseOnly = kResults.GetBool("PurchaseOnly");
-		m_bHumanOnly = kResults.GetBool("HumanOnly");
-	}
-#endif
+
+	m_bAddsFreshWater = kResults.GetBool("AddsFreshWater");
+	m_bPurchaseOnly = kResults.GetBool("PurchaseOnly");
+	m_bHumanOnly = kResults.GetBool("HumanOnly");
 
 	m_bMoveAfterCreated = kResults.GetBool("MoveAfterCreated");
 
@@ -557,6 +557,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iGlobalCityStrengthMod = kResults.GetInt("GlobalCityStrengthMod");
 	m_iGlobalRangedStrikeModifier = kResults.GetInt("GlobalRangedStrikeModifier");
 	m_iResearchTotalCostModifier = kResults.GetInt("ResearchTotalCostModifier");
+	m_iResearchTotalCostModifierGoldenAge = kResults.GetInt("ResearchTotalCostModifierGoldenAge");
 	m_iWaterTileDamage = kResults.GetInt("WaterTileDamage");
 	m_iWaterTileMovementReduce = kResults.GetInt("WaterTileMovementReduce");
 	m_iWaterTileTurnDamage = kResults.GetInt("WaterTileTurnDamage");
@@ -583,6 +584,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iMinNumReligions = kResults.GetInt("MinNumReligions");
 	m_iLandmarksTourismPercentGlobal = kResults.GetInt("LandmarksTourismPercentGlobal");
 	m_iGreatWorksTourismModifierGlobal = kResults.GetInt("GreatWorksTourismModifierGlobal");
+	m_iTradeRouteRiverBonusModifier = kResults.GetInt("TradeRouteRiverBonusModifier");
 	m_iTradeRouteSeaGoldBonusGlobal = kResults.GetInt("TradeRouteSeaGoldBonusGlobal");
 	m_iTradeRouteLandGoldBonusGlobal = kResults.GetInt("TradeRouteLandGoldBonusGlobal");
 	m_bAnyWater = kResults.GetBool("AnyWater");
@@ -839,6 +841,12 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 	szTextVal = kResults.GetText("PolicyBranchType");
 	m_iPolicyBranchType = GC.getInfoTypeForString(szTextVal, true);
+
+	szTextVal = kResults.GetText("PolicyNeededType");
+	m_iPolicyNeededType = GC.getInfoTypeForString(szTextVal, true);
+
+	m_bPuppetPurchaseOverride = kResults.GetBool("PuppetPurchaseOverride");
+	m_bAllowsPuppetPurchase = kResults.GetBool("AllowsPuppetPurchase");
 
 	szTextVal = kResults.GetText("SpecialistType");
 	m_iSpecialistType = GC.getInfoTypeForString(szTextVal, true);
@@ -2056,6 +2064,23 @@ int CvBuildingEntry::GetPolicyBranchType() const
 	return m_iPolicyBranchType;
 }
 
+// Policy  required for this building
+int CvBuildingEntry::GetPolicyNeededType() const
+{
+	return m_iPolicyNeededType;
+}
+
+/// Is this building purchaseable in any city?
+bool CvBuildingEntry::IsPuppetPurchaseOverride() const
+{
+	return m_bPuppetPurchaseOverride;
+}
+/// Does this building unlock purchasing in any city?
+bool CvBuildingEntry::IsAllowsPuppetPurchase() const
+{
+	return m_bAllowsPuppetPurchase;
+}
+
 /// What SpecialistType is allowed by this Building
 int CvBuildingEntry::GetSpecialistType() const
 {
@@ -2419,6 +2444,10 @@ int CvBuildingEntry::GetGlobalRangedStrikeModifier() const
 int CvBuildingEntry::GetResearchTotalCostModifier() const
 {
 	return m_iResearchTotalCostModifier;
+}
+int CvBuildingEntry::GetResearchTotalCostModifierGoldenAge() const
+{
+	return m_iResearchTotalCostModifierGoldenAge;
 }
 
 /// Does this Building allow us to Range Strike?
@@ -2980,7 +3009,6 @@ bool CvBuildingEntry::IsImmueVolcanoDamage() const
 }
 #endif
 
-#if defined(MOD_API_EXTENSIONS)
 /// Does this building add FreshWater?
 bool CvBuildingEntry::IsAddsFreshWater() const
 {
@@ -2997,7 +3025,6 @@ bool CvBuildingEntry::IsHumanOnly() const
 {
 	return m_bHumanOnly;
 }
-#endif
 
 bool CvBuildingEntry::IsMoveAfterCreated() const
 {
@@ -4211,6 +4238,11 @@ int CvBuildingEntry::GetLandmarksTourismPercentGlobal() const
 int CvBuildingEntry::GetGreatWorksTourismModifierGlobal() const
 {
 	return m_iGreatWorksTourismModifierGlobal;
+}
+
+int CvBuildingEntry::GetTradeRouteRiverBonusModifier() const
+{
+	return m_iTradeRouteRiverBonusModifier;
 }
 
 int CvBuildingEntry::GetTradeRouteSeaGoldBonusGlobal() const

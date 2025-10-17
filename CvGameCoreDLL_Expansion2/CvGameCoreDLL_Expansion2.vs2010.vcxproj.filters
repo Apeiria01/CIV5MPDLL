@@ -572,6 +572,9 @@
     <ClCompile Include="CvSerialize.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CvIndependentPromotionInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="banned.h">
@@ -1397,6 +1400,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CvMeta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CvIndependentPromotionInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

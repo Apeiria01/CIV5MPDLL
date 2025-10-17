@@ -5,7 +5,7 @@
     <ProjectGuid>{0b961596-36f9-4289-a247-0e889fef1f39}</ProjectGuid>
     <Name>(1) CIV5MPDLL</Name>
     <Guid>a2969a0a-e4da-41cc-9e0b-19b29aa971d8</Guid>
-    <ModVersion>48</ModVersion>
+    <ModVersion>52</ModVersion>
     <Stability>Alpha</Stability>
     <Teaser>Based on whoward69's DLL-VMC v97, fixes multiplayer gaming sync bugs and provides more powerful modding utilities</Teaser>
     <Description>This mod is based on whoward69's DLL-VMC v97. It fixes out-of-sync problem of
@@ -479,16 +479,6 @@
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
         <FileName>DB/NewTableChanges.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/BUILDINGS/Building_EnableUnitPurchase.xml</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/BUILDINGS/Building_NewTable.xml</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -999,14 +989,6 @@
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
     <Content Include="DB\BUILDINGS\BuildingClassCollections.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB\BUILDINGS\Building_EnableUnitPurchase.xml">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB\BUILDINGS\Building_NewTable.xml">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>

@@ -911,7 +911,7 @@ void CvPlot::updateVisibility()
 					// This unit has visibility rules, send a message that it needs to update itself.
 					auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(pLoopUnit));
 #if defined(MOD_PROMOTION_FEATURE_INVISIBLE)
-					gDLL->GameplayUnitVisibility(pDllUnit.get(), (pLoopUnit->getTeam() == eActiveTeam)?true:(isInvisibleVisible(eActiveTeam, eInvisibleType) || pLoopUnit->IsInvisibleInvalid()), true, 0.01f);
+					gDLL->GameplayUnitVisibility(pDllUnit.get(), (pLoopUnit->getTeam() == eActiveTeam)?true:(isInvisibleVisible(eActiveTeam, eInvisibleType) || pLoopUnit->IsInvisibleInvalid(this)), true, 0.01f);
 #else
 					gDLL->GameplayUnitVisibility(pDllUnit.get(), (pLoopUnit->getTeam() == eActiveTeam)?true:isInvisibleVisible(eActiveTeam, eInvisibleType), true, 0.01f);
 #endif
@@ -936,7 +936,7 @@ void CvPlot::updateVisibility()
 						// This unit has visibility rules, send a message that it needs to update itself.
 						auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(pLoopUnit));
 #if defined(MOD_PROMOTION_FEATURE_INVISIBLE)
-						gDLL->GameplayUnitVisibility(pDllUnit.get(), (pLoopUnit->getTeam() == eActiveTeam)?true:(isInvisibleVisible(eActiveTeam, eInvisibleType) || pLoopUnit->IsInvisibleInvalid()), true, 0.01f);
+						gDLL->GameplayUnitVisibility(pDllUnit.get(), (pLoopUnit->getTeam() == eActiveTeam)?true:(isInvisibleVisible(eActiveTeam, eInvisibleType) || pLoopUnit->IsInvisibleInvalid(this)), true, 0.01f);
 #else
 						gDLL->GameplayUnitVisibility(pDllUnit.get(), (pLoopUnit->getTeam() == eActiveTeam)?true:isInvisibleVisible(eActiveTeam, eInvisibleType), true, 0.01f);
 #endif
@@ -3240,14 +3240,6 @@ int CvPlot::getBuildTurnsLeft(BuildTypes eBuild, PlayerTypes ePlayer, int iNowEx
 			iThenBuildRate += pLoopUnit->workRate(true, eBuild);
 		}
 	}
-
-#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
-	if(MOD_POLICY_NEW_EFFECT_FOR_SP && GC.getBuildInfo(eBuild)->IsWater())
-	{
-		iThenBuildRate *= (100 + GET_PLAYER(ePlayer).getWaterBuildSpeedModifier());
-		iThenBuildRate /= 100;
-	}
-#endif
 
 	if(iThenBuildRate == 0)
 	{
@@ -9186,27 +9178,6 @@ int CvPlot::calculateImprovementYieldChange(ImprovementTypes eImprovement, Yield
 	{
 		iYield += pImprovement->GetTerrainYieldChanges(getTerrainType(), eYield);
 	}
-	
-	// Check to see if there's a bonus to apply before doing any looping
-	if(pImprovement->GetAdjacentCityYieldChange(eYield) > 0)
-	{
-		for(iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
-		{
-			CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
-
-			if(pAdjacentPlot != NULL)
-			{
-				if(pAdjacentPlot->isCity())
-				{
-					// Is the owner of this Plot (with the Improvement) also the owner of an adjacent City?
-					if(pAdjacentPlot->getPlotCity()->getOwner() == getOwner())
-					{
-						iYield += pImprovement->GetAdjacentCityYieldChange(eYield);
-					}
-				}
-			}
-		}
-	}
 
 #if defined(MOD_API_UNIFIED_YIELDS)
 	if(isFreshWater() || bOptimal)
@@ -9352,6 +9323,7 @@ int CvPlot::calculateImprovementYieldChange(ImprovementTypes eImprovement, Yield
 
 	// Working city
 	CvCity* pWorkingCity = getWorkingCity();
+	int iReligionAdjacentCityYield = 0;
 	if(pWorkingCity)
 	{
 		ReligionTypes eMajority = pWorkingCity->GetCityReligions()->GetReligiousMajority();
@@ -9361,10 +9333,12 @@ int CvPlot::calculateImprovementYieldChange(ImprovementTypes eImprovement, Yield
 			if(pReligion)
 			{
 				int iReligionChange = pReligion->m_Beliefs.GetImprovementYieldChange(eImprovement, eYield);
+				iReligionAdjacentCityYield += pReligion->m_Beliefs.GetImprovementAdjacentCityYieldChange(eImprovement, eYield);
 				BeliefTypes eSecondaryPantheon = pWorkingCity->GetCityReligions()->GetSecondaryReligionPantheonBelief();
 				if (eSecondaryPantheon != NO_BELIEF)
 				{
 					iReligionChange += GC.GetGameBeliefs()->GetEntry(eSecondaryPantheon)->GetImprovementYieldChange(eImprovement, eYield);
+					iReligionAdjacentCityYield += GC.GetGameBeliefs()->GetEntry(eSecondaryPantheon)->GetImprovementAdjacentCityYieldChange(eImprovement, eYield);
 				}
 				iYield += iReligionChange;
 			}
@@ -9373,6 +9347,23 @@ int CvPlot::calculateImprovementYieldChange(ImprovementTypes eImprovement, Yield
 		// Extra yield for improvements
 		iYield += pWorkingCity->GetImprovementExtraYield(eImprovement, eYield);
 		if(ePlayer != NO_PLAYER) iYield += GET_PLAYER(ePlayer).GetImprovementExtraYield(eImprovement, eYield);
+	}
+
+	// Check to see if there's a bonus to apply before doing any looping
+	int iAdjacentCityYieldChange = pImprovement->GetAdjacentCityYieldChange(eYield) + iReligionAdjacentCityYield;
+	if (iAdjacentCityYieldChange != 0)
+	{
+		for(iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
+		{
+			CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+			if(!pAdjacentPlot || !pAdjacentPlot->isCity()) continue;
+
+			// Is the owner of this Plot (with the Improvement) also the owner of an adjacent City?
+			if(pAdjacentPlot->getPlotCity()->getOwner() != getOwner())  continue;
+
+			iYield += iAdjacentCityYieldChange;
+			break;
+		}
 	}
 
 	return iYield;
@@ -10948,14 +10939,6 @@ bool CvPlot::changeBuildProgress(BuildTypes eBuild, int iChange, PlayerTypes ePl
 				m_eImprovementTypeUnderConstruction = eImprovement;
 			}
 		}
-
-#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
-		if(MOD_POLICY_NEW_EFFECT_FOR_SP && pkBuildInfo->IsWater())
-		{
-			iChange *= (100 + kPlayer.getWaterBuildSpeedModifier());
-			iChange /= 100;
-		}
-#endif
 
 		m_paiBuildProgress[eBuild] += iChange;
 		CvAssert(getBuildProgress(eBuild) >= 0);

@@ -103,6 +103,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_iExtraFoundedCityTerritoryClaimRange(0),
 	m_iFreeSocialPoliciesPerEra(0),
 	m_iFreeGreatPeoplePerEra(0),
+	m_iOwnedReligionUnitCultureExtraTurns(0),
 	m_iNumTradeRoutesModifier(0),
 	m_iTradeRouteResourceModifier(0),
 	m_iUniqueLuxuryCities(0),
@@ -169,6 +170,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_bBonusReligiousBelief(false),
 	m_bAbleToAnnexCityStates(false),
 	m_bAbleToDualEmpire(false),
+	m_bNoDoDeficit(false),
 	m_bCrossesMountainsAfterGreatGeneral(false),
 #if defined(MOD_TRAITS_CROSSES_ICE)
 	m_bCrossesIce(false),
@@ -233,6 +235,35 @@ CvTraitEntry::CvTraitEntry() :
 /// Destructor
 CvTraitEntry::~CvTraitEntry()
 {
+	SAFE_DELETE_ARRAY(m_paiExtraYieldThreshold);
+	SAFE_DELETE_ARRAY(m_paiYieldChange);
+	SAFE_DELETE_ARRAY(m_paiYieldChangeStrategicResources);
+	SAFE_DELETE_ARRAY(m_paiYieldChangeNaturalWonder);
+	SAFE_DELETE_ARRAY(m_paiYieldChangePerTradePartner);
+	SAFE_DELETE_ARRAY(m_paiYieldChangeIncomingTradeRoute);
+	SAFE_DELETE_ARRAY(m_paiYieldModifier);
+#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+	SAFE_DELETE_ARRAY(m_paiGoldenAgeYieldModifier);
+#endif
+	SAFE_DELETE_ARRAY(m_piStrategicResourceQuantityModifier);
+	SAFE_DELETE_ARRAY(m_piResourceQuantityModifiers);
+	SAFE_DELETE_ARRAY(m_piMovesChangeUnitCombats);
+	SAFE_DELETE_ARRAY(m_piMaintenanceModifierUnitCombats);
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piCapitalYieldChanges);
+	SAFE_DELETE_ARRAY(m_piCityYieldChanges);
+	SAFE_DELETE_ARRAY(m_piCoastalCityYieldChanges);
+	SAFE_DELETE_ARRAY(m_piGreatWorkYieldChanges);
+	SAFE_DELETE_ARRAY(m_piYieldFromKills);
+	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
+	SAFE_DELETE_ARRAY(m_piYieldChangeTradeRoute);
+	SAFE_DELETE_ARRAY(m_piYieldChangeWorldWonder);
+#endif
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piGoldenAgeGreatPersonRateModifier);
+#endif
+	SAFE_DELETE_ARRAY(m_piBuildingClassFaithCost);
+
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementYieldChanges);
 #if defined(MOD_API_UNIFIED_YIELDS) && defined(MOD_API_PLOT_YIELDS)
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiPlotYieldChanges);
@@ -655,6 +686,11 @@ int CvTraitEntry::GetFreeGreatPeoplePerEra() const
 	return m_iFreeGreatPeoplePerEra;
 }
 
+int CvTraitEntry::GetOwnedReligionUnitCultureExtraTurns() const
+{
+	return m_iOwnedReligionUnitCultureExtraTurns;
+}
+
 int CvTraitEntry::GetNumTradeRoutesModifier() const
 {
 	return m_iNumTradeRoutesModifier;
@@ -940,6 +976,12 @@ bool CvTraitEntry::IsAbleToAnnexCityStates() const
 bool CvTraitEntry::IsAbleToDualEmpire() const
 {
 	return m_bAbleToDualEmpire;
+}
+
+/// Accessor: Never disbanding things in DoDeficit()
+bool CvTraitEntry::IsNoDoDeficit() const
+{
+	return m_bNoDoDeficit;
 }
 
 /// Accessor: do combat units have the ability to cross mountains after a great general is born?
@@ -1361,6 +1403,16 @@ bool CvTraitEntry::IsFreePromotionUnitClass(const int promotionID, const int uni
 	return false;
 }
 #endif
+
+bool CvTraitEntry::IsHasBuildingClassFaithCost() const
+{
+	return m_piBuildingClassFaithCost != nullptr;
+}
+int CvTraitEntry::GetBuildingClassFaithCost(int iBuildingClass) const
+{
+	return m_piBuildingClassFaithCost ? m_piBuildingClassFaithCost[iBuildingClass] : 0;
+}
+
 /// Has this trait become obsolete?
 bool CvTraitEntry::IsObsoleteByTech(TeamTypes eTeam)
 {
@@ -1481,9 +1533,13 @@ int CvTraitEntry::GetSeaTradeRouteYieldTimes100(const YieldTypes eYield) const
 }
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-int CvTraitEntry::GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYield) const
+int CvTraitEntry::GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYield) const
 {
-	return m_piPerMajorReligionFollowerYieldModifier[eYield];
+	return m_piPerMajorReligionFollowerYieldModifierTimes100[eYield];
+}
+int CvTraitEntry::GetPerMajorReligionFollowerYieldModifierMax(const YieldTypes eYield) const
+{
+	return m_piPerMajorReligionFollowerYieldModifierMax[eYield];
 }
 #endif
 
@@ -1578,6 +1634,11 @@ int CvTraitEntry::GetGoldenAgeGrowThresholdModifier() const
 int CvTraitEntry::GetShareAllyResearchPercent() const
 {
 	return m_iShareAllyResearchPercent;
+}
+
+bool CvTraitEntry::CanPurchaseWonderInGoldenAge() const
+{
+	return m_bCanPurchaseWonderInGoldenAge;
 }
 
 bool CvTraitEntry::CanDiplomaticMarriage() const
@@ -1679,6 +1740,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_iExtraFoundedCityTerritoryClaimRange  = kResults.GetInt("ExtraFoundedCityTerritoryClaimRange");
 	m_iFreeSocialPoliciesPerEra				= kResults.GetInt("FreeSocialPoliciesPerEra");
 	m_iFreeGreatPeoplePerEra				= kResults.GetInt("FreeGreatPeoplePerEra");
+	m_iOwnedReligionUnitCultureExtraTurns	= kResults.GetInt("OwnedReligionUnitCultureExtraTurns");
 	m_iNumTradeRoutesModifier				= kResults.GetInt("NumTradeRoutesModifier");
 	m_iTradeRouteResourceModifier			= kResults.GetInt("TradeRouteResourceModifier");
 	m_iUniqueLuxuryCities					= kResults.GetInt("UniqueLuxuryCities");
@@ -1831,6 +1893,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_bBonusReligiousBelief = kResults.GetBool("BonusReligiousBelief");
 	m_bAbleToAnnexCityStates = kResults.GetBool("AbleToAnnexCityStates");
 	m_bAbleToDualEmpire = kResults.GetBool("AbleToDualEmpire");
+	m_bNoDoDeficit = kResults.GetBool("NoDoDeficit");
 	m_bCrossesMountainsAfterGreatGeneral = kResults.GetBool("CrossesMountainsAfterGreatGeneral");
 #if defined(MOD_TRAITS_CROSSES_ICE)
 	if (MOD_TRAITS_CROSSES_ICE) {
@@ -1942,6 +2005,28 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 		std::multimap<int,int>(m_FreePromotionUnitClasses).swap(m_FreePromotionUnitClasses);
 	}
 #endif
+
+	{
+		std::string sqlKey = "Trait_BuildingClassFaithCost";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if(pResults == NULL)
+		{
+			const char* szSQL = "select BuildingClasses.ID as BuildingClassID, Cost from Trait_BuildingClassFaithCost inner join BuildingClasses on BuildingClasses.Type = BuildingClassType where TraitType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+
+		pResults->Bind(1, szTraitType);
+
+		while(pResults->Step())
+		{
+			if(!m_piBuildingClassFaithCost) m_piBuildingClassFaithCost = FNEW(int[kUtility.MaxRows("BuildingClasses")], c_eCiv5GameplayDLL, 0);
+			const int BuildingClassID = pResults->GetInt(0);
+			const int iCost = pResults->GetInt(1);
+
+			m_piBuildingClassFaithCost[BuildingClassID] = iCost;
+		}
+		pResults->Reset();
+	}
 
 	//Populate m_MovesChangeUnitCombats
 	{
@@ -2425,7 +2510,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	{
 		for (int i = 0; i < NUM_YIELD_TYPES; i++)
 		{
-			m_piPerMajorReligionFollowerYieldModifier[i] = 0;
+			m_piPerMajorReligionFollowerYieldModifierTimes100[i] = 0;
 		}
 
 		std::string strKey("Trait_PerMajorReligionFollowerYieldModifier");
@@ -2440,8 +2525,44 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 		while (pResults->Step())
 		{
 			const int eYieldType = pResults->GetInt(0);
-			const int iModifier = pResults->GetInt(1);
-			m_piPerMajorReligionFollowerYieldModifier[eYieldType] += iModifier;
+			const int iModifier = pResults->GetInt(1) * 100;
+			m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType] += iModifier;
+		}
+	}
+	{
+		std::string strKey("Trait_PerMajorReligionFollowerYieldModifierTimes100");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select t2.ID, t1.Yield from Trait_PerMajorReligionFollowerYieldModifierTimes100 t1 inner join Yields t2 on t1.YieldType = t2.Type where t1.TraitType = ?");
+		}
+
+		pResults->Bind(1, szTraitType);
+
+		while (pResults->Step())
+		{
+			m_piPerMajorReligionFollowerYieldModifierTimes100[pResults->GetInt(0)] += pResults->GetInt(1);
+		}
+	}
+	{
+		for (int i = 0; i < NUM_YIELD_TYPES; i++)
+		{
+			m_piPerMajorReligionFollowerYieldModifierMax[i] = 0;
+		}
+
+		std::string strKey("Trait_PerMajorReligionFollowerYieldModifierMax");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select t2.ID, t1.Max from Trait_PerMajorReligionFollowerYieldModifierMax t1 inner join Yields t2 on t1.YieldType = t2.Type where t1.TraitType = ?");
+		}
+
+		pResults->Bind(1, szTraitType);
+		while (pResults->Step())
+		{
+			const int eYieldType = pResults->GetInt(0);
+			const int iMax = pResults->GetInt(1);
+			m_piPerMajorReligionFollowerYieldModifierMax[eYieldType] += iMax;
 		}
 	}
 
@@ -2479,6 +2600,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_iOthersTradeBonusModifier = kResults.GetInt("OthersTradeBonusModifier");
 	m_iGoldenAgeGrowThresholdModifier = kResults.GetInt("GoldenAgeGrowThresholdModifier");
 	m_iShareAllyResearchPercent = kResults.GetInt("ShareAllyResearchPercent");
+	m_bCanPurchaseWonderInGoldenAge = kResults.GetBool("CanPurchaseWonderInGoldenAge");
 	m_bCanDiplomaticMarriage = kResults.GetBool("CanDiplomaticMarriage");
 	m_bWLKDCityNoResearchCost = kResults.GetBool("WLKDCityNoResearchCost");
 	m_bGoodyUnitUpgradeFirst = kResults.GetBool("GoodyUnitUpgradeFirst");
@@ -2646,6 +2768,7 @@ void CvPlayerTraits::InitPlayerTraits()
 			m_iExtraFoundedCityTerritoryClaimRange += trait->GetExtraFoundedCityTerritoryClaimRange();
 			m_iFreeSocialPoliciesPerEra += trait->GetFreeSocialPoliciesPerEra();
 			m_iFreeGreatPeoplePerEra += trait->GetFreeGreatPeoplePerEra();
+			m_iOwnedReligionUnitCultureExtraTurns += trait->GetOwnedReligionUnitCultureExtraTurns();
 			m_iNumTradeRoutesModifier += trait->GetNumTradeRoutesModifier();
 			m_iTradeRouteResourceModifier += trait->GetTradeRouteResourceModifier();
 			m_iUniqueLuxuryCities += trait->GetUniqueLuxuryCities();
@@ -2691,6 +2814,14 @@ void CvPlayerTraits::InitPlayerTraits()
 			}
 			m_iTradeRouteLandGoldBonus += trait->GetTradeRouteLandGoldBonus();
 			m_iTradeRouteSeaGoldBonus += trait->GetTradeRouteSeaGoldBonus();
+			if(trait->IsHasBuildingClassFaithCost())
+			{
+				if(m_aiBuildingClassFaithCost.size() < GC.getNumBuildingClassInfos()) m_aiBuildingClassFaithCost.resize(GC.getNumBuildingClassInfos(), 0);
+				for(int iBuildingClassLoop = 0; iBuildingClassLoop < GC.getNumBuildingClassInfos(); iBuildingClassLoop++)
+				{
+					m_aiBuildingClassFaithCost[iBuildingClassLoop] += trait->GetBuildingClassFaithCost(iBuildingClassLoop);
+				}
+			}
 #endif
 
 			for (int i = 0; i < NUM_YIELD_TYPES; i++)
@@ -2703,7 +2834,8 @@ void CvPlayerTraits::InitPlayerTraits()
 			{
 				for (int i = 0; i < NUM_YIELD_TYPES; i++)
 				{
-					m_piPerMajorReligionFollowerYieldModifier[i] += trait->GetPerMajorReligionFollowerYieldModifier(static_cast<YieldTypes>(i));
+					m_piPerMajorReligionFollowerYieldModifierTimes100[i] += trait->GetPerMajorReligionFollowerYieldModifierTimes100(static_cast<YieldTypes>(i));
+					m_piPerMajorReligionFollowerYieldModifierMax[i] += trait->GetPerMajorReligionFollowerYieldModifierMax(static_cast<YieldTypes>(i));
 				}
 			}
 #endif
@@ -2784,6 +2916,7 @@ void CvPlayerTraits::InitPlayerTraits()
 				m_bAbleToAnnexCityStates = true;
 			}
 			m_bAbleToDualEmpire = trait->IsAbleToDualEmpire();
+			m_bNoDoDeficit = trait->IsNoDoDeficit();
 			if(trait->IsCrossesMountainsAfterGreatGeneral())
 			{
 				m_bCrossesMountainsAfterGreatGeneral = true;
@@ -2871,6 +3004,7 @@ void CvPlayerTraits::InitPlayerTraits()
 			m_iOthersTradeBonusModifier = trait->GetOthersTradeBonusModifier();
 			m_iGoldenAgeGrowThresholdModifier = trait->GetGoldenAgeGrowThresholdModifier();
 			m_iShareAllyResearchPercent = trait->GetShareAllyResearchPercent();
+			m_bCanPurchaseWonderInGoldenAge = trait->CanPurchaseWonderInGoldenAge();
 			m_bCanDiplomaticMarriage = trait->CanDiplomaticMarriage();
 			m_bWLKDCityNoResearchCost = trait->IsWLKDCityNoResearchCost();
 			m_bGoodyUnitUpgradeFirst = trait->IsGoodyUnitUpgradeFirst();
@@ -3119,6 +3253,7 @@ void CvPlayerTraits::Uninit()
 	m_piGoldenAgeGreatPersonRateModifier.clear();
 	m_ppiCityYieldFromUnimprovedFeature.clear();
 #endif
+	m_aiBuildingClassFaithCost.clear();
 	m_ppaaiUnimprovedFeatureYieldChange.clear();
 	m_ppiCityYieldModifierFromAdjacentFeature.clear();
 	m_ppiCityYieldPerAdjacentFeature.clear();
@@ -3201,6 +3336,7 @@ void CvPlayerTraits::Reset()
 	m_iExtraFoundedCityTerritoryClaimRange = 0;
 	m_iFreeSocialPoliciesPerEra = 0;
 	m_iFreeGreatPeoplePerEra = 0;
+	m_iOwnedReligionUnitCultureExtraTurns = 0;
 	m_iNumTradeRoutesModifier = 0;
 	m_iTradeRouteResourceModifier = 0;
 	m_iUniqueLuxuryCities = 0;
@@ -3259,6 +3395,7 @@ void CvPlayerTraits::Reset()
 	m_bBonusReligiousBelief = false;
 	m_bAbleToAnnexCityStates = false;
 	m_bAbleToDualEmpire = false;
+	m_bNoDoDeficit = false;
 	m_bCrossesMountainsAfterGreatGeneral = false;
 #if defined(MOD_TRAITS_CROSSES_ICE)
 	m_bCrossesIce = false;
@@ -3318,7 +3455,8 @@ void CvPlayerTraits::Reset()
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
 	for (int i = 0; i < NUM_YIELD_TYPES; i++)
 	{
-		m_piPerMajorReligionFollowerYieldModifier[i] = 0;
+		m_piPerMajorReligionFollowerYieldModifierTimes100[i] = 0;
+		m_piPerMajorReligionFollowerYieldModifierMax[i] = 0;
 	}
 #endif
 
@@ -3409,6 +3547,8 @@ void CvPlayerTraits::Reset()
 		m_piGoldenAgeGreatPersonRateModifier[iGreatPerson] = 0;
 	}
 #endif
+
+	m_aiBuildingClassFaithCost.resize(0);
 
 	for(int iTerrain = 0; iTerrain < GC.getNumTerrainInfos(); iTerrain++)
 	{
@@ -3799,6 +3939,11 @@ bool CvPlayerTraits::HasFreePromotionUnitClass(const int promotionID, const int 
 	return false;
 }
 #endif
+
+int CvPlayerTraits::GetBuildingClassFaithCost(BuildingClassTypes eBuildingClass) const
+{
+	return m_aiBuildingClassFaithCost.size() > eBuildingClass ? m_aiBuildingClassFaithCost[eBuildingClass] : 0;
+}
 
 /// Does each city get a free building?
 BuildingTypes CvPlayerTraits::GetFreeBuilding() const
@@ -4630,6 +4775,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	{
 		m_iFreeGreatPeoplePerEra = 0;
 	}
+	MOD_SERIALIZE_READ(151, kStream, m_iOwnedReligionUnitCultureExtraTurns, 0);
 
 	if (uiVersion >= 6)
 	{
@@ -4770,6 +4916,8 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_bAbleToAnnexCityStates;
 	
 	kStream >> m_bAbleToDualEmpire;
+
+	kStream >> m_bNoDoDeficit;
 
 	kStream >> m_bCrossesMountainsAfterGreatGeneral;
 #if defined(MOD_TRAITS_CROSSES_ICE)
@@ -4969,6 +5117,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_piGoldenAgeGreatPersonRateModifier;
 	kStream >> m_ppiCityYieldFromUnimprovedFeature;
 #endif
+	kStream >> m_aiBuildingClassFaithCost;
 	kStream >> m_ppaaiUnimprovedFeatureYieldChange;
 	kStream >> m_ppiCityYieldModifierFromAdjacentFeature;
 	kStream >> m_ppiCityYieldPerAdjacentFeature;
@@ -4995,7 +5144,8 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 
 	kStream >> m_piSeaTradeRouteYieldPerEraTimes100;
 	kStream >> m_piSeaTradeRouteYieldTimes100;
-	kStream >> m_piPerMajorReligionFollowerYieldModifier;
+	kStream >> m_piPerMajorReligionFollowerYieldModifierTimes100;
+	kStream >> m_piPerMajorReligionFollowerYieldModifierMax;
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
 	kStream >> m_iSpreadReligionFromKilledUnitStrengthPercent;
@@ -5031,7 +5181,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_iOthersTradeBonusModifier;
 	kStream >> m_iGoldenAgeGrowThresholdModifier;
 	kStream >> m_iShareAllyResearchPercent;
-
+	kStream >> m_bCanPurchaseWonderInGoldenAge;
 	kStream >> m_bCanDiplomaticMarriage;
 	kStream >> m_bWLKDCityNoResearchCost;
 	kStream >> m_bGoodyUnitUpgradeFirst;
@@ -5116,6 +5266,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iExtraFoundedCityTerritoryClaimRange;
 	kStream << m_iFreeSocialPoliciesPerEra;
 	kStream << m_iFreeGreatPeoplePerEra;
+	MOD_SERIALIZE_WRITE(kStream, m_iOwnedReligionUnitCultureExtraTurns);
 	kStream << m_iNumTradeRoutesModifier;
 	kStream << m_iTradeRouteResourceModifier;
 	kStream << m_iUniqueLuxuryCities;
@@ -5175,6 +5326,8 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_bBonusReligiousBelief;
 	kStream << m_bAbleToAnnexCityStates;
 	kStream << m_bAbleToDualEmpire;
+
+	kStream << m_bNoDoDeficit;
 	
 	kStream << m_bCrossesMountainsAfterGreatGeneral;
 #if defined(MOD_TRAITS_CROSSES_ICE)
@@ -5276,6 +5429,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_piGoldenAgeGreatPersonRateModifier;
 	kStream << m_ppiCityYieldFromUnimprovedFeature;
 #endif
+	kStream << m_aiBuildingClassFaithCost;
 	kStream << m_ppaaiUnimprovedFeatureYieldChange;
 	kStream << m_ppiCityYieldModifierFromAdjacentFeature;
 	kStream << m_ppiCityYieldPerAdjacentFeature;
@@ -5288,7 +5442,8 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 
 	kStream << m_piSeaTradeRouteYieldPerEraTimes100;
 	kStream << m_piSeaTradeRouteYieldTimes100;
-	kStream << m_piPerMajorReligionFollowerYieldModifier;
+	kStream << m_piPerMajorReligionFollowerYieldModifierTimes100;
+	kStream << m_piPerMajorReligionFollowerYieldModifierMax;
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
 	kStream << m_iSpreadReligionFromKilledUnitStrengthPercent;
@@ -5324,7 +5479,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iOthersTradeBonusModifier;
 	kStream << m_iGoldenAgeGrowThresholdModifier;
 	kStream << m_iShareAllyResearchPercent;
-
+	kStream << m_bCanPurchaseWonderInGoldenAge;
 	kStream << m_bCanDiplomaticMarriage;
 	kStream << m_bWLKDCityNoResearchCost;
 	kStream << m_bGoodyUnitUpgradeFirst;
@@ -5575,6 +5730,10 @@ int CvPlayerTraits::GetGoldenAgeGrowThresholdModifier() const
 int CvPlayerTraits::GetShareAllyResearchPercent() const
 {
 	return m_iShareAllyResearchPercent;
+}
+bool CvPlayerTraits::CanPurchaseWonderInGoldenAge() const
+{
+	return m_bCanPurchaseWonderInGoldenAge;
 }
 bool CvPlayerTraits::CanDiplomaticMarriage() const
 {

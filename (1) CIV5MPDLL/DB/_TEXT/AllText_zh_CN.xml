@@ -730,7 +730,7 @@
 			<Text>诺贝尔医学或生理学奖</Text>
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_MESSAGE">
-			<Text>{1_civ}的大科学家[COLOR_BLUE]{2_person_name}[ENDCOLOR]荣获新一届{4_prizeType}，你获得了+[COLOR_BLUE]{3_research}[ENDCOLOR][ICON_RESEARCH]科研！</Text>
+			<Text>{1_civ}的大科学家[COLOR:33:190:247:255]{2_person_name}[ENDCOLOR]荣获新一届{4_prizeType}，你获得了+[COLOR:33:190:247:255]{3_research}[ENDCOLOR][ICON_RESEARCH]科研！</Text>
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_WIN_NOBEL_PRIZE_SUMMARY">
 			<Text>诺贝尔奖得主！</Text>

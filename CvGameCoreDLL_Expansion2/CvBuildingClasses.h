@@ -147,6 +147,9 @@ public:
 	int GetPrereqAndTech() const;
 	int GetTechNoPrereqClasses() const;
 	int GetPolicyBranchType() const;
+	int GetPolicyNeededType() const;
+	bool IsPuppetPurchaseOverride() const;
+	bool IsAllowsPuppetPurchase() const;
 	int GetSpecialistType() const;
 	int GetSpecialistCount() const;
 	int GetSpecialistExtraCulture() const;
@@ -237,6 +240,7 @@ public:
 	int GetGlobalCityStrengthMod() const;
 	int GetGlobalRangedStrikeModifier() const;
 	int GetResearchTotalCostModifier() const;
+	int GetResearchTotalCostModifierGoldenAge() const;
 	int GetResetDamageValue() const;
 	int GetReduceDamageValue() const;
 
@@ -355,11 +359,9 @@ public:
 #if defined(MOD_MORE_NATURAL_WONDER)
 	bool IsImmueVolcanoDamage() const;
 #endif
-#if defined(MOD_API_EXTENSIONS)
 	bool IsAddsFreshWater() const;
 	bool IsPurchaseOnly() const;
 	bool IsHumanOnly() const;
-#endif
 	bool IsMoveAfterCreated() const;
 	bool IsMountain() const;
 	bool IsHill() const;
@@ -517,6 +519,7 @@ public:
 	int GetMinNumReligions() const;
 	int GetLandmarksTourismPercentGlobal() const;
 	int GetGreatWorksTourismModifierGlobal() const;
+	int GetTradeRouteRiverBonusModifier() const;
 	int GetTradeRouteSeaGoldBonusGlobal() const;
 	int GetTradeRouteLandGoldBonusGlobal() const;
 	bool IsAnyWater() const;
@@ -636,6 +639,9 @@ private:
 	int m_iPrereqAndTech;
 	int m_iTechNoPrereqClasses;
 	int m_iPolicyBranchType;
+	int m_iPolicyNeededType;
+	bool m_bPuppetPurchaseOverride;
+	bool m_bAllowsPuppetPurchase;
 	int m_iSpecialistType;
 	int m_iSpecialistCount;
 	int m_iSpecialistExtraCulture;
@@ -719,6 +725,7 @@ private:
 	int m_iGlobalCityStrengthMod;
 	int m_iGlobalRangedStrikeModifier;
 	int m_iResearchTotalCostModifier;
+	int m_iResearchTotalCostModifierGoldenAge;
 	int m_iWaterTileDamage;
 	int m_iWaterTileMovementReduce;
 	int m_iWaterTileTurnDamage;
@@ -843,11 +850,9 @@ private:
 #if defined(MOD_MORE_NATURAL_WONDER)
 	bool m_bImmueVolcanoDamage;
 #endif
-#if defined(MOD_API_EXTENSIONS)
 	bool m_bAddsFreshWater;
 	bool m_bPurchaseOnly;
 	bool m_bHumanOnly;
-#endif
 	bool m_bMoveAfterCreated;
 	bool m_bMountain;
 	bool m_bHill;
@@ -986,6 +991,7 @@ private:
 	int m_iMinNumReligions;
 	int m_iLandmarksTourismPercentGlobal;
 	int m_iGreatWorksTourismModifierGlobal;
+	int m_iTradeRouteRiverBonusModifier;
 	int m_iTradeRouteSeaGoldBonusGlobal;
 	int m_iTradeRouteLandGoldBonusGlobal;
 	bool m_bAnyWater;

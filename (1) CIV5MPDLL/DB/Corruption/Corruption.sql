@@ -15,6 +15,7 @@ create table CorruptionLevels (
     PublicSecurityBuildingClass text null
 );
 
+alter table Buildings add SecondCapitalsExtraScore integer default 0;
 alter table Policies add column CorruptionScoreModifier integer not null default 0;
 alter table Resources add column CorruptionScoreChange integer not null default 0;
 alter table Buildings add column CorruptionScoreChange integer not null default 0;

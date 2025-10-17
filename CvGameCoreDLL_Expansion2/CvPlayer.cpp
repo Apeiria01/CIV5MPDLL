@@ -198,7 +198,6 @@ CvPlayer::CvPlayer() :
 	, m_iEspionageModifier(0)
 	, m_iEspionageSpeedModifier(0)
 	, m_iSpyStartingRank(0)
-	, m_iSpyLevelUpWhenRiggingCount(0)
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	, m_iConversionModifier(0)
 #endif
@@ -206,6 +205,7 @@ CvPlayer::CvPlayer() :
 	, m_iSpecialPolicyBuildingHappiness("CvPlayer::m_iSpecialPolicyBuildingHappiness", m_syncArchive)
 	, m_iWoundedUnitDamageMod("CvPlayer::m_iWoundedUnitDamageMod", m_syncArchive)
 	, m_iUnitUpgradeCostMod("CvPlayer::m_iUnitUpgradeCostMod", m_syncArchive)
+	, m_iAllowPuppetPurchase("CvPlayer::m_iAllowPuppetPurchase", m_syncArchive)
 	, m_iBarbarianCombatBonus("CvPlayer::m_iBarbarianCombatBonus", m_syncArchive)
 	, m_iAlwaysSeeBarbCampsCount("CvPlayer::m_iAlwaysSeeBarbCampsCount", m_syncArchive)
 	, m_iHappinessFromBuildings("CvPlayer::m_iHappinessFromBuildings", m_syncArchive)
@@ -287,6 +287,7 @@ CvPlayer::CvPlayer() :
 	, m_iHappinessPerPolicy(0)
 	, m_iWaterBuildSpeedModifier(0)
 	, m_vSettlerProductionEraModifier()
+	, m_vBuildSpeedModifier()
 #endif
 	, m_iNullifyInfluenceModifier(0)
 	, m_iNumTradeRouteBonus(0)
@@ -385,6 +386,7 @@ CvPlayer::CvPlayer() :
 	, m_iGlobalCityStrengthMod(0)
 	, m_iGlobalRangedStrikeModifier(0)
 	, m_iResearchTotalCostModifier(0)
+	, m_iResearchTotalCostModifierGoldenAge(0)
 	, m_iLiberatedInfluence(0)
 	, m_iExtraUnitPlayerInstances(0)
 	, m_iWaterTileDamageGlobal(0)
@@ -739,12 +741,6 @@ void CvPlayer::init(PlayerTypes eID)
 		changeGoldPerUnitTimes100(GC.getINITIAL_GOLD_PER_UNIT_TIMES_100());
 
 		ChangeMaxNumBuilders(GC.getDEFAULT_MAX_NUM_BUILDERS());
-#ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-		for (int i = 0; i < NUM_YIELD_TYPES; i++)
-		{
-			ChangePerMajorReligionFollowerYieldModifier(static_cast<YieldTypes>(i), GetPlayerTraits()->GetPerMajorReligionFollowerYieldModifier(static_cast<YieldTypes>(i)));
-		}
-#endif
 		changeLevelExperienceModifier(GetPlayerTraits()->GetLevelExperienceModifier());
 		changeMaxGlobalBuildingProductionModifier(GetPlayerTraits()->GetMaxGlobalBuildingProductionModifier());
 		changeMaxTeamBuildingProductionModifier(GetPlayerTraits()->GetMaxTeamBuildingProductionModifier());
@@ -982,7 +978,6 @@ void CvPlayer::uninit()
 	m_iEspionageModifier = 0;
 	m_iEspionageSpeedModifier = 0;
 	m_iSpyStartingRank = 0;
-	m_iSpyLevelUpWhenRiggingCount = 0;
 
 	m_iCSAllies = 0;
 	m_iCSFriends = 0;
@@ -999,6 +994,7 @@ void CvPlayer::uninit()
 	m_iSpecialPolicyBuildingHappiness = 0;
 	m_iWoundedUnitDamageMod = 0;
 	m_iUnitUpgradeCostMod = 0;
+	m_iAllowPuppetPurchase = 0;
 	m_iBarbarianCombatBonus = 0;
 	m_iAlwaysSeeBarbCampsCount = 0;
 	m_iHappinessFromBuildings = 0;
@@ -1087,6 +1083,7 @@ void CvPlayer::uninit()
 	m_iHappinessPerPolicy = 0;
 	m_iWaterBuildSpeedModifier = 0;
 	m_vSettlerProductionEraModifier.clear();
+	m_vBuildSpeedModifier.clear();
 #endif
 	m_iNullifyInfluenceModifier = 0;
 	m_iNumTradeRouteBonus = 0;
@@ -1179,6 +1176,7 @@ void CvPlayer::uninit()
 	m_iGlobalCityStrengthMod = 0;
 	m_iGlobalRangedStrikeModifier = 0;
 	m_iResearchTotalCostModifier = 0;
+	m_iResearchTotalCostModifierGoldenAge = 0;
 	m_iLiberatedInfluence = 0;
 	m_iExtraUnitPlayerInstances = 0;
 	m_iWaterTileDamageGlobal = 0;
@@ -1371,6 +1369,8 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 #endif
 	m_vSettlerProductionEraModifier.clear();
 	m_vSettlerProductionEraModifier.resize(GC.getNumEraInfos(), 0);
+	m_vBuildSpeedModifier.clear();
+	m_vBuildSpeedModifier.resize(GC.getNumBuildInfos(), 0);
 	m_viTradeRouteDomainExtraRange.clear();
 	m_viTradeRouteDomainExtraRange.resize(NUM_DOMAIN_TYPES, 0);
 
@@ -1470,7 +1470,7 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
 	for (int i = 0; i < NUM_YIELD_TYPES; i++)
 	{
-		m_piPerMajorReligionFollowerYieldModifier[i] = 0;
+		m_piPerMajorReligionFollowerYieldModifierTimes100[i] = 0;
 	}
 #endif
 
@@ -8745,6 +8745,14 @@ bool CvPlayer::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestV
 			return false;
 		}
 	}
+	PolicyTypes ePolicy = (PolicyTypes)pBuildingInfo.GetPolicyNeededType();
+	if (ePolicy != NO_POLICY)
+	{
+		if (!GetPlayerPolicies()->HasPolicy(ePolicy))
+		{
+			return false;
+		}
+	}
 
 	if(!(currentTeam.GetTeamTechs()->HasTech((TechTypes)(pBuildingInfo.GetPrereqAndTech()))))
 	{
@@ -10067,9 +10075,11 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 #endif
 
 #if defined(MOD_ROG_CORE)
+	ChangeAllowPuppetPurchase(pBuildingInfo->IsAllowsPuppetPurchase() ? iChange : 0);
 	ChangeCityStrengthMod(pBuildingInfo->GetGlobalCityStrengthMod()* iChange);
 	ChangeGlobalRangedStrikeModifier(pBuildingInfo->GetGlobalRangedStrikeModifier()* iChange);
 	ChangeResearchTotalCostModifier(pBuildingInfo->GetResearchTotalCostModifier()* iChange);
+	ChangeResearchTotalCostModifierGoldenAge(pBuildingInfo->GetResearchTotalCostModifierGoldenAge()* iChange);
 	ChangeLiberatedInfluence(pBuildingInfo->GetLiberatedInfluence()* iChange);
 	ChangeExtraUnitPlayerInstances(pBuildingInfo->GetExtraUnitPlayerInstances()* iChange);
 	ChangeWaterTileDamageGlobal(pBuildingInfo->GetWaterTileDamageGlobal()* iChange);
@@ -14452,17 +14462,6 @@ void CvPlayer::ChangeStartingSpyRank(int iChange)
 	m_iSpyStartingRank = (m_iSpyStartingRank + iChange);
 }
 
-//Can spy level up when after rigging
-int CvPlayer::GetSpyLevelUpWhenRiggingCount() const
-{
-	return m_iSpyLevelUpWhenRiggingCount;
-}
-
-bool CvPlayer::IsSpyLevelUpWhenRigging() const
-{
-	return (GetSpyLevelUpWhenRiggingCount() > 0);
-}
-
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 //	--------------------------------------------------------------------------------
 /// Get the global modifier on the conversion progress rate
@@ -14546,6 +14545,27 @@ void CvPlayer::SetUnitUpgradeCostMod(int iValue)
 void CvPlayer::ChangeUnitUpgradeCostMod(int iChange)
 {
 	SetUnitUpgradeCostMod(m_iUnitUpgradeCostMod + iChange);
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetAllowPuppetPurchase() const
+{
+	return m_iAllowPuppetPurchase;
+}
+
+void CvPlayer::ChangeAllowPuppetPurchase(int iChange)
+{
+	if (iChange != 0)
+	{
+		m_iAllowPuppetPurchase = m_iAllowPuppetPurchase + iChange;;
+	}	
+}
+
+//	--------------------------------------------------------------------------------
+bool CvPlayer::IsAllowPuppetPurchase() const
+{
+	return m_iAllowPuppetPurchase > 0;
 }
 
 //	--------------------------------------------------------------------------------
@@ -16943,6 +16963,15 @@ void CvPlayer::changeSettlerProductionEraModifier(EraTypes eStartEra, int iChang
 	}
 }
 
+//	--------------------------------------------------------------------------------
+int CvPlayer::getBuildSpeedModifier(BuildTypes eBuild) const
+{
+	return m_vBuildSpeedModifier[eBuild];
+}
+void CvPlayer::changeBuildSpeedModifier(BuildTypes eBuild, int iChange)
+{
+	m_vBuildSpeedModifier[eBuild] += iChange;
+}
 #endif
 //	--------------------------------------------------------------------------------
 bool CvPlayer::isNullifyInfluenceModifier() const
@@ -21736,6 +21765,7 @@ int CvPlayer::GetScienceYieldFromPreviousTurns(int iGameTurn, int iNumPreviousTu
 {
 	// Beakers per turn yield is tracked in replay data, so use that
 	int iSum = 0;
+	int iReplayDataSetIndex = getReplayDataSetIndex("REPLAYDATASET_SCIENCEPERTURN");
 	for (int iI = 0; iI < iNumPreviousTurnsToCount; iI++)
 	{
 		int iTurn = iGameTurn - iI;
@@ -21744,14 +21774,16 @@ int CvPlayer::GetScienceYieldFromPreviousTurns(int iGameTurn, int iNumPreviousTu
 			break;
 		}
 
-		int iTurnScience = getReplayDataValue(getReplayDataSetIndex("REPLAYDATASET_SCIENCEPERTURN"), iTurn);
+		int iTurnScience = getReplayDataValue(iReplayDataSetIndex, iTurn);
 		if (iTurnScience >= 0)
 		{
 			iSum += iTurnScience;
 		}
 		else if (iTurnScience == -1) // No data for this turn (ex. late era start)
 		{
-			iSum += (3 * GetScience());
+			// Qingyin: I don't know why it is 3, but it has caused some problems (SP's Nobel Prize)
+			//iSum += (3 * GetScience());
+			iSum += calculateTotalYield(YIELD_SCIENCE);
 		}
 	}
 
@@ -21789,6 +21821,8 @@ void CvPlayer::SetGetsScienceFromPlayer(PlayerTypes ePlayer, bool bNewValue)
 /// Player spending too much cash?
 void CvPlayer::DoDeficit()
 {
+	if(GetPlayerTraits()->IsNoDoDeficit()) return;
+
 	int iNumMilitaryUnits = 0;
 
 	CvUnit* pLoopUnit;
@@ -22647,7 +22681,7 @@ inline static bool MeetCityResourceRequirement(const PolicyResourceInfo& info,  
 {
 	bool okPolicy = (player->HasPolicy(info.ePolicy) && !player->GetPlayerPolicies()->IsPolicyBlocked(info.ePolicy));
 	bool okCoastal = (!info.bMustCoastal || city->isCoastal());
-	bool okCityScale = (info.eCityScale == NO_CITY_SCALE || city->GetScale() == info.eCityScale);
+	bool okCityScale = (info.eCityScale == NO_CITY_SCALE || (info.bLargerScaleValid ? city->GetScale() >= info.eCityScale : city->GetScale() == info.eCityScale));
 	return okPolicy && okCoastal && okCityScale;
 }
 
@@ -26810,7 +26844,8 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	changePolicyModifiers(POLICYMOD_SHARED_IDEOLOGY_TRADE_CHANGE, pPolicy->GetSharedIdeologyTradeGoldChange() * iChange);
 	changePolicyModifiers(POLICYMOD_RIGGING_ELECTION_MODIFIER, pPolicy->GetRiggingElectionModifier() * iChange);
 	changePolicyModifiers(POLICYMOD_RIGGING_ELECTION_INFLUENCE_MODIFIER, pPolicy->GetRiggingElectionInfluenceModifier() * iChange);
-	changePolicyModifiers(POLICYMOD_SPY_LEVEL_UP_WHEN_RIGGING, pPolicy->IsSpyLevelUpWhenRigging() * iChange);
+	changePolicyModifiers(POLICYMOD_SPY_LEVEL_UP_WHEN_RIGGING, pPolicy->IsSpyLevelUpWhenRigging() ? iChange : 0);
+	changePolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY, pPolicy->IsNoOccupiedUnhappinessGarrisonedCity() ? iChange : 0);
 	changePolicyModifiers(POLICYMOD_MILITARY_UNIT_GIFT_INFLUENCE, pPolicy->GetMilitaryUnitGiftExtraInfluence() * iChange);
 	changePolicyModifiers(POLICYMOD_PROTECTED_MINOR_INFLUENCE, pPolicy->GetProtectedMinorPerTurnInfluence() * iChange);
 	changePolicyModifiers(POLICYMOD_AFRAID_INFLUENCE, pPolicy->GetAfraidMinorPerTurnInfluence() * iChange);
@@ -27187,6 +27222,13 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 		}
 	}
 
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	for(iI = 0; iI < GC.getNumBuildInfos(); iI++)
+	{
+		changeBuildSpeedModifier((BuildTypes)iI, pPolicy->GetBuildSpeedModifier(iI) * iChange);
+	}
+#endif
+
 	// Free Promotions
 	PromotionTypes ePromotion;
 	for(iI = 0; iI < GC.getNumPromotionInfos(); iI++)
@@ -27292,6 +27334,7 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 
 	bool bGarrisonFreeMaintenance = pPolicy->IsGarrisonFreeMaintenance();
 	bool bCulturePerGarrisonedUnit = pPolicy->GetCulturePerGarrisonedUnit();
+	bool bNoOccupiedUnhappinessGarrisonedCity = pPolicy->IsNoOccupiedUnhappinessGarrisonedCity();
 
 	// Loop through Cities
 
@@ -27363,6 +27406,10 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 					{
 						changeExtraUnitCost(-iUnit->getUnitInfo().GetExtraMaintenanceCost() * iChange);
 					}
+					if(bNoOccupiedUnhappinessGarrisonedCity)
+					{
+						pLoopCity->ChangeNoOccupiedUnhappinessCount(iChange);
+					}
 				}
 			}
 		}
@@ -27400,6 +27447,9 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 							iTotalWonders += iBuildingCount;
 						}
 #endif
+						// No Yield Bonus for Obsoleted Building
+						if(GET_TEAM(getTeam()).isObsoleteBuilding(eBuilding)) continue;
+
 						// Building Class Yield Stuff
 						for(iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
 						{
@@ -28054,7 +28104,6 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iEspionageModifier;
 	kStream >> m_iEspionageSpeedModifier;
 	kStream >> m_iSpyStartingRank;
-	kStream >> m_iSpyLevelUpWhenRiggingCount;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	MOD_SERIALIZE_READ(23, kStream, m_iConversionModifier, 0);
 #endif
@@ -28069,6 +28118,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iSpecialPolicyBuildingHappiness;
 	kStream >> m_iWoundedUnitDamageMod;
 	kStream >> m_iUnitUpgradeCostMod;
+	kStream >> m_iAllowPuppetPurchase;
 	kStream >> m_iBarbarianCombatBonus;
 	kStream >> m_iAlwaysSeeBarbCampsCount;
 	kStream >> m_iHappinessFromBuildings;
@@ -28179,6 +28229,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iHappinessPerPolicy;
 	kStream >> m_iWaterBuildSpeedModifier;
 	kStream >> m_vSettlerProductionEraModifier;
+	kStream >> m_vBuildSpeedModifier;
 #endif
 	kStream >> m_iNullifyInfluenceModifier;
 	kStream >> m_iNumTradeRouteBonus;
@@ -28313,6 +28364,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGlobalCityStrengthMod;
 	kStream >> m_iGlobalRangedStrikeModifier;
 	kStream >> m_iResearchTotalCostModifier;
+	kStream >> m_iResearchTotalCostModifierGoldenAge;
 	kStream >> m_iLiberatedInfluence;
 	kStream >> m_iExtraUnitPlayerInstances;
 	kStream >> m_iWaterTileDamageGlobal;
@@ -28713,7 +28765,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	}
 
 	kStream >> m_strEmbarkedGraphicOverride;
-	kStream >> m_piPerMajorReligionFollowerYieldModifier;
+	kStream >> m_piPerMajorReligionFollowerYieldModifierTimes100;
 
 	#ifdef MOD_RESOURCE_EXTRA_BUFF
 	kStream >> m_iResourceUnhappinessModifier;
@@ -28883,7 +28935,6 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iEspionageModifier;
 	kStream << m_iEspionageSpeedModifier;
 	kStream << m_iSpyStartingRank;
-	kStream << m_iSpyLevelUpWhenRiggingCount;
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	MOD_SERIALIZE_WRITE(kStream, m_iConversionModifier);
 #endif
@@ -28891,6 +28942,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iSpecialPolicyBuildingHappiness;
 	kStream << m_iWoundedUnitDamageMod;
 	kStream << m_iUnitUpgradeCostMod;
+	kStream << m_iAllowPuppetPurchase;
 	kStream << m_iBarbarianCombatBonus;
 	kStream << m_iAlwaysSeeBarbCampsCount;
 	kStream << m_iHappinessFromBuildings;
@@ -28978,6 +29030,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iHappinessPerPolicy;
 	kStream << m_iWaterBuildSpeedModifier;
 	kStream << m_vSettlerProductionEraModifier;
+	kStream << m_vBuildSpeedModifier;
 #endif
 	kStream << m_iNullifyInfluenceModifier;
 	kStream << m_iNumTradeRouteBonus;
@@ -29084,6 +29137,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGlobalCityStrengthMod;
 	kStream << m_iGlobalRangedStrikeModifier;
 	kStream << m_iResearchTotalCostModifier;
+	kStream << m_iResearchTotalCostModifierGoldenAge;
 	kStream << m_iLiberatedInfluence;
 	kStream << m_iExtraUnitPlayerInstances;
 	kStream << m_iWaterTileDamageGlobal;
@@ -29414,7 +29468,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	}
 
 	kStream << m_strEmbarkedGraphicOverride;
-	kStream << m_piPerMajorReligionFollowerYieldModifier;
+	kStream << m_piPerMajorReligionFollowerYieldModifierTimes100;
 
 #ifdef MOD_RESOURCE_EXTRA_BUFF
 	kStream << m_iResourceUnhappinessModifier;
@@ -30144,6 +30198,19 @@ void CvPlayer::ChangeResearchTotalCostModifier(int iChange)
 		m_iResearchTotalCostModifier += iChange;
 	}
 }
+int CvPlayer::GetResearchTotalCostModifierGoldenAge() const
+{
+	return m_iResearchTotalCostModifierGoldenAge;
+}
+
+void CvPlayer::ChangeResearchTotalCostModifierGoldenAge(int iChange)
+{
+	if (iChange != 0)
+	{
+		m_iResearchTotalCostModifierGoldenAge += iChange;
+	}
+}
+
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::GetLiberatedInfluence() const
@@ -30936,6 +31003,12 @@ CvPlot* CvPlayer::GetBestSettlePlot(CvUnit* pUnit, bool bEscorted, int iArea) co
 			int iValue = pPlot->getFoundValue(eOwner);
 			if(iValue > 5000)
 			{
+				if(MOD_SP_SMART_AI && getCapitalCity())
+				{
+					CvPlot* pCapPlot = getCapitalCity()->plot();
+					iValue = iValue * std::max(100 / plotDistance(pPlot->getX(), pPlot->getY(), pCapPlot->getX(), pCapPlot->getY()), 1);
+				}
+
 				int iSettlerDistance = ::plotDistance(pPlot->getX(), pPlot->getY(), iSettlerX, iSettlerY);
 				int iDistanceDropoff = min(99,(iDistanceDropoffMod * iSettlerDistance) / iEvalDistance);
 				iDistanceDropoff = max(0,iDistanceDropoff);
@@ -32651,18 +32724,18 @@ int CvPlayer::CountAllWorkedTerrain(TerrainTypes iTerrainType)
 #endif // end of MOD_API_EXTENSIONS
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-void CvPlayer::SetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iValue)
+void CvPlayer::SetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iValue)
 {
-	m_piPerMajorReligionFollowerYieldModifier[eYieldType] = iValue;
+	m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType] = iValue;
 }
 
-void CvPlayer::ChangePerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType, const int iChange) {
-	m_piPerMajorReligionFollowerYieldModifier[eYieldType] += iChange;
+void CvPlayer::ChangePerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType, const int iChange) {
+	m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType] += iChange;
 }
 
-int CvPlayer::GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const 
+int CvPlayer::GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType) const 
 {
-	return m_piPerMajorReligionFollowerYieldModifier[eYieldType];
+	return m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType];
 }
 
 #endif

@@ -76,6 +76,7 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_iSettlerProductionEraModifier(0),
 	m_iSettlerProductionStartEra(NO_ERA),
 	m_iHappinessPerReligionInCity(0),
+	m_piBuildSpeedModifier(NULL),
 #endif
 	m_iAllFeatureProduction(0),
 	m_iImprovementCostModifier(0),
@@ -161,6 +162,7 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_iRiggingElectionModifier(0),
 	m_iRiggingElectionInfluenceModifier(0),
 	m_bSpyLevelUpWhenRigging(false),
+	m_bNoOccupiedUnhappinessGarrisonedCity(false),
 	m_iMilitaryUnitGiftExtraInfluence(0),
 	m_iProtectedMinorPerTurnInfluence(0),
 	m_iAfraidMinorPerTurnInfluence(0),
@@ -336,6 +338,9 @@ CvPolicyEntry::~CvPolicyEntry(void)
 	{
 		delete m_pFreeUnitClasses;
 	}
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	SAFE_DELETE_ARRAY(m_piBuildSpeedModifier);
+#endif	
 }
 
 /// Read from XML file (pass 1)
@@ -501,6 +506,7 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_iRiggingElectionModifier = kResults.GetInt("RiggingElectionModifier");
 	m_iRiggingElectionInfluenceModifier = kResults.GetInt("RiggingElectionInfluenceModifier");
 	m_bSpyLevelUpWhenRigging = kResults.GetBool("SpyLevelUpWhenRigging");
+	m_bNoOccupiedUnhappinessGarrisonedCity = kResults.GetBool("NoOccupiedUnhappinessGarrisonedCity");
 	m_iMilitaryUnitGiftExtraInfluence = kResults.GetInt("MilitaryUnitGiftExtraInfluence");
 	m_iProtectedMinorPerTurnInfluence = kResults.GetInt("ProtectedMinorPerTurnInfluence");
 	m_iAfraidMinorPerTurnInfluence = kResults.GetInt("AfraidMinorPerTurnInfluence");
@@ -1195,7 +1201,7 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 		Database::Results* pResults = kUtility.GetResults(sqlKey);
 		if (pResults == NULL)
 		{
-			const char* szSQL = "select t2.ID, t1.Quantity, t1.CityScaleType, t1.MustCoastal from Policy_CityResources t1 left join Resources t2 on t1.ResourceType = t2.Type where t1.PolicyType = ?";
+			const char* szSQL = "select t2.ID, t1.Quantity, t1.CityScaleType, t1.LargerScaleValid, t1.MustCoastal from Policy_CityResources t1 left join Resources t2 on t1.ResourceType = t2.Type where t1.PolicyType = ?";
 			pResults = kUtility.PrepareResults(sqlKey, szSQL);
 		}
 
@@ -1208,7 +1214,8 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 			info.eResource = (ResourceTypes)pResults->GetInt(0);
 			info.iQuantity = pResults->GetInt(1);
 			info.eCityScale = (CityScaleTypes)GC.getInfoTypeForString(pResults->GetText(2));
-			info.bMustCoastal = pResults->GetBool(3);
+			info.bLargerScaleValid = pResults->GetBool(3);
+			info.bMustCoastal = pResults->GetBool(4);
 			m_vCityResources.push_back(info);
 		}
 
@@ -1363,6 +1370,9 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 		}
 		
 	}
+#endif
+#if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
+	kUtility.PopulateArrayByValue(m_piBuildSpeedModifier, "Builds", "Policy_BuildSpeedModifier", "BuildType", "PolicyType", szPolicyType, "Modifier");
 #endif
 
 	return true;
@@ -1678,6 +1688,12 @@ int CvPolicyEntry::GetSettlerProductionStartEra() const
 int CvPolicyEntry::GetHappinessPerReligionInCity() const
 {
 	return m_iHappinessPerReligionInCity;
+}
+int CvPolicyEntry::GetBuildSpeedModifier(int i) const
+{
+	CvAssertMsg(i < GC.getNumBuildInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_piBuildSpeedModifier ? m_piBuildSpeedModifier[i] : 0;
 }
 #endif
 /// How much Production does removing ALL Features now give us?
@@ -2140,6 +2156,11 @@ int CvPolicyEntry::GetRiggingElectionInfluenceModifier() const
 bool CvPolicyEntry::IsSpyLevelUpWhenRigging() const
 {
 	return m_bSpyLevelUpWhenRigging;
+}
+
+bool CvPolicyEntry::IsNoOccupiedUnhappinessGarrisonedCity() const
+{
+	return m_bNoOccupiedUnhappinessGarrisonedCity;
 }
 
 ///Influence boost upon gifting a military unit

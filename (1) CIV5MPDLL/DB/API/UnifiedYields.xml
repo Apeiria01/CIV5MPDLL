@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- DO NOT DELETE THIS FILE!!! -->
 <GameData>
-	<!-- See also: PlotYields.xml -->
-	<Table name="Building_YieldFromInternalTR">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="YieldType" type="integer" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer" default="0"/>
-	</Table>
-
-	<Table name="Building_FeatureYieldModifiers">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="FeatureType" type="text" reference="Features(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer"/>
-	</Table>
-
-    <Table name="Building_ImprovementYieldModifiers">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="ImprovementType" type="text" reference="Improvements(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer"/>
-	</Table>
-
 	<Table name="Project_YieldModifiers">
 		<Column name="ProjectType" type="text" reference="Projects(Type)"/>
 		<Column name="YieldType" type="text" reference="Yields(Type)"/>
@@ -522,101 +501,12 @@
 		<Column name="IgnoreNaturalWonderPlots" type="boolean" default="false"/>
 	</Table>
 
-
-	<Table name="Building_ResourceYieldChangesGlobal">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="ResourceType" type="text" reference="Resources(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer"/>
-	</Table>
-
-
 	<Table name="Tech_SpecialistYieldChanges">
 		<Column name="TechType" type="text" reference="Technologies(Type)"/>
 		<Column name="SpecialistType" type="text" reference="Specialists(Type)"/>
 		<Column name="YieldType" type="text" reference="Yields(Type)"/>
 		<Column name="Yield" type="integer"/>
 	</Table>
-
-
-	<Table name="Building_ImprovementYieldChangesGlobal">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="ImprovementType" type="text" reference="Improvements(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer"/>
-	</Table>
-
-
-	<Table name="Building_ImprovementYieldChanges">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="ImprovementType" type="text" reference="Improvements(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer"/>
-	</Table>
-
-
-	<Table name="Building_SpecialistYieldChangesLocal">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="SpecialistType" type="text" reference="Specialists(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer"/>
-	</Table>
-
-
-	<Table name="Building_YieldChangeWorldWonder">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer" default="0"/> 
-	</Table>
-
- 
-	<Table name="Building_YieldChangeWorldWonderGlobal">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer" default="0"/> 
-	</Table>
-
-
-	<Table name="Building_GreatWorkYieldChanges">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer" notnull="true"/>
-	</Table>
-
-	<Table name="Building_BuildingClassYieldModifiers">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="BuildingClassType" type="text" reference="BuildingClasses(Type)"/>
-		<Column name="YieldType" type="integer" reference="Yields(Type)"/>
-		<Column name="Modifier" type="integer" default="0"/>
-	</Table>
-
-	<Table name="Building_YieldChangesPerPopInEmpire">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="YieldType" type="text" reference="Yields(Type)"/>
-		<Column name="Yield" type="integer"/> <!-- This is a percent, eg 100 will give the same number of yields as there is population in the empire. -->
-	</Table>
-
-
-	<Table name="Building_ResourceQuantityFromPOP">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="ResourceType" type="text" reference="Resources(Type)"/>
-		<Column name="Modifier" type="integer"/>
-	</Table>
-
-
-	<Table name="Building_DomainFreeExperiencePerGreatWorkGlobal">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="DomainType" type="text" reference="Domains(Type)"/>
-		<Column name="Experience" type="integer"/>
-	</Table>
-
-
-	<Table name="Building_DomainFreeExperiencesGlobal">
-		<Column name="BuildingType" type="text" reference="Buildings(Type)"/>
-		<Column name="DomainType" type="text" reference="Domains(Type)"/>
-		<Column name="Experience" type="integer"/>
-	</Table>
-
 
 	<Table name="Unit_TechCombatStrength">
 		<Column name="UnitType" type="text" reference="Units(Type)"/>
@@ -630,7 +520,4 @@
 		<Column name="RangedCombatStrength" type="integer" default="0"/>
 	</Table>
 
-
-
-	
 </GameData>

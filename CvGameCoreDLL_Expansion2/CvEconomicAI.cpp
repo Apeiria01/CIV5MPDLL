@@ -2403,75 +2403,63 @@ void CvEconomicAI::DisbandExtraWorkers()
 // Check for very long obsolete units that didn't get an upgrade (usual suspects are wandering triremes and warriors)
 void CvEconomicAI::DisbandLongObsoleteUnits()
 {
-	CvUnit* pUnit;
-	int iLoop;
-	int unitEra;
-	int ArmyId;
-	int playerCurrentEra;
-	bool movingArmy;
-	CvTechEntry* pkTechInfo;
-	CvArmyAI* pThisArmy;
-	playerCurrentEra = m_pPlayer->GetCurrentEra();
+	int playerCurrentEra = m_pPlayer->GetCurrentEra();
 	// Treat information era as atomic for this checking.
-	playerCurrentEra = min(6, playerCurrentEra);
+	// For SP, Treat Feature era as information for this checking.
+	playerCurrentEra = min(MOD_SP_SMART_AI ? 8 : 6, playerCurrentEra);
 
 	// Loop through our units
-	for(pUnit = m_pPlayer->firstUnit(&iLoop); pUnit != NULL; pUnit = m_pPlayer->nextUnit(&iLoop))
+	int iLoop = 0;
+	for(CvUnit* pUnit = m_pPlayer->firstUnit(&iLoop); pUnit != NULL; pUnit = m_pPlayer->nextUnit(&iLoop))
 	{
-		if (pUnit)
+		if (!pUnit) continue;
+
+		int ArmyId = pUnit->getArmyID();
+		if (ArmyId == -1) continue;
+		CvArmyAI* pThisArmy = m_pPlayer->getArmyAI(ArmyId);
+		if (!pThisArmy) continue;
+		
+		bool movingArmy = ((pThisArmy->GetArmyAIState() == ARMYAISTATE_MOVING_TO_DESTINATION) || (pThisArmy->GetArmyAIState() == ARMYAISTATE_AT_DESTINATION));
+		if(movingArmy) continue;
+
+		// The unit must have an upgrade option, if not, then we don't care about this (includes workers, settlers, explorers)
+		UnitTypes eUpgradeUnitType = pUnit->GetUpgradeUnitType();
+		// Exclude settlers for this disband method, just in case
+		if(eUpgradeUnitType == NO_UNIT || pUnit->isFound()) continue;
+
+		const CvUnitEntry& pUnitInfo = pUnit->getUnitInfo();
+		// Exclude Policy Unit (e.g. Foreign Legion)
+		if(pUnitInfo.GetPolicyBranchType() != NO_POLICY_BRANCH_TYPE || pUnitInfo.GetPolicyType() != NO_POLICY)  continue;
+
+		// Check out unit era based on the prerequirement tech, defaults at ancient era.
+		TechTypes ePrereqTech = (TechTypes)pUnitInfo.GetPrereqAndTech();
+		int unitEra = 0;
+
+		if (ePrereqTech != NO_TECH)
 		{
-			movingArmy = false;
-			ArmyId = pUnit->getArmyID();
+			CvTechEntry* pkTechInfo = GC.getTechInfo(ePrereqTech);
 
-			if (ArmyId != -1)
+			if (pkTechInfo)
 			{
-				pThisArmy = m_pPlayer->getArmyAI(ArmyId);
+				unitEra = pkTechInfo->GetEra();
+			}
+		}
 
-				if (pThisArmy)
-				{
-					movingArmy = ((pThisArmy->GetArmyAIState() == ARMYAISTATE_MOVING_TO_DESTINATION) || (pThisArmy->GetArmyAIState() == ARMYAISTATE_AT_DESTINATION));
-				}
+		// for SP, stricter it
+		const int iMaxEraDiff = MOD_SP_SMART_AI ? 2 : 3;
+		// Too much era difference for that unit, lets scrap it.
+		if ((playerCurrentEra - unitEra) > iMaxEraDiff)
+		{
+			if(GC.getLogging() && GC.getAILogging())
+			{
+				CvString strLogString;
+				strLogString.Format("Disbanding long obsolete unit. %s, X: %d, Y: %d", pUnit->getName().GetCString(), pUnit->getX(), pUnit->getY());
+				m_pPlayer->GetHomelandAI()->LogHomelandMessage(strLogString);
 			}
 
-			if(!movingArmy)
-			{
-				// The unit must have an upgrade option, if not, then we don't care about this (includes workers, settlers, explorers)
-				UnitTypes eUpgradeUnitType = pUnit->GetUpgradeUnitType();
-
-				// Exclude settlers for this disband method, just in case
-				if(eUpgradeUnitType != NO_UNIT && !pUnit->isFound())
-				{
-					// Check out unit era based on the prerequirement tech, defaults at ancient era.
-					unitEra = 0;
-					UnitTypes currentUnitType = pUnit->getUnitType();
-					TechTypes ePrereqTech = (TechTypes)GC.getUnitInfo(currentUnitType)->GetPrereqAndTech();
-
-					if (ePrereqTech != NO_TECH)
-					{
-						pkTechInfo = GC.getTechInfo(ePrereqTech);
-
-						if (pkTechInfo)
-						{
-							unitEra = pkTechInfo->GetEra();
-						}
-					}
-
-					// Too much era difference for that unit, lets scrap it.
-					if ((playerCurrentEra - unitEra) > 3)
-					{
-						if(GC.getLogging() && GC.getAILogging())
-						{
-							CvString strLogString;
-							strLogString.Format("Disbanding long obsolete unit. %s, X: %d, Y: %d", pUnit->getName().GetCString(), pUnit->getX(), pUnit->getY());
-							m_pPlayer->GetHomelandAI()->LogHomelandMessage(strLogString);
-						}
-
-						pUnit->scrap();
-						// Only one unit scrap per turn.
-						return;
-					}
-				}
-			}
+			pUnit->scrap();
+			// Only one unit scrap per turn.
+			return;
 		}
 	}
 }

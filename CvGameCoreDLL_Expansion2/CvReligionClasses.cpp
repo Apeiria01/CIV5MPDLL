@@ -2999,7 +2999,14 @@ int CvPlayerReligions::GetCostNextProphet(bool bIncludeBeliefDiscounts, bool bAd
 		// Adjust for difficulty
 		if(!m_pPlayer->isHuman() && !m_pPlayer->IsAITeammateOfHuman() && !m_pPlayer->isBarbarian())
 		{
-			iCost *= GC.getGame().getHandicapInfo().getAITrainPercent();
+			if(GetNumProphetsSpawned(false) == 0 && GC.getGame().getHandicapInfo().getAIFirstProphetPercent() > 0)
+			{
+				iCost *= GC.getGame().getHandicapInfo().getAIFirstProphetPercent();
+			}
+			else
+			{
+				iCost *= GC.getGame().getHandicapInfo().getAITrainPercent();
+			}
 			iCost /= 100;
 		}
 	}
@@ -3490,6 +3497,19 @@ bool CvCityReligions::IsHolyCityAnyReligion()
 
 	return false;
 }
+
+///Return religion founded in this holy city or NO_RELIGION
+ReligionTypes CvCityReligions::GetReligionFoundedHere() const
+{
+    for (const auto& religionStatus : m_ReligionStatus)
+    {
+        if (religionStatus.m_bFoundedHere && religionStatus.m_eReligion > RELIGION_PANTHEON)
+        {
+            return religionStatus.m_eReligion;
+        }
+    }
+    return NO_RELIGION;
+} 
 
 /// Is there a "heretical" religion here that can be stomped out?
 bool CvCityReligions::IsReligionHereOtherThan(ReligionTypes eReligion)
@@ -6172,6 +6192,23 @@ int CvReligionAI::ScoreBelief(CvBeliefEntry* pEntry)
 {
 	int iRtnValue = 5;  // Base value since everything has SOME value
 
+
+	// Improvement
+	std::vector<ImprovementTypes> vEnhanceImprovements;
+	int iNumImprovementInfos = GC.getNumImprovementInfos();
+	for(int jJ = 0; jJ < iNumImprovementInfos; jJ++)
+	{
+		for(int iI = 0; iI < NUM_YIELD_TYPES; iI++)
+		{
+			if(pEntry->GetImprovementYieldChange((ImprovementTypes)jJ, (YieldTypes)iI) > 0 ||
+				pEntry->GetImprovementAdjacentCityYieldChange((ImprovementTypes)jJ, (YieldTypes)iI) > 0)
+			{
+				vEnhanceImprovements.push_back((ImprovementTypes)jJ);
+				break;
+			}
+		}
+	}
+
 	// Loop through each plot on map
 	int iPlotLoop;
 	CvPlot* pPlot;
@@ -6188,7 +6225,7 @@ int CvReligionAI::ScoreBelief(CvBeliefEntry* pEntry)
 			if(pClosestCity)
 			{
 				// Score it
-				int iScoreAtPlot = ScoreBeliefAtPlot(pEntry, pPlot);
+				int iScoreAtPlot = ScoreBeliefAtPlot(pEntry, pPlot, vEnhanceImprovements);
 
 				// Apply multiplier based on whether or not being worked, within culture borders, or not
 				if(pPlot->isBeingWorked())
@@ -6240,14 +6277,18 @@ int CvReligionAI::ScoreBelief(CvBeliefEntry* pEntry)
 }
 
 /// AI's evaluation of this belief's usefulness at this one plot
-int CvReligionAI::ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot)
+int CvReligionAI::ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot, const std::vector<ImprovementTypes>& vEnhanceImprovements)
 {
 	int iRtnValue = 0;
 
+	bool bAdjacentCity = pPlot->GetAdjacentCity() != NULL;
+	TerrainTypes eTerrain = pPlot->getTerrainType();
+	PlotTypes ePlot = pPlot->getPlotType();
+	FeatureTypes eFeature = pPlot->getFeatureType();
+	ResourceTypes eResource = pPlot->getResourceType();
 	for(int iI = 0; iI < NUM_YIELD_TYPES; iI++)
 	{
 		// Terrain
-		TerrainTypes eTerrain = pPlot->getTerrainType();
 		if(eTerrain != NO_TERRAIN)
 		{
 			iRtnValue += pEntry->GetTerrainYieldChange(eTerrain, iI);
@@ -6257,7 +6298,6 @@ int CvReligionAI::ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot)
 #if defined(MOD_RELIGION_PLOT_YIELDS)
 		if (MOD_RELIGION_PLOT_YIELDS) {
 			// Plot
-			PlotTypes ePlot = pPlot->getPlotType();
 			if(ePlot != NO_PLOT)
 			{
 				iRtnValue += pEntry->GetPlotYieldChange(ePlot, iI);
@@ -6266,7 +6306,6 @@ int CvReligionAI::ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot)
 #endif
 
 		// Feature
-		FeatureTypes eFeature = pPlot->getFeatureType();
 		if(eFeature != NO_FEATURE)
 		{
 			iRtnValue += pEntry->GetFeatureYieldChange(eFeature, iI);
@@ -6279,19 +6318,26 @@ int CvReligionAI::ScoreBeliefAtPlot(CvBeliefEntry* pEntry, CvPlot* pPlot)
 		}
 
 		// Resource
-		ResourceTypes eResource = pPlot->getResourceType();
 		if(eResource != NO_RESOURCE)
 		{
 			iRtnValue += pEntry->GetResourceYieldChange(eResource, iI);
+		}
 
-			// Improvement
-			int iNumImprovementInfos = GC.getNumImprovementInfos();
-			for(int jJ = 0; jJ < iNumImprovementInfos; jJ++)
+		// Improvement
+		for(auto eImprovement : vEnhanceImprovements)
+		{
+			if(!pPlot->canHaveImprovement(eImprovement, m_pPlayer->getTeam())) continue;
+
+			if(eResource != NO_RESOURCE)
 			{
-				if(pPlot->canHaveImprovement((ImprovementTypes)jJ, m_pPlayer->getTeam()))
-				{
-					iRtnValue += (pEntry->GetImprovementYieldChange((ImprovementTypes)jJ, (YieldTypes)iI) * 2);
-				}
+				iRtnValue += (pEntry->GetImprovementYieldChange(eImprovement, (YieldTypes)iI) * 2);
+				if(bAdjacentCity) iRtnValue += (pEntry->GetImprovementAdjacentCityYieldChange(eImprovement, (YieldTypes)iI) * 2);
+			}
+			else
+			{
+				// Qingyin: It may increase a large number of values
+				//iRtnValue += pEntry->GetImprovementYieldChange(eImprovement, (YieldTypes)iI);
+				if(bAdjacentCity) iRtnValue += pEntry->GetImprovementAdjacentCityYieldChange(eImprovement, (YieldTypes)iI);
 			}
 		}
 

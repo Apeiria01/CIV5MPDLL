@@ -122,6 +122,9 @@
     <PostBuildEvent>
       <Command>xcopy /Y /I "$(SolutionDir)\BuildOutput\VS2022_$(Configuration)$(Platform)\" "$(SolutionDir)\(1) CIV5MPDLL\DLL"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>..\update_commit_id.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -175,6 +178,9 @@
     <PostBuildEvent>
       <Command>xcopy /Y /I "$(SolutionDir)\BuildOutput\VS2022_$(Configuration)$(Platform)\" "$(SolutionDir)\(1) CIV5MPDLL\DLL"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>..\update_commit_id.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CustomMods.cpp" />
@@ -183,6 +189,7 @@
     <ClCompile Include="CvCityManager.cpp" />
     <ClCompile Include="CvCityScaleClasses.cpp" />
     <ClCompile Include="CvCorruption.cpp" />
+    <ClCompile Include="CvIndependentPromotionInfo.cpp" />
     <ClCompile Include="CvNuclearWinter.cpp" />
     <ClCompile Include="CvEventLog.cpp" />
     <ClCompile Include="CvGreatPersonInfo.cpp" />
@@ -464,6 +471,7 @@
     <ClInclude Include="CvCityManager.h" />
     <ClInclude Include="CvCityScaleClasses.h" />
     <ClInclude Include="CvCorruption.h" />
+    <ClInclude Include="CvIndependentPromotionInfo.h" />
     <ClInclude Include="CvNuclearWinter.h" />
     <ClInclude Include="CvCitySpecializationAI.h" />
     <ClInclude Include="CvCityStrategyAI.h" />

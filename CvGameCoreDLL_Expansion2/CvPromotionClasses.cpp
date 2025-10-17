@@ -481,23 +481,19 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 #endif
 
 #if defined(MOD_PROMOTIONS_ALLYCITYSTATE_BONUS)
-	if (MOD_PROMOTIONS_ALLYCITYSTATE_BONUS) {
-		m_iAllyCityStateCombatModifier = kResults.GetInt("AllyCityStateCombatModifier");
-		m_iAllyCityStateCombatModifierMax = kResults.GetInt("AllyCityStateCombatModifierMax");
-	}
+	m_iAllyCityStateCombatModifier = kResults.GetInt("AllyCityStateCombatModifier");
+	m_iAllyCityStateCombatModifierMax = kResults.GetInt("AllyCityStateCombatModifierMax");
 #endif
 
 #if defined(MOD_PROMOTIONS_EXTRARES_BONUS)
-	if (MOD_PROMOTIONS_EXTRARES_BONUS) {
-		const char* szTextVal = kResults.GetText("ExtraResourceType");
-		if (szTextVal) {
-			m_eExtraResourceType = (ResourceTypes)GC.getInfoTypeForString(szTextVal, true);
-		}
-		m_iExtraResourceCombatModifier = kResults.GetInt("ExtraResourceCombatModifier");
-		m_iExtraResourceCombatModifierMax = kResults.GetInt("ExtraResourceCombatModifierMax");
-		m_iExtraHappinessCombatModifier = kResults.GetInt("ExtraHappinessCombatModifier");
-		m_iExtraHappinessCombatModifierMax = kResults.GetInt("ExtraHappinessCombatModifierMax");
+	const char* szResourceTextVal = kResults.GetText("ExtraResourceType");
+	if (szResourceTextVal) {
+		m_eExtraResourceType = (ResourceTypes)GC.getInfoTypeForString(szResourceTextVal, true);
 	}
+	m_iExtraResourceCombatModifier = kResults.GetInt("ExtraResourceCombatModifier");
+	m_iExtraResourceCombatModifierMax = kResults.GetInt("ExtraResourceCombatModifierMax");
+	m_iExtraHappinessCombatModifier = kResults.GetInt("ExtraHappinessCombatModifier");
+	m_iExtraHappinessCombatModifierMax = kResults.GetInt("ExtraHappinessCombatModifierMax");
 #endif
 
 #if defined(MOD_DEFENSE_MOVES_BONUS)
@@ -511,9 +507,9 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iNearbyUnitPromotionBonus = kResults.GetInt("NearbyUnitPromotionBonus");
 	m_iNearbyUnitPromotionBonusRange = kResults.GetInt("NearbyUnitPromotionBonusRange");
 	m_iNearbyUnitPromotionBonusMax = kResults.GetInt("NearbyUnitPromotionBonusMax");
-	const char* szTextVal = kResults.GetText("CombatBonusFromNearbyUnitPromotion");
-	if (szTextVal) {
-		m_iCombatBonusFromNearbyUnitPromotion = (PromotionTypes)GC.getInfoTypeForString(szTextVal, true);
+	const char* szPromotionTextVal = kResults.GetText("CombatBonusFromNearbyUnitPromotion");
+	if (szPromotionTextVal) {
+		m_iCombatBonusFromNearbyUnitPromotion = (PromotionTypes)GC.getInfoTypeForString(szPromotionTextVal, true);
 	}
 #endif
 

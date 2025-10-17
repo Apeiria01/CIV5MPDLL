@@ -53,6 +53,11 @@ alter table Policies add column InstantFoodThresholdPercent integer not null def
 alter table Policies add column InstantFoodKeptPercent integer not null default 0;
 alter table Policies add column CaptureCityResistanceTurnsChangeFormula text references LuaFormula(Type);
 
+CREATE TABLE Policy_BuildSpeedModifier (
+	PolicyType TEXT REFERENCES Policies(Type),
+	BuildType text REFERENCES Builds(Type),
+	Modifier integer not null
+);
 ALTER TABLE Policies ADD 'WaterBuildSpeedModifier' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD 'SettlerProductionEraModifier' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD 'SettlerProductionStartEra' TEXT DEFAULT NULL REFERENCES Eras(Type);
@@ -100,8 +105,14 @@ alter table Policies add column CapitalTradeRouteGoldChange integer default 0;
 alter table Policies add column CapitalTradeRouteRangeChange integer default 0;
 alter table Policies add column RiggingElectionInfluenceModifier integer default 0;
 alter table Policies add column SpyLevelUpWhenRigging boolean default 0;
+alter table Policies add column NoOccupiedUnhappinessGarrisonedCity boolean default 0;
 
 create table PolicyBranch_CivilizationLocked (
     PolicyBranchType TEXT REFERENCES PolicyBranchTypes(Type),
     CivilizationType TEXT REFERENCES Civilizations(Type)
+);
+create table Policy_CityLoveKingDayYieldMod (
+	PolicyType text not null references Policies(Type),
+	YieldType integer not null references Yields(Type),
+	Yield integer not null default 0
 );

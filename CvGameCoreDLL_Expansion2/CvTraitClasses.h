@@ -127,6 +127,7 @@ public:
 	int GetExtraFoundedCityTerritoryClaimRange() const;
 	int GetFreeSocialPoliciesPerEra() const;
 	int GetFreeGreatPeoplePerEra() const;
+	int GetOwnedReligionUnitCultureExtraTurns() const;
 	int GetNumTradeRoutesModifier() const;
 	int GetTradeRouteResourceModifier() const;
 	int GetUniqueLuxuryCities() const;
@@ -193,6 +194,7 @@ public:
 	bool IsBonusReligiousBelief() const;
 	bool IsAbleToAnnexCityStates() const;
 	bool IsAbleToDualEmpire() const;
+	bool IsNoDoDeficit() const;
 	bool IsCrossesMountainsAfterGreatGeneral() const;
 #if defined(MOD_TRAITS_CROSSES_ICE)
 	bool IsCrossesIce() const;
@@ -267,6 +269,8 @@ public:
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	bool IsFreePromotionUnitClass(const int promotionID, const int unitClassID) const;
 #endif
+	bool IsHasBuildingClassFaithCost() const;
+	int GetBuildingClassFaithCost(int iBuildingClass) const;
 	bool IsObsoleteByTech(TeamTypes eTeam);
 	bool IsEnabledByTech(TeamTypes eTeam);
 #if defined(MOD_TRAITS_OTHER_PREREQS)
@@ -288,7 +292,8 @@ public:
 	int GetSeaTradeRouteYieldPerEraTimes100(const YieldTypes eYield) const;
 	int GetSeaTradeRouteYieldTimes100(const YieldTypes eYield) const;
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYield) const;
+	int GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYield) const;
+	int GetPerMajorReligionFollowerYieldModifierMax(const YieldTypes eYield) const;
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
@@ -327,7 +332,7 @@ public:
 	int GetGoldenAgeGrowThresholdModifier() const;
 
 	int GetShareAllyResearchPercent() const;
-
+	bool CanPurchaseWonderInGoldenAge() const;
 	bool CanDiplomaticMarriage() const;
 
 	virtual bool CacheResults(Database::Results& kResults, CvDatabaseUtility& kUtility);
@@ -413,6 +418,7 @@ protected:
 	int m_iExtraFoundedCityTerritoryClaimRange;
 	int m_iFreeSocialPoliciesPerEra;
 	int m_iFreeGreatPeoplePerEra;
+	int m_iOwnedReligionUnitCultureExtraTurns;
 	int m_iNumTradeRoutesModifier;
 	int m_iTradeRouteResourceModifier;
 	int m_iUniqueLuxuryCities;
@@ -480,6 +486,7 @@ protected:
 	bool m_bBonusReligiousBelief;
 	bool m_bAbleToAnnexCityStates;
 	bool m_bAbleToDualEmpire = false;
+	bool m_bNoDoDeficit = false;
 	bool m_bCrossesMountainsAfterGreatGeneral;
 #if defined(MOD_TRAITS_CROSSES_ICE)
 	bool m_bCrossesIce;
@@ -550,6 +557,7 @@ protected:
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	std::multimap<int, int> m_FreePromotionUnitClasses;
 #endif
+	int* m_piBuildingClassFaithCost = nullptr;
 	std::vector<FreeResourceXCities> m_aFreeResourceXCities;
 	std::vector<bool> m_abNoTrainUnitClass;
 
@@ -557,7 +565,8 @@ protected:
 	int m_piSeaTradeRouteYieldTimes100[NUM_YIELD_TYPES];
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierTimes100[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierMax[NUM_YIELD_TYPES];
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
@@ -596,7 +605,7 @@ protected:
 	int m_iGoldenAgeGrowThresholdModifier = 0;
 
 	int m_iShareAllyResearchPercent = 0;
-
+	bool m_bCanPurchaseWonderInGoldenAge = false;
 	bool m_bCanDiplomaticMarriage = false;
 private:
 	CvTraitEntry(const CvTraitEntry&);
@@ -926,6 +935,10 @@ public:
 	{
 		return m_iFreeGreatPeoplePerEra;
 	}
+	int GetOwnedReligionUnitCultureExtraTurns() const
+	{
+		return m_iOwnedReligionUnitCultureExtraTurns;
+	}
 	int GetNumTradeRoutesModifier() const
 	{
 		return m_iNumTradeRoutesModifier;
@@ -1143,6 +1156,10 @@ public:
 	{
 		return m_bAbleToDualEmpire;
 	};
+	bool IsNoDoDeficit() const
+	{
+		return m_bNoDoDeficit;
+	};
 	bool IsCrossesMountainsAfterGreatGeneral() const
 	{
 		return m_bCrossesMountainsAfterGreatGeneral;
@@ -1280,6 +1297,7 @@ public:
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	bool HasFreePromotionUnitClass(const int promotionID, const int unitClassID) const;
 #endif
+	int GetBuildingClassFaithCost(BuildingClassTypes eBuildingClass) const;
 
 	// Public functions to make trait-based game state changes
 	void AddUniqueLuxuries(CvCity *pCity);
@@ -1324,9 +1342,13 @@ public:
 	}
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	int GetPerMajorReligionFollowerYieldModifier(const YieldTypes eYieldType) const
+	int GetPerMajorReligionFollowerYieldModifierTimes100(const YieldTypes eYieldType) const
 	{
-		return m_piPerMajorReligionFollowerYieldModifier[eYieldType];
+		return m_piPerMajorReligionFollowerYieldModifierTimes100[eYieldType];
+	}
+	int GetPerMajorReligionFollowerYieldModifierMax(const YieldTypes eYieldType) const
+	{
+		return m_piPerMajorReligionFollowerYieldModifierMax[eYieldType];
 	}
 #endif
 
@@ -1385,7 +1407,7 @@ public:
 	int GetGoldenAgeGrowThresholdModifier() const;
 
 	int GetShareAllyResearchPercent() const;
-
+	bool CanPurchaseWonderInGoldenAge() const;
 	bool CanDiplomaticMarriage() const;
 	bool IsWLKDCityNoResearchCost() const;
 	bool IsGoodyUnitUpgradeFirst() const;
@@ -1478,6 +1500,7 @@ private:
 	int m_iExtraFoundedCityTerritoryClaimRange;
 	int m_iFreeSocialPoliciesPerEra;
 	int m_iFreeGreatPeoplePerEra;
+	int m_iOwnedReligionUnitCultureExtraTurns;
 	int m_iNumTradeRoutesModifier;
 	int m_iTradeRouteResourceModifier;
 	int m_iUniqueLuxuryCities;
@@ -1538,6 +1561,7 @@ private:
 	bool m_bBonusReligiousBelief = false;
 	bool m_bAbleToAnnexCityStates = false;
 	bool m_bAbleToDualEmpire = false;
+	bool m_bNoDoDeficit = false;
 	bool m_bCrossesMountainsAfterGreatGeneral = false;
 #if defined(MOD_TRAITS_CROSSES_ICE)
 	bool m_bCrossesIce = false;
@@ -1580,6 +1604,7 @@ private:
 	std::vector<int> m_aiResourceQuantityModifier;
 	std::vector<bool> m_abNoTrain;
 	FStaticVector<FreeTraitUnit, SAFE_ESTIMATE_NUM_FREE_UNITS, true, c_eCiv5GameplayDLL, 0> m_aFreeTraitUnits;
+	std::vector<int> m_aiBuildingClassFaithCost;
 	std::vector<int> m_aUniqueLuxuryAreas;
 
 	// Maya calendar bonus data
@@ -1629,7 +1654,8 @@ private:
 	int m_piSeaTradeRouteYieldTimes100[NUM_YIELD_TYPES];
 
 #ifdef MOD_TRAIT_RELIGION_FOLLOWER_EFFECTS
-	int m_piPerMajorReligionFollowerYieldModifier[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierTimes100[NUM_YIELD_TYPES];
+	int m_piPerMajorReligionFollowerYieldModifierMax[NUM_YIELD_TYPES];
 #endif
 
 #ifdef MOD_TRAITS_SPREAD_RELIGION_AFTER_KILLING
@@ -1668,7 +1694,7 @@ private:
 	int m_iGoldenAgeGrowThresholdModifier = 0;
 
 	int m_iShareAllyResearchPercent = 0;
-
+	bool m_bCanPurchaseWonderInGoldenAge = false;
 	bool m_bCanDiplomaticMarriage = false;
 	bool m_bWLKDCityNoResearchCost = false;
 	bool m_bGoodyUnitUpgradeFirst = false;

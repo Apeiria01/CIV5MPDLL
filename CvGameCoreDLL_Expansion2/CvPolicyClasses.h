@@ -86,6 +86,7 @@ public:
 	int GetSettlerProductionEraModifier() const;
 	int GetSettlerProductionStartEra() const;
 	int GetHappinessPerReligionInCity() const;
+	int GetBuildSpeedModifier(int i) const;
 #endif
 	int GetAllFeatureProduction() const;
 	int GetImprovementCostModifier() const;
@@ -184,6 +185,7 @@ public:
 	int GetRiggingElectionModifier() const;
 	int GetRiggingElectionInfluenceModifier() const;
 	bool IsSpyLevelUpWhenRigging() const;
+	bool IsNoOccupiedUnhappinessGarrisonedCity() const;
 	int GetMilitaryUnitGiftExtraInfluence() const;
 	int GetProtectedMinorPerTurnInfluence() const;
 	int GetAfraidMinorPerTurnInfluence() const;
@@ -417,6 +419,7 @@ private:
 	int m_iSettlerProductionEraModifier;
 	int m_iSettlerProductionStartEra;
 	int m_iHappinessPerReligionInCity;
+	int* m_piBuildSpeedModifier;
 #endif
 	int m_iAllFeatureProduction;
 	int m_iImprovementCostModifier;
@@ -500,6 +503,7 @@ private:
 	int m_iRiggingElectionModifier;
 	int m_iRiggingElectionInfluenceModifier;
 	bool m_bSpyLevelUpWhenRigging;
+	bool m_bNoOccupiedUnhappinessGarrisonedCity;
 	int m_iMilitaryUnitGiftExtraInfluence;
 	int m_iProtectedMinorPerTurnInfluence;
 	int m_iAfraidMinorPerTurnInfluence;

@@ -103,6 +103,7 @@ public:
 #endif
 	int GetResourceQuantityModifier(int i) const;
 	int GetImprovementYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
+	int GetImprovementAdjacentCityYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
 	int GetBuildingClassYieldChange(int i, int j) const;
 	int GetBuildingClassHappiness(int i) const;
 	int GetBuildingClassTourism(int i) const;
@@ -266,6 +267,7 @@ protected:
 #endif
 	int* m_piResourceQuantityModifiers;
 	int** m_ppiImprovementYieldChanges;
+	int** m_ppiImprovementAdjacentCityYieldChanges;
 	int** m_ppiBuildingClassYieldChanges;
 	int* m_paiBuildingClassHappiness;
 	int* m_paiBuildingClassTourism;
@@ -561,6 +563,7 @@ public:
 #endif
 	int GetResourceQuantityModifier(ResourceTypes eResource) const;
 	int GetImprovementYieldChange(ImprovementTypes eImprovement, YieldTypes eYield) const;
+	int GetImprovementAdjacentCityYieldChange(ImprovementTypes eIndex1, YieldTypes eIndex2) const;
 	int GetBuildingClassYieldChange(BuildingClassTypes eBuildingClass, YieldTypes eYieldType, int iFollowers) const;
 	int GetBuildingClassHappiness(BuildingClassTypes eBuildingClass, int iFollowers) const;
 	int GetBuildingClassTourism(BuildingClassTypes eBuildingClass) const;
@@ -655,6 +658,8 @@ private:
 	int m_iCityExtraMissionarySpreads;
 	bool m_bAllowYieldPerBirth;
 #endif
+	std::vector<std::vector<int>> m_vImprovementYieldChanges;
+	std::vector<std::vector<int>> m_vImprovementAdjacentCityYieldChanges;
 
 	EraTypes m_eObsoleteEra;
 	ResourceTypes m_eResourceRevealed;
