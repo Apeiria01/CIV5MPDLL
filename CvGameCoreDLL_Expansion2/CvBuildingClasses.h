@@ -519,6 +519,7 @@ public:
 	int GetMinNumReligions() const;
 	int GetLandmarksTourismPercentGlobal() const;
 	int GetGreatWorksTourismModifierGlobal() const;
+	int GetTradeRouteRiverBonusModifier() const;
 	int GetTradeRouteSeaGoldBonusGlobal() const;
 	int GetTradeRouteLandGoldBonusGlobal() const;
 	bool IsAnyWater() const;
@@ -990,6 +991,7 @@ private:
 	int m_iMinNumReligions;
 	int m_iLandmarksTourismPercentGlobal;
 	int m_iGreatWorksTourismModifierGlobal;
+	int m_iTradeRouteRiverBonusModifier;
 	int m_iTradeRouteSeaGoldBonusGlobal;
 	int m_iTradeRouteLandGoldBonusGlobal;
 	bool m_bAnyWater;

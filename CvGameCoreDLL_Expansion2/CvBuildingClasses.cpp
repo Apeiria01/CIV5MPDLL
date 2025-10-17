@@ -335,6 +335,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iMinNumReligions(0),
 	m_iLandmarksTourismPercentGlobal(0),
 	m_iGreatWorksTourismModifierGlobal(0),
+	m_iTradeRouteRiverBonusModifier(0),
 	m_iTradeRouteSeaGoldBonusGlobal(0),
 	m_iTradeRouteLandGoldBonusGlobal(0),
 	m_bAnyWater(false),
@@ -583,6 +584,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iMinNumReligions = kResults.GetInt("MinNumReligions");
 	m_iLandmarksTourismPercentGlobal = kResults.GetInt("LandmarksTourismPercentGlobal");
 	m_iGreatWorksTourismModifierGlobal = kResults.GetInt("GreatWorksTourismModifierGlobal");
+	m_iTradeRouteRiverBonusModifier = kResults.GetInt("TradeRouteRiverBonusModifier");
 	m_iTradeRouteSeaGoldBonusGlobal = kResults.GetInt("TradeRouteSeaGoldBonusGlobal");
 	m_iTradeRouteLandGoldBonusGlobal = kResults.GetInt("TradeRouteLandGoldBonusGlobal");
 	m_bAnyWater = kResults.GetBool("AnyWater");
@@ -4236,6 +4238,11 @@ int CvBuildingEntry::GetLandmarksTourismPercentGlobal() const
 int CvBuildingEntry::GetGreatWorksTourismModifierGlobal() const
 {
 	return m_iGreatWorksTourismModifierGlobal;
+}
+
+int CvBuildingEntry::GetTradeRouteRiverBonusModifier() const
+{
+	return m_iTradeRouteRiverBonusModifier;
 }
 
 int CvBuildingEntry::GetTradeRouteSeaGoldBonusGlobal() const

@@ -597,6 +597,8 @@ public:
 	void changePlotBuyCostModifier(int iChange);
 	int GetUnitMaxExperienceLocal() const;
 	void ChangeUnitMaxExperienceLocal(int iChange);
+	int GetTradeRouteRiverBonusModifier() const;
+	void ChangeTradeRouteRiverBonusModifier(int iChange);
 	int GetSecondCapitalsExtraScore() const;
 	void ChangeSecondCapitalsExtraScore(int iChange);
 	int GetFoodKeptFromPollution() const;
@@ -1501,6 +1503,7 @@ protected:
 	FAutoVariable<int, CvCity> m_iPlotCultureCostModifier;
 	int m_iPlotBuyCostModifier;
 	int m_iUnitMaxExperienceLocal;
+	int m_iTradeRouteRiverBonusModifier;
 	int m_iSecondCapitalsExtraScore;
 	int m_iFoodKeptFromPollution;
 	int m_iNumAllowsFoodTradeRoutes;

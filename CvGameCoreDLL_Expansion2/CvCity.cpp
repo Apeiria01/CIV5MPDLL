@@ -269,6 +269,7 @@ CvCity::CvCity() :
 	, m_iPlotCultureCostModifier("CvCity::m_iPlotCultureCostModifier", m_syncArchive)
 	, m_iPlotBuyCostModifier(0)
 	, m_iUnitMaxExperienceLocal(0)
+	, m_iTradeRouteRiverBonusModifier(0)
 	, m_iSecondCapitalsExtraScore(0)
 	, m_iFoodKeptFromPollution(0)
 	, m_iNumAllowsFoodTradeRoutes(0)
@@ -1135,6 +1136,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iPlotCultureCostModifier = 0;
 	m_iPlotBuyCostModifier = 0;
 	m_iUnitMaxExperienceLocal = 0;
+	m_iTradeRouteRiverBonusModifier = 0;
 	m_iSecondCapitalsExtraScore = 0;
 	m_iFoodKeptFromPollution = 0;
 	m_iNumAllowsFoodTradeRoutes = 0;
@@ -7817,6 +7819,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changePlotCultureCostModifier(pBuildingInfo->GetPlotCultureCostModifier() * iChange);
 		changePlotBuyCostModifier(pBuildingInfo->GetPlotBuyCostModifier() * iChange);
 		ChangeUnitMaxExperienceLocal(pBuildingInfo->GetUnitMaxExperienceLocal() * iChange);
+		ChangeTradeRouteRiverBonusModifier(pBuildingInfo->GetTradeRouteRiverBonusModifier() * iChange);
 		ChangeSecondCapitalsExtraScore(pBuildingInfo->GetSecondCapitalsExtraScore() * iChange);
 		ChangeFoodKeptFromPollution(pBuildingInfo->GetFoodKeptFromPollution() * iChange);
 		ChangeNumAllowsFoodTradeRoutes(pBuildingInfo->AllowsFoodTradeRoutes() ? iChange : 0);
@@ -11122,6 +11125,17 @@ void CvCity::ChangeUnitMaxExperienceLocal(int iChange)
 	m_iUnitMaxExperienceLocal = (m_iUnitMaxExperienceLocal + iChange);
 }
 
+//	--------------------------------------------------------------------------------
+int CvCity::GetTradeRouteRiverBonusModifier() const
+{
+	VALIDATE_OBJECT
+	return m_iTradeRouteRiverBonusModifier;
+}
+void CvCity::ChangeTradeRouteRiverBonusModifier(int iChange)
+{
+	VALIDATE_OBJECT
+	m_iTradeRouteRiverBonusModifier = (m_iTradeRouteRiverBonusModifier + iChange);
+}
 
 //	--------------------------------------------------------------------------------
 int CvCity::GetSecondCapitalsExtraScore() const
@@ -19918,6 +19932,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iPlotCultureCostModifier;
 	kStream >> m_iPlotBuyCostModifier;
 	kStream >> m_iUnitMaxExperienceLocal;
+	kStream >> m_iTradeRouteRiverBonusModifier;
 	kStream >> m_iSecondCapitalsExtraScore;
 	kStream >> m_iFoodKeptFromPollution;
 	kStream >> m_iNumAllowsFoodTradeRoutes;
@@ -20432,6 +20447,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iPlotCultureCostModifier; // Added for Version 3
 	kStream << m_iPlotBuyCostModifier; // Added for Version 12
 	kStream << m_iUnitMaxExperienceLocal;
+	kStream << m_iTradeRouteRiverBonusModifier;
 	kStream << m_iSecondCapitalsExtraScore;
 	kStream << m_iFoodKeptFromPollution;
 	kStream << m_iNumAllowsFoodTradeRoutes;

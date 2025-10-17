@@ -225,6 +225,7 @@ create table Building_TradeRouteFromTheCityYieldsPerEra (
 --******************** New Modifier ********************--
 alter table Buildings add ResearchTotalCostModifierGoldenAge integer default 0;
 alter table Buildings add ResearchTotalCostModifier integer default 0;
+alter table Buildings add TradeRouteRiverBonusModifier integer default 0;
 alter table Buildings add TradeRouteSeaGoldBonusGlobal integer default 0;
 alter table Buildings add TradeRouteLandGoldBonusGlobal integer default 0;
 alter table Buildings add LandmarksTourismPercentGlobal integer default 0;
