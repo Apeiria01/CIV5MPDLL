@@ -16757,8 +16757,21 @@ int CvUnit::GetAirCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bInc
 	// Unit is Defender
 	if(pCity == NULL)
 	{
+		// If this is a defenseless unit, do a fixed amount of damage
+		if(!pDefender->IsCanDefend())
+		{
+			//can assassinate any civilian with one missile hit
+			if (AI_getUnitAIType() == UNITAI_MISSILE_AIR)
+				return pDefender->GetCurrHitPoints();
+			else
+				return /*4*/ GC.getNONCOMBAT_UNIT_RANGED_DAMAGE();;
+		}
+		if (pDefender->isEmbarked())
+		{
+			iDefenderStrength = pDefender->GetEmbarkedUnitDefense();;
+		}
 		// Use Ranged combat value for defender, UNLESS it's a boat
-		if(pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, /*bForRangedAttack*/ false) > 0 && !pDefender->getDomainType() == DOMAIN_SEA  && !pDefender->isRangedSupportFire())
+		else if(!pDefender->isRangedSupportFire() && pDefender->getDomainType() != DOMAIN_SEA && pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, /*bForRangedAttack*/ false) > 0)
 		{
 			iDefenderStrength = pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, /*bForRangedAttack*/ false);
 		}
@@ -16865,13 +16878,17 @@ int CvUnit::GetRangeCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bI
 	{
 		// If this is a defenseless unit, do a fixed amount of damage
 		if(!pDefender->IsCanDefend())
-			return /*4*/ GC.getNONCOMBAT_UNIT_RANGED_DAMAGE();
-
+		{
+			//can assassinate any civilian with one missile hit
+			if (AI_getUnitAIType() == UNITAI_MISSILE_AIR)
+				return pDefender->GetCurrHitPoints();
+			else
+				return /*4*/ GC.getNONCOMBAT_UNIT_RANGED_DAMAGE();;
+		}
 		if (pDefender->isEmbarked())
 		{
 			iDefenderStrength = pDefender->GetEmbarkedUnitDefense();;
 		}
-
 		// Use Ranged combat value for defender, UNLESS it's a boat or an Impi (ranged support)
 		else if(!pDefender->isRangedSupportFire() && pDefender->getDomainType() != DOMAIN_SEA && pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, false) > 0)
 		{
