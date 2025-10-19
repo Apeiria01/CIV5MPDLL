@@ -7663,6 +7663,35 @@ void CvPlot::setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder
 			}
 		}
 
+		// Temporary fix Pontoon Bridge
+		if(isWater())
+		{
+			if(eNewValue != NO_IMPROVEMENT && GC.getImprovementInfo(eNewValue)->IsAllowsWalkWater())
+			{
+				// If there are any Units here, disembark them
+				for(int iUnitLoop = 0; iUnitLoop < getNumUnits(); iUnitLoop++)
+				{
+					CvUnit* loopUnit = getUnitByIndex(iUnitLoop);
+					if(!loopUnit || !loopUnit->isEmbarked()) continue;
+
+					loopUnit->disembark(this);
+				}
+			}
+			// AllowsWalkWater -> Not AllowsWalkWater
+			else if(eOldImprovement != NO_IMPROVEMENT && GC.getImprovementInfo(eOldImprovement)->IsAllowsWalkWater())
+			{
+				// If there are any Units here, embark them
+				for(int iUnitLoop = 0; iUnitLoop < getNumUnits(); iUnitLoop++)
+				{
+					CvUnit* loopUnit = getUnitByIndex(iUnitLoop);
+					if(!loopUnit || loopUnit->getUnitInfo().GetDomainType() != DOMAIN_LAND) continue;
+					if(loopUnit->isEmbarked() || loopUnit->canMoveAllTerrain() || loopUnit->canMoveImpassable() || loopUnit->isTrade()) continue;
+
+					loopUnit->embark(this);
+				}
+			}
+		}
+
 		if(m_eImprovementType != NO_IMPROVEMENT)
 		{
 			CvImprovementEntry& newImprovementEntry = *GC.getImprovementInfo(eNewValue);
