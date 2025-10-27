@@ -129,6 +129,11 @@ void CvLuaPlayer::RegistStaticFunctions() {
 
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lSetLostUC);
 	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeFreeBuildingCount);
+
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumCropsTotalTimes100);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumCropsUsed);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumArmeeTotalTimes100);
+	REGIST_STATIC_FUNCTION(CvLuaPlayer::lChangeNumArmeeUsed);
 }
 
 //------------------------------------------------------------------------------
