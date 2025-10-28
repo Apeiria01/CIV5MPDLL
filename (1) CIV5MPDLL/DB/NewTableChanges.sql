@@ -18,29 +18,29 @@ INSERT INTO Defines(Name, Value) VALUES('CITY_CRIME_OPINION_DISSIDENTS_YIELD', 1
 INSERT INTO Defines(Name, Value) VALUES('CITY_CRIME_GOLDEN_AGE_YIELD',-10);
 INSERT INTO Defines(Name, Value) VALUES('CITY_LOYALTY_GOLDEN_AGE_YIELD', -10);
 
-ALTER TABLE Features ADD PseudoNaturalWonder INTEGER DEFAULT 0;
-ALTER TABLE Features ADD Volcano boolean default 0;
+alter table Features add PseudoNaturalWonder integer default 0;
+alter table Features add Volcano boolean default 0;
 
-ALTER TABLE HandicapInfos ADD StrategicResourceMod INTEGER DEFAULT 100;
-ALTER TABLE HandicapInfos ADD StrategicResourceModPerEra INTEGER DEFAULT 0;
+alter table HandicapInfos add StrategicResourceMod integer default 100;
+alter table HandicapInfos add StrategicResourceModPerEra integer default 0;
 -- If AIFirstProphetPercent is positive, it overrides AITrainPercent on AI's First Prophet Cost
-ALTER TABLE HandicapInfos ADD AIFirstProphetPercent INTEGER DEFAULT 0;
+alter table HandicapInfos add AIFirstProphetPercent integer default 0;
 
-ALTER TABLE GameSpeeds ADD FreePromotion TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
-ALTER TABLE GameSpeeds ADD COLUMN 'SetterExtraPercent' INTEGER DEFAULT 0;
+alter table GameSpeeds add FreePromotion text references UnitPromotions(Type);
+alter table GameSpeeds add SetterExtraPercent integer default 0;
 
-ALTER TABLE Processes ADD COLUMN 'DefenseValue' INTEGER DEFAULT 0;
+alter table Processes add DefenseValue integer default 0;
 
-ALTER TABLE Projects ADD COLUMN 'FreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
-ALTER TABLE Projects ADD COLUMN 'NoBroadcast' BOOLEAN DEFAULT 0;
-ALTER TABLE Projects ADD COLUMN 'PolicyBranchPrereq' TEXT DEFAULT NULL REFERENCES PolicyBranchTypes(Type);
-CREATE TABLE IF NOT EXISTS Project_PolicyNeeded (
-    `ProjectType` TEXT DEFAULT '' references Projects(Type),
-    `PolicyType` TEXT DEFAULT '' references Policies(Type)
+alter table Projects add FreePromotion text references UnitPromotions(Type);
+alter table Projects add NoBroadcast boolean default 0;
+alter table Projects add PolicyBranchPrereq text references PolicyBranchTypes(Type);
+create table Project_PolicyNeeded (
+    ProjectType text references Projects(Type),
+    PolicyType text references Policies(Type)
 );
 
-ALTER TABLE Builds ADD COLUMN 'ObsoleteTech' TEXT DEFAULT NULL;
-CREATE TABLE IF NOT EXISTS Build_ResourceRemove (
-    BuildType TEXT DEFAULT NULL  REFERENCES Builds(Type),
-    ResourceType TEXT DEFAULT NULL REFERENCES Resources(Type)
+alter table Builds add ObsoleteTech text default null;
+create table Build_ResourceRemove (
+    BuildType text references Builds(Type),
+    ResourceType text references Resources(Type)
 );
