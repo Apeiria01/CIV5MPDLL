@@ -208,12 +208,12 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/GLOBAL/AlpinePasses.sql</FileName>
+        <FileName>DB/UNITS/Units_DDL.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/GLOBAL/CannotEmbark.sql</FileName>
+        <FileName>DB/GLOBAL/AlpinePasses.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -228,17 +228,7 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/GLOBAL/ExcludeFromGifts.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
         <FileName>DB/GLOBAL/GreatworkYieldtypes.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/GLOBAL/MoveAfterUpgrade.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -253,22 +243,12 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/GLOBAL/PromotionClasses.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
         <FileName>DB/GLOBAL/Relocation.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
         <FileName>DB/GLOBAL/Resolutions.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/GLOBAL/SeparateGreatAdmiral.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -298,17 +278,7 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/PROMOTIONS/CrossIce.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/PROMOTIONS/CrossMountains.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/PROMOTIONS/CrossOceans.sql</FileName>
+        <FileName>DB/PROMOTIONS/CrossNew.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -349,6 +319,11 @@
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
         <FileName>DB/PROMOTIONS/PromotionCollections.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
+        <FileName>DB/PROMOTIONS/NewPromotions_DDL.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -419,11 +394,6 @@
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
         <FileName>DB/UNITS/NewUnits_DDL.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/UNITS/Unit_ScalingFromOwnedImprovements.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -790,11 +760,11 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/GLOBAL/AlpinePasses.sql">
+    <Content Include="DB/UNITS/Units_DDL.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/GLOBAL/CannotEmbark.sql">
+    <Content Include="DB/GLOBAL/AlpinePasses.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
@@ -806,15 +776,7 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/GLOBAL/ExcludeFromGifts.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
     <Content Include="DB/GLOBAL/GreatworkYieldtypes.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB/GLOBAL/MoveAfterUpgrade.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
@@ -826,19 +788,11 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/GLOBAL/PromotionClasses.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
     <Content Include="DB/GLOBAL/Relocation.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
     <Content Include="DB/GLOBAL/Resolutions.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB/GLOBAL/SeparateGreatAdmiral.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
@@ -862,15 +816,7 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/PROMOTIONS/CrossIce.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB/PROMOTIONS/CrossMountains.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB/PROMOTIONS/CrossOceans.sql">
+    <Content Include="DB/PROMOTIONS/CrossNew.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
@@ -887,6 +833,10 @@
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
     <Content Include="DB/PROMOTIONS/ImprovementBonus.sql">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>False</ImportIntoVFS>
+    </Content>
+    <Content Include="DB/PROMOTIONS/NewPromotions_DDL.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
@@ -1127,10 +1077,6 @@
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
     <Content Include="DB\UNITS\NewUnits_DDL.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB\UNITS\Unit_ScalingFromOwnedImprovements.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
