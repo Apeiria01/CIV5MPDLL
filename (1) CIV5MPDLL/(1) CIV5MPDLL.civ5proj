@@ -103,22 +103,17 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/API/UnifiedYields.sql</FileName>
+        <FileName>DB/YIELDS/UnifiedYields.sql</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/API/UnifiedYields.xml</FileName>
+        <FileName>DB/YIELDS/UnifiedYields.xml</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/API/UnifiedYieldsGoldenAge.xml</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/API/UnifiedYieldsTourism.xml</FileName>
+        <FileName>DB/YIELDS/UnifiedYieldsMoreYield.xml</FileName>
       </Action>
       <Action>
         <Set>OnModActivated</Set>
@@ -488,11 +483,6 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/YIELDS/NewYields_DDL.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
         <FileName>DB/IMPROVEMENTS/Improvement_Upgrade_Downgrade.sql</FileName>
       </Action>
       <Action>
@@ -716,19 +706,15 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/API/UnifiedYields.sql">
+    <Content Include="DB/YIELDS/UnifiedYields.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/API/UnifiedYields.xml">
+    <Content Include="DB/YIELDS/UnifiedYields.xml">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB/API/UnifiedYieldsGoldenAge.xml">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB/API/UnifiedYieldsTourism.xml">
+    <Content Include="DB/YIELDS/UnifiedYieldsMoreYield.xml">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
@@ -1145,10 +1131,6 @@
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
     <Content Include="DB\UNITS\Unit_ScalingFromOwnedImprovements.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB\YIELDS\NewYields_DDL.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>

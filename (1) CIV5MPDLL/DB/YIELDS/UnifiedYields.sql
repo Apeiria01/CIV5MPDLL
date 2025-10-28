@@ -20,5 +20,5 @@ UPDATE Yields SET ImageTexture='YieldAtlas_128_Faith.dds' WHERE Type='YIELD_FAIT
 
 INSERT INTO CustomModDbUpdates(Name, Value) VALUES('API_UNIFIED_YIELDS_SQL', 1);
 
-
-ALTER TABLE Features ADD COLUMN 'FreePromotionIfOwned' TEXT DEFAULT NULL;
+ALTER TABLE Yields ADD GreakWorkYieldMod INTEGER DEFAULT 0;
+ALTER TABLE Features ADD FreePromotionIfOwned TEXT REFERENCES UnitPromotions(Type);
