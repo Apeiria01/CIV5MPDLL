@@ -468,6 +468,11 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
+        <FileName>DB/IMPROVEMENTS/NewImprovements_DDL.sql</FileName>
+      </Action>
+      <Action>
+        <Set>OnModActivated</Set>
+        <Type>UpdateDatabase</Type>
         <FileName>DB/GLOBAL/WarCasualties.sql</FileName>
       </Action>
       <Action>
@@ -503,11 +508,6 @@
       <Action>
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
-        <FileName>DB/IMPROVEMENTS/Improvement_TradeRouteYieldChanges.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
         <FileName>DB/TRAITS/TraitsGoldenAgeEffects.sql</FileName>
       </Action>
       <Action>
@@ -539,16 +539,6 @@
         <Set>OnModActivated</Set>
         <Type>UpdateDatabase</Type>
         <FileName>DB/TRAITS/CombatBonusFromReligion.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/IMPROVEMENTS/Improvement_YieldChangesPerUnit.sql</FileName>
-      </Action>
-      <Action>
-        <Set>OnModActivated</Set>
-        <Type>UpdateDatabase</Type>
-        <FileName>DB/IMPROVEMENTS/Improvement_UnitXPPerTurn.sql</FileName>
       </Action>
     </ModActions>
     <ModReferences />
@@ -948,14 +938,6 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB\IMPROVEMENTS\Improvement_TradeRouteYieldChanges.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
-    <Content Include="DB\IMPROVEMENTS\Improvement_UnitXPPerTurn.sql">
-      <SubType>Lua</SubType>
-      <ImportIntoVFS>False</ImportIntoVFS>
-    </Content>
     <Content Include="DB\IMPROVEMENTS\Improvement_Upgrade_Downgrade.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
@@ -968,7 +950,7 @@
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>
-    <Content Include="DB\IMPROVEMENTS\Improvement_YieldChangesPerUnit.sql">
+    <Content Include="DB\IMPROVEMENTS\NewImprovements_DDL.sql">
       <SubType>Lua</SubType>
       <ImportIntoVFS>False</ImportIntoVFS>
     </Content>

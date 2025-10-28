@@ -1,14 +1,8 @@
 ALTER TABLE Processes ADD COLUMN 'DefenseValue' INTEGER DEFAULT 0;
 
-ALTER TABLE Builds ADD COLUMN 'ObsoleteTech' TEXT DEFAULT NULL;
-
 ALTER TABLE Technologies ADD COLUMN 'CitySplashDamage' BOOLEAN DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'NearbyFriendHeal' INTEGER DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'ImprovementResource' TEXT DEFAULT NULL;
-ALTER TABLE Improvements ADD COLUMN 'ImprovementResourceQuantity' INTEGER DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'IsFreshWater' BOOLEAN DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'NoLake' BOOLEAN DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'ForbidSameBuildUnitClasses' TEXT DEFAULT NULL;
+ALTER TABLE Technologies ADD BombardRange INTEGER DEFAULT 0;
+ALTER TABLE Technologies ADD BombardIndirect INTEGER DEFAULT 0;
 
 INSERT INTO Defines(Name, Value) VALUES('ORIGINAL_CAPITAL_MODMAX', 10);
 
@@ -33,9 +27,6 @@ INSERT INTO Defines(Name, Value) VALUES('CITY_LOYALTY_GOLDEN_AGE_YIELD', -10);
 ALTER TABLE Features ADD PseudoNaturalWonder INTEGER DEFAULT 0;
 ALTER TABLE Features ADD  'Volcano'  boolean default 0;
 
-ALTER TABLE Technologies ADD BombardRange INTEGER DEFAULT 0;
-ALTER TABLE Technologies ADD BombardIndirect INTEGER DEFAULT 0;
-
 ALTER TABLE Policies ADD COLUMN 'DefenseBoostAllCities' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD COLUMN 'FreePopulation' INTEGER DEFAULT 0;
 ALTER TABLE Policies ADD COLUMN 'FreePopulationCapital' INTEGER DEFAULT 0;
@@ -54,24 +45,10 @@ ALTER TABLE Traits ADD COLUMN 'GoldenAgeOnWar' BOOLEAN DEFAULT 0;
 ALTER TABLE Traits ADD COLUMN 'BuyOwnedTiles' BOOLEAN DEFAULT 0;
 ALTER TABLE Traits ADD COLUMN `CanPurchaseWonderInGoldenAge` BOOLEAN NOT NULL DEFAULT 0;
 
-ALTER TABLE Improvements ADD WonderProductionModifier INTEGER DEFAULT 0;
-ALTER TABLE Improvements ADD ExtraScore INTEGER DEFAULT 0;
-CREATE TABLE IF NOT EXISTS Improvement_FeaturesNeeded (
-    `ImprovementType` TEXT DEFAULT '' references Improvements(Type),
-    `FeatureType` TEXT DEFAULT '' references Features(Type)
-);
-
 ALTER TABLE HandicapInfos ADD StrategicResourceMod INTEGER DEFAULT 100;
 ALTER TABLE HandicapInfos ADD StrategicResourceModPerEra INTEGER DEFAULT 0;
 -- If AIFirstProphetPercent is positive, it overrides AITrainPercent on AI's First Prophet Cost
 ALTER TABLE HandicapInfos ADD AIFirstProphetPercent INTEGER DEFAULT 0;
-
-ALTER TABLE Improvements ADD COLUMN 'RequiredAdjacentImprovement' TEXT DEFAULT NULL REFERENCES Improvements(Type);
-ALTER TABLE Improvements ADD COLUMN 'RequiredAdjacentCity' BOOLEAN DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'RemoveWhenSetNoFuture' BOOLEAN DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'NumWaterPlotMakesValid' INTEGER DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'NoFeature' BOOLEAN DEFAULT 0;
-ALTER TABLE Improvements ADD COLUMN 'NoRemove' BOOLEAN DEFAULT 0;
 
 ALTER TABLE GameSpeeds ADD FreePromotion TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
 ALTER TABLE GameSpeeds ADD COLUMN 'SetterExtraPercent' INTEGER DEFAULT 0;
@@ -79,7 +56,6 @@ ALTER TABLE GameSpeeds ADD COLUMN 'SetterExtraPercent' INTEGER DEFAULT 0;
 ALTER TABLE Projects ADD COLUMN 'FreePromotion' TEXT DEFAULT NULL REFERENCES UnitPromotions(Type);
 ALTER TABLE Projects ADD COLUMN 'NoBroadcast' BOOLEAN DEFAULT 0;
 ALTER TABLE Projects ADD COLUMN 'PolicyBranchPrereq' TEXT DEFAULT NULL REFERENCES PolicyBranchTypes(Type);
-
 CREATE TABLE IF NOT EXISTS Project_PolicyNeeded (
     `ProjectType` TEXT DEFAULT '' references Projects(Type),
     `PolicyType` TEXT DEFAULT '' references Policies(Type)
@@ -89,6 +65,7 @@ CREATE TABLE IF NOT EXISTS Project_PolicyNeeded (
 ALTER TABLE Civilizations ADD COLUMN `SpecialGAText` TEXT DEFAULT 'TXT_KEY_GOLDEN_AGE_ANNOUNCE';
 ALTER TABLE Civilizations ADD COLUMN `SpecialGAHelpText` TEXT DEFAULT 'TXT_KEY_TP_GOLDEN_AGE_EFFECT';
 
+ALTER TABLE Builds ADD COLUMN 'ObsoleteTech' TEXT DEFAULT NULL;
 CREATE TABLE IF NOT EXISTS Build_ResourceRemove (
     BuildType TEXT DEFAULT NULL  REFERENCES Builds(Type),
     ResourceType TEXT DEFAULT NULL REFERENCES Resources(Type)
