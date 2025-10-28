@@ -13078,12 +13078,8 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 		if (pYield)
 		{
 			iTempMod = pYield->getGoldenAgeYieldMod();
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
-			if (MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER)
-			{
-				iTempMod += owner.getGoldenAgeYieldRateModifier(eIndex);
-			}
-#endif
+			iTempMod += owner.getGoldenAgeYieldRateModifier(eIndex);
+
 			iModifier += iTempMod;
 			if (iTempMod != 0 && toolTipSink)
 				GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_GOLDEN_AGE", iTempMod);

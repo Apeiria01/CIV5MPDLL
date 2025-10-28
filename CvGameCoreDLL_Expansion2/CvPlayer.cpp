@@ -762,9 +762,8 @@ void CvPlayer::init(PlayerTypes eID)
 			ChangeCityYieldChangeTimes100((YieldTypes)iJ, 100 * GetPlayerTraits()->GetFreeCityYield((YieldTypes)iJ));
 
 			changeYieldRateModifier((YieldTypes)iJ, GetPlayerTraits()->GetYieldRateModifier((YieldTypes)iJ));
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+
 			changeGoldenAgeYieldRateModifier((YieldTypes)iJ, GetPlayerTraits()->GetGoldenAgeYieldRateModifier((YieldTypes)iJ));
-#endif
 		}
 
 		recomputeGreatPeopleModifiers();
@@ -1423,12 +1422,8 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 	m_vCityStateTradeRouteYieldModifierGlobal.clear();
 	m_vCityStateTradeRouteYieldModifierGlobal.resize(NUM_YIELD_TYPES, 0);
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	m_aiGoldenAgeYieldRateModifier.clear();
 	m_aiGoldenAgeYieldRateModifier.resize(NUM_YIELD_TYPES, 0);
-#endif
-
-
 
 	m_aiCapitalYieldRateModifier.clear();
 	m_aiCapitalYieldRateModifier.resize(NUM_YIELD_TYPES, 0);
@@ -21479,11 +21474,7 @@ void CvPlayer::changeCityLoveKingDayYieldMod(YieldTypes eIndex, int iChange)
 	}
 }
 
-
-
-
-
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+//	--------------------------------------------------------------------------------
 int CvPlayer::getGoldenAgeYieldRateModifier(YieldTypes eIndex) const
 {
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
@@ -21507,8 +21498,6 @@ void CvPlayer::changeGoldenAgeYieldRateModifier(YieldTypes eIndex, int iChange)
 		}
 	}
 }
-#endif
-
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getCapitalYieldRateModifier(YieldTypes eIndex) const
@@ -28492,10 +28481,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_aiYieldRateModifier;
 	kStream >> m_aiCapitalYieldRateModifier;
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	kStream >> m_aiGoldenAgeYieldRateModifier;
-#endif
-
 
 	if (uiVersion >= 4)
 	{
@@ -29247,11 +29233,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_aiYieldRateModifier;
 	kStream << m_aiCapitalYieldRateModifier;
 
-
-
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	kStream << m_aiGoldenAgeYieldRateModifier;
-#endif
 
 	kStream << m_aiGreatWorkYieldChange;
 	kStream << m_aiExtraYieldThreshold;

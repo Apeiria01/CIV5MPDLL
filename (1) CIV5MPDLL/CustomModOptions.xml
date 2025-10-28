@@ -1177,8 +1177,6 @@
     <!-- table change: Improvement_TradeRouteYieldChanges.sql -->
     <Row Class="4" Name="IMPROVEMENT_TRADE_ROUTE_BONUSES" Value="0"/>
 
-    <Row Class="6" Name="TRAITS_GOLDEN_AGE_YIELD_MODIFIER" Value="0"/>
-
     <Row Class="6" Name="POLICIY_PUBLIC_OPTION" Value="0"/>
 
     <Row Class="6" Name="BATTLE_CAPTURE_NEW_RULE" Value="0"/>

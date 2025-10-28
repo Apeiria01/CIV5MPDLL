@@ -141,9 +141,6 @@
 		<Row Name="PUPPET_SOVEREIGNTY_MODIFIER">
 			<Value>-25</Value>
 		</Row>
-		<Row Name="WONDER_GOLDEN_AGE_PURCHASE_MODIFIER">
-			<Value>200</Value>
-		</Row>
 	</Defines>
 
 	<PostDefines>
