@@ -8172,8 +8172,8 @@ bool CvPlayer::canFound(int iX, int iY, bool bTestVisible) const
 	}
 #endif
 
-#if defined(MOD_MORE_NATURAL_WONDER)
-	if (MOD_MORE_NATURAL_WONDER) {
+#if defined(MOD_VOLCANO_BREAK)
+	if (MOD_VOLCANO_BREAK) {
 		if (pPlot->IsVolcano())
 		{
 			return false;

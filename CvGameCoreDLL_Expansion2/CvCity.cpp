@@ -1086,7 +1086,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iBaseTourism = 0;
 	m_iBaseTourismBeforeModifiers = 0;
 	m_aiNumProjects.resize(GC.getNumProjectInfos());
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_iImmueVolcanoDamage = 0;
 #endif
 	m_iAddsFreshWater = 0;
@@ -7782,7 +7782,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changeLandTileMovementReduce(pBuildingInfo->GetLandTileMovementReduce()* iChange);
 		changeLandTileTurnDamage(pBuildingInfo->GetLandTileTurnDamage()* iChange);
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 		changeImmueVolcanoDamage(pBuildingInfo->IsImmueVolcanoDamage()* iChange);  
 #endif
 		changeAddsFreshWater(pBuildingInfo->IsAddsFreshWater()* iChange);
@@ -8890,19 +8890,16 @@ bool CvCity::isCoastal(int iMinWaterSize) const
 }
 
 
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 //	--------------------------------------------------------------------------------
 int CvCity::getImmueVolcanoDamage() const
 {
 	return m_iImmueVolcanoDamage;
 }
-//	--------------------------------------------------------------------------------
 bool CvCity::isImmueVolcanoDamage() const
 {
 	return (getImmueVolcanoDamage() > 0);
 }
-
-//	--------------------------------------------------------------------------------
 void CvCity::changeImmueVolcanoDamage(int iChange)
 {
 	if (iChange != 0)
@@ -19943,7 +19940,7 @@ void CvCity::read(FDataStream& kStream)
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	// SEE ABOVE - MOD_SERIALIZE_READ(90, kStream, m_iCityAutomatonWorkersChange, 0);
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	kStream >> m_iImmueVolcanoDamage;
 #endif
 	kStream >> m_iAddsFreshWater;
@@ -20458,7 +20455,7 @@ void CvCity::write(FDataStream& kStream) const
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	// SEE ABOVE - MOD_SERIALIZE_WRITE(kStream, m_iCityAutomatonWorkersChange);
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	kStream << m_iImmueVolcanoDamage;
 #endif
 	kStream << m_iAddsFreshWater;

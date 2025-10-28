@@ -145,7 +145,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_bWater(false),
 	m_bRiver(false),
 	m_bFreshWater(false),
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bImmueVolcanoDamage(false),
 #endif
 	m_bAddsFreshWater(false),
@@ -531,7 +531,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_bWater = kResults.GetBool("Water");
 	m_bRiver = kResults.GetBool("River");
 	m_bFreshWater = kResults.GetBool("FreshWater");
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bImmueVolcanoDamage = kResults.GetBool("ImmueVolcanoDamage"); 
 #endif
 
@@ -3001,7 +3001,7 @@ bool CvBuildingEntry::IsFreshWater() const
 	return m_bFreshWater;
 }
 
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 /// Does this building add FreshWater?
 bool CvBuildingEntry::IsImmueVolcanoDamage() const
 {

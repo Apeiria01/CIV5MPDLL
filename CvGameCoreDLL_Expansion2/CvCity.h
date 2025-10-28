@@ -408,7 +408,7 @@ public:
 
 	bool isCoastal(int iMinWaterSize = -1) const;
 
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	int getImmueVolcanoDamage() const;
 	void changeImmueVolcanoDamage(int iChange);
 	bool isImmueVolcanoDamage() const;
@@ -1552,7 +1552,7 @@ protected:
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int m_iConversionModifier;
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	int m_iImmueVolcanoDamage;
 #endif
 	int m_iAddsFreshWater;

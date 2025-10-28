@@ -5099,12 +5099,14 @@ CvFeatureInfo::CvFeatureInfo() :
 	m_bVisibleAlways(false),
 	m_bNukeImmune(false),
 	m_bRough(false),
-	m_bNaturalWonder(false),
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bVolcano(false),
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
 	m_bPseudoNaturalWonder(false),
 	m_iPromotionIfOwned(NO_PROMOTION),
 #endif
+	m_bNaturalWonder(false),
 	m_iWorldSoundscapeScriptId(0),
 	m_iEffectProbability(0),
 	m_piYieldChange(NULL),
@@ -5286,6 +5288,22 @@ bool CvFeatureInfo::IsRough() const
 	return m_bRough;
 }
 //------------------------------------------------------------------------------
+#if defined(MOD_VOLCANO_BREAK)
+bool CvFeatureInfo::IsVolcano() const
+{
+	return m_bVolcano;
+}
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
+bool CvFeatureInfo::IsPseudoNaturalWonder() const
+{
+	return m_bPseudoNaturalWonder;
+}
+int CvFeatureInfo::getPromotionIfOwned() const
+{
+	return m_iPromotionIfOwned;
+}
+#endif
 bool CvFeatureInfo::IsNaturalWonder(bool orPseudoNatural) const
 {
 #if defined(MOD_MORE_NATURAL_WONDER)
@@ -5294,21 +5312,6 @@ bool CvFeatureInfo::IsNaturalWonder(bool orPseudoNatural) const
 	return m_bNaturalWonder;
 #endif
 }
-#if defined(MOD_MORE_NATURAL_WONDER)
-bool CvFeatureInfo::IsVolcano() const
-{
-	return m_bVolcano;
-}
-bool CvFeatureInfo::IsPseudoNaturalWonder() const
-{
-	return m_bPseudoNaturalWonder;
-}
-
-int CvFeatureInfo::getPromotionIfOwned() const
-{
-	return m_iPromotionIfOwned;
-}
-#endif
 //------------------------------------------------------------------------------
 const char* CvFeatureInfo::getArtDefineTag() const
 {
@@ -5463,14 +5466,16 @@ bool CvFeatureInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_bVisibleAlways = kResults.GetBool("VisibleAlways");
 	m_bNukeImmune = kResults.GetBool("NukeImmune");
 	m_bRough = kResults.GetBool("Rough");
-	m_bNaturalWonder = kResults.GetBool("NaturalWonder");
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bVolcano = kResults.GetBool("Volcano");
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
 	m_bPseudoNaturalWonder = kResults.GetBool("PseudoNaturalWonder");
 
 	szTextVal = kResults.GetText("FreePromotionIfOwned");
 	m_iPromotionIfOwned = GC.getInfoTypeForString(szTextVal, true);
 #endif
+	m_bNaturalWonder = kResults.GetBool("NaturalWonder");
 	m_strEffectType = kResults.GetText("EffectType");
 	m_strEffectTypeTag = kResults.GetText("EffectTypeTag");
 

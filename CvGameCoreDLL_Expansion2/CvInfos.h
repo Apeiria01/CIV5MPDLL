@@ -1580,15 +1580,14 @@ public:
 	bool isNukeImmune() const;
 	bool IsRough() const;
 
+#if defined(MOD_VOLCANO_BREAK)
+	bool IsVolcano() const;
+#endif
 #if defined(MOD_MORE_NATURAL_WONDER)
 	bool IsPseudoNaturalWonder() const;
-#endif
-	bool IsNaturalWonder(bool orPseudoNatural = false) const;
-
-#if defined(MOD_MORE_NATURAL_WONDER)
-	bool IsVolcano() const;
 	int getPromotionIfOwned() const;
 #endif
+	bool IsNaturalWonder(bool orPseudoNatural = false) const;
 
 	const char* getArtDefineTag() const;
 	void setArtDefineTag(const char* szTag);
@@ -1652,12 +1651,14 @@ protected:
 	bool m_bVisibleAlways;
 	bool m_bNukeImmune;
 	bool m_bRough;
-	bool m_bNaturalWonder;
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	bool m_bVolcano;
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
 	bool m_bPseudoNaturalWonder;
 	int m_iPromotionIfOwned;
 #endif
+	bool m_bNaturalWonder;
 	// Set each time the game is started
 	bool m_bClearable;
 

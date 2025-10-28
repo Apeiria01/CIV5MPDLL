@@ -356,7 +356,7 @@ public:
 	bool IsWater() const;
 	bool IsRiver() const;
 	bool IsFreshWater() const;
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	bool IsImmueVolcanoDamage() const;
 #endif
 	bool IsAddsFreshWater() const;
@@ -847,7 +847,7 @@ private:
 	bool m_bWater;
 	bool m_bRiver;
 	bool m_bFreshWater;
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	bool m_bImmueVolcanoDamage;
 #endif
 	bool m_bAddsFreshWater;

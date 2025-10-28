@@ -73,6 +73,9 @@
     <LibraryPath>C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\lib</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions>/EHsc  /d2noftol3 %(AdditionalOptions)</AdditionalOptions>

@@ -188,8 +188,6 @@ CvPlot::CvPlot() :
 	m_fPopupDelay = 0.5;
 #endif
 
-	m_iBreakTurns = 0;
-
 	m_cContinentType = 0;
 	m_cRiverCrossing = 0;
 
@@ -261,8 +259,6 @@ void CvPlot::reset(int iX, int iY, bool bConstructorCall)
 	m_cContinentType = 0;
 
 	m_uiTradeRouteBitFlags = 0;
-
-	m_iBreakTurns = 0;
 
 	m_bStartingPlot = false;
 	m_bHills = false;
@@ -367,6 +363,13 @@ void CvPlot::reset(int iX, int iY, bool bConstructorCall)
 	}
 
 	m_kArchaeologyData.Reset();
+
+#if defined(MOD_VOLCANO_BREAK)
+	m_iBreakTurns = 0;
+#endif
+#ifdef MOD_IMPROVEMENTS_UPGRADE
+	m_iXP = 0;
+#endif
 }
 
 //////////////////////////////////////
@@ -443,188 +446,8 @@ void CvPlot::doTurn()
 #if defined(SHOW_PLOT_POPUP)
 	m_fPopupDelay = 0.5;
 #endif
-
 #if defined(MOD_VOLCANO_BREAK)
-	if (MOD_VOLCANO_BREAK && IsVolcano() && GC.getGame().getElapsedGameTurns() > 6)
-	{
-		if (GetBreakTurns() > 0  )
-		{
-			ChangeBreakTurns(-1);
-		}
-
-		int iFakeRandNum=0;
-		iFakeRandNum= GC.getGame().getSmallFakeRandNum(1000, GetPlotIndex());
-
-		bool bOutBreakLv1 = false, bOutBreakLv2 = false, bOutBreakLv3 = false;
-		if (iFakeRandNum <= 30)
-		{
-			bOutBreakLv1 = true;
-		}
-		else if (iFakeRandNum <= 600 && iFakeRandNum>=590)
-		{
-			bOutBreakLv2 = true;
-		}
-		else if (iFakeRandNum >= 995)
-		{
-			bOutBreakLv3 = true;
-		}
-
-		if (GetBreakTurns() == 0)
-		{
-			if (bOutBreakLv1)
-			{
-				GC.getGame().setPlotExtraYield(getX(), getY(), YIELD_FOOD, 1);
-
-				if (!IsImmueVolcanoDamage())
-				{
-					if (getImprovementType() != NO_IMPROVEMENT && !isCity() && !IsImprovementPillaged())
-					{
-						CvImprovementEntry* pkImprovement = GC.getImprovementInfo(getImprovementType());
-						if (pkImprovement)
-						{
-							if(pkImprovement->IsDestroyedWhenPillaged())
-							{
-								setImprovementType(NO_IMPROVEMENT);
-							}
-							else
-							{
-								SetImprovementPillaged(true);
-							}
-						}
-					}
-					for (int iUnitLoop = 0; iUnitLoop < getNumUnits(); iUnitLoop++)
-					{
-						CvUnit* loopUnit = getUnitByIndex(iUnitLoop);
-						if (loopUnit != NULL && loopUnit->getDomainType() != DOMAIN_AIR && loopUnit->getDomainType() != DOMAIN_HOVER)
-						{
-							loopUnit->changeDamage(50);
-						}
-					}
-				}
-				SetBreakTurns(10);
-				CvString strBuffer = GetLocalizedText("TXT_KEY_VOLCANO_EVENT_1");
-				CvString strSummary = GetLocalizedText("TXT_KEY_VOLCAN_EVENT_TITLE");
-				if (isRevealed(GC.getGame().getActiveTeam(), false))
-				{
-					GET_TEAM(GC.getGame().getActiveTeam()).AddNotification(NOTIFICATION_GENERIC, strBuffer, strSummary, getX(), getY());
-				}
-			}
-				
-			else if (bOutBreakLv2)
-			{
-				int iRange = 1;
-				for (int iDX = -iRange; iDX <= iRange; iDX++)
-				{
-					for (int iDY = -iRange; iDY <= iRange; iDY++)
-					{
-						CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iDX, iDY, iRange);
-						if (pLoopPlot != NULL)
-						{
-							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_FOOD, 1);
-							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_PRODUCTION, 1);
-
-							if (!pLoopPlot->IsImmueVolcanoDamage())
-							{
-								if (pLoopPlot->getImprovementType() != NO_IMPROVEMENT && !pLoopPlot->isCity() && !pLoopPlot->IsImprovementPillaged())
-								{
-									CvImprovementEntry* pkImprovement = GC.getImprovementInfo(pLoopPlot->getImprovementType());
-									if (pkImprovement)
-									{
-										if(pkImprovement->IsDestroyedWhenPillaged())
-										{
-											pLoopPlot->setImprovementType(NO_IMPROVEMENT);
-										}
-										else
-										{
-											pLoopPlot->SetImprovementPillaged(true);
-										}
-									}
-								}
-
-								if (pLoopPlot->isCity())
-								{
-									pLoopPlot->getPlotCity()->changeDamage(0.25 * (pLoopPlot->getPlotCity()->GetMaxHitPoints()));
-								}
-
-								for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
-								{
-									CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
-									if (loopUnit != NULL && loopUnit->getDomainType() != DOMAIN_AIR && loopUnit->getDomainType() != DOMAIN_HOVER)
-									{
-										loopUnit->changeDamage(99);
-									}
-								}
-							}
-						}
-					}
-				}
-				SetBreakTurns(15);
-				CvString strBuffer = GetLocalizedText("TXT_KEY_VOLCANO_EVENT_2");
-				CvString strSummary = GetLocalizedText("TXT_KEY_VOLCAN_EVENT_TITLE");
-				if (isRevealed(GC.getGame().getActiveTeam(), false))
-				{
-					GET_TEAM(GC.getGame().getActiveTeam()).AddNotification(NOTIFICATION_GENERIC, strBuffer, strSummary, getX(), getY());
-				}
-			}
-
-			else if (bOutBreakLv3)
-			{
-				int iRange = 2;
-				for (int iDX = -iRange; iDX <= iRange; iDX++)
-				{
-					for (int iDY = -iRange; iDY <= iRange; iDY++)
-					{
-						CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iDX, iDY, iRange);
-						if (pLoopPlot != NULL)
-						{
-							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_FOOD, 1);
-							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_PRODUCTION, 1);
-
-							if (!pLoopPlot->IsImmueVolcanoDamage())
-							{
-								if (pLoopPlot->getImprovementType() != NO_IMPROVEMENT && !pLoopPlot->isCity() && !pLoopPlot->IsImprovementPillaged())
-								{
-									CvImprovementEntry* pkImprovement = GC.getImprovementInfo(pLoopPlot->getImprovementType());
-									if (pkImprovement)
-									{
-										if(pkImprovement->IsDestroyedWhenPillaged())
-										{
-											pLoopPlot->setImprovementType(NO_IMPROVEMENT);
-										}
-										else
-										{
-											pLoopPlot->SetImprovementPillaged(true);
-										}
-									}
-								}
-
-								if (pLoopPlot->isCity())
-								{
-									pLoopPlot->getPlotCity()->changeDamage(0.80 * (pLoopPlot->getPlotCity()->GetMaxHitPoints()));
-								}
-
-								for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
-								{
-									CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
-									if (loopUnit != NULL && loopUnit->getDomainType() != DOMAIN_AIR && loopUnit->getDomainType() != DOMAIN_HOVER)
-									{
-										loopUnit->changeDamage(150);
-									}
-								}
-							}
-						}
-					}
-				}
-				SetBreakTurns(20);
-				CvString strBuffer = GetLocalizedText("TXT_KEY_VOLCANO_EVENT_3");
-				CvString strSummary = GetLocalizedText("TXT_KEY_VOLCAN_EVENT_TITLE");
-				if (isRevealed(GC.getGame().getActiveTeam(), false))
-				{
-					GET_TEAM(GC.getGame().getActiveTeam()).AddNotification(NOTIFICATION_GENERIC, strBuffer, strSummary, getX(), getY());
-				}
-			}
-		}
-	}
+	doVolcanoBreak();
 #endif
 
 	if(isOwned())
@@ -726,26 +549,6 @@ void CvPlot::doTurn()
 	}
 #endif
 	// XXX
-}
-
-
-int CvPlot::GetBreakTurns() const
-{
-	return m_iBreakTurns;
-}
-void CvPlot::ChangeBreakTurns(int iValue) //Set in city::doturn
-{
-	if (iValue != 0)
-	{
-		m_iBreakTurns += iValue;
-	}
-}
-void CvPlot::SetBreakTurns(int iValue)
-{
-	if (iValue != m_iBreakTurns)
-	{
-		m_iBreakTurns = iValue;
-	}
 }
 
 //	--------------------------------------------------------------------------------
@@ -5787,10 +5590,7 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 				PromotionTypes eFreePromotion = (PromotionTypes)pFeatureInfo->getPromotionIfOwned();
 				if (eFreePromotion != NO_PROMOTION)
 				{
-					if (!GET_PLAYER(eNewValue).IsFreePromotion(eFreePromotion))
-					{
-						GET_PLAYER(eNewValue).ChangeFreePromotionCount(eFreePromotion, 1);
-					}
+					GET_PLAYER(eNewValue).ChangeFreePromotionCount(eFreePromotion, 1);
 				}
 #endif
 			}
@@ -5807,10 +5607,7 @@ void CvPlot::setOwner(PlayerTypes eNewValue, int iAcquiringCityID, bool bCheckUn
 					PromotionTypes eFreePromotion = (PromotionTypes)pFeatureInfo->getPromotionIfOwned();
 					if (eFreePromotion != NO_PROMOTION)
 					{
-						if (GET_PLAYER(eOldOwner).IsFreePromotion(eFreePromotion))
-						{
-							GET_PLAYER(eOldOwner).ChangeFreePromotionCount(eFreePromotion, -1);
-						}
+						GET_PLAYER(eOldOwner).ChangeFreePromotionCount(eFreePromotion, -1);
 					}
 #endif
 				}		
@@ -7026,13 +6823,195 @@ bool CvPlot::IsNaturalWonder(bool orPseudoNatural) const
 #endif
 }
 
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 bool CvPlot::IsVolcano() const
 {
 	FeatureTypes eFeature = getFeatureType();
-	if (eFeature == NO_FEATURE)
-	return false;
+	if (eFeature == NO_FEATURE) return false;
 	return GC.getFeatureInfo(eFeature)->IsVolcano();
+}
+void CvPlot::doVolcanoBreak()
+{
+	if (MOD_VOLCANO_BREAK && IsVolcano() && GC.getGame().getElapsedGameTurns() > 6)
+	{
+		if (GetBreakTurns() > 0)
+		{
+			ChangeBreakTurns(-1);
+		}
+
+		int iFakeRandNum = 0;
+		iFakeRandNum = GC.getGame().getSmallFakeRandNum(1000, GetPlotIndex());
+
+		bool bOutBreakLv1 = false, bOutBreakLv2 = false, bOutBreakLv3 = false;
+		if (iFakeRandNum <= 30)
+		{
+			bOutBreakLv1 = true;
+		}
+		else if (iFakeRandNum <= 600 && iFakeRandNum >= 590)
+		{
+			bOutBreakLv2 = true;
+		}
+		else if (iFakeRandNum >= 995)
+		{
+			bOutBreakLv3 = true;
+		}
+
+		if (GetBreakTurns() == 0)
+		{
+			if (bOutBreakLv1)
+			{
+				GC.getGame().setPlotExtraYield(getX(), getY(), YIELD_FOOD, 1);
+
+				if (!IsImmueVolcanoDamage())
+				{
+					if (getImprovementType() != NO_IMPROVEMENT && !isCity() && !IsImprovementPillaged())
+					{
+						CvImprovementEntry* pkImprovement = GC.getImprovementInfo(getImprovementType());
+						if (pkImprovement)
+						{
+							if(pkImprovement->IsDestroyedWhenPillaged())
+							{
+								setImprovementType(NO_IMPROVEMENT);
+							}
+							else
+							{
+								SetImprovementPillaged(true);
+							}
+						}
+					}
+					for (int iUnitLoop = 0; iUnitLoop < getNumUnits(); iUnitLoop++)
+					{
+						CvUnit* loopUnit = getUnitByIndex(iUnitLoop);
+						if (loopUnit != NULL && loopUnit->getDomainType() != DOMAIN_AIR && loopUnit->getDomainType() != DOMAIN_HOVER)
+						{
+							loopUnit->changeDamage(50);
+						}
+					}
+				}
+				SetBreakTurns(10);
+				CvString strBuffer = GetLocalizedText("TXT_KEY_VOLCANO_EVENT_1");
+				CvString strSummary = GetLocalizedText("TXT_KEY_VOLCAN_EVENT_TITLE");
+				if (isRevealed(GC.getGame().getActiveTeam(), false))
+				{
+					GET_TEAM(GC.getGame().getActiveTeam()).AddNotification(NOTIFICATION_GENERIC, strBuffer, strSummary, getX(), getY());
+				}
+			}
+				
+			else if (bOutBreakLv2)
+			{
+				int iRange = 1;
+				for (int iDX = -iRange; iDX <= iRange; iDX++)
+				{
+					for (int iDY = -iRange; iDY <= iRange; iDY++)
+					{
+						CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iDX, iDY, iRange);
+						if (pLoopPlot != NULL)
+						{
+							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_FOOD, 1);
+							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_PRODUCTION, 1);
+
+							if (!pLoopPlot->IsImmueVolcanoDamage())
+							{
+								if (pLoopPlot->getImprovementType() != NO_IMPROVEMENT && !pLoopPlot->isCity() && !pLoopPlot->IsImprovementPillaged())
+								{
+									CvImprovementEntry* pkImprovement = GC.getImprovementInfo(pLoopPlot->getImprovementType());
+									if (pkImprovement)
+									{
+										if(pkImprovement->IsDestroyedWhenPillaged())
+										{
+											pLoopPlot->setImprovementType(NO_IMPROVEMENT);
+										}
+										else
+										{
+											pLoopPlot->SetImprovementPillaged(true);
+										}
+									}
+								}
+
+								if (pLoopPlot->isCity())
+								{
+									pLoopPlot->getPlotCity()->changeDamage(0.25 * (pLoopPlot->getPlotCity()->GetMaxHitPoints()));
+								}
+
+								for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
+								{
+									CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
+									if (loopUnit != NULL && loopUnit->getDomainType() != DOMAIN_AIR && loopUnit->getDomainType() != DOMAIN_HOVER)
+									{
+										loopUnit->changeDamage(99);
+									}
+								}
+							}
+						}
+					}
+				}
+				SetBreakTurns(15);
+				CvString strBuffer = GetLocalizedText("TXT_KEY_VOLCANO_EVENT_2");
+				CvString strSummary = GetLocalizedText("TXT_KEY_VOLCAN_EVENT_TITLE");
+				if (isRevealed(GC.getGame().getActiveTeam(), false))
+				{
+					GET_TEAM(GC.getGame().getActiveTeam()).AddNotification(NOTIFICATION_GENERIC, strBuffer, strSummary, getX(), getY());
+				}
+			}
+
+			else if (bOutBreakLv3)
+			{
+				int iRange = 2;
+				for (int iDX = -iRange; iDX <= iRange; iDX++)
+				{
+					for (int iDY = -iRange; iDY <= iRange; iDY++)
+					{
+						CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iDX, iDY, iRange);
+						if (pLoopPlot != NULL)
+						{
+							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_FOOD, 1);
+							GC.getGame().setPlotExtraYield(pLoopPlot->getX(), pLoopPlot->getY(), YIELD_PRODUCTION, 1);
+
+							if (!pLoopPlot->IsImmueVolcanoDamage())
+							{
+								if (pLoopPlot->getImprovementType() != NO_IMPROVEMENT && !pLoopPlot->isCity() && !pLoopPlot->IsImprovementPillaged())
+								{
+									CvImprovementEntry* pkImprovement = GC.getImprovementInfo(pLoopPlot->getImprovementType());
+									if (pkImprovement)
+									{
+										if(pkImprovement->IsDestroyedWhenPillaged())
+										{
+											pLoopPlot->setImprovementType(NO_IMPROVEMENT);
+										}
+										else
+										{
+											pLoopPlot->SetImprovementPillaged(true);
+										}
+									}
+								}
+
+								if (pLoopPlot->isCity())
+								{
+									pLoopPlot->getPlotCity()->changeDamage(0.80 * (pLoopPlot->getPlotCity()->GetMaxHitPoints()));
+								}
+
+								for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
+								{
+									CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
+									if (loopUnit != NULL && loopUnit->getDomainType() != DOMAIN_AIR && loopUnit->getDomainType() != DOMAIN_HOVER)
+									{
+										loopUnit->changeDamage(150);
+									}
+								}
+							}
+						}
+					}
+				}
+				SetBreakTurns(20);
+				CvString strBuffer = GetLocalizedText("TXT_KEY_VOLCANO_EVENT_3");
+				CvString strSummary = GetLocalizedText("TXT_KEY_VOLCAN_EVENT_TITLE");
+				if (isRevealed(GC.getGame().getActiveTeam(), false))
+				{
+					GET_TEAM(GC.getGame().getActiveTeam()).AddNotification(NOTIFICATION_GENERIC, strBuffer, strSummary, getX(), getY());
+				}
+			}
+		}
+	}
 }
 
 bool CvPlot::IsImmueVolcanoDamage() const
@@ -11755,7 +11734,6 @@ void CvPlot::read(FDataStream& kStream)
 	kStream >> m_iImprovementDuration;
 	kStream >> m_iUpgradeProgress;
 	kStream >> m_iCulture;
-	kStream >> m_iBreakTurns;
 	kStream >> m_iNumMajorCivsRevealed;
 	kStream >> m_iCityRadiusCount;
 	kStream >> m_iReconCount;
@@ -11953,6 +11931,9 @@ void CvPlot::read(FDataStream& kStream)
 	kStream >> m_cContinentType;
 	kStream >> m_kArchaeologyData;
 
+#if defined(MOD_VOLCANO_BREAK)
+	kStream >> m_iBreakTurns;
+#endif
 #ifdef MOD_IMPROVEMENTS_UPGRADE
 	kStream >> m_iXP;
 #endif
@@ -11980,7 +11961,6 @@ void CvPlot::write(FDataStream& kStream) const
 	kStream << m_iImprovementDuration;
 	kStream << m_iUpgradeProgress;
 	kStream << m_iCulture;
-	kStream << m_iBreakTurns;
 	kStream << m_iNumMajorCivsRevealed;
 	kStream << m_iCityRadiusCount;
 	kStream << m_iReconCount;
@@ -12113,6 +12093,9 @@ void CvPlot::write(FDataStream& kStream) const
 	kStream << m_cContinentType;
 	kStream << m_kArchaeologyData;
 
+#if defined(MOD_VOLCANO_BREAK)
+	kStream << m_iBreakTurns;
+#endif
 #ifdef MOD_IMPROVEMENTS_UPGRADE
 	kStream << m_iXP;
 #endif
@@ -13364,6 +13347,29 @@ int CvPlot::ComputeYieldFromAdjacentFeature(CvImprovementEntry& kImprovement, Yi
 	return iRtnValue;
 }
 
+//	--------------------------------------------------------------------------------
+#if defined(MOD_VOLCANO_BREAK)
+int CvPlot::GetBreakTurns() const
+{
+	return m_iBreakTurns;
+}
+void CvPlot::ChangeBreakTurns(int iValue) //Set in city::doturn
+{
+	if (iValue != 0)
+	{
+		m_iBreakTurns += iValue;
+	}
+}
+void CvPlot::SetBreakTurns(int iValue)
+{
+	if (iValue != m_iBreakTurns)
+	{
+		m_iBreakTurns = iValue;
+	}
+}
+#endif
+
+//	--------------------------------------------------------------------------------
 #ifdef MOD_IMPROVEMENTS_UPGRADE
 int CvPlot::GetXP() const
 {
@@ -13462,6 +13468,7 @@ int CvPlot::ChangeXP(int iChange, bool bDoUpdate)
 }
 #endif
 
+//	--------------------------------------------------------------------------------
 #ifdef MOD_GLOBAL_PROMOTIONS_REMOVAL
 void CvPlot::ClearUnitPromotions(bool bOnlyFriendUnit)
 {
