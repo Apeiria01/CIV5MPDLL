@@ -434,7 +434,6 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 
 	//Arrays
 	const char* szUnitType = GetType();
-	if(strcmp("UNIT_ASSYRIAN_SCUD_MISSILE", szUnitType) == 0 || strcmp("UNIT_EGYPT_UNIT777", szUnitType) == 0) throw 1;
 
 	kUtility.SetFlavors(m_piFlavorValue, "Unit_Flavors", "UnitType", szUnitType);
 

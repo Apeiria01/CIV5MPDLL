@@ -7902,7 +7902,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 #endif
 
 #if defined(MOD_NUCLEAR_WINTER_FOR_SP)
-		ChangeNumNoNuclearWinterLocal(pBuildingInfo->IsNoNuclearWinterLocal() && pBuildingInfo->GetID() == GC.getInfoTypeForString("BUILDING_MEGACITY_PYRAMID") ? iChange : 0);
+		ChangeNumNoNuclearWinterLocal(pBuildingInfo->IsNoNuclearWinterLocal() ? iChange : 0);
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
         ChangeNumEnableCrops(pBuildingInfo->IsEnableCrops() ? iChange : 0);
