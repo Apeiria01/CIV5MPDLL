@@ -250,6 +250,7 @@ public:
 	int GetYieldFromBarbarianKills(YieldTypes eYield) const;
 	int GetYieldChangeTradeRoute(int i) const;
 	int GetYieldChangeWorldWonder(int i) const;
+	int GetRiverPlotYieldChanges(int i) const;
 	int GetTradeRouteYieldChange(DomainTypes eIndex1, YieldTypes eIndex2) const;
 #endif
 	int GetSpecialistYieldChanges(SpecialistTypes eIndex1, YieldTypes eIndex2) const;
@@ -537,6 +538,7 @@ protected:
 	int* m_piYieldFromBarbarianKills;
 	int* m_piYieldChangeTradeRoute;
 	int* m_piYieldChangeWorldWonder;
+	int* m_piRiverPlotYieldChanges;
 	int** m_ppiTradeRouteYieldChange;
 #endif
 	int** m_ppiSpecialistYieldChanges;
@@ -1274,6 +1276,10 @@ public:
 	{
 		return m_iYieldChangeWorldWonder[(int)eYield];
 	};
+	int GetRiverPlotYieldChanges(YieldTypes eYield) const
+	{
+		return m_iRiverPlotYieldChanges[(int)eYield];
+	};
 	int GetTradeRouteYieldChange(DomainTypes eDomain, YieldTypes eYield) const;
 #endif
 	int GetSpecialistYieldChange(SpecialistTypes eSpecialist, YieldTypes eYield) const;
@@ -1628,6 +1634,7 @@ private:
 	int m_iYieldFromBarbarianKills[NUM_YIELD_TYPES];
 	int m_iYieldChangeTradeRoute[NUM_YIELD_TYPES];
 	int m_iYieldChangeWorldWonder[NUM_YIELD_TYPES];
+	int m_iRiverPlotYieldChanges[NUM_YIELD_TYPES];
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiTradeRouteYieldChange;
 #endif
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppaaiSpecialistYieldChange;

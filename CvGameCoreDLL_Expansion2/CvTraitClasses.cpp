@@ -216,6 +216,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_piYieldFromBarbarianKills(NULL),
 	m_piYieldChangeTradeRoute(NULL),
 	m_piYieldChangeWorldWonder(NULL),
+	m_piRiverPlotYieldChanges(NULL),
 	m_ppiTradeRouteYieldChange(NULL),
 #endif
 	m_ppiSpecialistYieldChanges(NULL),
@@ -254,6 +255,7 @@ CvTraitEntry::~CvTraitEntry()
 	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
 	SAFE_DELETE_ARRAY(m_piYieldChangeTradeRoute);
 	SAFE_DELETE_ARRAY(m_piYieldChangeWorldWonder);
+	SAFE_DELETE_ARRAY(m_piRiverPlotYieldChanges);
 #endif
 #if defined(MOD_API_UNIFIED_YIELDS)
 	SAFE_DELETE_ARRAY(m_piGoldenAgeGreatPersonRateModifier);
@@ -1216,6 +1218,11 @@ int CvTraitEntry::GetYieldChangeTradeRoute(int i) const
 int CvTraitEntry::GetYieldChangeWorldWonder(int i) const
 {
 	return m_piYieldChangeWorldWonder ? m_piYieldChangeWorldWonder[i] : 0;
+}
+
+int CvTraitEntry::GetRiverPlotYieldChanges(int i) const
+{
+	return m_piRiverPlotYieldChanges ? m_piRiverPlotYieldChanges[i] : 0;
 }
 
 int CvTraitEntry::GetTradeRouteYieldChange(DomainTypes eIndex1, YieldTypes eIndex2) const
@@ -2229,6 +2236,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	kUtility.SetYields(m_piYieldFromBarbarianKills, "Trait_YieldFromBarbarianKills", "TraitType", szTraitType);
 	kUtility.SetYields(m_piYieldChangeTradeRoute, "Trait_YieldChangeTradeRoute", "TraitType", szTraitType);
 	kUtility.SetYields(m_piYieldChangeWorldWonder, "Trait_YieldChangeWorldWonder", "TraitType", szTraitType);
+	kUtility.SetYields(m_piRiverPlotYieldChanges, "Trait_RiverPlotYieldChanges", "TraitType", szTraitType);	
 
 	//TradeRouteYieldChange
 	{
@@ -3129,6 +3137,7 @@ void CvPlayerTraits::InitPlayerTraits()
 				m_iYieldFromBarbarianKills[iYield] = trait->GetYieldFromBarbarianKills((YieldTypes) iYield);
 				m_iYieldChangeTradeRoute[iYield] = trait->GetYieldChangeTradeRoute(iYield);
 				m_iYieldChangeWorldWonder[iYield] = trait->GetYieldChangeWorldWonder(iYield);
+				m_iRiverPlotYieldChanges[iYield] = trait->GetRiverPlotYieldChanges(iYield);
 
 				for(int iDomainLoop = 0; iDomainLoop < NUM_DOMAIN_TYPES; iDomainLoop++)
 				{
@@ -3502,6 +3511,7 @@ void CvPlayerTraits::Reset()
 		m_iYieldFromBarbarianKills[iYield] = 0;
 		m_iYieldChangeTradeRoute[iYield] = 0;
 		m_iYieldChangeWorldWonder[iYield] = 0;
+		m_iRiverPlotYieldChanges[iYield] = 0;
 		for(int iDomain = 0; iDomain < NUM_DOMAIN_TYPES; iDomain++)
 		{
 			m_ppiTradeRouteYieldChange[iDomain] = yield;
@@ -5094,6 +5104,9 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	ArrayWrapper<int> kYieldChangeWorldWonderWrapper(NUM_YIELD_TYPES, m_iYieldChangeWorldWonder);
 	kStream >> kYieldChangeWorldWonderWrapper;
 
+	ArrayWrapper<int> kRiverPlotYieldChangesWrapper(NUM_YIELD_TYPES, m_iRiverPlotYieldChanges);
+	kStream >> kRiverPlotYieldChangesWrapper;
+
 	kStream >> m_ppiTradeRouteYieldChange;
 #endif
 	kStream >> m_ppaaiSpecialistYieldChange;
@@ -5405,6 +5418,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldFromBarbarianKills);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangeTradeRoute);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangeWorldWonder);
+	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iRiverPlotYieldChanges);
 	kStream << m_ppiTradeRouteYieldChange;
 #endif
 	kStream << m_ppaaiSpecialistYieldChange;

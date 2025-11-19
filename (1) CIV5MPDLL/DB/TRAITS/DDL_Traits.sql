@@ -11,6 +11,11 @@ create table Trait_CityYieldPerAdjacentFeature (
     YieldType text references Yields(Type),
     MaxValue int default 0
 );
+create table Trait_RiverPlotYieldChanges (
+	TraitType text references Traits(Type),
+	YieldType text not null references Yields(Type),
+	Yield integer default 0
+);
 create table Trait_PerMajorReligionFollowerYieldModifier (
     TraitType text references Traits(Type),
     YieldType text references Yields(Type),
