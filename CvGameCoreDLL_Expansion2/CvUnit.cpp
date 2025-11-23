@@ -29401,7 +29401,7 @@ bool CvUnit::CanDoInterfaceMode(InterfaceModeTypes eInterfaceMode, bool bTestVis
 		break;
 
 	case INTERFACEMODE_REBASE:
-		if(getDomainType() == DOMAIN_AIR)
+		if(getDomainType() == DOMAIN_AIR && !getUnitInfo().IsForbidRebase()) 
 		{
 			return true;
 		}

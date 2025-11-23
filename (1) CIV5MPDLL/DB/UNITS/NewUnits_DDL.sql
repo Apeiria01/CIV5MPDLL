@@ -21,6 +21,7 @@ alter table Units add FaithCostIncrease integer default 0;
 
 alter table Units add NoSpreadTurnPopModifierAfterRemovingHeresy integer default 0;
 alter table Units add NoAggressive boolean default 0;
+alter table Units add ForbidRebase boolean default 0;
 alter table Units add UnitTechUpgrade boolean default 0;
 
 alter table Units add NoFallout boolean default 0;

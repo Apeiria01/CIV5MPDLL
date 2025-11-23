@@ -81,6 +81,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_iTrainPopulationConsume(0),
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy(0),
 	m_bNoAggressive(false),
+	m_bForbidRebase(false),
 	m_iFaithCostIncrease(false),
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
@@ -349,6 +350,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_iTrainPopulationConsume = kResults.GetInt("TrainPopulationConsume");
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy = kResults.GetInt("NoSpreadTurnPopModifierAfterRemovingHeresy");
 	m_bNoAggressive = kResults.GetBool("NoAggressive");
+	m_bForbidRebase = kResults.GetBool("ForbidRebase");
 	
 	if(m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_WRITER", true /*bHideAssert*/)
 	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_ARTIST", true /*bHideAssert*/)
@@ -923,6 +925,11 @@ int CvUnitEntry::GetNoSpreadTurnPopModifierAfterRemovingHeresy() const
 bool CvUnitEntry::IsNoAggressive() const
 {
 	return m_bNoAggressive;
+}
+
+bool CvUnitEntry::IsForbidRebase() const
+{
+	return m_bForbidRebase;
 }
 
 bool CvUnitEntry::IsFaithCostIncrease() const
