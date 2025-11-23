@@ -692,6 +692,8 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 	Method(GetCivBuildingWithDefault);
 	Method(GetCivUnitWithDefault);
 	Method(GetCivUnitNowTech);
+	Method(IsBuildingObsolete);
+	Method(IsUnitObsolete);
 #endif
 	Method(IsMinorCiv);
 	Method(GetMinorCivType);
@@ -6712,6 +6714,36 @@ int CvLuaPlayer::lGetCivUnitNowTech(lua_State* L)
 		eUnitClass = (UnitClassTypes)pUnitEntry->GetGoodyHutUpgradeUnitClass();
 	}
 	lua_pushinteger(L, eResUnitType);
+	return 1;
+}
+int CvLuaPlayer::lIsBuildingObsolete(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	BuildingTypes eBuilding = (BuildingTypes)lua_tointeger(L, 2);
+	CvBuildingEntry* pBuildingInfo = GC.getBuildingInfo(eBuilding);
+	if (pBuildingInfo && pBuildingInfo->GetObsoleteTech() != NO_TECH)
+	{
+		lua_pushboolean(L, pkPlayer->HasTech((TechTypes)pBuildingInfo->GetObsoleteTech()));
+	}
+	else
+	{
+		lua_pushboolean(L, false);
+	}
+	return 1;
+}
+int CvLuaPlayer::lIsUnitObsolete(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	UnitTypes eUnit = (UnitTypes)lua_tointeger(L, 2);
+	CvUnitEntry* pUnitInfo = GC.getUnitInfo(eUnit);
+	if (pUnitInfo && pUnitInfo->GetObsoleteTech() != NO_TECH)
+	{
+		lua_pushboolean(L, pkPlayer->HasTech((TechTypes)pUnitInfo->GetObsoleteTech()));
+	}
+	else
+	{
+		lua_pushboolean(L, false);
+	}
 	return 1;
 }
 #endif
