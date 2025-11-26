@@ -488,6 +488,7 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	m_ppiResourceYieldChangeGlobal.clear();
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChange);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChangeGlobal);
+	CvDatabaseUtility::SafeDelete2DArray(m_ppiFeatureYieldChangesGlobal);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiTerrainYieldChangesGlobal);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChangeGlobal);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiYieldPerXTerrain);
