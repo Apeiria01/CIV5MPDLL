@@ -118,6 +118,7 @@ alter table UnitPromotions add LostAllMovesAttackCity integer default 0;
 alter table UnitPromotions add RiverDoubleMove boolean default 0;
 alter table UnitPromotions add ExtraMoveTimesXX integer default 0;
 alter table UnitPromotions add RangeAttackCostModifier integer default 0;
+alter table UnitPromotions add SetUpCostModifier integer default 0;
 
 alter table UnitPromotions add UnitAttackFaithBonus integer default 0;
 alter table UnitPromotions add CityAttackFaithBonus integer default 0;

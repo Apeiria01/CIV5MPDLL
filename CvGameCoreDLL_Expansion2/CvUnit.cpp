@@ -470,6 +470,7 @@ CvUnit::CvUnit() :
 	, m_iMilitaryMightMod(0)
 	, m_iExtraMoveTimesXX(0)
 	, m_iRangeAttackCostModifier(100)
+	, m_iSetUpCostModifier(100)
 	, m_iOriginalCapitalDamageFix(0)
 	, m_iOriginalCapitalSpecialDamageFix(0)
 	, m_iMultipleInitExperence(0)
@@ -1477,6 +1478,7 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iMilitaryMightMod = 0;
 	m_iExtraMoveTimesXX = 0;
 	m_iRangeAttackCostModifier = 100;
+	m_iSetUpCostModifier = 100;
 	m_iOriginalCapitalDamageFix = 0;
 	m_iOriginalCapitalSpecialDamageFix = 0;
 	m_iMultipleInitExperence = 0;
@@ -5866,7 +5868,7 @@ void CvUnit::setSetUpForRangedAttack(bool bValue)
 
 		if(bValue)
 		{
-			changeMoves(-GC.getMOVE_DENOMINATOR());
+			changeMoves(-GC.getMOVE_DENOMINATOR() * GetSetUpCostModifier() / 100);
 		}
 	}
 }
@@ -7270,6 +7272,15 @@ void CvUnit::ChangeRangeAttackCostModifier(int iValue)
 const int CvUnit::GetRangeAttackCostModifier() const
 {
 	return m_iRangeAttackCostModifier;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeSetUpCostModifier(int iValue)
+{
+	m_iSetUpCostModifier += iValue;
+}
+const int CvUnit::GetSetUpCostModifier() const
+{
+	return m_iSetUpCostModifier;
 }
 //	--------------------------------------------------------------------------------
 void CvUnit::ChangeOriginalCapitalDamageFix(int iValue)
@@ -26286,6 +26297,7 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeMilitaryMightMod((thisPromotion.GetMilitaryMightMod()) * iChange);
 		ChangeExtraMoveTimesXX((thisPromotion.GetExtraMoveTimesXX()) * iChange);
 		ChangeRangeAttackCostModifier((thisPromotion.GetRangeAttackCostModifier()) * iChange);
+		ChangeSetUpCostModifier((thisPromotion.GetSetUpCostModifier()) * iChange);
 		ChangeOriginalCapitalDamageFix((thisPromotion.GetOriginalCapitalDamageFix()) * iChange);
 		ChangeOriginalCapitalSpecialDamageFix((thisPromotion.GetOriginalCapitalSpecialDamageFix()) * iChange);
 		ChangeMultipleInitExperence((thisPromotion.GetMultipleInitExperence()) * iChange);
@@ -26897,6 +26909,7 @@ void CvUnit::read(FDataStream& kStream)
 	kStream >> m_iMilitaryMightMod;
 	kStream >> m_iExtraMoveTimesXX;
 	kStream >> m_iRangeAttackCostModifier;
+	kStream >> m_iSetUpCostModifier;
 	kStream >> m_iOriginalCapitalDamageFix;
 	kStream >> m_iOriginalCapitalSpecialDamageFix;
 	kStream >> m_iMultipleInitExperence;
@@ -27307,6 +27320,7 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iMilitaryMightMod;
 	kStream << m_iExtraMoveTimesXX;
 	kStream << m_iRangeAttackCostModifier;
+	kStream << m_iSetUpCostModifier;
 	kStream << m_iOriginalCapitalDamageFix;
 	kStream << m_iOriginalCapitalSpecialDamageFix;
 	kStream << m_iMultipleInitExperence;
@@ -27613,7 +27627,7 @@ bool CvUnit::canRangeStrike() const
 int CvUnit::GetRangePlusMoveToshot() const
 {
 	VALIDATE_OBJECT
-	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? 1 : 0)));
+	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? GetRangePlusMoveToshot() / 100 : 0)));
 }
 #endif
 

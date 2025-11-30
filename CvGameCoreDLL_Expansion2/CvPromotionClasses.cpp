@@ -211,6 +211,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iMilitaryMightMod(0),
 	m_iExtraMoveTimesXX(0),
 	m_iRangeAttackCostModifier(0),
+	m_iSetUpCostModifier(0),
 	m_iOriginalCapitalDamageFix(0),
 	m_iOriginalCapitalSpecialDamageFix(0),
 	m_iMultipleInitExperence(0),
@@ -768,6 +769,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iMilitaryMightMod = kResults.GetInt("MilitaryMightMod");
 	m_iExtraMoveTimesXX = kResults.GetInt("ExtraMoveTimesXX");
 	m_iRangeAttackCostModifier = kResults.GetInt("RangeAttackCostModifier");
+	m_iSetUpCostModifier = kResults.GetInt("SetUpCostModifier");
 	m_iOriginalCapitalDamageFix = kResults.GetInt("OriginalCapitalDamageFix");
 	m_iOriginalCapitalSpecialDamageFix = kResults.GetInt("OriginalCapitalSpecialDamageFix");
 	m_iMultipleInitExperence = kResults.GetInt("MultipleInitExperence");
@@ -2661,6 +2663,11 @@ int CvPromotionEntry::GetExtraMoveTimesXX() const
 int CvPromotionEntry::GetRangeAttackCostModifier() const
 {
 	return m_iRangeAttackCostModifier;
+}
+
+int CvPromotionEntry::GetSetUpCostModifier() const
+{
+	return m_iSetUpCostModifier;
 }
 
 int CvPromotionEntry::GetOriginalCapitalDamageFix() const
