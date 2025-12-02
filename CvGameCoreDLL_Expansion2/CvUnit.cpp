@@ -27627,7 +27627,7 @@ bool CvUnit::canRangeStrike() const
 int CvUnit::GetRangePlusMoveToshot() const
 {
 	VALIDATE_OBJECT
-	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? GetRangePlusMoveToshot() / 100 : 0)));
+	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? GetSetUpCostModifier() / 100 : 0)));
 }
 #endif
 
