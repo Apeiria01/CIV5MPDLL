@@ -560,6 +560,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(ChangeBaseYieldRateFromReligion);
 
 	Method(GetYieldPerPopTimes100);
+	Method(GetExtraBaseYieldRateTimes100);
 
 	Method(GetBaseYieldRateModifier);
 	Method(GetYieldRate);
@@ -3908,6 +3909,20 @@ int CvLuaCity::lChangeBaseYieldRateFromReligion(lua_State* L)
 int CvLuaCity::lGetYieldPerPopTimes100(lua_State* L)
 {
 	return BasicLuaMethod(L, &CvCity::GetYieldPerPopTimes100);
+}
+
+//------------------------------------------------------------------------------
+int CvLuaCity::lGetExtraBaseYieldRateTimes100(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const YieldTypes eIndex = (YieldTypes)lua_tointeger(L, 2);
+	int iResult = 0;
+	iResult += pkCity->GetYieldPerPopTimes100(eIndex) * pkCity->getPopulation();
+	iResult += GET_PLAYER(pkCity->getOwner()).GetYieldPerPopChange(eIndex) * pkCity->getPopulation();
+	iResult += pkCity->GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(pkCity->getOwner()).getTotalPopulation() / 100;
+	iResult += pkCity->GetYieldPerReligionTimes100(eIndex) * pkCity->GetCityReligions()->GetNumReligionsWithFollowers();
+	lua_pushinteger(L, iResult);
+	return 1;
 }
 
 //------------------------------------------------------------------------------

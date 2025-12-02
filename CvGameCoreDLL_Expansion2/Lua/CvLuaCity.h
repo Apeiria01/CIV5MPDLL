@@ -432,6 +432,7 @@ protected:
 	static int lChangeBaseYieldRateFromReligion(lua_State* L);
 
 	static int lGetYieldPerPopTimes100(lua_State* L);
+	static int lGetExtraBaseYieldRateTimes100(lua_State* L);
 
 	static int lGetBaseYieldRateModifier(lua_State* L);
 	static int lGetYieldRate(lua_State* L);
