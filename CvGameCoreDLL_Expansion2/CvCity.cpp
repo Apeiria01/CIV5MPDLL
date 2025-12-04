@@ -7419,7 +7419,7 @@ void CvCity::processFeature(FeatureTypes eFeature, int iChange)
 	{
 		const YieldTypes eYield = static_cast<YieldTypes>(iI);
 		changeFeatureYieldRateModifier(eYield, (getYieldModifierFromFeature(eFeature, eYield) * iChange));
-		UpdateCityYields(eYield);
+		// will update yields at the end of CvCityCitizens::SetWorkingPlot
 	}
 }
 
@@ -7427,13 +7427,12 @@ void CvCity::processTerrain(TerrainTypes eTerrain, int iChange)
 {
 	VALIDATE_OBJECT
 
-		// Yield modifier for having a local Improvement
-		for (int iI = 0; iI < NUM_YIELD_TYPES; iI++)
-		{
-			const YieldTypes eYield = static_cast<YieldTypes>(iI);
-			changeTerrainYieldRateModifier(eYield, (getYieldModifierFromTerrain(eTerrain, eYield) * iChange));
-			UpdateCityYields(eYield);
-		}
+	// Yield modifier for having a local Improvement
+	for (int iI = 0; iI < NUM_YIELD_TYPES; iI++)
+	{
+		const YieldTypes eYield = static_cast<YieldTypes>(iI);
+		changeTerrainYieldRateModifier(eYield, (getYieldModifierFromTerrain(eTerrain, eYield) * iChange));
+	}
 }
 
 
@@ -7447,7 +7446,6 @@ void CvCity::processImprovement(ImprovementTypes eImprovement, int iChange)
 	{
 		const YieldTypes eYield = static_cast<YieldTypes>(iI);
 		changeImprovementYieldRateModifier(eYield, (getYieldModifierFromImprovement(eImprovement, eYield) * iChange));
-		UpdateCityYields(eYield);
 	}
 }
 
@@ -8482,7 +8480,6 @@ void CvCity::processSpecialist(SpecialistTypes eSpecialist, int iChange)
 		//int globalModifier = GET_PLAYER(getOwner()).GetYieldModifierFromSpecialistGlobal(eSpecialist, ((YieldTypes)iI));
 		int LocalModifier = getYieldModifierFromSpecialist(eSpecialist, ((YieldTypes)iI));
 		changeSpecialistYieldRateModifier(((YieldTypes)iI), (LocalModifier)*iChange);
-		UpdateCityYields(((YieldTypes)iI));
 	}
 
 	updateExtraSpecialistYield();
