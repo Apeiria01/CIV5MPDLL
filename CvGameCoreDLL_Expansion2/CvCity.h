@@ -858,15 +858,16 @@ public:
 
 	int GetBaseYieldRateFromReligion(YieldTypes eIndex) const;
 	void ChangeBaseYieldRateFromReligion(YieldTypes eIndex, int iChange);
-	// END Base Yield
-
-	
 
 	int GetYieldPerPopTimes100(YieldTypes eIndex) const;
 	void ChangeYieldPerPopTimes100(YieldTypes eIndex, int iChange);
 
+	int GetYieldPerPopInEmpireTimes100(YieldTypes eIndex) const;
+	void ChangeYieldPerPopInEmpireTimes100(YieldTypes eIndex, int iChange);
+
 	int GetYieldPerReligionTimes100(YieldTypes eIndex) const;
 	void ChangeYieldPerReligionTimes100(YieldTypes eIndex, int iChange);
+	// END Base Yield
 
 	int GetYieldPerEra(YieldTypes eIndex) const;
 	void ChangeYieldPerEra(YieldTypes eIndex, int iChange);
@@ -883,13 +884,9 @@ public:
 	int GetResourceQuantityFromPOP(ResourceTypes eResource) const;
 	void ChangeResourceQuantityFromPOP(ResourceTypes eResource, int iChange);
 
-
-#if defined(MOD_ROG_CORE)
-	int GetYieldPerPopInEmpireTimes100(YieldTypes eIndex) const;
-	void ChangeYieldPerPopInEmpireTimes100(YieldTypes eIndex, int iChange);
-#endif
 	int GetYieldFromInternalTR(YieldTypes eIndex1) const;
 	void ChangeYieldFromInternalTR(YieldTypes eIndex, int iChange);
+
 	int GetYieldFromProcessModifier(YieldTypes eIndex1) const;
 	void ChangeYieldFromProcessModifier(YieldTypes eIndex, int iChange);
 
@@ -1622,6 +1619,7 @@ protected:
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldRateMultiplier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldPerPop;
+	FAutoVariable<std::vector<int>, CvCity> m_aiYieldPerPopInEmpire;
 
 	std::vector<int> m_aiNumProjects;
 
@@ -1641,7 +1639,6 @@ protected:
 
 	std::vector<int> m_aiYieldFromPillage;
 
-	std::map<int, int> m_aiYieldPerPopInEmpire;
 	std::vector<int> m_aiResourceQuantityFromPOP;
 	std::vector<int> m_aiSpecialistRateModifier;
 #endif

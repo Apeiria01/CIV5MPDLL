@@ -269,6 +269,7 @@ public:
 	int GetMilitaryMightMod() const;
 	int GetExtraMoveTimesXX() const;
 	int GetRangeAttackCostModifier() const;
+	int GetSetUpCostModifier() const;
 	int GetOriginalCapitalDamageFix() const;
 	int GetOriginalCapitalSpecialDamageFix() const;
 	int GetMultipleInitExperence() const;
@@ -651,6 +652,7 @@ protected:
 	int m_iMilitaryMightMod;
 	int m_iExtraMoveTimesXX;
 	int m_iRangeAttackCostModifier;
+	int m_iSetUpCostModifier;
 	int m_iOriginalCapitalDamageFix;
 	int m_iOriginalCapitalSpecialDamageFix;
 	int m_iMultipleInitExperence;
