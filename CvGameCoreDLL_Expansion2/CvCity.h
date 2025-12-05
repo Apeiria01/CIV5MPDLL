@@ -425,6 +425,10 @@ public:
 	void changeForbiddenForeignSpyCount(int iChange);
 	bool isForbiddenForeignSpy() const;
 
+	int GetAllowSpaceshipLaunchCount() const;
+	void ChangeAllowSpaceshipLaunchCount(int iChange);
+	bool IsAllowSpaceshipLaunch() const;
+
 	int foodConsumption(bool bNoAngry = false, int iExtra = 0) const;
 	int foodDifference(bool bBottom = true) const;
 	int foodDifferenceTimes100(bool bBottom = true, CvString* toolTipSink = NULL) const;
@@ -1558,6 +1562,7 @@ protected:
 	int m_iAddsFreshWater;
 	FAutoVariable<int, CvCity> m_iExtraAttackOnKill;
 	int m_iForbiddenForeignSpyCount;
+	int m_iAllowSpaceshipLaunchCount;
 #if defined(MOD_ROG_CORE)
 	int m_iExtraDamageHealPercent;
 	FAutoVariable<int, CvCity> m_iExtraDamageHeal;

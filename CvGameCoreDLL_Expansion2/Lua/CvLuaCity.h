@@ -735,6 +735,8 @@ protected:
 	LUAAPIEXTN(IsSecondCapital, bool);
 	LUAAPIEXTN(GetFoodConsumptionPerPopTimes100, bool);
 	LUAAPIEXTN(GetDefendedAgainstSpreadUntilTurn, int);
+
+	LUAAPIEXTN(IsAllowSpaceshipLaunch, bool);
 };
 
 #endif //CVLUACITY_H

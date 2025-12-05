@@ -95,6 +95,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iCityCountUnhappinessMod(0),
 	m_bNoOccupiedUnhappiness(false),
 	m_bNotNeedOccupied(false),
+	m_bAllowSpaceshipLaunch(false),
 	m_iGlobalPopulationChange(0),
 	m_iTechShare(0),
 	m_iFreeTechs(0),
@@ -650,6 +651,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iCityCountUnhappinessMod = kResults.GetInt("CityCountUnhappinessMod");
 	m_bNoOccupiedUnhappiness = kResults.GetBool("NoOccupiedUnhappiness");
 	m_bNotNeedOccupied = kResults.GetBool("NotNeedOccupied");
+	m_bAllowSpaceshipLaunch = kResults.GetBool("AllowSpaceshipLaunch");
 	m_iWorkerSpeedModifier = kResults.GetInt("WorkerSpeedModifier");
 	m_iMilitaryProductionModifier = kResults.GetInt("MilitaryProductionModifier");
 	m_iSpaceProductionModifier = kResults.GetInt("SpaceProductionModifier");
@@ -2709,6 +2711,13 @@ bool CvBuildingEntry::IsNotNeedOccupied() const
 {
 	return m_bNotNeedOccupied;
 }
+
+/// AllowSpaceshipLaunch
+bool CvBuildingEntry::IsAllowSpaceshipLaunch() const
+{
+	return m_bAllowSpaceshipLaunch;
+}
+
 
 /// Population added to every City in the player's empire
 int CvBuildingEntry::GetGlobalPopulationChange() const

@@ -229,6 +229,7 @@ CvCity::CvCity() :
 	, m_iAddsFreshWater(0)
 	, m_iExtraAttackOnKill("CvCity::m_iExtraAttackOnKill", m_syncArchive)
 	, m_iForbiddenForeignSpyCount(0)
+	, m_iAllowSpaceshipLaunchCount(0)
 #if defined(MOD_ROG_CORE)
 	, m_aiNumTimesAttackedThisTurn()
 	, m_aiYieldPerAlly()
@@ -1092,6 +1093,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iAddsFreshWater = 0;
 	m_iExtraAttackOnKill = 0;
 	m_iForbiddenForeignSpyCount = 0;
+	m_iAllowSpaceshipLaunchCount = 0;
 #if defined(MOD_ROG_CORE)
 	m_aiNumTimesAttackedThisTurn.resize(REALLY_MAX_PLAYERS);
 	m_aiSpecialistRateModifier.resize(GC.getNumSpecialistInfos());
@@ -7789,6 +7791,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changeExtraAttackOnKill((pBuildingInfo->IsExtraAttackOnKill()) ? iChange : 0);
 		changeForbiddenForeignSpyCount(pBuildingInfo->IsForbiddenForeignSpy()* iChange);
 		changeExtraAttacks(pBuildingInfo->GetExtraAttacks()* iChange);
+		ChangeAllowSpaceshipLaunchCount((pBuildingInfo->IsAllowSpaceshipLaunch()) ? iChange : 0);
 
 #if !defined(MOD_API_EXTENSIONS)
 		// Trust the modder if they set a building to negative happiness
@@ -8998,6 +9001,27 @@ void CvCity::changeForbiddenForeignSpyCount(int iChange)
 	{
 		m_iForbiddenForeignSpyCount = (m_iForbiddenForeignSpyCount + iChange);
 		CvAssert(getForbiddenForeignSpyCount() >= 0);
+	}
+}
+
+//	--------------------------------------------------------------------------------
+int CvCity::GetAllowSpaceshipLaunchCount() const
+{
+	return m_iAllowSpaceshipLaunchCount;
+}
+
+//	--------------------------------------------------------------------------------
+bool CvCity::IsAllowSpaceshipLaunch() const
+{
+	return (GetAllowSpaceshipLaunchCount() > 0 || isCapital());
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::ChangeAllowSpaceshipLaunchCount(int iChange)
+{
+	if (iChange != 0)
+	{
+		m_iAllowSpaceshipLaunchCount = (m_iAllowSpaceshipLaunchCount + iChange);
 	}
 }
 
@@ -19942,6 +19966,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iAddsFreshWater;
 	kStream >> m_iExtraAttackOnKill;
 	kStream >> m_iForbiddenForeignSpyCount;
+	kStream >> m_iAllowSpaceshipLaunchCount;
 #ifdef MOD_ROG_CORE
 	kStream >> m_iCityBuildingRangeStrikeModifier;
 	kStream >> m_iExtraDamageHealPercent;
@@ -20457,6 +20482,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iAddsFreshWater;
 	kStream << m_iExtraAttackOnKill;
 	kStream << m_iForbiddenForeignSpyCount;
+	kStream << m_iAllowSpaceshipLaunchCount;
 #ifdef MOD_ROG_CORE
 	kStream << m_iCityBuildingRangeStrikeModifier;
 	kStream << m_iExtraDamageHealPercent;
