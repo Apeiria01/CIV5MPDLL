@@ -13,13 +13,13 @@
 			<Text>[COLOR_CYAN]Immune to {1_Num}[ENDCOLOR]</Text>
 		</Row>
 		<Row Tag="TXT_KEY_NOTIFICATION_SPY_EVICTED_FPRBIDDEN_YOU">
-			<Text>Your spy {1_SpyRank}{2_SpyName}fled {3_CityName}，because this city no longer supports action。</Text>
+			<Text>Your spy {1_SpyRank}{2_SpyName}fled {3_CityName}, because this city no longer supports action.</Text>
 		</Row>
 		<Row Tag="TXT_KEY_NO_ACTION_BUILDING_EMPIRE_RESOURCE">
-			<Text>[NEWLINE]Need domestic ownership{1_FeatureName:textkey}。</Text>
+			<Text>[NEWLINE]Need domestic ownership{1_FeatureName:textkey}.</Text>
 		</Row>
 		<Row Tag="TXT_KEY_NO_ACTION_BUILDING_LOCAL_FEATURE">
-			<Text>[NEWLINE]Need to be near the city{1_FeatureName:textkey}。</Text>
+			<Text>[NEWLINE]Need to be near the city{1_FeatureName:textkey}.</Text>
 		</Row>
 		<Row Tag="TXT_KEY_AIR_PATROL_BOMBED_GROUND_TARGETS">
 			<Text>Your {@1_UnitName} met no resistance and attacked enemy air and ground air defense units!</Text>
@@ -28,7 +28,7 @@
 			<Text>Our {2_Unit} was knocked back by the enemy's {1_Unit}!</Text>
 		</Row>
 		<Row Tag="TXT_KEY_UNIT_MORALE_FALL_BACK_S">
-			<Text>{1_Unit}was repelled！</Text>
+			<Text>{1_Unit}was repelled!</Text>
 		</Row>
 		<Row Tag="TXT_KEY_UNIT_MORALE_FALL_BACK_THEM">
 			<Text>Our {1_Unit} forced the enemy's {2_Unit} to retreat!</Text>
@@ -125,7 +125,7 @@
 		</Row>
 
 		<Row Tag="TXT_KEY_PRODMOD_WONDER_IMPROVEMENT">
-			<Text>[NEWLINE][ICON_BULLET]Improved facilities provide spectacle construction bonus: {1_Num}%。</Text>
+			<Text>[NEWLINE][ICON_BULLET]Improved facilities provide spectacle construction bonus: {1_Num}%</Text>
 		</Row>
 	</Language_en_US>
 
@@ -632,16 +632,16 @@
 		</Row>
 
 		<Row Tag="TXT_KEY_VOLCAN_EVENT_TITLE">
-			<Text>Volcanic eruptions！</Text>
+			<Text>Volcanic eruptions!</Text>
 		</Row>
 		<Row Tag="TXT_KEY_VOLCANO_EVENT_1">
-			<Text>A small eruption of a volcano occurred。</Text>
+			<Text>A small eruption of a volcano occurred.</Text>
 		</Row>
 		<Row Tag="TXT_KEY_VOLCANO_EVENT_2">
-			<Text>A large eruption of a volcano occurred。</Text>
+			<Text>A large eruption of a volcano occurred.</Text>
 		</Row>
 		<Row Tag="TXT_KEY_VOLCANO_EVENT_3">
-			<Text>A supermassive eruption of a volcano occurred。</Text>
+			<Text>A supermassive eruption of a volcano occurred.</Text>
 		</Row>
 
 		<Row tag="TXT_KEY_NOTIFICATION_INSTANT_TOURISM_WHEN_CONQUER">
