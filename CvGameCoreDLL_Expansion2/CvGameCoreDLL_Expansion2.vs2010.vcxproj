@@ -193,6 +193,7 @@
     <ClCompile Include="CvCityScaleClasses.cpp" />
     <ClCompile Include="CvCorruption.cpp" />
     <ClCompile Include="CvIndependentPromotionInfo.cpp" />
+    <ClCompile Include="CvUnitPurchaseCollections.cpp" />
     <ClCompile Include="CvNuclearWinter.cpp" />
     <ClCompile Include="CvEventLog.cpp" />
     <ClCompile Include="CvGreatPersonInfo.cpp" />
@@ -475,6 +476,7 @@
     <ClInclude Include="CvCityScaleClasses.h" />
     <ClInclude Include="CvCorruption.h" />
     <ClInclude Include="CvIndependentPromotionInfo.h" />
+    <ClInclude Include="CvUnitPurchaseCollections.h" />
     <ClInclude Include="CvNuclearWinter.h" />
     <ClInclude Include="CvCitySpecializationAI.h" />
     <ClInclude Include="CvCityStrategyAI.h" />

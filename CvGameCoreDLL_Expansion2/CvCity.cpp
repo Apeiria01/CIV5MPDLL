@@ -5890,36 +5890,19 @@ int CvCity::GetPurchaseCost(UnitTypes eUnit)
 	}
 
 	int iModifier = pkUnitInfo->GetHurryCostModifier();
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS)
+	{
+		int iCollectionsModifer = GC.GetUnitPurchaseCollections()->GetUnitClassPurchaseCost(this, (UnitClassTypes)pkUnitInfo->GetUnitClassType(), YIELD_GOLD);
+		if(iCollectionsModifer > 0 && iModifier > 0) iModifier = std::min(iCollectionsModifer, iModifier);
+		else if(iCollectionsModifer > 0) iModifier = iCollectionsModifer;
+	}	
+#endif
 
 	bool bIsSpaceshipPart = pkUnitInfo->GetSpaceshipProject() != NO_PROJECT;
 
 	if (iModifier == -1 && (!bIsSpaceshipPart || !GET_PLAYER(getOwner()).IsEnablesSSPartPurchase()))
 	{
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
-			CvTeam& owningTeam = GET_TEAM(getTeam());
-			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
-			int currentMinMod = MAXINT32;
-			for(auto eBuilding : vBuildingList){
-				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
-
-				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
-				if(!pBuildingEntry) continue;
-				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-				if (!pAllowPurchaseList) continue;
-
-				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-				for (int i = 0; i < num; i++){
-					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
-					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
-						currentMinMod = pAllowPurchaseList[i].second;
-						iModifier = currentMinMod;
-					}
-				}
-			}
-		}
-		
-#endif
 		if(iModifier == -1) return -1;
 	}
 
@@ -6105,27 +6088,11 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 		// Cost goes up in later eras
 		iCost = pkUnitInfo->GetFaithCost();
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-		if (iCost <= 0 && MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
-			CvTeam& owningTeam = GET_TEAM(getTeam());
-			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
-			int currentMinMod = MAXINT32;
-			for(auto eBuilding : vBuildingList){
-				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
-
-				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
-				if(!pBuildingEntry) continue;
-				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-				if (!pAllowPurchaseList) continue;
-
-				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-				for (int i = 0; i < num; i++){
-					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
-					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
-						currentMinMod = pAllowPurchaseList[i].second;
-						iCost = currentMinMod;
-					}
-				}
-			}
+		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS)
+		{
+			int iCollectionsMod = GC.GetUnitPurchaseCollections()->GetUnitClassPurchaseCost(this, (UnitClassTypes)pkUnitInfo->GetUnitClassType(), YIELD_FAITH);
+			if(iCollectionsMod > 0 && iCost > 0) iCost = std::min(iCollectionsMod, iCost);
+			else if(iCollectionsMod > 0) iCost = iCollectionsMod;
 		}
 #endif
 		CvPlayerAI& kOwner = GET_PLAYER(getOwner());

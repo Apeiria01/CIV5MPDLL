@@ -2310,6 +2310,7 @@ void CvGlobals::init()
 	m_pLuaEvaluatorManager = FNEW(lua::EvaluatorManager, c_eCiv5GameplayDLL, 0);
 
 	m_pIndependentPromotion = FNEW(CvIndependentPromotionInfo, c_eCiv5GameplayDLL, 0);
+	m_pUnitPurchaseCollections = FNEW(CvUnitPurchaseCollections, c_eCiv5GameplayDLL, 0);
 
 	auto_ptr<ICvDLLDatabaseUtility1> pkLoader(getDatabaseLoadUtility());
 
@@ -4439,25 +4440,9 @@ CvIndependentPromotionInfo* CvGlobals::GetIndependentPromotion()
 	return m_pIndependentPromotion;
 }
 
-const std::vector<BuildingTypes>& CvGlobals::GetEnableUnitPurchaseBuildings() const
+CvUnitPurchaseCollections* CvGlobals::GetUnitPurchaseCollections()
 {
-	return m_vEnableUnitPurchaseBuildings;
-}
-void CvGlobals::InitEnableUnitPurchaseBuildings()
-{
-	CvDatabaseUtility kUtility;
-	m_vEnableUnitPurchaseBuildings.clear();
-	std::string strKey("m_vEnableUnitPurchaseBuildings");
-	Database::Results* pResults = kUtility.GetResults(strKey);
-	if(pResults == NULL)
-	{
-		pResults = kUtility.PrepareResults(strKey, "SELECT DISTINCT Buildings.ID from Buildings INNER JOIN Building_EnableUnitPurchase ON Buildings.Type = BuildingType");
-	}
-	while(pResults->Step())
-	{
-		const int iBuildingID = pResults->GetInt(0);
-		m_vEnableUnitPurchaseBuildings.push_back((BuildingTypes)iBuildingID);
-	}
+	return m_pUnitPurchaseCollections;
 }
 
 CvString*& CvGlobals::getFootstepAudioTags()

@@ -567,10 +567,6 @@ public:
 
 	CvThemingBonusInfo *GetThemingBonusInfo(int i) const;
 	int GetNumThemingBonuses() const {return m_iNumThemingBonuses;};
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-	int GetNumAllowPurchaseUnitsByYieldType(YieldTypes iType);
-	std::pair<UnitClassTypes, int>* GetAllowPurchaseUnitsByYieldType(YieldTypes iType);
-#endif
 
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
 	int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
@@ -975,11 +971,6 @@ private:
 
 	int* m_paiHurryModifier;
 	int* m_paiHurryModifierLocal;
-
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-	int m_iNumAllowPurchaseUnits[NUM_YIELD_TYPES];
-	std::pair<UnitClassTypes, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
-#endif 
 
 	std::vector<int> m_setBuildingClassesNeededInCity;
 	std::vector<int> m_setBuildingClassesNeededGlobal;

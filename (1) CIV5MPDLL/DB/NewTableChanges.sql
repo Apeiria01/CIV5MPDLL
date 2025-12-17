@@ -44,3 +44,16 @@ create table Build_ResourceRemove (
     BuildType text references Builds(Type),
     ResourceType text references Resources(Type)
 );
+
+create table UnitClass_PurchaseCollections(
+    UnitClassType text not null references UnitClasses(Type),
+    BuildingType text references Buildings(Type),
+    PolicyType text references Policies(Type),
+    PlayerBeliefType text references Beliefs(Type),
+    CityBeliefType text references Beliefs(Type),
+
+    FoundersHolyCity boolean default 0,
+
+	YieldType text not null references Yields(Type),
+	CostModifier integer not null default -1
+);
