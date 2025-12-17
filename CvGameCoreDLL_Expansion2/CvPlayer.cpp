@@ -10284,22 +10284,7 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 		}
 	}
 
-	int iOldEspionageSpeedModifier = GetEspionageSpeedModifier();
 	ChangeEspionageSpeedModifier(pBuildingInfo->GetGlobalEspionageSpeedModifier() * iChange);
-	if (iOldEspionageSpeedModifier != GetEspionageSpeedModifier())
-	{
-		int iLoop;
-		for (uint ui = 0; ui < MAX_MAJOR_CIVS; ui++)
-		{
-			PlayerTypes ePlayer = (PlayerTypes)ui;
-			for (CvCity* pLoopCity = GET_PLAYER(ePlayer).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(ePlayer).nextCity(&iLoop))
-			{
-				GetEspionage()->UpdateCity(pLoopCity);
-			}
-		}
-	}
-
-
 
 	if (pBuildingInfo->GetMinorFriendshipAnchorChange() > 0)
 	{
@@ -14440,7 +14425,11 @@ int CvPlayer::GetEspionageSpeedModifier() const
 /// Change the global modifier on the espionage progress rate
 void CvPlayer::ChangeEspionageSpeedModifier(int iChange)
 {
-	m_iEspionageSpeedModifier = (m_iEspionageSpeedModifier + iChange);
+	if (iChange != 0)
+	{
+		m_iEspionageSpeedModifier += iChange;
+		GetEspionage()->UpdateSpies();
+	}
 }
 
 //	--------------------------------------------------------------------------------
