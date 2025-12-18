@@ -2434,6 +2434,7 @@ void CvGlobals::uninit()
 	SAFE_DELETE(m_pLuaEvaluatorManager);
 
 	SAFE_DELETE(m_pIndependentPromotion);
+	SAFE_DELETE(m_pUnitPurchaseCollections);
 
 	// already deleted outside of the dll, set to null for safety
 	m_pathFinder=NULL;
