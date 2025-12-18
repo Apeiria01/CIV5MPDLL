@@ -29,6 +29,19 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          lfs: true
+      
+      - name: Debug print workspace tree
+        shell: pwsh
+        run: |
+          Write-Output "=== Workspace root ==="
+          Get-Location
+
+          Write-Output "=== Workspace tree (depth 3) ==="
+          Get-ChildItem -Recurse -Depth 3 -Force | ForEach-Object {
+            $_.FullName
+          }
 
       - name: Filter Changed Paths
         uses: dorny/paths-filter@v3
@@ -103,6 +116,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - uses: actions/cache@v4
         id: cache
@@ -170,6 +185,14 @@ jobs:
             Write-Output "SDK library path not found: $SDKLib"
           }
         shell: pwsh
+      
+      - name: Extract VS2013
+        run: |
+          $src = ".github/dependencies"
+          $dst = ".github/dependencies/Microsoft Visual Studio 12.0"
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Write-Output "Extracting VS2013 to $dst"
+          7z x "$src/Microsoft Visual Studio 12.0.zip.001" -y -o"$dst"
 
       - name: Setup Visual Studio environment and build msvc debug
         shell: cmd
@@ -197,13 +220,13 @@ jobs:
           
           REM Try MSBuild first (with automatic GitHub problem matchers)
           echo "Attempting MSBuild with automatic problem detection..."
-          msbuild VoxPopuli_vs2013.sln /p:Configuration=Debug /p:Platform=Win32 /v:normal /flp:logfile=msvc_debug_msbuild.log;verbosity=normal
+          msbuild CvGameCoreDLL.vs2022.sln /p:Configuration=Debug /p:Platform=Win32 /v:normal /flp:logfile=msvc_debug_msbuild.log;verbosity=normal /clp:ErrorsOnly
           if %ERRORLEVEL% EQU 0 (
             echo "MSBuild succeeded! Using MSBuild output."
             type msvc_debug_msbuild.log
           ) else (
             echo "MSBuild failed, falling back to devenv..."
-            devenv VoxPopuli_vs2013.sln /build Debug /out msvc_debug_build.log
+            devenv CvGameCoreDLL.vs2022.sln /build Debug /out msvc_debug_build.log
             type msvc_debug_build.log
           )
 
@@ -233,13 +256,13 @@ jobs:
           
           REM Try MSBuild first (with automatic GitHub problem matchers)
           echo "Attempting MSBuild with automatic problem detection..."
-          msbuild VoxPopuli_vs2013.sln /p:Configuration=Release /p:Platform=Win32 /v:normal /flp:logfile=msvc_release_msbuild.log;verbosity=normal
+          msbuild CvGameCoreDLL.vs2022.sln /p:Configuration=Release /p:Platform=Win32 /v:normal /flp:logfile=msvc_release_msbuild.log;verbosity=normal /clp:ErrorsOnly
           if %ERRORLEVEL% EQU 0 (
             echo "MSBuild succeeded! Using MSBuild output."
             type msvc_release_msbuild.log
           ) else (
             echo "MSBuild failed, falling back to devenv..."
-            devenv VoxPopuli_vs2013.sln /build Release /out msvc_release_build.log
+            devenv CvGameCoreDLL.vs2022.sln /build Release /out msvc_release_build.log
             type msvc_release_build.log
           )
 
@@ -400,12 +423,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: MPDLL_MSVC_Debug
-          path: 'BuildOutput/Debug'
+          path: 'BuildOutput/VS2022_DebugWin32'
 
       - name: Create msvc release artifact
         uses: actions/upload-artifact@v4
         with:
           name: MPDLL_MSVC_Release
-          path: 'BuildOutput/Release'
+          path: 'BuildOutput/VS2022_ReleaseWin32'
 
 
