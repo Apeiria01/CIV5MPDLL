@@ -11,6 +11,11 @@ on:
     types: [opened, reopened, synchronize, ready_for_review]
     branches: [ master ]
   workflow_dispatch:
+    inputs:
+      build_debug:
+        description: 'Build Debug DLL'
+        required: false
+        default: 'false'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -193,8 +198,22 @@ jobs:
           New-Item -ItemType Directory -Force -Path $dst | Out-Null
           Write-Output "Extracting VS2013 to $dst"
           7z x "$src/Microsoft Visual Studio 12.0.zip.001" -y -o"$dst"
+      
+      - name: Modify PropsFile
+        shell: cmd
+        run: |
+          set SDKVersion=7.1
+          set MPDLLExecutablePath=$(SolutionDir).github\dependencies\Microsoft Visual Studio 12.0\Common7\IDE;$(SolutionDir).github\dependencies\Microsoft Visual Studio 12.0\VC\bin;$(ExecutablePath);
+          set MPDLLIncludePath=C:\Program Files (x86)\Microsoft SDKs\Windows\v%SDKVersion%\Include;C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include;
+          set MPDLLLibraryPath=C:\Program Files (x86)\Microsoft SDKs\Windows\v%SDKVersion%\Lib;C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\lib;
+          powershell -Command "(gc MPDLLCompile.props) -replace '<ExecutablePath>.*</ExecutablePath>', '<ExecutablePath>%MPDLLExecutablePath%</ExecutablePath>' | Out-File MPDLLCompile.props -Encoding UTF8"
+          powershell -Command "(gc MPDLLCompile.props) -replace '<IncludePath>.*</IncludePath>', '<IncludePath>%MPDLLIncludePath%</IncludePath>' | Out-File MPDLLCompile.props -Encoding UTF8"
+          powershell -Command "(gc MPDLLCompile.props) -replace '<LibraryPath>.*</LibraryPath>', '<LibraryPath>%MPDLLLibraryPath%</LibraryPath>' | Out-File MPDLLCompile.props -Encoding UTF8"
+          echo "Modify MPDLLCompile.props ..."
+          type MPDLLCompile.props
 
       - name: Setup Visual Studio environment and build msvc debug
+        if: ${{ inputs.build_debug == 'true' }}
         shell: cmd
         run: |
           set SDKVersion=7.1
@@ -420,6 +439,7 @@ jobs:
           }
 
       - name: Create msvc debug artifact
+        if: ${{ inputs.build_debug == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: MPDLL_MSVC_Debug
