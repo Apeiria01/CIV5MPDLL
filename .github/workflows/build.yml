@@ -16,6 +16,10 @@ on:
         description: 'Build Debug DLL'
         required: false
         default: 'false'
+      build_43Civ:
+        description: 'Build 43Civ DLL'
+        required: false
+        default: 'false'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -211,6 +215,15 @@ jobs:
           powershell -Command "(gc MPDLLCompile.props) -replace '<LibraryPath>.*</LibraryPath>', '<LibraryPath>%MPDLLLibraryPath%</LibraryPath>' | Out-File MPDLLCompile.props -Encoding UTF8"
           echo "Modify MPDLLCompile.props ..."
           type MPDLLCompile.props
+      
+      - name: Modify Civ number
+        if: ${{ inputs.build_43Civ == 'true' }}
+        shell: cmd
+        run: |
+          set CivNumDefineFile=CvGameCoreDLLUtil\include\CustomModsGlobal.h
+          powershell -Command "(gc %CivNumDefineFile%) | ForEach-Object { $_ -replace '^\s*//\s*#define MOD_GLOBAL_MAX_MAJOR_CIVS \(43\)', '#define MOD_GLOBAL_MAX_MAJOR_CIVS (43)' } | Out-File %CivNumDefineFile% -Encoding UTF8"
+          echo "Modify CustomModsGlobal.h ..."
+          type %CivNumDefineFile%
 
       - name: Setup Visual Studio environment and build msvc debug
         if: ${{ inputs.build_debug == 'true' }}
