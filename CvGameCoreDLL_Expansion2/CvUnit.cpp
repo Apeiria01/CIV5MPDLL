@@ -2863,127 +2863,106 @@ void CvUnit::doTurn()
 #endif
 	}
 
-	    int damage = 0;
-		if (GetNearbyEnemyDamage() > 0)
-		{
+	int damage = 0;
+	if (GetNearbyEnemyDamage() > 0)
+	{
 		damage = damage + GetNearbyEnemyDamage();
-		}
-		if (IsFortifiedThisTurn() && GetDamageAoEFortified() > 0)
-		{
+	}
+	if (IsFortifiedThisTurn() && GetDamageAoEFortified() > 0)
+	{
 		damage = damage + GetDamageAoEFortified();
-		}
-		if (damage>0)
-		{
-		  DoAdjacentPlotDamage(plot(), damage);
-		}
+	}
+	if (damage > 0)
+	{
+		DoAdjacentPlotDamage(plot(), damage);
+	}
 
-
-		int iDX = 0, iDY = 0;
-		int iBlastRadius = 2;
-		int iTotalxp = 0;
-		int iTotalMove = 0;
-		for (iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
+	int iBlastRadius = 1;
+	int iTotalXP = 0;
+	int iTotalMove = 0;
+	for (int iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
+	{
+		for (int iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
 		{
-			for (iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
+			CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iDX, iDY, 1);
+			if (pLoopPlot == NULL) continue;
+			for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
 			{
-				CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(),getY(), iDX, iDY,1);
+				CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
+				
+				if (loopUnit == NULL || loopUnit == this) continue;
+				if (!loopUnit->IsCombatUnit() || loopUnit->getDomainType() != getDomainType()) continue;
+				if (loopUnit->getOwner() != getOwner()) continue;
 
-				if (pLoopPlot != NULL)
-				{
-					for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
-					{
-						CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
-						if (loopUnit == NULL)
-							continue;
-						if (!loopUnit->IsCombatUnit())
-							continue;
-						if (loopUnit->getDomainType() != getDomainType())
-							continue;
-						if (loopUnit->getOwner() != getOwner())
-							continue;
-						if (loopUnit== this)
-							continue;
-
-						int ixp = loopUnit->GetAdjacentSapExperience();
-						int iMoveExtra = loopUnit->GetAdjacentFriendlySapMovement();
-
-						if (ixp > 0)
-						{
-						 iTotalxp += ixp;
-						}
-						if (iMoveExtra > 0)
-						{
-						iTotalMove += iMoveExtra;
-						}
-
-					}
-				}
+				iTotalXP += loopUnit->GetAdjacentSapExperience();
+				iTotalMove += loopUnit->GetAdjacentFriendlySapMovement();
 			}
 		}
-		CvPlot* pPlot = plot();
-		if((GetStayCSInfluencePerTurn() != 0 || GetStayCSExpPerTurn() != 0) && pPlot && GET_PLAYER(pPlot->getOwner()).isMinorCiv() && !GET_TEAM(pPlot->getTeam()).isAtWar(getTeam()))
+	}
+	CvPlot* pPlot = plot();
+	if((GetStayCSInfluencePerTurn() != 0 || GetStayCSExpPerTurn() != 0) && pPlot && GET_PLAYER(pPlot->getOwner()).isMinorCiv() && !GET_TEAM(pPlot->getTeam()).isAtWar(getTeam()))
+	{
+		PlayerTypes eMinor = pPlot->getOwner();
+		GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), GetStayCSInfluencePerTurn());
+		iTotalXP += GetStayCSExpPerTurn();
+	}
+	if(!IsCivilianUnit() && pPlot)
+	{
+		CvCity* pCity = pPlot->getPlotCity();
+		if (pCity)
 		{
-			PlayerTypes eMinor = pPlot->getOwner();
-			GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), GetStayCSInfluencePerTurn());
-			iTotalxp += GetStayCSExpPerTurn();
+			iTotalXP += pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
 		}
-		if(!IsCivilianUnit() && pPlot)
-		{
-			CvCity* pCity = pPlot->getPlotCity();
-			if (pCity)
-			{
-				iTotalxp += pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
-			}
-			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
-			iTotalxp += GetFreeExpPerTurn();
-		}
-		if (iTotalxp > 0)
-		{
+		iTotalXP += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
+		iTotalXP += GetFreeExpPerTurn();
+	}
+	if (iTotalXP > 0)
+	{
 #if defined(MOD_UNITS_XP_TIMES_100)
-			changeExperienceTimes100(iTotalxp * 100);
+		changeExperienceTimes100(iTotalXP * 100);
 #else
-			changeExperience(iTotalxp);
+		changeExperience(iTotalxp);
 #endif
-			testPromotionReady();
-		}
-		if (iTotalMove > 0)
+		testPromotionReady();
+	}
+	if (iTotalMove > 0)
+	{
+		changeMoves(iTotalMove);
+	}
+
+
+	int iTotalMovePenalty = 0;
+	for (int iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
+	{
+		CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+
+		if (pAdjacentPlot != NULL)
 		{
-			changeMoves(iTotalMove);
-		}
-
-
-		int iTotalMovePenalty = 0;
-		for (int iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
-		{
-			CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
-
-			if (pAdjacentPlot != NULL)
+			for (int iUnitLoop = 0; iUnitLoop < pAdjacentPlot->getNumUnits(); iUnitLoop++)
 			{
-				for (int iUnitLoop = 0; iUnitLoop < pAdjacentPlot->getNumUnits(); iUnitLoop++)
-				{
-					CvUnit* loopUnit = pAdjacentPlot->getUnitByIndex(iUnitLoop);
-					if (loopUnit == NULL)
-						continue;
-					if (!loopUnit->IsCombatUnit())
-						continue;
-					if (loopUnit->getDomainType() != getDomainType())
-						continue;
-					if (!loopUnit->isEnemy(getTeam(), plot()))
-						continue;
+				CvUnit* loopUnit = pAdjacentPlot->getUnitByIndex(iUnitLoop);
+				if (loopUnit == NULL)
+					continue;
+				if (!loopUnit->IsCombatUnit())
+					continue;
+				if (loopUnit->getDomainType() != getDomainType())
+					continue;
+				if (!loopUnit->isEnemy(getTeam(), plot()))
+					continue;
 
-					int iMovePenalty = loopUnit->GetAdjacentEnemySapMovement();
-					if (iMovePenalty <= 0)
-						continue;
+				int iMovePenalty = loopUnit->GetAdjacentEnemySapMovement();
+				if (iMovePenalty <= 0)
+					continue;
 
-					iTotalMovePenalty += iMovePenalty;
-				}
+				iTotalMovePenalty += iMovePenalty;
 			}
 		}
-		if (iTotalMovePenalty > 0)
-		{
-			iTotalMovePenalty = min(getMoves() - 1, iTotalMovePenalty);
-			changeMoves(-iTotalMovePenalty);
-		}
+	}
+	if (iTotalMovePenalty > 0)
+	{
+		iTotalMovePenalty = min(getMoves() - 1, iTotalMovePenalty);
+		changeMoves(-iTotalMovePenalty);
+	}
 #endif
 
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
