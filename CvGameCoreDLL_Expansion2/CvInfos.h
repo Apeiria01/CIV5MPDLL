@@ -1959,6 +1959,8 @@ public:
 	int getTradeRouteDistanceMod() const;
 #endif
 	int GetEstimatedNumCities() const;
+	int GetExtraCityDistance() const;
+	int GetHandicapExtraAIStartingUnit(int i) const;
 
 	static CvWorldInfo CreateCustomWorldSize(const CvWorldInfo& kTemplate, int iWidth, int iHeight);
 	static CvWorldInfo CreateCustomWorldSize(const CvWorldInfo& kTemplate, int iWidth, int iHeight, int iPlayers, int iMinorCivs);
@@ -2000,6 +2002,8 @@ protected:
 	int m_iTradeRouteDistanceMod;
 #endif
 	int m_iEstimatedNumCities;
+	int m_iExtraCityDistance;
+	std::vector<int> m_viHandicapExtraAIStartingUnit;
 };
 
 FDataStream& operator<<(FDataStream&, const CvWorldInfo&);

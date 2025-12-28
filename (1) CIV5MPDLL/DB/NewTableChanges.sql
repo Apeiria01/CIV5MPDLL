@@ -26,6 +26,13 @@ alter table HandicapInfos add StrategicResourceModPerEra integer default 0;
 -- If AIFirstProphetPercent is positive, it overrides AITrainPercent on AI's First Prophet Cost
 alter table HandicapInfos add AIFirstProphetPercent integer default 0;
 
+alter table Worlds add ExtraCityDistance integer default 0;
+create table World_HandicapExtraAIStartingUnit (
+    WorldType text references Worlds(Type),
+    HandicapType text references HandicapInfos(Type),
+    ExtraAIStartingUnit integer default 0
+);
+
 alter table GameSpeeds add FreePromotion text references UnitPromotions(Type);
 alter table GameSpeeds add SetterExtraPercent integer default 0;
 
@@ -43,17 +50,4 @@ alter table Builds add ObsoleteTech text default null;
 create table Build_ResourceRemove (
     BuildType text references Builds(Type),
     ResourceType text references Resources(Type)
-);
-
-create table UnitClass_PurchaseCollections(
-    UnitClassType text not null references UnitClasses(Type),
-    BuildingType text references Buildings(Type),
-    PolicyType text references Policies(Type),
-    PlayerBeliefType text references Beliefs(Type),
-    CityBeliefType text references Beliefs(Type),
-
-    FoundersHolyCity boolean default 0,
-
-	YieldType text not null references Yields(Type),
-	CostModifier integer not null default -1
 );

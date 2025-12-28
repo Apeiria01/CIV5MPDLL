@@ -1919,8 +1919,14 @@ void CvPlayer::initFreeUnits(CvGameInitialItemsOverrides& /*kOverrides*/)
 			{
 				iFreeCount = playerCivilization.getCivilizationFreeUnitsClass(iI);
 				iDefaultAI = playerCivilization.getCivilizationFreeUnitsDefaultUnitAI(iI);
-
-				iFreeCount *= (gameStartEra.getStartingUnitMultiplier() + ((!isHuman()) ? gameHandicap.getAIStartingUnitMultiplier() : 0));
+				
+				int iAIStartingUnitMultiplier = 0;
+				if (!isHuman())
+				{
+					iAIStartingUnitMultiplier += gameHandicap.getAIStartingUnitMultiplier();
+					iAIStartingUnitMultiplier += GC.getMap().getWorldInfo().GetHandicapExtraAIStartingUnit(gameHandicap.GetID());
+				}
+				iFreeCount *= gameStartEra.getStartingUnitMultiplier() + iAIStartingUnitMultiplier;
 
 				// City states only get 1 of something
 				if(isMinorCiv() && iFreeCount > 1)

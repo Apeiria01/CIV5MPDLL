@@ -40,3 +40,15 @@ create table Unit_InstantYieldFromTrainings (
     YieldType integer references Yields(Type),
     Yield integer default 0
 );
+create table UnitClass_PurchaseCollections(
+    UnitClassType text not null references UnitClasses(Type),
+    BuildingType text references Buildings(Type),
+    PolicyType text references Policies(Type),
+    PlayerBeliefType text references Beliefs(Type),
+    CityBeliefType text references Beliefs(Type),
+
+    FoundersHolyCity boolean default 0,
+
+	YieldType text not null references Yields(Type),
+	CostModifier integer not null default -1
+);
