@@ -195,6 +195,12 @@ CvUnitEntry::~CvUnitEntry(void)
 	SAFE_DELETE_ARRAY(m_piProductionTraits);
 	SAFE_DELETE_ARRAY(m_piFlavorValue);
 	SAFE_DELETE_ARRAY(m_piUnitGroupRequired);
+	SAFE_DELETE_ARRAY(m_piProductionModifierBuildings);
+	SAFE_DELETE_ARRAY(m_piYieldFromKills);
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
+#endif
+	SAFE_DELETE_ARRAY(m_piInstantYieldFromTrainings);
 	SAFE_DELETE_ARRAY(m_pbFreePromotions);
 	SAFE_DELETE_ARRAY(m_paszEarlyArtDefineTags);
 	SAFE_DELETE_ARRAY(m_paszLateArtDefineTags);
