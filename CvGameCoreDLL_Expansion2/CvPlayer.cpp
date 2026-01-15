@@ -27417,39 +27417,35 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 
 			eBuilding = (BuildingTypes) getCivilizationInfo().getCivilizationBuildings(eBuildingClass);
 
-			if(eBuilding != NO_BUILDING)
-			{
-				CvBuildingEntry* pkBuilding = GC.getBuildingInfo(eBuilding);
-				if(pkBuilding)
-				{
-					iBuildingCount = pLoopCity->GetCityBuildings()->GetNumBuilding(eBuilding);
+			if(eBuilding == NO_BUILDING) continue;
+			// No Yield Bonus for Obsoleted Building
+			if(GET_TEAM(getTeam()).isObsoleteBuilding(eBuilding)) continue;
 
-					if(iBuildingCount > 0)
-					{
+			CvBuildingEntry* pkBuilding = GC.getBuildingInfo(eBuilding);
+			if(!pkBuilding) continue;
+				
+			iBuildingCount = pLoopCity->GetCityBuildings()->GetNumBuilding(eBuilding);
+			if(iBuildingCount <= 0) continue;
+
 #if defined(MOD_API_UNIFIED_YIELDS)
-						if (isWorldWonderClass(pkBuilding->GetBuildingClassInfo())) {
-							iTotalWonders += iBuildingCount;
-						}
+			if (isWorldWonderClass(pkBuilding->GetBuildingClassInfo())) {
+				iTotalWonders += iBuildingCount;
+			}
 #endif
-						// No Yield Bonus for Obsoleted Building
-						if(GET_TEAM(getTeam()).isObsoleteBuilding(eBuilding)) continue;
 
-						// Building Class Yield Stuff
-						for(iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
-						{
-							eYield = (YieldTypes) iJ;
-							iYieldMod = pPolicy->GetBuildingClassYieldModifiers(eBuildingClass, eYield);
-							if (iYieldMod > 0)
-							{
-								pLoopCity->changeYieldRateModifier(eYield, iYieldMod * iBuildingCount * iChange);
-							}
-							iYieldChange = pPolicy->GetBuildingClassYieldChanges(eBuildingClass, eYield);
-							if (iYieldChange != 0)
-							{
-								pLoopCity->ChangeBaseYieldRateFromBuildingsPolicies(eYield, iYieldChange * iBuildingCount * iChange);
-							}
-						}
-					}
+			// Building Class Yield Stuff
+			for(iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
+			{
+				eYield = (YieldTypes) iJ;
+				iYieldMod = pPolicy->GetBuildingClassYieldModifiers(eBuildingClass, eYield);
+				if (iYieldMod > 0)
+				{
+					pLoopCity->changeYieldRateModifier(eYield, iYieldMod * iBuildingCount * iChange);
+				}
+				iYieldChange = pPolicy->GetBuildingClassYieldChanges(eBuildingClass, eYield);
+				if (iYieldChange != 0)
+				{
+					pLoopCity->ChangeBaseYieldRateFromBuildingsPolicies(eYield, iYieldChange * iBuildingCount * iChange);
 				}
 			}
 		}
