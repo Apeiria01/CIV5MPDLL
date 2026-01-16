@@ -48,6 +48,7 @@ alter table Traits add NoDoDeficit boolean default 0;
 alter table Traits add FreeGreatPeoplePerEra integer default 0;
 alter table Traits add OwnedReligionUnitCultureExtraTurns int default 0;
 alter table Traits add InfluenceFromGreatPeopleBirth integer default 0;
+alter table Traits add ExtraUnitPlayerInstances integer default 0;
 alter table Traits add ArtistGoldenAgeTechBoost boolean default 0;
 alter table Traits add GoodyUnitUpgradeFirst boolean default 0;
 
@@ -69,8 +70,6 @@ create table Trait_FreePromotionUnitClasses(
     UnitClassType text references UnitClasses(Type),
     PromotionType text references UnitPromotions(Type)
 );
-
-alter table Traits add ExtraUnitPlayerInstances integer default 0;
 --******************** New War Bonus ********************--
 alter table Traits add NoResistance boolean default 0;
 alter table Traits add GoldenAgeOnWar boolean default 0;

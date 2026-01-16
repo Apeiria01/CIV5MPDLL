@@ -4783,6 +4783,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	{
 		m_iFreeGreatPeoplePerEra = 0;
 	}
+	kStream >> m_iExtraUnitPlayerInstances;
 	MOD_SERIALIZE_READ(151, kStream, m_iOwnedReligionUnitCultureExtraTurns, 0);
 
 	if (uiVersion >= 6)
@@ -4865,12 +4866,10 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	if (uiVersion >= 16)
 	{
 		kStream >> m_iTradeBuildingModifier;
-		kStream >> m_iExtraUnitPlayerInstances;
 	}
 	else
 	{
 		m_iTradeBuildingModifier = 0;
-		m_iExtraUnitPlayerInstances = 0;
 	}
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	kStream >> m_iNumFreeWorldWonderPerCity;
