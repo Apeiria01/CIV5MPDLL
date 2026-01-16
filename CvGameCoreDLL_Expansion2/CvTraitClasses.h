@@ -127,6 +127,7 @@ public:
 	int GetExtraFoundedCityTerritoryClaimRange() const;
 	int GetFreeSocialPoliciesPerEra() const;
 	int GetFreeGreatPeoplePerEra() const;
+	int GetExtraUnitPlayerInstances() const;
 	int GetOwnedReligionUnitCultureExtraTurns() const;
 	int GetNumTradeRoutesModifier() const;
 	int GetTradeRouteResourceModifier() const;
@@ -417,6 +418,7 @@ protected:
 	int m_iExtraFoundedCityTerritoryClaimRange;
 	int m_iFreeSocialPoliciesPerEra;
 	int m_iFreeGreatPeoplePerEra;
+	int m_iExtraUnitPlayerInstances;
 	int m_iOwnedReligionUnitCultureExtraTurns;
 	int m_iNumTradeRoutesModifier;
 	int m_iTradeRouteResourceModifier;
@@ -932,6 +934,10 @@ public:
 	int GetFreeGreatPeoplePerEra() const
 	{
 		return m_iFreeGreatPeoplePerEra;
+	}
+	int GetExtraUnitPlayerInstances() const
+	{
+		return m_iExtraUnitPlayerInstances;
 	}
 	int GetOwnedReligionUnitCultureExtraTurns() const
 	{
@@ -1500,6 +1506,7 @@ private:
 	int m_iExtraFoundedCityTerritoryClaimRange;
 	int m_iFreeSocialPoliciesPerEra;
 	int m_iFreeGreatPeoplePerEra;
+	int m_iExtraUnitPlayerInstances;
 	int m_iOwnedReligionUnitCultureExtraTurns;
 	int m_iNumTradeRoutesModifier;
 	int m_iTradeRouteResourceModifier;

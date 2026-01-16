@@ -69,6 +69,8 @@ create table Trait_FreePromotionUnitClasses(
     UnitClassType text references UnitClasses(Type),
     PromotionType text references UnitPromotions(Type)
 );
+
+alter table Traits add ExtraUnitPlayerInstances integer default 0;
 --******************** New War Bonus ********************--
 alter table Traits add NoResistance boolean default 0;
 alter table Traits add GoldenAgeOnWar boolean default 0;

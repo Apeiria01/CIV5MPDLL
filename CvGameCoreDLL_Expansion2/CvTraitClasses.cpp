@@ -103,6 +103,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_iExtraFoundedCityTerritoryClaimRange(0),
 	m_iFreeSocialPoliciesPerEra(0),
 	m_iFreeGreatPeoplePerEra(0),
+	m_iExtraUnitPlayerInstances(0),
 	m_iOwnedReligionUnitCultureExtraTurns(0),
 	m_iNumTradeRoutesModifier(0),
 	m_iTradeRouteResourceModifier(0),
@@ -682,6 +683,12 @@ int CvTraitEntry::GetFreeSocialPoliciesPerEra() const
 int CvTraitEntry::GetFreeGreatPeoplePerEra() const
 {
 	return m_iFreeGreatPeoplePerEra;
+}
+
+/// Accessor: extra unit instances for player
+int CvTraitEntry::GetExtraUnitPlayerInstances() const
+{
+	return m_iExtraUnitPlayerInstances;
 }
 
 int CvTraitEntry::GetOwnedReligionUnitCultureExtraTurns() const
@@ -1741,6 +1748,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_iExtraFoundedCityTerritoryClaimRange  = kResults.GetInt("ExtraFoundedCityTerritoryClaimRange");
 	m_iFreeSocialPoliciesPerEra				= kResults.GetInt("FreeSocialPoliciesPerEra");
 	m_iFreeGreatPeoplePerEra				= kResults.GetInt("FreeGreatPeoplePerEra");
+	m_iExtraUnitPlayerInstances				= kResults.GetInt("ExtraUnitPlayerInstances");
 	m_iOwnedReligionUnitCultureExtraTurns	= kResults.GetInt("OwnedReligionUnitCultureExtraTurns");
 	m_iNumTradeRoutesModifier				= kResults.GetInt("NumTradeRoutesModifier");
 	m_iTradeRouteResourceModifier			= kResults.GetInt("TradeRouteResourceModifier");
@@ -2768,6 +2776,7 @@ void CvPlayerTraits::InitPlayerTraits()
 			m_iExtraFoundedCityTerritoryClaimRange += trait->GetExtraFoundedCityTerritoryClaimRange();
 			m_iFreeSocialPoliciesPerEra += trait->GetFreeSocialPoliciesPerEra();
 			m_iFreeGreatPeoplePerEra += trait->GetFreeGreatPeoplePerEra();
+			m_iExtraUnitPlayerInstances += trait->GetExtraUnitPlayerInstances();
 			m_iOwnedReligionUnitCultureExtraTurns += trait->GetOwnedReligionUnitCultureExtraTurns();
 			m_iNumTradeRoutesModifier += trait->GetNumTradeRoutesModifier();
 			m_iTradeRouteResourceModifier += trait->GetTradeRouteResourceModifier();
@@ -3335,6 +3344,7 @@ void CvPlayerTraits::Reset()
 	m_iExtraFoundedCityTerritoryClaimRange = 0;
 	m_iFreeSocialPoliciesPerEra = 0;
 	m_iFreeGreatPeoplePerEra = 0;
+	m_iExtraUnitPlayerInstances = 0;
 	m_iOwnedReligionUnitCultureExtraTurns = 0;
 	m_iNumTradeRoutesModifier = 0;
 	m_iTradeRouteResourceModifier = 0;
@@ -4855,10 +4865,12 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	if (uiVersion >= 16)
 	{
 		kStream >> m_iTradeBuildingModifier;
+		kStream >> m_iExtraUnitPlayerInstances;
 	}
 	else
 	{
 		m_iTradeBuildingModifier = 0;
+		m_iExtraUnitPlayerInstances = 0;
 	}
 #if defined(MOD_TRAIT_NEW_EFFECT_FOR_SP)
 	kStream >> m_iNumFreeWorldWonderPerCity;
@@ -5265,6 +5277,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iExtraFoundedCityTerritoryClaimRange;
 	kStream << m_iFreeSocialPoliciesPerEra;
 	kStream << m_iFreeGreatPeoplePerEra;
+	kStream << m_iExtraUnitPlayerInstances;
 	MOD_SERIALIZE_WRITE(kStream, m_iOwnedReligionUnitCultureExtraTurns);
 	kStream << m_iNumTradeRoutesModifier;
 	kStream << m_iTradeRouteResourceModifier;

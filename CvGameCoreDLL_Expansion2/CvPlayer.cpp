@@ -756,7 +756,7 @@ void CvPlayer::init(PlayerTypes eID)
 		GetTreasury()->ChangeCityConnectionTradeRouteGoldChange(GetPlayerTraits()->GetCityConnectionTradeRouteChange());
 		changeWonderProductionModifier(GetPlayerTraits()->GetWonderProductionModifier());
 		ChangeRouteGoldMaintenanceMod(GetPlayerTraits()->GetImprovementMaintenanceModifier());
-
+		ChangeExtraUnitPlayerInstances(GetPlayerTraits()->GetExtraUnitPlayerInstances());
 		for(iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
 		{
 			ChangeCityYieldChangeTimes100((YieldTypes)iJ, 100 * GetPlayerTraits()->GetFreeCityYield((YieldTypes)iJ));
