@@ -10321,52 +10321,45 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 		for (iI = 0; iI < GC.getNumBuildingClassInfos(); iI++)
 		{
 			eBuildingClass = (BuildingClassTypes)iI;
-
-			CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
-			if (!pkBuildingClassInfo)
+			if (!GC.getBuildingClassInfo(eBuildingClass))
 			{
 				continue;
 			}
 
-			BuildingTypes eTestBuilding = NO_BUILDING;
+			BuildingTypes eTestBuilding = (BuildingTypes)getCivilizationInfo().getCivilizationBuildings(eBuildingClass);
+			if (eTestBuilding == NO_BUILDING) continue;
+			// No Bonus for Obsoleted Building
+			if(GET_TEAM(getTeam()).isObsoleteBuilding(eTestBuilding)) continue;
 
-			eTestBuilding = (BuildingTypes)getCivilizationInfo().getCivilizationBuildings(eBuildingClass);
+			CvBuildingEntry* pkBuilding = GC.getBuildingInfo(eTestBuilding);
+			CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
+			if (!pkBuilding || !pkBuildingClassInfo) continue;
 
-			if (eTestBuilding != NO_BUILDING)
+			iBuildingCount = pLoopCityBuildings->GetNumBuilding(eTestBuilding);
+			if (iBuildingCount <= 0) continue;
+
+			// Building Class Yield Stuff
+			for (iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
 			{
-				CvBuildingEntry* pkBuilding = GC.getBuildingInfo(eTestBuilding);
-				CvBuildingClassInfo* pkBuildingClassInfo = GC.getBuildingClassInfo(eBuildingClass);
-				if (pkBuilding)
+				YieldTypes eYield = (YieldTypes)iJ;
+				int iYieldChange = pBuildingInfo->GetBuildingClassYieldChange(eBuildingClass, eYield);
+				if (iYieldChange > 0)
 				{
-					iBuildingCount = pLoopCityBuildings->GetNumBuilding(eTestBuilding);
-					if (iBuildingCount > 0)
-					{
-						// Building Class Yield Stuff
-						for (iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
-						{
-							YieldTypes eYield = (YieldTypes)iJ;
-							int iYieldChange = pBuildingInfo->GetBuildingClassYieldChange(eBuildingClass, eYield);
-							if (iYieldChange > 0)
-							{
-								pLoopCity->ChangeBaseYieldRateFromBuildings(eYield, iYieldChange * iBuildingCount * iChange);
-							}
-
-							int iWonderYieldChange = pBuildingInfo->GetYieldChangeWorldWonderGlobal(eYield);
-							if (iWonderYieldChange > 0 && isWorldWonderClass(*pkBuildingClassInfo))
-							{
-								pLoopCityBuildings->ChangeBuildingYieldChange(eBuildingClass, eYield, (iWonderYieldChange * iBuildingCount * iChange));
-								pLoopCity->changeLocalBuildingClassYield(eBuildingClass, eYield, (iWonderYieldChange * iBuildingCount * iChange));
-							}
-
-							int iYieldMod = pBuildingInfo->GetBuildingClassYieldModifier(eBuildingClass, eYield);
-							if (iYieldMod != 0)
-							{
-								pLoopCity->changeYieldRateModifier(eYield, iYieldMod * iBuildingCount * iChange);
-							}
-						}
-					}
+					pLoopCity->ChangeBaseYieldRateFromBuildings(eYield, iYieldChange * iBuildingCount * iChange);
 				}
 
+				int iWonderYieldChange = pBuildingInfo->GetYieldChangeWorldWonderGlobal(eYield);
+				if (iWonderYieldChange > 0 && isWorldWonderClass(*pkBuildingClassInfo))
+				{
+					pLoopCityBuildings->ChangeBuildingYieldChange(eBuildingClass, eYield, (iWonderYieldChange * iBuildingCount * iChange));
+					pLoopCity->changeLocalBuildingClassYield(eBuildingClass, eYield, (iWonderYieldChange * iBuildingCount * iChange));
+				}
+
+				int iYieldMod = pBuildingInfo->GetBuildingClassYieldModifier(eBuildingClass, eYield);
+				if (iYieldMod != 0)
+				{
+					pLoopCity->changeYieldRateModifier(eYield, iYieldMod * iBuildingCount * iChange);
+				}
 			}
 		}
 	}
