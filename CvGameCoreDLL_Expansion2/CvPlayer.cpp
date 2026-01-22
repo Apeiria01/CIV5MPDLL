@@ -254,6 +254,7 @@ CvPlayer::CvPlayer() :
 	, m_iAlwaysWeLoveKindDayInGoldenAge()
 	, m_iNoResistance()
 	, m_iUpgradeAllTerritory()
+	, m_iNoTechForWonderProject()
 	, m_iCityCaptureHealGlobal(0)
 	, m_iOriginalCapitalCaptureTech(0)
 	, m_iOriginalCapitalCapturePolicy(0)
@@ -1042,6 +1043,7 @@ void CvPlayer::uninit()
 	m_iAlwaysWeLoveKindDayInGoldenAge = 0;
 	m_iNoResistance = 0;
 	m_iUpgradeAllTerritory = 0;
+	m_iNoTechForWonderProject = 0;
 	m_iCityCaptureHealGlobal = 0;
 	m_iOriginalCapitalCaptureTech = 0;
 	m_iOriginalCapitalCapturePolicy = 0;
@@ -8471,24 +8473,28 @@ bool CvPlayer::canTrain(UnitTypes eUnit, bool bContinue, bool bTestVisible, bool
 		}
 	}
 
+	ProjectTypes eProject = (ProjectTypes) pUnitInfo.GetSpaceshipProject();
+    bool bIsProjectUnit = (eProject != NO_PROJECT) || (pUnitInfo.GetProjectPrereq() != NO_PROJECT);
 	// Tech requirements
-	if(!(GET_TEAM(getTeam()).GetTeamTechs()->HasTech((TechTypes)(pUnitInfo.GetPrereqAndTech()))))
-	{
-		return false;
-	}
-
-	int iI;
-	for(iI = 0; iI < GC.getNUM_UNIT_AND_TECH_PREREQS(); iI++)
-	{
-		if(pUnitInfo.GetPrereqAndTechs(iI) != NO_TECH)
+	if(!bIsProjectUnit || !CanNoTechForWonderProject())
+    {
+		if(!(GET_TEAM(getTeam()).GetTeamTechs()->HasTech((TechTypes)(pUnitInfo.GetPrereqAndTech()))))
 		{
-			if(!(GET_TEAM(getTeam()).GetTeamTechs()->HasTech((TechTypes)(pUnitInfo.GetPrereqAndTechs(iI)))))
+			return false;
+		}
+
+		int iI;
+		for(iI = 0; iI < GC.getNUM_UNIT_AND_TECH_PREREQS(); iI++)
+		{
+			if(pUnitInfo.GetPrereqAndTechs(iI) != NO_TECH)
 			{
-				return false;
+				if(!(GET_TEAM(getTeam()).GetTeamTechs()->HasTech((TechTypes)(pUnitInfo.GetPrereqAndTechs(iI)))))
+				{
+					return false;
+				}
 			}
 		}
 	}
-
 	// Obsolete Tech
 	if((TechTypes)pUnitInfo.GetObsoleteTech() != NO_TECH)
 	{
@@ -8517,7 +8523,6 @@ bool CvPlayer::canTrain(UnitTypes eUnit, bool bContinue, bool bTestVisible, bool
 	}
 
 	// Spaceship part we already have?
-	ProjectTypes eProject = (ProjectTypes) pUnitInfo.GetSpaceshipProject();
 	if(eProject != NO_PROJECT)
 	{
 		if(GET_TEAM(getTeam()).isProjectMaxedOut(eProject))
@@ -8754,20 +8759,22 @@ bool CvPlayer::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestV
 			return false;
 		}
 	}
-
-	if(!(currentTeam.GetTeamTechs()->HasTech((TechTypes)(pBuildingInfo.GetPrereqAndTech()))))
+	bool bIsWorldWonderOrProject = (pkBuildingInfo->GetBuildingClassInfo().getMaxGlobalInstances() == 1);
+	if(!bIsWorldWonderOrProject || (!GET_PLAYER(GetID()).CanNoTechForWonderProject()))
 	{
-		return false;
-	}
 
-	for(auto iTech : pBuildingInfo.GetPrereqAndTechs())
-	{
-		if(!currentTeam.GetTeamTechs()->HasTech((TechTypes)iTech))
+		if(!(currentTeam.GetTeamTechs()->HasTech((TechTypes)(pBuildingInfo.GetPrereqAndTech()))))
 		{
 			return false;
 		}
-	}
-
+		for(auto iTech : pBuildingInfo.GetPrereqAndTechs())
+		{
+			if(!currentTeam.GetTeamTechs()->HasTech((TechTypes)iTech))
+			{
+				return false;
+			}
+		}
+   }
 	if(currentTeam.isObsoleteBuilding(eBuilding))
 	{
 		return false;
@@ -9027,9 +9034,15 @@ bool CvPlayer::canCreate(ProjectTypes eProject, bool bContinue, bool bTestVisibl
 	}
 
 	// Tech requirement
-	if(!(GET_TEAM(getTeam()).GetTeamTechs()->HasTech((TechTypes)(pProjectInfo.GetTechPrereq()))))
+	if(pProjectInfo.GetTechPrereq() != NO_TECH)  
 	{
-		return false;
+		if(!GET_PLAYER(GetID()).CanNoTechForWonderProject())  
+		{
+			if(!(GET_TEAM(getTeam()).GetTeamTechs()->HasTech((TechTypes)(pProjectInfo.GetTechPrereq()))))
+			{
+				return false;
+			}
+		}
 	}
 
 	// Policy branch requirement?
@@ -16377,6 +16390,27 @@ void CvPlayer::ChangeNoResistance(int iChange)
 
 
 
+//	--------------------------------------------------------------------------------
+bool CvPlayer::CanNoTechForWonderProject() const
+{
+	if (GetNoTechForWonderProject() > 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+//	--------------------------------------------------------------------------------
+int CvPlayer::GetNoTechForWonderProject() const
+{
+	return m_iNoTechForWonderProject;
+}
+//	--------------------------------------------------------------------------------
+void CvPlayer::ChangeNoTechForWonderProject(int iChange)
+{
+	m_iNoTechForWonderProject += iChange;
+}
 //	--------------------------------------------------------------------------------
 bool CvPlayer::CanUpgradeAllTerritory() const
 {
@@ -26950,6 +26984,10 @@ void CvPlayer::processPolicies(PolicyTypes ePolicy, int iChange)
 	{
 		ChangeNoResistance(pPolicy->IsNoResistance() * iChange);
 	}
+	if(pPolicy->IsNoTechForWonderProject())
+	{
+		ChangeNoTechForWonderProject(pPolicy->IsNoTechForWonderProject() * iChange);
+	}
 
 	if (pPolicy->IsAlwaysWeLoveKindDayInGoldenAge())
 	{
@@ -28157,6 +28195,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iGreatAdmiralsThresholdModifier;
 	kStream >> m_iAlwaysWeLoveKindDayInGoldenAge;
 	kStream >> m_iNoResistance;
+	kStream >> m_iNoTechForWonderProject;
 	kStream >> m_iUpgradeAllTerritory;
 	kStream >> m_iCityCaptureHealGlobal;
 	kStream >> m_iOriginalCapitalCaptureTech;
@@ -28970,6 +29009,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iGreatAdmiralsThresholdModifier;
 	kStream << m_iAlwaysWeLoveKindDayInGoldenAge;
 	kStream << m_iNoResistance;
+	kStream << m_iNoTechForWonderProject;
 	kStream << m_iUpgradeAllTerritory;
 	kStream << m_iCityCaptureHealGlobal;
 	kStream << m_iOriginalCapitalCaptureTech;
