@@ -127,6 +127,7 @@ public:
 	int GetExtraFoundedCityTerritoryClaimRange() const;
 	int GetFreeSocialPoliciesPerEra() const;
 	int GetFreeGreatPeoplePerEra() const;
+	int GetExtraUnitPlayerInstances() const;
 	int GetOwnedReligionUnitCultureExtraTurns() const;
 	int GetNumTradeRoutesModifier() const;
 	int GetTradeRouteResourceModifier() const;
@@ -220,9 +221,7 @@ public:
 	int GetYieldChangePerTradePartner(int i) const;
 	int GetYieldChangeIncomingTradeRoute(int i) const;
 	int GetYieldModifier(int i) const;
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	int GetGoldenAgeYieldModifier(int i) const;
-#endif
 	int GetStrategicResourceQuantityModifier(int i) const;
 	int GetObsoleteTech() const;
 	int GetPrereqTech() const;
@@ -252,6 +251,7 @@ public:
 	int GetYieldFromBarbarianKills(YieldTypes eYield) const;
 	int GetYieldChangeTradeRoute(int i) const;
 	int GetYieldChangeWorldWonder(int i) const;
+	int GetRiverPlotYieldChanges(int i) const;
 	int GetTradeRouteYieldChange(DomainTypes eIndex1, YieldTypes eIndex2) const;
 #endif
 	int GetSpecialistYieldChanges(SpecialistTypes eIndex1, YieldTypes eIndex2) const;
@@ -418,6 +418,7 @@ protected:
 	int m_iExtraFoundedCityTerritoryClaimRange;
 	int m_iFreeSocialPoliciesPerEra;
 	int m_iFreeGreatPeoplePerEra;
+	int m_iExtraUnitPlayerInstances;
 	int m_iOwnedReligionUnitCultureExtraTurns;
 	int m_iNumTradeRoutesModifier;
 	int m_iTradeRouteResourceModifier;
@@ -517,9 +518,7 @@ protected:
 	int* m_paiYieldChangePerTradePartner;
 	int* m_paiYieldChangeIncomingTradeRoute;
 	int* m_paiYieldModifier;
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	int* m_paiGoldenAgeYieldModifier;
-#endif
 	int* m_piStrategicResourceQuantityModifier;
 	int* m_piResourceQuantityModifiers;
 	int* m_piMovesChangeUnitCombats;
@@ -541,6 +540,7 @@ protected:
 	int* m_piYieldFromBarbarianKills;
 	int* m_piYieldChangeTradeRoute;
 	int* m_piYieldChangeWorldWonder;
+	int* m_piRiverPlotYieldChanges;
 	int** m_ppiTradeRouteYieldChange;
 #endif
 	int** m_ppiSpecialistYieldChanges;
@@ -935,6 +935,10 @@ public:
 	{
 		return m_iFreeGreatPeoplePerEra;
 	}
+	int GetExtraUnitPlayerInstances() const
+	{
+		return m_iExtraUnitPlayerInstances;
+	}
 	int GetOwnedReligionUnitCultureExtraTurns() const
 	{
 		return m_iOwnedReligionUnitCultureExtraTurns;
@@ -1229,12 +1233,10 @@ public:
 	{
 		return m_iYieldRateModifier[(int)eYield];
 	};
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	int GetGoldenAgeYieldRateModifier(YieldTypes eYield) const
 	{
 		return m_iGoldenAgeYieldRateModifier[(int)eYield];
 	};
-#endif
 	int GetStrategicResourceQuantityModifier(TerrainTypes eTerrain) const
 	{
 		return m_iStrategicResourceQuantityModifier[(int)eTerrain];
@@ -1279,6 +1281,10 @@ public:
 	int GetYieldChangeWorldWonder(YieldTypes eYield) const
 	{
 		return m_iYieldChangeWorldWonder[(int)eYield];
+	};
+	int GetRiverPlotYieldChanges(YieldTypes eYield) const
+	{
+		return m_iRiverPlotYieldChanges[(int)eYield];
 	};
 	int GetTradeRouteYieldChange(DomainTypes eDomain, YieldTypes eYield) const;
 #endif
@@ -1500,6 +1506,7 @@ private:
 	int m_iExtraFoundedCityTerritoryClaimRange;
 	int m_iFreeSocialPoliciesPerEra;
 	int m_iFreeGreatPeoplePerEra;
+	int m_iExtraUnitPlayerInstances;
 	int m_iOwnedReligionUnitCultureExtraTurns;
 	int m_iNumTradeRoutesModifier;
 	int m_iTradeRouteResourceModifier;
@@ -1597,9 +1604,7 @@ private:
 	int m_iYieldChangePerTradePartner[NUM_YIELD_TYPES];
 	int m_iYieldChangeIncomingTradeRoute[NUM_YIELD_TYPES];
 	int m_iYieldRateModifier[NUM_YIELD_TYPES];
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	int m_iGoldenAgeYieldRateModifier[NUM_YIELD_TYPES];
-#endif
 	int m_iStrategicResourceQuantityModifier[NUM_TERRAIN_TYPES];
 	std::vector<int> m_aiResourceQuantityModifier;
 	std::vector<bool> m_abNoTrain;
@@ -1636,6 +1641,7 @@ private:
 	int m_iYieldFromBarbarianKills[NUM_YIELD_TYPES];
 	int m_iYieldChangeTradeRoute[NUM_YIELD_TYPES];
 	int m_iYieldChangeWorldWonder[NUM_YIELD_TYPES];
+	int m_iRiverPlotYieldChanges[NUM_YIELD_TYPES];
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppiTradeRouteYieldChange;
 #endif
 	std::vector< Firaxis::Array<int, NUM_YIELD_TYPES > > m_ppaaiSpecialistYieldChange;

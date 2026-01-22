@@ -125,7 +125,7 @@
 		</Row>
 
 		<Row Tag="TXT_KEY_PRODMOD_WONDER_IMPROVEMENT">
-			<Text>[NEWLINE][ICON_BULLET]改良設施提供奇觀建造加成: {1_Num}%。</Text>
+			<Text>[NEWLINE][ICON_BULLET]改良設施提供奇觀建造加成: {1_Num}%</Text>
 		</Row>
 
 		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">

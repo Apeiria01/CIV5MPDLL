@@ -135,13 +135,7 @@ public:
 
 	bool isVisibleWorked() const;
 	bool isWithinTeamCityRadius(TeamTypes eTeam, PlayerTypes eIgnorePlayer = NO_PLAYER) const;
-#if defined(MOD_MORE_NATURAL_WONDER)
-	bool IsVolcano() const;
-	bool IsImmueVolcanoDamage() const;
-	int GetBreakTurns() const;
-	void ChangeBreakTurns(int iValue); //Set in plot::doturn
-	void SetBreakTurns(int iValue);
-#endif
+
 	bool isLake() const;
 	bool isFreshWater() const;
 
@@ -886,6 +880,14 @@ public:
 	int CvPlot::ComputeYieldFromAdjacentFeature(CvImprovementEntry& kImprovement, YieldTypes eYield) const;
 #endif
 
+#if defined(MOD_VOLCANO_BREAK)
+	bool IsVolcano() const;
+	void doVolcanoBreak();
+	bool IsImmueVolcanoDamage() const;
+	int GetBreakTurns() const;
+	void ChangeBreakTurns(int iValue); //Set in plot::doturn
+	void SetBreakTurns(int iValue);
+#endif
 #ifdef MOD_IMPROVEMENTS_UPGRADE
 	int GetXP() const;
 	int GetXPGrowth() const;
@@ -1003,8 +1005,6 @@ protected:
 	int m_iArea;
 	int m_iLandmass;
 
-	int m_iBreakTurns;
-
 	// This is a variable that you can use for whatever nefarious deeds you need to do
 	// it will not be saved or loaded - you should assume that it is filled with garbage
 	// when you get it
@@ -1069,8 +1069,11 @@ protected:
 
 	CvArchaeologyData m_kArchaeologyData;
 
+#if defined(MOD_VOLCANO_BREAK)
+	short m_iBreakTurns = 0;
+#endif
 #ifdef MOD_IMPROVEMENTS_UPGRADE
-	int m_iXP = 0;
+	short m_iXP = 0;
 #endif
 
 	void processArea(CvArea* pArea, int iChange);

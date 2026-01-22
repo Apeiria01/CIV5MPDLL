@@ -81,6 +81,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_iTrainPopulationConsume(0),
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy(0),
 	m_bNoAggressive(false),
+	m_bForbidRebase(false),
 	m_iFaithCostIncrease(false),
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
@@ -194,6 +195,12 @@ CvUnitEntry::~CvUnitEntry(void)
 	SAFE_DELETE_ARRAY(m_piProductionTraits);
 	SAFE_DELETE_ARRAY(m_piFlavorValue);
 	SAFE_DELETE_ARRAY(m_piUnitGroupRequired);
+	SAFE_DELETE_ARRAY(m_piProductionModifierBuildings);
+	SAFE_DELETE_ARRAY(m_piYieldFromKills);
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
+#endif
+	SAFE_DELETE_ARRAY(m_piInstantYieldFromTrainings);
 	SAFE_DELETE_ARRAY(m_pbFreePromotions);
 	SAFE_DELETE_ARRAY(m_paszEarlyArtDefineTags);
 	SAFE_DELETE_ARRAY(m_paszLateArtDefineTags);
@@ -349,6 +356,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_iTrainPopulationConsume = kResults.GetInt("TrainPopulationConsume");
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy = kResults.GetInt("NoSpreadTurnPopModifierAfterRemovingHeresy");
 	m_bNoAggressive = kResults.GetBool("NoAggressive");
+	m_bForbidRebase = kResults.GetBool("ForbidRebase");
 	
 	if(m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_WRITER", true /*bHideAssert*/)
 	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_ARTIST", true /*bHideAssert*/)
@@ -434,7 +442,6 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 
 	//Arrays
 	const char* szUnitType = GetType();
-	if(strcmp("UNIT_ASSYRIAN_SCUD_MISSILE", szUnitType) == 0 || strcmp("UNIT_EGYPT_UNIT777", szUnitType) == 0) throw 1;
 
 	kUtility.SetFlavors(m_piFlavorValue, "Unit_Flavors", "UnitType", szUnitType);
 
@@ -924,6 +931,11 @@ int CvUnitEntry::GetNoSpreadTurnPopModifierAfterRemovingHeresy() const
 bool CvUnitEntry::IsNoAggressive() const
 {
 	return m_bNoAggressive;
+}
+
+bool CvUnitEntry::IsForbidRebase() const
+{
+	return m_bForbidRebase;
 }
 
 bool CvUnitEntry::IsFaithCostIncrease() const

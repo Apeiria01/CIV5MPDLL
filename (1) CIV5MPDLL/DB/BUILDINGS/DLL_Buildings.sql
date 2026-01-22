@@ -320,6 +320,7 @@ alter table Buildings add MoveAfterCreated integer default 0;
 alter table Buildings add ExtraUnitPlayerInstances integer default 0;
 alter table Buildings add GoldenAgeUnitCombatModifier int not null default 0;
 alter table Buildings add UnitMaxExperienceLocal integer default 0;
+alter table Buildings add AllowSpaceshipLaunch boolean default 0;
 
 create table Building_DomainFreeExperiencesGlobal (
 	BuildingType text not null references Buildings(Type),

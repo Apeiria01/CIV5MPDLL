@@ -309,6 +309,7 @@ public:
 	int GetCityCountUnhappinessMod() const;
 	bool IsNoOccupiedUnhappiness() const;
 	bool IsNotNeedOccupied() const;
+	bool IsAllowSpaceshipLaunch() const;
 	int GetGlobalPopulationChange() const;
 	int GetTechShare() const;
 	int GetFreeTechs() const;
@@ -356,7 +357,7 @@ public:
 	bool IsWater() const;
 	bool IsRiver() const;
 	bool IsFreshWater() const;
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	bool IsImmueVolcanoDamage() const;
 #endif
 	bool IsAddsFreshWater() const;
@@ -566,10 +567,6 @@ public:
 
 	CvThemingBonusInfo *GetThemingBonusInfo(int i) const;
 	int GetNumThemingBonuses() const {return m_iNumThemingBonuses;};
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-	int GetNumAllowPurchaseUnitsByYieldType(YieldTypes iType);
-	std::pair<UnitClassTypes, int>* GetAllowPurchaseUnitsByYieldType(YieldTypes iType);
-#endif
 
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
 	int GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const;
@@ -787,6 +784,7 @@ private:
 	int m_iCityCountUnhappinessMod;
 	bool m_bNoOccupiedUnhappiness;
 	bool m_bNotNeedOccupied;
+	bool m_bAllowSpaceshipLaunch;
 	int m_iGlobalPopulationChange;
 	int m_iTechShare;
 	int m_iFreeTechs;
@@ -847,7 +845,7 @@ private:
 	bool m_bWater;
 	bool m_bRiver;
 	bool m_bFreshWater;
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	bool m_bImmueVolcanoDamage;
 #endif
 	bool m_bAddsFreshWater;
@@ -973,11 +971,6 @@ private:
 
 	int* m_paiHurryModifier;
 	int* m_paiHurryModifierLocal;
-
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-	int m_iNumAllowPurchaseUnits[NUM_YIELD_TYPES];
-	std::pair<UnitClassTypes, int>* m_piAllowPurchaseUnits[NUM_YIELD_TYPES];
-#endif 
 
 	std::vector<int> m_setBuildingClassesNeededInCity;
 	std::vector<int> m_setBuildingClassesNeededGlobal;

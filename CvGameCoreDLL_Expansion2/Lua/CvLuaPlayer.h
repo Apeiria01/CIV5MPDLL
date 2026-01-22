@@ -580,6 +580,8 @@ protected:
 	LUAAPIEXTN(GetCivBuildingWithDefault, int);
 	LUAAPIEXTN(GetCivUnitWithDefault, int);
 	LUAAPIEXTN(GetCivUnitNowTech, int);
+	LUAAPIEXTN(IsBuildingObsolete, int);
+	LUAAPIEXTN(IsUnitObsolete, int);
 #endif
 	static int lIsMinorCiv(lua_State* L);
 	static int lGetMinorCivType(lua_State* L);

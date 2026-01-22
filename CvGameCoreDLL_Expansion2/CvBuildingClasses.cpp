@@ -95,6 +95,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_iCityCountUnhappinessMod(0),
 	m_bNoOccupiedUnhappiness(false),
 	m_bNotNeedOccupied(false),
+	m_bAllowSpaceshipLaunch(false),
 	m_iGlobalPopulationChange(0),
 	m_iTechShare(0),
 	m_iFreeTechs(0),
@@ -145,7 +146,7 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_bWater(false),
 	m_bRiver(false),
 	m_bFreshWater(false),
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bImmueVolcanoDamage(false),
 #endif
 	m_bAddsFreshWater(false),
@@ -378,12 +379,6 @@ CvBuildingEntry::CvBuildingEntry(void):
 	m_bOriginalCapitalOnly(false)
 
 {
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-	for (int i = 0; i < NUM_YIELD_TYPES; i++) {
-		m_iNumAllowPurchaseUnits[i] = 0;
-		m_piAllowPurchaseUnits[i] = nullptr;
-	}
-#endif
 }
 
 /// Destructor
@@ -488,6 +483,7 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	m_ppiResourceYieldChangeGlobal.clear();
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChange);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChangeGlobal);
+	CvDatabaseUtility::SafeDelete2DArray(m_ppiFeatureYieldChangesGlobal);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiTerrainYieldChangesGlobal);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiImprovementYieldChangeGlobal);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppaiYieldPerXTerrain);
@@ -507,16 +503,6 @@ CvBuildingEntry::~CvBuildingEntry(void)
 	{
 		delete m_pFreeUnits;
 	}
-
-
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-	if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
-		for (int i = 0; i < NUM_YIELD_TYPES; i++) {
-			if(m_piAllowPurchaseUnits[i]) delete[] m_piAllowPurchaseUnits[i];
-		}
-	}
-#endif
-
 }
 
 /// Read from XML file
@@ -531,7 +517,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_bWater = kResults.GetBool("Water");
 	m_bRiver = kResults.GetBool("River");
 	m_bFreshWater = kResults.GetBool("FreshWater");
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bImmueVolcanoDamage = kResults.GetBool("ImmueVolcanoDamage"); 
 #endif
 
@@ -650,6 +636,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	m_iCityCountUnhappinessMod = kResults.GetInt("CityCountUnhappinessMod");
 	m_bNoOccupiedUnhappiness = kResults.GetBool("NoOccupiedUnhappiness");
 	m_bNotNeedOccupied = kResults.GetBool("NotNeedOccupied");
+	m_bAllowSpaceshipLaunch = kResults.GetBool("AllowSpaceshipLaunch");
 	m_iWorkerSpeedModifier = kResults.GetInt("WorkerSpeedModifier");
 	m_iMilitaryProductionModifier = kResults.GetInt("MilitaryProductionModifier");
 	m_iSpaceProductionModifier = kResults.GetInt("SpaceProductionModifier");
@@ -1443,60 +1430,6 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 		}
 		pResults->Reset();
 	}
-
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-	//Buildings enable city to purchase units.
-	{
-		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
-			for (int i = 0; i < NUM_YIELD_TYPES; i++) {
-				char namedText[512];
-				sprintf_s(namedText, "select count(*) from Building_EnableUnitPurchase inner join Yields on Yields.Type = YieldType where Yields.ID = %d and BuildingType = ?", i);
-				char cstrKey[512];
-				sprintf_s(cstrKey, "Building_EnableUnitPurchase_%d_Count", i);
-				std::string strKey(cstrKey);
-				auto pResultAllowUnitCount = kUtility.GetResults(strKey);
-				if (pResultAllowUnitCount == NULL)
-				{
-					pResultAllowUnitCount = kUtility.PrepareResults(strKey, namedText);
-				}
-
-				pResultAllowUnitCount->Bind(1, szBuildingType);
-
-				pResultAllowUnitCount->Step();
-				m_iNumAllowPurchaseUnits[i] = pResultAllowUnitCount->GetInt(0);
-
-				pResultAllowUnitCount->Reset();
-				m_piAllowPurchaseUnits[i] = new std::pair<UnitClassTypes, int>[m_iNumAllowPurchaseUnits[i]];
-			}
-		}
-	}
-
-	{
-		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
-			for (int i = 0; i < NUM_YIELD_TYPES; i++) {
-				char cstrKey[512];
-				sprintf_s(cstrKey, "Building_EnableUnitPurchase_%d", i);
-				std::string strKey(cstrKey);
-				char query[512];
-				sprintf_s(query, "select UnitClasses.ID as UnitClasseID, Building_EnableUnitPurchase.CostModifier as CostModifier from Building_EnableUnitPurchase\
-				inner join Yields on Yields.Type = YieldType inner join UnitClasses on UnitClasses.Type = UnitClassType where Yields.ID = %d and BuildingType = ?", i);
-				auto pResultAllowUnit = kUtility.GetResults(strKey);
-				if (pResultAllowUnit == NULL)
-				{
-					pResultAllowUnit = kUtility.PrepareResults(strKey, query);
-				}
-				pResultAllowUnit->Bind(1, szBuildingType);
-				int idx = 0;
-				while (pResultAllowUnit->Step()) {
-					const int UnitClasseID = pResultAllowUnit->GetInt(0);
-					const int CostModifier = pResultAllowUnit->GetInt(1);
-					m_piAllowPurchaseUnits[i][idx] = std::make_pair((UnitClassTypes)UnitClasseID, CostModifier);
-					idx++;
-				}
-			}
-		}
-	}
-#endif // MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
 
 	//TerrainYieldChanges
 	{
@@ -2710,6 +2643,13 @@ bool CvBuildingEntry::IsNotNeedOccupied() const
 	return m_bNotNeedOccupied;
 }
 
+/// AllowSpaceshipLaunch
+bool CvBuildingEntry::IsAllowSpaceshipLaunch() const
+{
+	return m_bAllowSpaceshipLaunch;
+}
+
+
 /// Population added to every City in the player's empire
 int CvBuildingEntry::GetGlobalPopulationChange() const
 {
@@ -3001,7 +2941,7 @@ bool CvBuildingEntry::IsFreshWater() const
 	return m_bFreshWater;
 }
 
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 /// Does this building add FreshWater?
 bool CvBuildingEntry::IsImmueVolcanoDamage() const
 {
@@ -4558,13 +4498,6 @@ CvThemingBonusInfo *CvBuildingEntry::GetThemingBonusInfo(int i) const
 	}
 }
 
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-int CvBuildingEntry::GetNumAllowPurchaseUnitsByYieldType(YieldTypes iType) {
-	CvAssertMsg(iType < NUM_YIELD_TYPES, "Index out of bounds");
-	CvAssertMsg(iType > -1, "Index out of bounds");
-	return m_iNumAllowPurchaseUnits[iType];
-}
-
 #ifdef MOD_BUILDINGS_YIELD_FROM_OTHER_YIELD
 int CvBuildingEntry::GetYieldFromOtherYield(const YieldTypes eInType, const YieldTypes eOutType, const YieldFromYield eConvertType) const
 {
@@ -4593,13 +4526,6 @@ CityScaleTypes CvBuildingEntry::GetEnableCityScaleGrowth() const
 bool CvBuildingEntry::GetEnableAllCityScaleGrowth() const
 {
 	return m_bEnableAllCityScaleGrowth;
-}
-#endif
-
-std::pair<UnitClassTypes, int>* CvBuildingEntry::GetAllowPurchaseUnitsByYieldType(YieldTypes iType) {
-	CvAssertMsg(iType < NUM_YIELD_TYPES, "Index out of bounds");
-	CvAssertMsg(iType > -1, "Index out of bounds");
-	return m_piAllowPurchaseUnits[iType];
 }
 #endif
 

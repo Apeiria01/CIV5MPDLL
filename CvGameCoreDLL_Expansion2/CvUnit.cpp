@@ -470,6 +470,7 @@ CvUnit::CvUnit() :
 	, m_iMilitaryMightMod(0)
 	, m_iExtraMoveTimesXX(0)
 	, m_iRangeAttackCostModifier(100)
+	, m_iSetUpCostModifier(100)
 	, m_iOriginalCapitalDamageFix(0)
 	, m_iOriginalCapitalSpecialDamageFix(0)
 	, m_iMultipleInitExperence(0)
@@ -1477,6 +1478,7 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_iMilitaryMightMod = 0;
 	m_iExtraMoveTimesXX = 0;
 	m_iRangeAttackCostModifier = 100;
+	m_iSetUpCostModifier = 100;
 	m_iOriginalCapitalDamageFix = 0;
 	m_iOriginalCapitalSpecialDamageFix = 0;
 	m_iMultipleInitExperence = 0;
@@ -2861,127 +2863,106 @@ void CvUnit::doTurn()
 #endif
 	}
 
-	    int damage = 0;
-		if (GetNearbyEnemyDamage() > 0)
-		{
+	int damage = 0;
+	if (GetNearbyEnemyDamage() > 0)
+	{
 		damage = damage + GetNearbyEnemyDamage();
-		}
-		if (IsFortifiedThisTurn() && GetDamageAoEFortified() > 0)
-		{
+	}
+	if (IsFortifiedThisTurn() && GetDamageAoEFortified() > 0)
+	{
 		damage = damage + GetDamageAoEFortified();
-		}
-		if (damage>0)
-		{
-		  DoAdjacentPlotDamage(plot(), damage);
-		}
+	}
+	if (damage > 0)
+	{
+		DoAdjacentPlotDamage(plot(), damage);
+	}
 
-
-		int iDX = 0, iDY = 0;
-		int iBlastRadius = 2;
-		int iTotalxp = 0;
-		int iTotalMove = 0;
-		for (iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
+	int iBlastRadius = 1;
+	int iTotalXP = 0;
+	int iTotalMove = 0;
+	for (int iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
+	{
+		for (int iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
 		{
-			for (iDY = -(iBlastRadius); iDY <= iBlastRadius; iDY++)
+			CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(), getY(), iDX, iDY, 1);
+			if (pLoopPlot == NULL) continue;
+			for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
 			{
-				CvPlot* pLoopPlot = plotXYWithRangeCheck(getX(),getY(), iDX, iDY,1);
+				CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
+				
+				if (loopUnit == NULL || loopUnit == this) continue;
+				if (!loopUnit->IsCombatUnit() || loopUnit->getDomainType() != getDomainType()) continue;
+				if (loopUnit->getOwner() != getOwner()) continue;
 
-				if (pLoopPlot != NULL)
-				{
-					for (int iUnitLoop = 0; iUnitLoop < pLoopPlot->getNumUnits(); iUnitLoop++)
-					{
-						CvUnit* loopUnit = pLoopPlot->getUnitByIndex(iUnitLoop);
-						if (loopUnit == NULL)
-							continue;
-						if (!loopUnit->IsCombatUnit())
-							continue;
-						if (loopUnit->getDomainType() != getDomainType())
-							continue;
-						if (loopUnit->getOwner() != getOwner())
-							continue;
-						if (loopUnit== this)
-							continue;
-
-						int ixp = loopUnit->GetAdjacentSapExperience();
-						int iMoveExtra = loopUnit->GetAdjacentFriendlySapMovement();
-
-						if (ixp > 0)
-						{
-						 iTotalxp += ixp;
-						}
-						if (iMoveExtra > 0)
-						{
-						iTotalMove += iMoveExtra;
-						}
-
-					}
-				}
+				iTotalXP += loopUnit->GetAdjacentSapExperience();
+				iTotalMove += loopUnit->GetAdjacentFriendlySapMovement();
 			}
 		}
-		CvPlot* pPlot = plot();
-		if((GetStayCSInfluencePerTurn() != 0 || GetStayCSExpPerTurn() != 0) && pPlot && GET_PLAYER(pPlot->getOwner()).isMinorCiv() && !GET_TEAM(pPlot->getTeam()).isAtWar(getTeam()))
+	}
+	CvPlot* pPlot = plot();
+	if((GetStayCSInfluencePerTurn() != 0 || GetStayCSExpPerTurn() != 0) && pPlot && GET_PLAYER(pPlot->getOwner()).isMinorCiv() && !GET_TEAM(pPlot->getTeam()).isAtWar(getTeam()))
+	{
+		PlayerTypes eMinor = pPlot->getOwner();
+		GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), GetStayCSInfluencePerTurn());
+		iTotalXP += GetStayCSExpPerTurn();
+	}
+	if(!IsCivilianUnit() && pPlot)
+	{
+		CvCity* pCity = pPlot->getPlotCity();
+		if (pCity)
 		{
-			PlayerTypes eMinor = pPlot->getOwner();
-			GET_PLAYER(eMinor).GetMinorCivAI()->ChangeFriendshipWithMajor(getOwner(), GetStayCSInfluencePerTurn());
-			iTotalxp += GetStayCSExpPerTurn();
+			iTotalXP += pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
 		}
-		if(!IsCivilianUnit() && pPlot)
-		{
-			CvCity* pCity = pPlot->getPlotCity();
-			if (pCity)
-			{
-				iTotalxp += pCity->GetDomainFreeExperiencesPerTurn(getDomainType());
-			}
-			iTotalxp += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
-			iTotalxp += GetFreeExpPerTurn();
-		}
-		if (iTotalxp > 0)
-		{
+		iTotalXP += GET_PLAYER(getOwner()).GetDomainFreeExperiencesPerTurnGlobal(getDomainType());
+		iTotalXP += GetFreeExpPerTurn();
+	}
+	if (iTotalXP > 0)
+	{
 #if defined(MOD_UNITS_XP_TIMES_100)
-			changeExperienceTimes100(iTotalxp * 100);
+		changeExperienceTimes100(iTotalXP * 100);
 #else
-			changeExperience(iTotalxp);
+		changeExperience(iTotalxp);
 #endif
-			testPromotionReady();
-		}
-		if (iTotalMove > 0)
+		testPromotionReady();
+	}
+	if (iTotalMove > 0)
+	{
+		changeMoves(iTotalMove);
+	}
+
+
+	int iTotalMovePenalty = 0;
+	for (int iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
+	{
+		CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
+
+		if (pAdjacentPlot != NULL)
 		{
-			changeMoves(iTotalMove);
-		}
-
-
-		int iTotalMovePenalty = 0;
-		for (int iI = 0; iI < NUM_DIRECTION_TYPES; ++iI)
-		{
-			CvPlot* pAdjacentPlot = plotDirection(getX(), getY(), ((DirectionTypes)iI));
-
-			if (pAdjacentPlot != NULL)
+			for (int iUnitLoop = 0; iUnitLoop < pAdjacentPlot->getNumUnits(); iUnitLoop++)
 			{
-				for (int iUnitLoop = 0; iUnitLoop < pAdjacentPlot->getNumUnits(); iUnitLoop++)
-				{
-					CvUnit* loopUnit = pAdjacentPlot->getUnitByIndex(iUnitLoop);
-					if (loopUnit == NULL)
-						continue;
-					if (!loopUnit->IsCombatUnit())
-						continue;
-					if (loopUnit->getDomainType() != getDomainType())
-						continue;
-					if (!loopUnit->isEnemy(getTeam(), plot()))
-						continue;
+				CvUnit* loopUnit = pAdjacentPlot->getUnitByIndex(iUnitLoop);
+				if (loopUnit == NULL)
+					continue;
+				if (!loopUnit->IsCombatUnit())
+					continue;
+				if (loopUnit->getDomainType() != getDomainType())
+					continue;
+				if (!loopUnit->isEnemy(getTeam(), plot()))
+					continue;
 
-					int iMovePenalty = loopUnit->GetAdjacentEnemySapMovement();
-					if (iMovePenalty <= 0)
-						continue;
+				int iMovePenalty = loopUnit->GetAdjacentEnemySapMovement();
+				if (iMovePenalty <= 0)
+					continue;
 
-					iTotalMovePenalty += iMovePenalty;
-				}
+				iTotalMovePenalty += iMovePenalty;
 			}
 		}
-		if (iTotalMovePenalty > 0)
-		{
-			iTotalMovePenalty = min(getMoves() - 1, iTotalMovePenalty);
-			changeMoves(-iTotalMovePenalty);
-		}
+	}
+	if (iTotalMovePenalty > 0)
+	{
+		iTotalMovePenalty = min(getMoves() - 1, iTotalMovePenalty);
+		changeMoves(-iTotalMovePenalty);
+	}
 #endif
 
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
@@ -5866,7 +5847,7 @@ void CvUnit::setSetUpForRangedAttack(bool bValue)
 
 		if(bValue)
 		{
-			changeMoves(-GC.getMOVE_DENOMINATOR());
+			changeMoves(-GC.getMOVE_DENOMINATOR() * GetSetUpCostModifier() / 100);
 		}
 	}
 }
@@ -7270,6 +7251,15 @@ void CvUnit::ChangeRangeAttackCostModifier(int iValue)
 const int CvUnit::GetRangeAttackCostModifier() const
 {
 	return m_iRangeAttackCostModifier;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::ChangeSetUpCostModifier(int iValue)
+{
+	m_iSetUpCostModifier += iValue;
+}
+const int CvUnit::GetSetUpCostModifier() const
+{
+	return m_iSetUpCostModifier;
 }
 //	--------------------------------------------------------------------------------
 void CvUnit::ChangeOriginalCapitalDamageFix(int iValue)
@@ -12047,7 +12037,7 @@ bool CvUnit::CanBuildSpaceship(const CvPlot* pPlot, bool bVisible) const
 			return false;
 
 		// Can only build SS part in our capital
-		if(!pCity->isCapital())
+		if (!pCity->IsAllowSpaceshipLaunch())
 			return false;
 	}
 
@@ -16757,8 +16747,21 @@ int CvUnit::GetAirCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bInc
 	// Unit is Defender
 	if(pCity == NULL)
 	{
+		// If this is a defenseless unit, do a fixed amount of damage
+		if(!pDefender->IsCanDefend())
+		{
+			//can assassinate any civilian with one missile hit
+			if (AI_getUnitAIType() == UNITAI_MISSILE_AIR)
+				return pDefender->GetCurrHitPoints();
+			else
+				return /*4*/ GC.getNONCOMBAT_UNIT_RANGED_DAMAGE();;
+		}
+		if (pDefender->isEmbarked())
+		{
+			iDefenderStrength = pDefender->GetEmbarkedUnitDefense();;
+		}
 		// Use Ranged combat value for defender, UNLESS it's a boat
-		if(pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, /*bForRangedAttack*/ false) > 0 && !pDefender->getDomainType() == DOMAIN_SEA  && !pDefender->isRangedSupportFire())
+		else if(!pDefender->isRangedSupportFire() && pDefender->getDomainType() != DOMAIN_SEA && pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, /*bForRangedAttack*/ false) > 0)
 		{
 			iDefenderStrength = pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, /*bForRangedAttack*/ false);
 		}
@@ -16865,13 +16868,17 @@ int CvUnit::GetRangeCombatDamage(const CvUnit* pDefender, CvCity* pCity, bool bI
 	{
 		// If this is a defenseless unit, do a fixed amount of damage
 		if(!pDefender->IsCanDefend())
-			return /*4*/ GC.getNONCOMBAT_UNIT_RANGED_DAMAGE();
-
+		{
+			//can assassinate any civilian with one missile hit
+			if (AI_getUnitAIType() == UNITAI_MISSILE_AIR)
+				return pDefender->GetCurrHitPoints();
+			else
+				return /*4*/ GC.getNONCOMBAT_UNIT_RANGED_DAMAGE();;
+		}
 		if (pDefender->isEmbarked())
 		{
 			iDefenderStrength = pDefender->GetEmbarkedUnitDefense();;
 		}
-
 		// Use Ranged combat value for defender, UNLESS it's a boat or an Impi (ranged support)
 		else if(!pDefender->isRangedSupportFire() && pDefender->getDomainType() != DOMAIN_SEA && pDefender->GetMaxRangedCombatStrength(this, /*pCity*/ NULL, false, false) > 0)
 		{
@@ -26269,6 +26276,7 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		ChangeMilitaryMightMod((thisPromotion.GetMilitaryMightMod()) * iChange);
 		ChangeExtraMoveTimesXX((thisPromotion.GetExtraMoveTimesXX()) * iChange);
 		ChangeRangeAttackCostModifier((thisPromotion.GetRangeAttackCostModifier()) * iChange);
+		ChangeSetUpCostModifier((thisPromotion.GetSetUpCostModifier()) * iChange);
 		ChangeOriginalCapitalDamageFix((thisPromotion.GetOriginalCapitalDamageFix()) * iChange);
 		ChangeOriginalCapitalSpecialDamageFix((thisPromotion.GetOriginalCapitalSpecialDamageFix()) * iChange);
 		ChangeMultipleInitExperence((thisPromotion.GetMultipleInitExperence()) * iChange);
@@ -26880,6 +26888,7 @@ void CvUnit::read(FDataStream& kStream)
 	kStream >> m_iMilitaryMightMod;
 	kStream >> m_iExtraMoveTimesXX;
 	kStream >> m_iRangeAttackCostModifier;
+	kStream >> m_iSetUpCostModifier;
 	kStream >> m_iOriginalCapitalDamageFix;
 	kStream >> m_iOriginalCapitalSpecialDamageFix;
 	kStream >> m_iMultipleInitExperence;
@@ -27290,6 +27299,7 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iMilitaryMightMod;
 	kStream << m_iExtraMoveTimesXX;
 	kStream << m_iRangeAttackCostModifier;
+	kStream << m_iSetUpCostModifier;
 	kStream << m_iOriginalCapitalDamageFix;
 	kStream << m_iOriginalCapitalSpecialDamageFix;
 	kStream << m_iMultipleInitExperence;
@@ -27596,7 +27606,7 @@ bool CvUnit::canRangeStrike() const
 int CvUnit::GetRangePlusMoveToshot() const
 {
 	VALIDATE_OBJECT
-	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? 1 : 0)));
+	return ((getDomainType() == DOMAIN_AIR) ? GetRange() : (GetRange() + baseMoves() - (isMustSetUpToRangedAttack() ? GetSetUpCostModifier() / 100 : 0)));
 }
 #endif
 
@@ -29384,7 +29394,7 @@ bool CvUnit::CanDoInterfaceMode(InterfaceModeTypes eInterfaceMode, bool bTestVis
 		break;
 
 	case INTERFACEMODE_REBASE:
-		if(getDomainType() == DOMAIN_AIR)
+		if(getDomainType() == DOMAIN_AIR && !getUnitInfo().IsForbidRebase()) 
 		{
 			return true;
 		}

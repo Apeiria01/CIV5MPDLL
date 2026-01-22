@@ -5099,12 +5099,14 @@ CvFeatureInfo::CvFeatureInfo() :
 	m_bVisibleAlways(false),
 	m_bNukeImmune(false),
 	m_bRough(false),
-	m_bNaturalWonder(false),
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bVolcano(false),
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
 	m_bPseudoNaturalWonder(false),
 	m_iPromotionIfOwned(NO_PROMOTION),
 #endif
+	m_bNaturalWonder(false),
 	m_iWorldSoundscapeScriptId(0),
 	m_iEffectProbability(0),
 	m_piYieldChange(NULL),
@@ -5286,6 +5288,22 @@ bool CvFeatureInfo::IsRough() const
 	return m_bRough;
 }
 //------------------------------------------------------------------------------
+#if defined(MOD_VOLCANO_BREAK)
+bool CvFeatureInfo::IsVolcano() const
+{
+	return m_bVolcano;
+}
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
+bool CvFeatureInfo::IsPseudoNaturalWonder() const
+{
+	return m_bPseudoNaturalWonder;
+}
+int CvFeatureInfo::getPromotionIfOwned() const
+{
+	return m_iPromotionIfOwned;
+}
+#endif
 bool CvFeatureInfo::IsNaturalWonder(bool orPseudoNatural) const
 {
 #if defined(MOD_MORE_NATURAL_WONDER)
@@ -5294,21 +5312,6 @@ bool CvFeatureInfo::IsNaturalWonder(bool orPseudoNatural) const
 	return m_bNaturalWonder;
 #endif
 }
-#if defined(MOD_MORE_NATURAL_WONDER)
-bool CvFeatureInfo::IsVolcano() const
-{
-	return m_bVolcano;
-}
-bool CvFeatureInfo::IsPseudoNaturalWonder() const
-{
-	return m_bPseudoNaturalWonder;
-}
-
-int CvFeatureInfo::getPromotionIfOwned() const
-{
-	return m_iPromotionIfOwned;
-}
-#endif
 //------------------------------------------------------------------------------
 const char* CvFeatureInfo::getArtDefineTag() const
 {
@@ -5463,14 +5466,16 @@ bool CvFeatureInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_bVisibleAlways = kResults.GetBool("VisibleAlways");
 	m_bNukeImmune = kResults.GetBool("NukeImmune");
 	m_bRough = kResults.GetBool("Rough");
-	m_bNaturalWonder = kResults.GetBool("NaturalWonder");
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_bVolcano = kResults.GetBool("Volcano");
+#endif
+#if defined(MOD_MORE_NATURAL_WONDER)
 	m_bPseudoNaturalWonder = kResults.GetBool("PseudoNaturalWonder");
 
 	szTextVal = kResults.GetText("FreePromotionIfOwned");
 	m_iPromotionIfOwned = GC.getInfoTypeForString(szTextVal, true);
 #endif
+	m_bNaturalWonder = kResults.GetBool("NaturalWonder");
 	m_strEffectType = kResults.GetText("EffectType");
 	m_strEffectTypeTag = kResults.GetText("EffectTypeTag");
 
@@ -6205,7 +6210,9 @@ CvWorldInfo::CvWorldInfo() :
 #if defined(MOD_TRADE_ROUTE_SCALING)
 	m_iTradeRouteDistanceMod(100),
 #endif
-	m_iEstimatedNumCities(0)
+	m_iEstimatedNumCities(0),
+	m_iExtraCityDistance(0),
+	m_viHandicapExtraAIStartingUnit()
 {
 }
 //------------------------------------------------------------------------------
@@ -6316,6 +6323,18 @@ int CvWorldInfo::GetEstimatedNumCities() const
 	return m_iEstimatedNumCities;
 }
 //------------------------------------------------------------------------------
+int CvWorldInfo::GetExtraCityDistance() const
+{
+	return m_iExtraCityDistance;
+}
+//------------------------------------------------------------------------------
+int CvWorldInfo::GetHandicapExtraAIStartingUnit(int i) const
+{
+	CvAssertMsg(i < GC.getNumHandicapInfos(), "Index out of bounds");
+	CvAssertMsg(i > -1, "Index out of bounds");
+	return m_viHandicapExtraAIStartingUnit[i];
+}
+//------------------------------------------------------------------------------
 CvWorldInfo CvWorldInfo::CreateCustomWorldSize(const CvWorldInfo& kTemplate, int iWidth, int iHeight)
 {
 	CvWorldInfo kWorldInfo(kTemplate);
@@ -6366,6 +6385,31 @@ bool CvWorldInfo::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	}
 #endif
 	m_iEstimatedNumCities			= kResults.GetInt("EstimatedNumCities");
+	m_iExtraCityDistance			= kResults.GetInt("ExtraCityDistance");
+	
+	//Arrays
+	{
+		m_viHandicapExtraAIStartingUnit.clear();
+		m_viHandicapExtraAIStartingUnit.resize(GC.getNumHandicapInfos(), 0);
+		std::string strKey = "World_HandicapExtraAIStartingUnit";
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		if (pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select HandicapInfos.ID, World_HandicapExtraAIStartingUnit.ExtraAIStartingUnit from World_HandicapExtraAIStartingUnit \
+			inner join Worlds on World_HandicapExtraAIStartingUnit.WorldType = Worlds.Type \
+			inner join HandicapInfos on World_HandicapExtraAIStartingUnit.HandicapType = HandicapInfos.Type \
+			where World_HandicapExtraAIStartingUnit.WorldType = ?");
+		}
+		pResults->Bind(1, GetType());
+
+		while (pResults->Step())
+		{
+			HandicapTypes eHandicap = static_cast<HandicapTypes>(pResults->GetInt(0));
+			int iExtraAIStartingUnit = pResults->GetInt(1);
+			m_viHandicapExtraAIStartingUnit[eHandicap] += iExtraAIStartingUnit;
+		}
+		pResults->Reset();
+	}
 
 	return true;
 }
@@ -6396,6 +6440,8 @@ bool CvWorldInfo::operator==(const CvWorldInfo& rhs) const
 	if(m_iTradeRouteDistanceMod != rhs.m_iTradeRouteDistanceMod) return false;
 #endif
 	if(m_iNumCitiesTechCostMod != rhs.m_iNumCitiesTechCostMod) return false;
+	if(m_iExtraCityDistance != rhs.m_iExtraCityDistance) return false;
+	if(m_viHandicapExtraAIStartingUnit != rhs.m_viHandicapExtraAIStartingUnit) return false;
 	return true;
 }
 
@@ -6442,6 +6488,8 @@ void CvWorldInfo::readFrom(FDataStream& loadFrom)
 #if defined(MOD_TRADE_ROUTE_SCALING)
 	MOD_SERIALIZE_READ(52, loadFrom, m_iTradeRouteDistanceMod, 100);
 #endif
+	loadFrom >> m_iExtraCityDistance;
+	loadFrom >> m_viHandicapExtraAIStartingUnit;
 }
 
 // A special reader for version 0 (pre-versioning)
@@ -6497,6 +6545,8 @@ void CvWorldInfo::writeTo(FDataStream& saveTo) const
 #if defined(MOD_TRADE_ROUTE_SCALING)
 	MOD_SERIALIZE_WRITE(saveTo, m_iTradeRouteDistanceMod);
 #endif
+	saveTo << m_iExtraCityDistance;
+	saveTo << m_viHandicapExtraAIStartingUnit;
 }
 
 FDataStream& operator<<(FDataStream& saveTo, const CvWorldInfo& readFrom)

@@ -293,6 +293,7 @@ CvPolicyEntry::~CvPolicyEntry(void)
 	SAFE_DELETE_ARRAY(m_piCapitalYieldModifier);
 	SAFE_DELETE_ARRAY(m_piGreatWorkYieldChange);
 	SAFE_DELETE_ARRAY(m_piSpecialistExtraYield);
+	SAFE_DELETE_ARRAY(m_piImprovementCultureChange);
 	SAFE_DELETE_ARRAY(m_pabFreePromotion);
 	SAFE_DELETE_ARRAY(m_paiUnitCombatProductionModifiers);
 	SAFE_DELETE_ARRAY(m_paiUnitCombatFreeExperiences);
@@ -334,10 +335,8 @@ CvPolicyEntry::~CvPolicyEntry(void)
 	SAFE_DELETE_ARRAY(m_piGreatPersonOutputModifierPerGWs);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldModifiers);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldChanges);
-	if(m_pFreeUnitClasses)
-	{
-		delete m_pFreeUnitClasses;
-	}
+	SAFE_DELETE_ARRAY(m_piFlavorValue);
+	SAFE_DELETE_ARRAY(m_pFreeUnitClasses);
 #if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
 	SAFE_DELETE_ARRAY(m_piBuildSpeedModifier);
 #endif	

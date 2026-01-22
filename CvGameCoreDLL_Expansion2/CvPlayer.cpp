@@ -756,15 +756,14 @@ void CvPlayer::init(PlayerTypes eID)
 		GetTreasury()->ChangeCityConnectionTradeRouteGoldChange(GetPlayerTraits()->GetCityConnectionTradeRouteChange());
 		changeWonderProductionModifier(GetPlayerTraits()->GetWonderProductionModifier());
 		ChangeRouteGoldMaintenanceMod(GetPlayerTraits()->GetImprovementMaintenanceModifier());
-
+		ChangeExtraUnitPlayerInstances(GetPlayerTraits()->GetExtraUnitPlayerInstances());
 		for(iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
 		{
 			ChangeCityYieldChangeTimes100((YieldTypes)iJ, 100 * GetPlayerTraits()->GetFreeCityYield((YieldTypes)iJ));
 
 			changeYieldRateModifier((YieldTypes)iJ, GetPlayerTraits()->GetYieldRateModifier((YieldTypes)iJ));
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+
 			changeGoldenAgeYieldRateModifier((YieldTypes)iJ, GetPlayerTraits()->GetGoldenAgeYieldRateModifier((YieldTypes)iJ));
-#endif
 		}
 
 		recomputeGreatPeopleModifiers();
@@ -1423,12 +1422,8 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 	m_vCityStateTradeRouteYieldModifierGlobal.clear();
 	m_vCityStateTradeRouteYieldModifierGlobal.resize(NUM_YIELD_TYPES, 0);
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	m_aiGoldenAgeYieldRateModifier.clear();
 	m_aiGoldenAgeYieldRateModifier.resize(NUM_YIELD_TYPES, 0);
-#endif
-
-
 
 	m_aiCapitalYieldRateModifier.clear();
 	m_aiCapitalYieldRateModifier.resize(NUM_YIELD_TYPES, 0);
@@ -1924,8 +1919,14 @@ void CvPlayer::initFreeUnits(CvGameInitialItemsOverrides& /*kOverrides*/)
 			{
 				iFreeCount = playerCivilization.getCivilizationFreeUnitsClass(iI);
 				iDefaultAI = playerCivilization.getCivilizationFreeUnitsDefaultUnitAI(iI);
-
-				iFreeCount *= (gameStartEra.getStartingUnitMultiplier() + ((!isHuman()) ? gameHandicap.getAIStartingUnitMultiplier() : 0));
+				
+				int iAIStartingUnitMultiplier = 0;
+				if (!isHuman())
+				{
+					iAIStartingUnitMultiplier += gameHandicap.getAIStartingUnitMultiplier();
+					iAIStartingUnitMultiplier += GC.getMap().getWorldInfo().GetHandicapExtraAIStartingUnit(gameHandicap.GetID());
+				}
+				iFreeCount *= gameStartEra.getStartingUnitMultiplier() + iAIStartingUnitMultiplier;
 
 				// City states only get 1 of something
 				if(isMinorCiv() && iFreeCount > 1)
@@ -8172,8 +8173,8 @@ bool CvPlayer::canFound(int iX, int iY, bool bTestVisible) const
 	}
 #endif
 
-#if defined(MOD_MORE_NATURAL_WONDER)
-	if (MOD_MORE_NATURAL_WONDER) {
+#if defined(MOD_VOLCANO_BREAK)
+	if (MOD_VOLCANO_BREAK) {
 		if (pPlot->IsVolcano())
 		{
 			return false;
@@ -10289,22 +10290,7 @@ void CvPlayer::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst
 		}
 	}
 
-	int iOldEspionageSpeedModifier = GetEspionageSpeedModifier();
 	ChangeEspionageSpeedModifier(pBuildingInfo->GetGlobalEspionageSpeedModifier() * iChange);
-	if (iOldEspionageSpeedModifier != GetEspionageSpeedModifier())
-	{
-		int iLoop;
-		for (uint ui = 0; ui < MAX_MAJOR_CIVS; ui++)
-		{
-			PlayerTypes ePlayer = (PlayerTypes)ui;
-			for (CvCity* pLoopCity = GET_PLAYER(ePlayer).firstCity(&iLoop); pLoopCity != NULL; pLoopCity = GET_PLAYER(ePlayer).nextCity(&iLoop))
-			{
-				GetEspionage()->UpdateCity(pLoopCity);
-			}
-		}
-	}
-
-
 
 	if (pBuildingInfo->GetMinorFriendshipAnchorChange() > 0)
 	{
@@ -14445,7 +14431,11 @@ int CvPlayer::GetEspionageSpeedModifier() const
 /// Change the global modifier on the espionage progress rate
 void CvPlayer::ChangeEspionageSpeedModifier(int iChange)
 {
-	m_iEspionageSpeedModifier = (m_iEspionageSpeedModifier + iChange);
+	if (iChange != 0)
+	{
+		m_iEspionageSpeedModifier += iChange;
+		GetEspionage()->UpdateSpies();
+	}
 }
 
 //	--------------------------------------------------------------------------------
@@ -21479,11 +21469,7 @@ void CvPlayer::changeCityLoveKingDayYieldMod(YieldTypes eIndex, int iChange)
 	}
 }
 
-
-
-
-
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
+//	--------------------------------------------------------------------------------
 int CvPlayer::getGoldenAgeYieldRateModifier(YieldTypes eIndex) const
 {
 	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
@@ -21507,8 +21493,6 @@ void CvPlayer::changeGoldenAgeYieldRateModifier(YieldTypes eIndex, int iChange)
 		}
 	}
 }
-#endif
-
 
 //	--------------------------------------------------------------------------------
 int CvPlayer::getCapitalYieldRateModifier(YieldTypes eIndex) const
@@ -28492,10 +28476,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_aiYieldRateModifier;
 	kStream >> m_aiCapitalYieldRateModifier;
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	kStream >> m_aiGoldenAgeYieldRateModifier;
-#endif
-
 
 	if (uiVersion >= 4)
 	{
@@ -29247,11 +29228,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_aiYieldRateModifier;
 	kStream << m_aiCapitalYieldRateModifier;
 
-
-
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	kStream << m_aiGoldenAgeYieldRateModifier;
-#endif
 
 	kStream << m_aiGreatWorkYieldChange;
 	kStream << m_aiExtraYieldThreshold;

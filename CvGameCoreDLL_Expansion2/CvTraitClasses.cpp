@@ -103,6 +103,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_iExtraFoundedCityTerritoryClaimRange(0),
 	m_iFreeSocialPoliciesPerEra(0),
 	m_iFreeGreatPeoplePerEra(0),
+	m_iExtraUnitPlayerInstances(0),
 	m_iOwnedReligionUnitCultureExtraTurns(0),
 	m_iNumTradeRoutesModifier(0),
 	m_iTradeRouteResourceModifier(0),
@@ -196,9 +197,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_paiYieldChangePerTradePartner(NULL),
 	m_paiYieldChangeIncomingTradeRoute(NULL),
 	m_paiYieldModifier(NULL),
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	m_paiGoldenAgeYieldModifier(NULL),
-#endif
 	m_piStrategicResourceQuantityModifier(NULL),
 	m_piResourceQuantityModifiers(NULL),
 	m_ppiImprovementYieldChanges(NULL),
@@ -218,6 +217,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_piYieldFromBarbarianKills(NULL),
 	m_piYieldChangeTradeRoute(NULL),
 	m_piYieldChangeWorldWonder(NULL),
+	m_piRiverPlotYieldChanges(NULL),
 	m_ppiTradeRouteYieldChange(NULL),
 #endif
 	m_ppiSpecialistYieldChanges(NULL),
@@ -242,9 +242,7 @@ CvTraitEntry::~CvTraitEntry()
 	SAFE_DELETE_ARRAY(m_paiYieldChangePerTradePartner);
 	SAFE_DELETE_ARRAY(m_paiYieldChangeIncomingTradeRoute);
 	SAFE_DELETE_ARRAY(m_paiYieldModifier);
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	SAFE_DELETE_ARRAY(m_paiGoldenAgeYieldModifier);
-#endif
 	SAFE_DELETE_ARRAY(m_piStrategicResourceQuantityModifier);
 	SAFE_DELETE_ARRAY(m_piResourceQuantityModifiers);
 	SAFE_DELETE_ARRAY(m_piMovesChangeUnitCombats);
@@ -258,6 +256,7 @@ CvTraitEntry::~CvTraitEntry()
 	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
 	SAFE_DELETE_ARRAY(m_piYieldChangeTradeRoute);
 	SAFE_DELETE_ARRAY(m_piYieldChangeWorldWonder);
+	SAFE_DELETE_ARRAY(m_piRiverPlotYieldChanges);
 #endif
 #if defined(MOD_API_UNIFIED_YIELDS)
 	SAFE_DELETE_ARRAY(m_piGoldenAgeGreatPersonRateModifier);
@@ -686,6 +685,12 @@ int CvTraitEntry::GetFreeGreatPeoplePerEra() const
 	return m_iFreeGreatPeoplePerEra;
 }
 
+/// Accessor: extra unit instances for player
+int CvTraitEntry::GetExtraUnitPlayerInstances() const
+{
+	return m_iExtraUnitPlayerInstances;
+}
+
 int CvTraitEntry::GetOwnedReligionUnitCultureExtraTurns() const
 {
 	return m_iOwnedReligionUnitCultureExtraTurns;
@@ -1096,12 +1101,10 @@ int CvTraitEntry::GetYieldModifier(int i) const
 	return m_paiYieldModifier ? m_paiYieldModifier[i] : -1;
 }
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 int CvTraitEntry::GetGoldenAgeYieldModifier(int i) const
 {
 	return m_paiGoldenAgeYieldModifier ? m_paiGoldenAgeYieldModifier[i] : -1;
 }
-#endif
 
 /// Accessor:: Additional quantity of strategic resources
 int CvTraitEntry::GetStrategicResourceQuantityModifier(int i) const
@@ -1222,6 +1225,11 @@ int CvTraitEntry::GetYieldChangeTradeRoute(int i) const
 int CvTraitEntry::GetYieldChangeWorldWonder(int i) const
 {
 	return m_piYieldChangeWorldWonder ? m_piYieldChangeWorldWonder[i] : 0;
+}
+
+int CvTraitEntry::GetRiverPlotYieldChanges(int i) const
+{
+	return m_piRiverPlotYieldChanges ? m_piRiverPlotYieldChanges[i] : 0;
 }
 
 int CvTraitEntry::GetTradeRouteYieldChange(DomainTypes eIndex1, YieldTypes eIndex2) const
@@ -1740,6 +1748,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_iExtraFoundedCityTerritoryClaimRange  = kResults.GetInt("ExtraFoundedCityTerritoryClaimRange");
 	m_iFreeSocialPoliciesPerEra				= kResults.GetInt("FreeSocialPoliciesPerEra");
 	m_iFreeGreatPeoplePerEra				= kResults.GetInt("FreeGreatPeoplePerEra");
+	m_iExtraUnitPlayerInstances				= kResults.GetInt("ExtraUnitPlayerInstances");
 	m_iOwnedReligionUnitCultureExtraTurns	= kResults.GetInt("OwnedReligionUnitCultureExtraTurns");
 	m_iNumTradeRoutesModifier				= kResults.GetInt("NumTradeRoutesModifier");
 	m_iTradeRouteResourceModifier			= kResults.GetInt("TradeRouteResourceModifier");
@@ -1922,9 +1931,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	kUtility.SetYields(m_paiYieldChangePerTradePartner, "Trait_YieldChangesPerTradePartner", "TraitType", szTraitType);
 	kUtility.SetYields(m_paiYieldChangeIncomingTradeRoute, "Trait_YieldChangesIncomingTradeRoute", "TraitType", szTraitType);
 	kUtility.SetYields(m_paiYieldModifier, "Trait_YieldModifiers", "TraitType", szTraitType);
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	kUtility.SetYields(m_paiGoldenAgeYieldModifier, "Trait_GoldenAgeYieldModifiers", "TraitType", szTraitType);
-#endif
 
 	const int iNumTerrains = GC.getNumTerrainInfos();
 
@@ -2237,6 +2244,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	kUtility.SetYields(m_piYieldFromBarbarianKills, "Trait_YieldFromBarbarianKills", "TraitType", szTraitType);
 	kUtility.SetYields(m_piYieldChangeTradeRoute, "Trait_YieldChangeTradeRoute", "TraitType", szTraitType);
 	kUtility.SetYields(m_piYieldChangeWorldWonder, "Trait_YieldChangeWorldWonder", "TraitType", szTraitType);
+	kUtility.SetYields(m_piRiverPlotYieldChanges, "Trait_RiverPlotYieldChanges", "TraitType", szTraitType);	
 
 	//TradeRouteYieldChange
 	{
@@ -2768,6 +2776,7 @@ void CvPlayerTraits::InitPlayerTraits()
 			m_iExtraFoundedCityTerritoryClaimRange += trait->GetExtraFoundedCityTerritoryClaimRange();
 			m_iFreeSocialPoliciesPerEra += trait->GetFreeSocialPoliciesPerEra();
 			m_iFreeGreatPeoplePerEra += trait->GetFreeGreatPeoplePerEra();
+			m_iExtraUnitPlayerInstances += trait->GetExtraUnitPlayerInstances();
 			m_iOwnedReligionUnitCultureExtraTurns += trait->GetOwnedReligionUnitCultureExtraTurns();
 			m_iNumTradeRoutesModifier += trait->GetNumTradeRoutesModifier();
 			m_iTradeRouteResourceModifier += trait->GetTradeRouteResourceModifier();
@@ -3021,9 +3030,7 @@ void CvPlayerTraits::InitPlayerTraits()
 				m_iYieldChangePerTradePartner[iYield] = trait->GetYieldChangePerTradePartner(iYield);
 				m_iYieldChangeIncomingTradeRoute[iYield] = trait->GetYieldChangeIncomingTradeRoute(iYield);
 				m_iYieldRateModifier[iYield] = trait->GetYieldModifier(iYield);
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 				m_iGoldenAgeYieldRateModifier[iYield] = trait->GetGoldenAgeYieldModifier(iYield);
-#endif
 
 				for(int iFeatureLoop = 0; iFeatureLoop < GC.getNumFeatureInfos(); iFeatureLoop++)
 				{
@@ -3139,6 +3146,7 @@ void CvPlayerTraits::InitPlayerTraits()
 				m_iYieldFromBarbarianKills[iYield] = trait->GetYieldFromBarbarianKills((YieldTypes) iYield);
 				m_iYieldChangeTradeRoute[iYield] = trait->GetYieldChangeTradeRoute(iYield);
 				m_iYieldChangeWorldWonder[iYield] = trait->GetYieldChangeWorldWonder(iYield);
+				m_iRiverPlotYieldChanges[iYield] = trait->GetRiverPlotYieldChanges(iYield);
 
 				for(int iDomainLoop = 0; iDomainLoop < NUM_DOMAIN_TYPES; iDomainLoop++)
 				{
@@ -3336,6 +3344,7 @@ void CvPlayerTraits::Reset()
 	m_iExtraFoundedCityTerritoryClaimRange = 0;
 	m_iFreeSocialPoliciesPerEra = 0;
 	m_iFreeGreatPeoplePerEra = 0;
+	m_iExtraUnitPlayerInstances = 0;
 	m_iOwnedReligionUnitCultureExtraTurns = 0;
 	m_iNumTradeRoutesModifier = 0;
 	m_iTradeRouteResourceModifier = 0;
@@ -3475,9 +3484,7 @@ void CvPlayerTraits::Reset()
 		m_iYieldChangePerTradePartner[iYield] = 0;
 		m_iYieldChangeIncomingTradeRoute[iYield] = 0;
 		m_iYieldRateModifier[iYield] = 0;
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 		m_iGoldenAgeYieldRateModifier[iYield] = 0;
-#endif
 
 		for(int iImprovement = 0; iImprovement < GC.getNumImprovementInfos(); iImprovement++)
 		{
@@ -3514,6 +3521,7 @@ void CvPlayerTraits::Reset()
 		m_iYieldFromBarbarianKills[iYield] = 0;
 		m_iYieldChangeTradeRoute[iYield] = 0;
 		m_iYieldChangeWorldWonder[iYield] = 0;
+		m_iRiverPlotYieldChanges[iYield] = 0;
 		for(int iDomain = 0; iDomain < NUM_DOMAIN_TYPES; iDomain++)
 		{
 			m_ppiTradeRouteYieldChange[iDomain] = yield;
@@ -4775,6 +4783,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	{
 		m_iFreeGreatPeoplePerEra = 0;
 	}
+	kStream >> m_iExtraUnitPlayerInstances;
 	MOD_SERIALIZE_READ(151, kStream, m_iOwnedReligionUnitCultureExtraTurns, 0);
 
 	if (uiVersion >= 6)
@@ -5000,10 +5009,8 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	ArrayWrapper<int> kYieldRateModifierWrapper(NUM_YIELD_TYPES, m_iYieldRateModifier);
 	kStream >> kYieldRateModifierWrapper;
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	ArrayWrapper<int> kGoldenAgeYieldRateModifierWrapper(NUM_YIELD_TYPES, m_iGoldenAgeYieldRateModifier);
 	kStream >> kGoldenAgeYieldRateModifierWrapper;
-#endif
 
 	ArrayWrapper<int> kYieldChangeNaturalWonderWrapper(NUM_YIELD_TYPES, m_iYieldChangeNaturalWonder);
 	kStream >> kYieldChangeNaturalWonderWrapper;
@@ -5107,6 +5114,9 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 
 	ArrayWrapper<int> kYieldChangeWorldWonderWrapper(NUM_YIELD_TYPES, m_iYieldChangeWorldWonder);
 	kStream >> kYieldChangeWorldWonderWrapper;
+
+	ArrayWrapper<int> kRiverPlotYieldChangesWrapper(NUM_YIELD_TYPES, m_iRiverPlotYieldChanges);
+	kStream >> kRiverPlotYieldChangesWrapper;
 
 	kStream >> m_ppiTradeRouteYieldChange;
 #endif
@@ -5266,6 +5276,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iExtraFoundedCityTerritoryClaimRange;
 	kStream << m_iFreeSocialPoliciesPerEra;
 	kStream << m_iFreeGreatPeoplePerEra;
+	kStream << m_iExtraUnitPlayerInstances;
 	MOD_SERIALIZE_WRITE(kStream, m_iOwnedReligionUnitCultureExtraTurns);
 	kStream << m_iNumTradeRoutesModifier;
 	kStream << m_iTradeRouteResourceModifier;
@@ -5368,9 +5379,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iFreeCityYield);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangeStrategicResources);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldRateModifier);
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iGoldenAgeYieldRateModifier);
-#endif
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangeNaturalWonder);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangePerTradePartner);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangeIncomingTradeRoute);
@@ -5421,6 +5430,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldFromBarbarianKills);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangeTradeRoute);
 	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iYieldChangeWorldWonder);
+	kStream << ArrayWrapper<int>(NUM_YIELD_TYPES, m_iRiverPlotYieldChanges);
 	kStream << m_ppiTradeRouteYieldChange;
 #endif
 	kStream << m_ppaaiSpecialistYieldChange;

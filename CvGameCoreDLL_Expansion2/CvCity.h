@@ -408,7 +408,7 @@ public:
 
 	bool isCoastal(int iMinWaterSize = -1) const;
 
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	int getImmueVolcanoDamage() const;
 	void changeImmueVolcanoDamage(int iChange);
 	bool isImmueVolcanoDamage() const;
@@ -424,6 +424,10 @@ public:
 	int getForbiddenForeignSpyCount() const;
 	void changeForbiddenForeignSpyCount(int iChange);
 	bool isForbiddenForeignSpy() const;
+
+	int GetAllowSpaceshipLaunchCount() const;
+	void ChangeAllowSpaceshipLaunchCount(int iChange);
+	bool IsAllowSpaceshipLaunch() const;
 
 	int foodConsumption(bool bNoAngry = false, int iExtra = 0) const;
 	int foodDifference(bool bBottom = true) const;
@@ -854,15 +858,16 @@ public:
 
 	int GetBaseYieldRateFromReligion(YieldTypes eIndex) const;
 	void ChangeBaseYieldRateFromReligion(YieldTypes eIndex, int iChange);
-	// END Base Yield
-
-	
 
 	int GetYieldPerPopTimes100(YieldTypes eIndex) const;
 	void ChangeYieldPerPopTimes100(YieldTypes eIndex, int iChange);
 
+	int GetYieldPerPopInEmpireTimes100(YieldTypes eIndex) const;
+	void ChangeYieldPerPopInEmpireTimes100(YieldTypes eIndex, int iChange);
+
 	int GetYieldPerReligionTimes100(YieldTypes eIndex) const;
 	void ChangeYieldPerReligionTimes100(YieldTypes eIndex, int iChange);
+	// END Base Yield
 
 	int GetYieldPerEra(YieldTypes eIndex) const;
 	void ChangeYieldPerEra(YieldTypes eIndex, int iChange);
@@ -879,13 +884,9 @@ public:
 	int GetResourceQuantityFromPOP(ResourceTypes eResource) const;
 	void ChangeResourceQuantityFromPOP(ResourceTypes eResource, int iChange);
 
-
-#if defined(MOD_ROG_CORE)
-	int GetYieldPerPopInEmpireTimes100(YieldTypes eIndex) const;
-	void ChangeYieldPerPopInEmpireTimes100(YieldTypes eIndex, int iChange);
-#endif
 	int GetYieldFromInternalTR(YieldTypes eIndex1) const;
 	void ChangeYieldFromInternalTR(YieldTypes eIndex, int iChange);
+
 	int GetYieldFromProcessModifier(YieldTypes eIndex1) const;
 	void ChangeYieldFromProcessModifier(YieldTypes eIndex, int iChange);
 
@@ -1552,12 +1553,13 @@ protected:
 #if defined(MOD_RELIGION_CONVERSION_MODIFIERS)
 	int m_iConversionModifier;
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	int m_iImmueVolcanoDamage;
 #endif
 	int m_iAddsFreshWater;
 	FAutoVariable<int, CvCity> m_iExtraAttackOnKill;
 	int m_iForbiddenForeignSpyCount;
+	int m_iAllowSpaceshipLaunchCount;
 #if defined(MOD_ROG_CORE)
 	int m_iExtraDamageHealPercent;
 	FAutoVariable<int, CvCity> m_iExtraDamageHeal;
@@ -1617,6 +1619,7 @@ protected:
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldRateModifier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldRateMultiplier;
 	FAutoVariable<std::vector<int>, CvCity> m_aiYieldPerPop;
+	FAutoVariable<std::vector<int>, CvCity> m_aiYieldPerPopInEmpire;
 
 	std::vector<int> m_aiNumProjects;
 
@@ -1636,7 +1639,6 @@ protected:
 
 	std::vector<int> m_aiYieldFromPillage;
 
-	std::map<int, int> m_aiYieldPerPopInEmpire;
 	std::vector<int> m_aiResourceQuantityFromPOP;
 	std::vector<int> m_aiSpecialistRateModifier;
 #endif

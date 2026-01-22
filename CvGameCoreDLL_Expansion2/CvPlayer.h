@@ -1335,10 +1335,8 @@ public:
 	int getYieldRateModifier(YieldTypes eIndex) const;
 	void changeYieldRateModifier(YieldTypes eIndex, int iChange);
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	int getGoldenAgeYieldRateModifier(YieldTypes eIndex) const;
 	void changeGoldenAgeYieldRateModifier(YieldTypes eIndex, int iChange);
-#endif
 
 	int getCapitalYieldRateModifier(YieldTypes eIndex) const;
 	void changeCapitalYieldRateModifier(YieldTypes eIndex, int iChange);
@@ -2696,9 +2694,7 @@ protected:
 	std::vector<int> m_aiSiphonLuxuryCount;
 	std::vector<int> m_aiGreatWorkYieldChange;
 
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
 	std::vector<int> m_aiGoldenAgeYieldRateModifier;
-#endif
 
 	int m_iMoveAfterCreated;
 

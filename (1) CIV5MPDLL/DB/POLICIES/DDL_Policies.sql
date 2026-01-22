@@ -1,118 +1,116 @@
-alter table Policies add column `MinorBullyInfluenceLossModifier` int not null default 0;
-
+--******************** New Yield Bonus ********************--
+alter table Policies add ScienceModifierFromRANum integer default 0;
+create table Policy_CityNumberCityYieldModifier (
+    PolicyType text references Policies(Type),
+    YieldType text references Yields(Type),
+    Yield integer default 0
+);
+create table Policy_CityWithWorldWonderYieldModifier (
+    PolicyType text references Policies(Type),
+    YieldType text references Yields(Type),
+    Yield integer default 0
+);
+create table Policy_YieldModifierPerArtifacts (
+    PolicyType text references Policies(Type),
+    YieldType text references Yields(Type),
+    Yield integer default 0
+);
+create table Policy_CityLoveKingDayYieldMod (
+    PolicyType text references Policies(Type),
+    YieldType text references Yields(Type),
+    Yield integer default 0
+);
+create table Policy_TradeRouteCityYieldModifier (
+    PolicyType text references Policies(Type),
+    YieldType text references Yields(Type),
+    Yield integer default 0
+);
 create table Policy_MinorsTradeRouteYieldRate (
-    PolicyType text default '',
-    YieldType text default '',
-    Rate integer not null
+    PolicyType text references Policies(Type),
+    YieldType text references Yields(Type),
+    Rate integer default 0
 );
-
 create table Policy_InternalTradeRouteDestYieldRate (
-    PolicyType text default '',
-    YieldType text default '',
-    Rate integer not null
+    PolicyType text references Policies(Type),
+    YieldType text references Yields(Type),
+    Rate integer default 0
 );
-
-alter table Policies add column IdeologyPressureModifier integer not null default 0;
-alter table Policies add column IdeologyUnhappinessModifier integer not null default 0;
-
-CREATE TABLE Policy_CityWithWorldWonderYieldModifier (
-	'PolicyType' text default '',
-	'YieldType' text default '',
-	'Yield' integer  not null ,
-	foreign key (PolicyType) references Policies(Type),
-	foreign key (YieldType) references Yields(Type)
-);
-
-CREATE TABLE Policy_TradeRouteCityYieldModifier (
-	'PolicyType' text default '',
-	'YieldType' text default '',
-	'Yield' integer not null ,
-	foreign key (PolicyType) references Policies(Type),
-	foreign key (YieldType) references Yields(Type)
-);
-
-alter table Policies add column GlobalHappinessFromFaithPercent integer not null default 0;
-
-alter table Policies add column HappinessInWLTKDCities integer not null default 0;
-
-CREATE TABLE Policy_CityNumberCityYieldModifier (
-	'PolicyType' text default '',
-	'YieldType' text default '',
-	'Yield' integer not null ,
-	foreign key (PolicyType) references Policies(Type),
-	foreign key (YieldType) references Yields(Type)
-);
-
 create table Policy_HappinessYieldModifier (
     PolicyType text references Policies(Type),
     YieldType text references Yields(Type),
     YieldFormula text references LuaFormula(Type)
 );
+--******************** New Instant Effect ********************--
+alter table Policies add FreePopulation integer default 0;
+alter table Policies add FreePopulationCapital integer default 0;
+alter table Policies add InstantFoodThresholdPercent integer not null default 0;
+alter table Policies add InstantFoodKeptPercent integer not null default 0;
+alter table Policies add FreeBuildingClass text default null references BuildingClasses(Type);
+alter table Policies add ExtraSpies integer default 0;
+--******************** New Effect ********************--
+alter table Policies add DefenseBoostAllCities integer default 0;
+alter table Policies add AlwaysWeLoveKindDayInGoldenAge boolean default 0;
 
-alter table Policies add column InstantFoodThresholdPercent integer not null default 0;
-alter table Policies add column InstantFoodKeptPercent integer not null default 0;
-alter table Policies add column CaptureCityResistanceTurnsChangeFormula text references LuaFormula(Type);
+alter table Policies add MinorLocalBullyScoreModifier integer default 0;
+alter table Policies add MinorAllyBullyScoreModifier integer default 0;
+alter table Policies add MinorBullyInfluenceLossModifier int default 0;
+alter table Policies add RiggingElectionInfluenceModifier integer default 0;
+alter table Policies add SpyLevelUpWhenRigging boolean default 0;
 
-CREATE TABLE Policy_BuildSpeedModifier (
-	PolicyType TEXT REFERENCES Policies(Type),
-	BuildType text REFERENCES Builds(Type),
-	Modifier integer not null
-);
-ALTER TABLE Policies ADD 'WaterBuildSpeedModifier' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'SettlerProductionEraModifier' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'SettlerProductionStartEra' TEXT DEFAULT NULL REFERENCES Eras(Type);
-ALTER TABLE Policies ADD 'NumTradeRouteBonus' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'HappinessPerReligionInCity' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'HappinessPerPolicy' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'DifferentIdeologyTourismModifier' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'ReligionProductionModifier' INTEGER DEFAULT 0;
+alter table Policies add IdeologyPressureModifier integer not null default 0;
+alter table Policies add IdeologyUnhappinessModifier integer not null default 0;
+alter table Policies add NullifyInfluenceModifier boolean default 0;
+alter table Policies add DifferentIdeologyTourismModifier integer default 0;
+alter table Policies add TourismModifierPerGPCreation boolean default 0;
+alter table Policies add DiplomatPropagandaModifier integer default 0;
 
-ALTER TABLE Policies ADD 'NullifyInfluenceModifier' BOOLEAN DEFAULT 0;
-ALTER TABLE Policies ADD 'SettlerPopConsume' BOOLEAN DEFAULT 0;
-ALTER TABLE Policies ADD 'TourismModifierPerGPCreation' BOOLEAN DEFAULT 0;
-ALTER TABLE Policies ADD 'ScienceModifierFromRANum' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'DiplomatPropagandaModifier' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'CityExtraProductionCount' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'NationalWonderCityCostModifier' INTEGER DEFAULT 0;
+alter table Policies add GlobalHappinessFromFaithPercent integer not null default 0;
+alter table Policies add HappinessInWLTKDCities integer not null default 0;
+alter table Policies add HappinessPerReligionInCity integer default 0;
+alter table Policies add HappinessPerPolicy integer default 0;
 
-ALTER TABLE Policies ADD 'DeepWaterNavalStrengthCultureModifier' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'FreeBuildingClass' text default null references BuildingClasses(Type);
+alter table Policies add NoResistance boolean default 0;
+alter table Policies add UpgradeAllTerritory boolean default 0;
+alter table Policies add CityCaptureHealGlobal integer default 0;
+alter table Policies add OriginalCapitalCaptureTech integer default 0;
+alter table Policies add OriginalCapitalCapturePolicy integer default 0;
+alter table Policies add OriginalCapitalCaptureGreatPerson integer default 0;
+alter table Policies add CaptureCityResistanceTurnsChangeFormula text references LuaFormula(Type);
+alter table Policies add NoOccupiedUnhappinessGarrisonedCity boolean default 0;
 
-ALTER TABLE Policies ADD 'MinorLocalBullyScoreModifier' INTEGER DEFAULT 0;
-ALTER TABLE Policies ADD 'MinorAllyBullyScoreModifier' INTEGER DEFAULT 0;
+alter table Policies add FreePromotionRemoved integer default -1;
+alter table Policies add RemoveCurrentPromotion boolean default 0;
+alter table Policies add RemoveOceanImpassableCombatUnit boolean default 0;
 
-alter table Policies add column FreePromotionRemoved integer default -1;
-alter table Policies add column RemoveCurrentPromotion boolean default 0;
-alter table Policies add column RemoveOceanImpassableCombatUnit boolean default 0;
-
-CREATE TABLE Policy_YieldModifierPerArtifacts (
-	'PolicyType' text default '',
-	'YieldType' text default '',
-	'Yield' integer  not null ,
-	foreign key (PolicyType) references Policies(Type),
-	foreign key (YieldType) references Yields(Type)
-);
-
-CREATE TABLE Policy_GreatPersonOutputModifierPerGWs (
-	'PolicyType' text default '',
-	'GreatPersonType' text default '',
-	'Modifier' integer  not null ,
-	foreign key (PolicyType) references Policies(Type),
-	foreign key (GreatPersonType) references GreatPersons(Type)
+alter table Policies add WaterBuildSpeedModifier integer default 0;
+create table Policy_BuildSpeedModifier (
+    PolicyType text references Policies(Type),
+    BuildType text references Builds(Type),
+    Modifier integer not null
 );
 
-alter table Policies add column CapitalTradeRouteGoldChange integer default 0;
-alter table Policies add column CapitalTradeRouteRangeChange integer default 0;
-alter table Policies add column RiggingElectionInfluenceModifier integer default 0;
-alter table Policies add column SpyLevelUpWhenRigging boolean default 0;
-alter table Policies add column NoOccupiedUnhappinessGarrisonedCity boolean default 0;
+alter table Policies add SettlerPopConsume boolean default 0;
+alter table Policies add SettlerProductionEraModifier integer default 0;
+alter table Policies add SettlerProductionStartEra text default null references Eras(Type);
 
+alter table Policies add NumTradeRouteBonus integer default 0;
+alter table Policies add CapitalTradeRouteGoldChange integer default 0;
+alter table Policies add CapitalTradeRouteRangeChange integer default 0;
+
+alter table Policies add ReligionProductionModifier integer default 0;
+alter table Policies add NationalWonderCityCostModifier integer default 0;
+alter table Policies add CityExtraProductionCount integer default 0;
+alter table Policies add DeepWaterNavalStrengthCultureModifier integer default 0;
+
+alter table Policies add GreatScientistBeakerPolicyModifier integer default 0;
+alter table Policies add ProductionBeakerMod integer default 0;
+create table Policy_GreatPersonOutputModifierPerGWs (
+    PolicyType text references Policies(Type),
+    GreatPersonType text references GreatPersons(Type),
+    Modifier integer default 0
+);
+--******************** New Condition ********************--
 create table PolicyBranch_CivilizationLocked (
-    PolicyBranchType TEXT REFERENCES PolicyBranchTypes(Type),
-    CivilizationType TEXT REFERENCES Civilizations(Type)
-);
-create table Policy_CityLoveKingDayYieldMod (
-	PolicyType text not null references Policies(Type),
-	YieldType integer not null references Yields(Type),
-	Yield integer not null default 0
+    PolicyBranchType text references PolicyBranchTypes(Type),
+    CivilizationType text references Civilizations(Type)
 );

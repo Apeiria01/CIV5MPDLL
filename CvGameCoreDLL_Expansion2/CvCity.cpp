@@ -229,6 +229,7 @@ CvCity::CvCity() :
 	, m_iAddsFreshWater(0)
 	, m_iExtraAttackOnKill("CvCity::m_iExtraAttackOnKill", m_syncArchive)
 	, m_iForbiddenForeignSpyCount(0)
+	, m_iAllowSpaceshipLaunchCount(0)
 #if defined(MOD_ROG_CORE)
 	, m_aiNumTimesAttackedThisTurn()
 	, m_aiYieldPerAlly()
@@ -242,7 +243,6 @@ CvCity::CvCity() :
 	, m_aiYieldFromBirth()
 	, m_aiYieldFromBorderGrowth()
 	, m_aiYieldFromPillage()
-	, m_aiYieldPerPopInEmpire()
 	, m_aiResourceQuantityFromPOP()
 #endif
 
@@ -350,6 +350,7 @@ CvCity::CvCity() :
 	, m_aiYieldRateModifier("CvCity::m_aiYieldRateModifier", m_syncArchive)
 	, m_aiYieldRateMultiplier("CvCity::m_aiYieldRateMultiplier", m_syncArchive)
 	, m_aiYieldPerPop("CvCity::m_aiYieldPerPop", m_syncArchive)
+	, m_aiYieldPerPopInEmpire("CvCity::m_aiYieldPerPopInEmpire", m_syncArchive)
 	, m_aiPowerYieldRateModifier("CvCity::m_aiPowerYieldRateModifier", m_syncArchive)
 	, m_aiFeatureYieldRateModifier("CvCity::m_aiFeatureYieldRateModifier", m_syncArchive)
 	, m_aiTerrainYieldRateModifier("CvCity::m_aiTerrainYieldRateModifier", m_syncArchive)
@@ -1039,10 +1040,6 @@ void CvCity::uninit()
 
 	m_orderQueue.clear();
 
-#if defined(MOD_ROG_CORE) 
-	m_aiYieldPerPopInEmpire.clear();
-#endif
-
 	m_yieldChanges.clear();
 #if defined(MOD_BUILDING_IMPROVEMENT_RESOURCES) 
 	m_ppiResourceFromImprovement.clear();
@@ -1086,12 +1083,13 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_iBaseTourism = 0;
 	m_iBaseTourismBeforeModifiers = 0;
 	m_aiNumProjects.resize(GC.getNumProjectInfos());
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	m_iImmueVolcanoDamage = 0;
 #endif
 	m_iAddsFreshWater = 0;
 	m_iExtraAttackOnKill = 0;
 	m_iForbiddenForeignSpyCount = 0;
+	m_iAllowSpaceshipLaunchCount = 0;
 #if defined(MOD_ROG_CORE)
 	m_aiNumTimesAttackedThisTurn.resize(REALLY_MAX_PLAYERS);
 	m_aiSpecialistRateModifier.resize(GC.getNumSpecialistInfos());
@@ -1225,6 +1223,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_aiBaseYieldRateFromMisc.resize(NUM_YIELD_TYPES);
 	m_aiBaseYieldRateFromReligion.resize(NUM_YIELD_TYPES);
 	m_aiYieldPerPop.resize(NUM_YIELD_TYPES);
+	m_aiYieldPerPopInEmpire.resize(NUM_YIELD_TYPES);
 
 	m_aiYieldFromInternalTR.resize(NUM_YIELD_TYPES);
 	m_aiYieldFromProcessModifier.resize(NUM_YIELD_TYPES);
@@ -1248,7 +1247,6 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 	m_aiYieldFromBirth.resize(NUM_YIELD_TYPES);
 	m_aiYieldFromBorderGrowth.resize(NUM_YIELD_TYPES);
 	m_aiYieldFromPillage.resize(NUM_YIELD_TYPES);
-	m_aiYieldPerPopInEmpire.clear();
 #endif
 
 	m_aiYieldPerReligion.resize(NUM_YIELD_TYPES);
@@ -1279,6 +1277,7 @@ void CvCity::reset(int iID, PlayerTypes eOwner, int iX, int iY, bool bConstructo
 		m_aiBaseYieldRateFromMisc.setAt(iI, 0);
 		m_aiBaseYieldRateFromReligion[iI] = 0;
 		m_aiYieldPerPop.setAt(iI, 0);
+		m_aiYieldPerPopInEmpire.setAt(iI, 0);
 		m_aiYieldPerReligion[iI] = 0;
 		m_aiYieldPerEra[iI] = 0;
 		m_aiYieldModifierPerEra[iI] = 0;
@@ -5891,36 +5890,19 @@ int CvCity::GetPurchaseCost(UnitTypes eUnit)
 	}
 
 	int iModifier = pkUnitInfo->GetHurryCostModifier();
+#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
+	if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS)
+	{
+		int iCollectionsModifer = GC.GetUnitPurchaseCollections()->GetUnitClassPurchaseCost(this, (UnitClassTypes)pkUnitInfo->GetUnitClassType(), YIELD_GOLD);
+		if(iCollectionsModifer > 0 && iModifier > 0) iModifier = std::min(iCollectionsModifer, iModifier);
+		else if(iCollectionsModifer > 0) iModifier = iCollectionsModifer;
+	}	
+#endif
 
 	bool bIsSpaceshipPart = pkUnitInfo->GetSpaceshipProject() != NO_PROJECT;
 
 	if (iModifier == -1 && (!bIsSpaceshipPart || !GET_PLAYER(getOwner()).IsEnablesSSPartPurchase()))
 	{
-#ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
-			CvTeam& owningTeam = GET_TEAM(getTeam());
-			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
-			int currentMinMod = MAXINT32;
-			for(auto eBuilding : vBuildingList){
-				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
-
-				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
-				if(!pBuildingEntry) continue;
-				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-				if (!pAllowPurchaseList) continue;
-
-				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_GOLD);
-				for (int i = 0; i < num; i++){
-					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
-					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
-						currentMinMod = pAllowPurchaseList[i].second;
-						iModifier = currentMinMod;
-					}
-				}
-			}
-		}
-		
-#endif
 		if(iModifier == -1) return -1;
 	}
 
@@ -6106,27 +6088,11 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 		// Cost goes up in later eras
 		iCost = pkUnitInfo->GetFaithCost();
 #ifdef MOD_API_BUILDING_ENABLE_PURCHASE_UNITS
-		if (iCost <= 0 && MOD_API_BUILDING_ENABLE_PURCHASE_UNITS) {
-			CvTeam& owningTeam = GET_TEAM(getTeam());
-			const auto& vBuildingList = GC.GetEnableUnitPurchaseBuildings();
-			int currentMinMod = MAXINT32;
-			for(auto eBuilding : vBuildingList){
-				if(!HasBuilding(eBuilding) || owningTeam.isObsoleteBuilding(eBuilding)) continue;
-
-				CvBuildingEntry* pBuildingEntry = GC.getBuildingInfo(eBuilding);
-				if(!pBuildingEntry) continue;
-				const auto pAllowPurchaseList = pBuildingEntry->GetAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-				if (!pAllowPurchaseList) continue;
-
-				int num = pBuildingEntry->GetNumAllowPurchaseUnitsByYieldType(YIELD_FAITH);
-				for (int i = 0; i < num; i++){
-					if (pkUnitInfo->GetUnitClassType() != pAllowPurchaseList[i].first) continue;
-					if (pAllowPurchaseList[i].second > 0 && pAllowPurchaseList[i].second < currentMinMod){
-						currentMinMod = pAllowPurchaseList[i].second;
-						iCost = currentMinMod;
-					}
-				}
-			}
+		if (MOD_API_BUILDING_ENABLE_PURCHASE_UNITS)
+		{
+			int iCollectionsMod = GC.GetUnitPurchaseCollections()->GetUnitClassPurchaseCost(this, (UnitClassTypes)pkUnitInfo->GetUnitClassType(), YIELD_FAITH);
+			if(iCollectionsMod > 0 && iCost > 0) iCost = std::min(iCollectionsMod, iCost);
+			else if(iCollectionsMod > 0) iCost = iCollectionsMod;
 		}
 #endif
 		CvPlayerAI& kOwner = GET_PLAYER(getOwner());
@@ -6722,11 +6688,9 @@ int CvCity::getProductionModifier(BuildingTypes eBuilding, CvString* toolTipSink
 		int iBaseYield = getBaseYieldRate(YIELD_PRODUCTION, false) * 100;
 		iBaseYield += (GetYieldPerPopTimes100(YIELD_PRODUCTION) * getPopulation());
 		iBaseYield += (GET_PLAYER(getOwner()).GetYieldPerPopChange(YIELD_PRODUCTION) * getPopulation());
+		iBaseYield += (GetYieldPerPopInEmpireTimes100(YIELD_PRODUCTION) * GET_PLAYER(getOwner()).getTotalPopulation());
 		iBaseYield += (GetYieldPerReligionTimes100(YIELD_PRODUCTION) * GetCityReligions()->GetNumReligionsWithFollowers());
 
-#if defined(MOD_ROG_CORE)
-		iBaseYield += (GetYieldPerPopInEmpireTimes100(YIELD_PRODUCTION) * GET_PLAYER(getOwner()).getTotalPopulation());
-#endif
 		iBaseYield /= 100;
 		iTempMod = getProductionNeeded(eBuilding) * 100 / iBaseYield;
 		// Make sure it is not affected by multiplications
@@ -6841,9 +6805,8 @@ int CvCity::getProductionDifference(int /*iProductionNeeded*/, int /*iProduction
 	int iBaseProduction = getBaseYieldRate(YIELD_PRODUCTION, false) * 100;
 	iBaseProduction += (GetYieldPerPopTimes100(YIELD_PRODUCTION) * getPopulation());
 	iBaseProduction += (GET_PLAYER(getOwner()).GetYieldPerPopChange(YIELD_PRODUCTION) * getPopulation());
-#if defined(MOD_ROG_CORE)
 	iBaseProduction += (GetYieldPerPopInEmpireTimes100(YIELD_PRODUCTION) * GET_PLAYER(getOwner()).getTotalPopulation());
-#endif
+	iBaseProduction += (GetYieldPerReligionTimes100(YIELD_PRODUCTION) * GetCityReligions()->GetNumReligionsWithFollowers());
 
 	int iModifiedProduction = iBaseProduction * getBaseYieldRateModifier(YIELD_PRODUCTION, iProductionModifier);
 	iModifiedProduction /= 10000;
@@ -6896,9 +6859,8 @@ int CvCity::getProductionDifferenceTimes100(int /*iProductionNeeded*/, int /*iPr
 	int iBaseProduction = getBaseYieldRate(YIELD_PRODUCTION, false) * 100;
 	iBaseProduction += (GetYieldPerPopTimes100(YIELD_PRODUCTION) * getPopulation());
 	iBaseProduction += (GET_PLAYER(getOwner()).GetYieldPerPopChange(YIELD_PRODUCTION) * getPopulation());
-#if defined(MOD_ROG_CORE)
 	iBaseProduction += (GetYieldPerPopInEmpireTimes100(YIELD_PRODUCTION) * GET_PLAYER(getOwner()).getTotalPopulation()) / 100;
-#endif
+	iBaseProduction += (GetYieldPerReligionTimes100(YIELD_PRODUCTION) * GetCityReligions()->GetNumReligionsWithFollowers());
 
 	int iModifiedProduction = iBaseProduction * getBaseYieldRateModifier(YIELD_PRODUCTION, iProductionModifier);
 	iModifiedProduction /= 100;
@@ -7424,7 +7386,7 @@ void CvCity::processFeature(FeatureTypes eFeature, int iChange)
 	{
 		const YieldTypes eYield = static_cast<YieldTypes>(iI);
 		changeFeatureYieldRateModifier(eYield, (getYieldModifierFromFeature(eFeature, eYield) * iChange));
-		UpdateCityYields(eYield);
+		// will update yields at the end of CvCityCitizens::SetWorkingPlot
 	}
 }
 
@@ -7432,13 +7394,12 @@ void CvCity::processTerrain(TerrainTypes eTerrain, int iChange)
 {
 	VALIDATE_OBJECT
 
-		// Yield modifier for having a local Improvement
-		for (int iI = 0; iI < NUM_YIELD_TYPES; iI++)
-		{
-			const YieldTypes eYield = static_cast<YieldTypes>(iI);
-			changeTerrainYieldRateModifier(eYield, (getYieldModifierFromTerrain(eTerrain, eYield) * iChange));
-			UpdateCityYields(eYield);
-		}
+	// Yield modifier for having a local Improvement
+	for (int iI = 0; iI < NUM_YIELD_TYPES; iI++)
+	{
+		const YieldTypes eYield = static_cast<YieldTypes>(iI);
+		changeTerrainYieldRateModifier(eYield, (getYieldModifierFromTerrain(eTerrain, eYield) * iChange));
+	}
 }
 
 
@@ -7452,7 +7413,6 @@ void CvCity::processImprovement(ImprovementTypes eImprovement, int iChange)
 	{
 		const YieldTypes eYield = static_cast<YieldTypes>(iI);
 		changeImprovementYieldRateModifier(eYield, (getYieldModifierFromImprovement(eImprovement, eYield) * iChange));
-		UpdateCityYields(eYield);
 	}
 }
 
@@ -7782,13 +7742,14 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 		changeLandTileMovementReduce(pBuildingInfo->GetLandTileMovementReduce()* iChange);
 		changeLandTileTurnDamage(pBuildingInfo->GetLandTileTurnDamage()* iChange);
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 		changeImmueVolcanoDamage(pBuildingInfo->IsImmueVolcanoDamage()* iChange);  
 #endif
 		changeAddsFreshWater(pBuildingInfo->IsAddsFreshWater()* iChange);
 		changeExtraAttackOnKill((pBuildingInfo->IsExtraAttackOnKill()) ? iChange : 0);
 		changeForbiddenForeignSpyCount(pBuildingInfo->IsForbiddenForeignSpy()* iChange);
 		changeExtraAttacks(pBuildingInfo->GetExtraAttacks()* iChange);
+		ChangeAllowSpaceshipLaunchCount((pBuildingInfo->IsAllowSpaceshipLaunch()) ? iChange : 0);
 
 #if !defined(MOD_API_EXTENSIONS)
 		// Trust the modder if they set a building to negative happiness
@@ -7902,7 +7863,7 @@ void CvCity::processBuilding(BuildingTypes eBuilding, int iChange, bool bFirst, 
 #endif
 
 #if defined(MOD_NUCLEAR_WINTER_FOR_SP)
-		ChangeNumNoNuclearWinterLocal(pBuildingInfo->IsNoNuclearWinterLocal() && pBuildingInfo->GetID() == GC.getInfoTypeForString("BUILDING_MEGACITY_PYRAMID") ? iChange : 0);
+		ChangeNumNoNuclearWinterLocal(pBuildingInfo->IsNoNuclearWinterLocal() ? iChange : 0);
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
         ChangeNumEnableCrops(pBuildingInfo->IsEnableCrops() ? iChange : 0);
@@ -8486,7 +8447,6 @@ void CvCity::processSpecialist(SpecialistTypes eSpecialist, int iChange)
 		//int globalModifier = GET_PLAYER(getOwner()).GetYieldModifierFromSpecialistGlobal(eSpecialist, ((YieldTypes)iI));
 		int LocalModifier = getYieldModifierFromSpecialist(eSpecialist, ((YieldTypes)iI));
 		changeSpecialistYieldRateModifier(((YieldTypes)iI), (LocalModifier)*iChange);
-		UpdateCityYields(((YieldTypes)iI));
 	}
 
 	updateExtraSpecialistYield();
@@ -8890,19 +8850,16 @@ bool CvCity::isCoastal(int iMinWaterSize) const
 }
 
 
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 //	--------------------------------------------------------------------------------
 int CvCity::getImmueVolcanoDamage() const
 {
 	return m_iImmueVolcanoDamage;
 }
-//	--------------------------------------------------------------------------------
 bool CvCity::isImmueVolcanoDamage() const
 {
 	return (getImmueVolcanoDamage() > 0);
 }
-
-//	--------------------------------------------------------------------------------
 void CvCity::changeImmueVolcanoDamage(int iChange)
 {
 	if (iChange != 0)
@@ -9001,6 +8958,27 @@ void CvCity::changeForbiddenForeignSpyCount(int iChange)
 	{
 		m_iForbiddenForeignSpyCount = (m_iForbiddenForeignSpyCount + iChange);
 		CvAssert(getForbiddenForeignSpyCount() >= 0);
+	}
+}
+
+//	--------------------------------------------------------------------------------
+int CvCity::GetAllowSpaceshipLaunchCount() const
+{
+	return m_iAllowSpaceshipLaunchCount;
+}
+
+//	--------------------------------------------------------------------------------
+bool CvCity::IsAllowSpaceshipLaunch() const
+{
+	return (GetAllowSpaceshipLaunchCount() > 0 || isCapital());
+}
+
+//	--------------------------------------------------------------------------------
+void CvCity::ChangeAllowSpaceshipLaunchCount(int iChange)
+{
+	if (iChange != 0)
+	{
+		m_iAllowSpaceshipLaunchCount = (m_iAllowSpaceshipLaunchCount + iChange);
 	}
 }
 
@@ -10337,16 +10315,16 @@ int CvCity::GetBaseJONSCulturePerTurn() const
 	// GetBaseYieldRateFromSpecialists(YIELD_CULTURE) gets everything else!
 	iCulturePerTurn += GetBaseYieldRateFromSpecialists(YIELD_CULTURE);
 	iCulturePerTurn += GetBaseYieldRateFromProjects(YIELD_CULTURE);
+#endif
 	iCulturePerTurn += (GetYieldPerPopTimes100(YIELD_CULTURE) * getPopulation()) / 100;
 	iCulturePerTurn += GET_PLAYER(getOwner()).GetYieldPerPopChange(YIELD_CULTURE) * getPopulation() / 100;
-#endif
+	iCulturePerTurn += (GetYieldPerPopInEmpireTimes100(YIELD_CULTURE) * GET_PLAYER(getOwner()).getTotalPopulation()) / 100;
 	iCulturePerTurn += (GetYieldPerReligionTimes100(YIELD_CULTURE) * GetCityReligions()->GetNumReligionsWithFollowers()) /100;
 	iCulturePerTurn += (GetYieldPerEra(YIELD_CULTURE) * (GET_PLAYER(getOwner()).GetCurrentEra() + 1));
 #if defined(MOD_ROG_CORE)
 	iCulturePerTurn += GetBaseYieldRateFromCSAlliance(YIELD_CULTURE);
 	iCulturePerTurn += GetBaseYieldRateFromCSFriendship(YIELD_CULTURE);
 	iCulturePerTurn += GetBaseYieldRateFromEspionageSpy(YIELD_CULTURE);
-	iCulturePerTurn += (GetYieldPerPopInEmpireTimes100(YIELD_CULTURE) * GET_PLAYER(getOwner()).getTotalPopulation()) / 100;
 #endif
 
 #if defined(MOD_API_UNIFIED_YIELDS)
@@ -10526,16 +10504,16 @@ int CvCity::GetFaithPerTurn(bool bStatic) const
 	iFaith += GetBaseYieldRateFromProjects(YIELD_FAITH);
 #if defined(MOD_API_UNIFIED_YIELDS)
 	iFaith += GetBaseYieldRateFromSpecialists(YIELD_FAITH);
+#endif
 	iFaith += (GetYieldPerPopTimes100(YIELD_FAITH) * getPopulation()) / 100;
 	iFaith += GET_PLAYER(getOwner()).GetYieldPerPopChange(YIELD_FAITH)* getPopulation() / 100;
-#endif
+	iFaith += (GetYieldPerPopInEmpireTimes100(YIELD_FAITH) * GET_PLAYER(getOwner()).getTotalPopulation()) / 100;
 	iFaith += (GetYieldPerReligionTimes100(YIELD_FAITH) * GetCityReligions()->GetNumReligionsWithFollowers()) /100;
 	iFaith += (GetYieldPerEra(YIELD_FAITH) * (GET_PLAYER(getOwner()).GetCurrentEra() + 1));
 #if defined(MOD_ROG_CORE)
 	iFaith += GetBaseYieldRateFromCSAlliance(YIELD_FAITH);
 	iFaith += GetBaseYieldRateFromCSFriendship(YIELD_FAITH);
 	iFaith += GetBaseYieldRateFromEspionageSpy(YIELD_FAITH);
-	iFaith += (GetYieldPerPopInEmpireTimes100(YIELD_FAITH) * GET_PLAYER(getOwner()).getTotalPopulation()) / 100;
 #endif
 
 	//Update Yields from yields ... need to sidestep constness
@@ -12787,7 +12765,7 @@ int CvCity::getRiverPlotYield(YieldTypes eIndex) const
 	VALIDATE_OBJECT
 	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
 	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
-	return m_aiRiverPlotYield[eIndex] + GET_PLAYER(getOwner()).getRiverPlotYield(eIndex);
+	return m_aiRiverPlotYield[eIndex] + GET_PLAYER(getOwner()).getRiverPlotYield(eIndex) + GET_PLAYER(getOwner()).GetPlayerTraits()->GetRiverPlotYieldChanges(eIndex);
 }
 
 //	--------------------------------------------------------------------------------
@@ -13081,12 +13059,8 @@ int CvCity::getBaseYieldRateModifier(YieldTypes eIndex, int iExtra, CvString* to
 		if (pYield)
 		{
 			iTempMod = pYield->getGoldenAgeYieldMod();
-#ifdef MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER
-			if (MOD_TRAITS_GOLDEN_AGE_YIELD_MODIFIER)
-			{
-				iTempMod += owner.getGoldenAgeYieldRateModifier(eIndex);
-			}
-#endif
+			iTempMod += owner.getGoldenAgeYieldRateModifier(eIndex);
+
 			iModifier += iTempMod;
 			if (iTempMod != 0 && toolTipSink)
 				GC.getGame().BuildProdModHelpText(toolTipSink, "TXT_KEY_PRODMOD_YIELD_GOLDEN_AGE", iTempMod);
@@ -13482,11 +13456,8 @@ int CvCity::getBasicYieldRateTimes100(const YieldTypes eIndex, const bool bIgnor
 	int iBaseYield = getBaseYieldRate(eIndex, bIgnoreFromOtherYield) * 100;
 	iBaseYield += (GetYieldPerPopTimes100(eIndex) * getPopulation());
 	iBaseYield += (GET_PLAYER(getOwner()).GetYieldPerPopChange(eIndex) * getPopulation());
-	iBaseYield += (GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers());
-
-#if defined(MOD_ROG_CORE)
 	iBaseYield += (GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(m_eOwner).getTotalPopulation());
-#endif
+	iBaseYield += (GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers());
 
 	int iNonSpecialist = GET_PLAYER(getOwner()).getYieldFromNonSpecialistCitizens(eIndex);
 	if (iNonSpecialist != 0)
@@ -14074,6 +14045,14 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_POPULATION", iBaseYieldTimes100, YieldIcon);
 	}
 
+	iBaseValue = (GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(m_eOwner).getTotalPopulation());
+	if(iBaseValue != 0)
+	{
+		iBaseYieldTimes100 = iBaseValue;
+		iBaseYieldTimes100 /= 100;
+		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TOTAL_POPULATION", iBaseYieldTimes100, YieldIcon);
+	}
+
 	iBaseValue = GetYieldPerReligionTimes100(eIndex) * GetCityReligions()->GetNumReligionsWithFollowers();
 	if(iBaseValue != 0)
 	{
@@ -14097,14 +14076,6 @@ CvString CvCity::getYieldRateInfoTool(YieldTypes eIndex, bool bIgnoreTrade) cons
 		iBaseYieldTimes100 = iBaseValue;
 		iBaseYieldTimes100 /= 100;
 		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_NON_SPECIALIST_CITIZENS", iBaseYieldTimes100, YieldIcon);
-	}
-
-	iBaseValue = (GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(m_eOwner).getTotalPopulation());
-	if(iBaseValue != 0)
-	{
-		iBaseYieldTimes100 = iBaseValue;
-		iBaseYieldTimes100 /= 100;
-		szRtnValue += GetLocalizedText("TXT_KEY_CITYVIEW_BASE_YIELD_TT_FROM_TOTAL_POPULATION", iBaseYieldTimes100, YieldIcon);
 	}
 
 	iBaseValue = GetBaseYieldRateFromEspionageSpy(eIndex);
@@ -14575,7 +14546,30 @@ void CvCity::ChangeYieldPerPopTimes100(YieldTypes eIndex, int iChange)
 		m_aiYieldPerPop.setAt(eIndex, m_aiYieldPerPop[eIndex] + iChange);
 }
 
+//	--------------------------------------------------------------------------------
+/// Extra yield for each pop point Global
+int CvCity::GetYieldPerPopInEmpireTimes100(YieldTypes eIndex) const
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
 
+	return m_aiYieldPerPopInEmpire[eIndex];
+}
+
+//	--------------------------------------------------------------------------------
+/// Extra yield for each pop point Global
+void CvCity::ChangeYieldPerPopInEmpireTimes100(YieldTypes eIndex, int iChange)
+{
+	VALIDATE_OBJECT
+	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
+	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
+
+	if(iChange != 0)
+		m_aiYieldPerPopInEmpire.setAt(eIndex, m_aiYieldPerPopInEmpire[eIndex] + iChange);
+}
+
+//	--------------------------------------------------------------------------------
 #if defined(MOD_ROG_CORE)
 //	--------------------------------------------------------------------------------
 /// Extra yield from building
@@ -14924,34 +14918,6 @@ void CvCity::ChangeYieldFromBorderGrowth(YieldTypes eIndex, int iChange)
 	}
 }
 //	--------------------------------------------------------------------------------
-/// Extra yield for each pop point in empire
-int CvCity::GetYieldPerPopInEmpireTimes100(YieldTypes eIndex) const
-{
-	VALIDATE_OBJECT
-		CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
-	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
-
-	std::map<int, int>::const_iterator it = m_aiYieldPerPopInEmpire.find((int)eIndex);
-	if (it != m_aiYieldPerPopInEmpire.end()) // find returns the iterator to map::end if the key i is not present in the map
-	{
-		return it->second;
-	}
-
-	return 0;
-}
-
-//	--------------------------------------------------------------------------------
-/// Extra yield for each pop point in empire
-void CvCity::ChangeYieldPerPopInEmpireTimes100(YieldTypes eIndex, int iChange)
-{
-	VALIDATE_OBJECT
-	CvAssertMsg(eIndex >= 0, "eIndex expected to be >= 0");
-	CvAssertMsg(eIndex < NUM_YIELD_TYPES, "eIndex expected to be < NUM_YIELD_TYPES");
-
-	if (iChange != 0)
-		m_aiYieldPerPopInEmpire[(int)eIndex] += iChange;
-}
-
 
 int CvCity::GetYieldFromPillage(YieldTypes eIndex) const
 {
@@ -19943,12 +19909,13 @@ void CvCity::read(FDataStream& kStream)
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	// SEE ABOVE - MOD_SERIALIZE_READ(90, kStream, m_iCityAutomatonWorkersChange, 0);
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	kStream >> m_iImmueVolcanoDamage;
 #endif
 	kStream >> m_iAddsFreshWater;
 	kStream >> m_iExtraAttackOnKill;
 	kStream >> m_iForbiddenForeignSpyCount;
+	kStream >> m_iAllowSpaceshipLaunchCount;
 #ifdef MOD_ROG_CORE
 	kStream >> m_iCityBuildingRangeStrikeModifier;
 	kStream >> m_iExtraDamageHealPercent;
@@ -19958,7 +19925,6 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_iNumAttacks;
 	kStream >> m_iAttacksMade;
 	kStream >> m_iNukeInterceptionChance;
-	kStream >> m_aiYieldPerPopInEmpire;
 	
 	kStream >> m_iResetDamageValue;
 	kStream >> m_iReduceDamageValue;
@@ -20066,6 +20032,7 @@ void CvCity::read(FDataStream& kStream)
 	kStream >> m_aiBaseYieldRateFromMisc;
 	kStream >> m_aiBaseYieldRateFromReligion;
 	kStream >> m_aiYieldPerPop;
+	kStream >> m_aiYieldPerPopInEmpire;
 	kStream >> m_aiYieldFromInternalTR;
 	kStream >> m_aiYieldFromProcessModifier;
 	kStream >> m_aiNumProjects;
@@ -20458,12 +20425,13 @@ void CvCity::write(FDataStream& kStream) const
 #if defined(MOD_BUILDINGS_CITY_AUTOMATON_WORKERS)
 	// SEE ABOVE - MOD_SERIALIZE_WRITE(kStream, m_iCityAutomatonWorkersChange);
 #endif
-#if defined(MOD_MORE_NATURAL_WONDER)
+#if defined(MOD_VOLCANO_BREAK)
 	kStream << m_iImmueVolcanoDamage;
 #endif
 	kStream << m_iAddsFreshWater;
 	kStream << m_iExtraAttackOnKill;
 	kStream << m_iForbiddenForeignSpyCount;
+	kStream << m_iAllowSpaceshipLaunchCount;
 #ifdef MOD_ROG_CORE
 	kStream << m_iCityBuildingRangeStrikeModifier;
 	kStream << m_iExtraDamageHealPercent;
@@ -20474,7 +20442,6 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_iAttacksMade;
 	kStream << m_iNukeInterceptionChance;
 
-	kStream << m_aiYieldPerPopInEmpire;
 	kStream << m_iResetDamageValue;
 	kStream << m_iReduceDamageValue;
 
@@ -20560,6 +20527,7 @@ void CvCity::write(FDataStream& kStream) const
 	kStream << m_aiBaseYieldRateFromMisc;
 	kStream << m_aiBaseYieldRateFromReligion;
 	kStream << m_aiYieldPerPop;
+	kStream << m_aiYieldPerPopInEmpire;
 	kStream << m_aiYieldFromInternalTR;
 	kStream << m_aiYieldFromProcessModifier;
 	kStream << m_aiNumProjects;
