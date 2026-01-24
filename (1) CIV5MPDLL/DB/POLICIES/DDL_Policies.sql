@@ -114,4 +114,5 @@ create table PolicyBranch_CivilizationLocked (
     PolicyBranchType text references PolicyBranchTypes(Type),
     CivilizationType text references Civilizations(Type)
 );
-alter table Policies add NoTechForWonderProject boolean default 0;
+alter table Policies add NoTechForWonder boolean default 0;
+alter table Policies add NoTechForProject boolean default 0;

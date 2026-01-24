@@ -207,7 +207,8 @@ CvPolicyEntry::CvPolicyEntry(void):
 #endif
 	m_bAlwaysWeLoveKindDayInGoldenAge(false),
 	m_bNoResistance(false),
-	m_bNoTechForWonderProject(false),
+	m_bNoTechForWonder(false),
+	m_bNoTechForProject(false),
 	m_bUpgradeAllTerritory(false),
 	m_iDefenseBoost(0),
 	m_iCityCaptureHealGlobal(0),
@@ -538,7 +539,8 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 #endif
 	m_bAlwaysWeLoveKindDayInGoldenAge = kResults.GetInt("AlwaysWeLoveKindDayInGoldenAge");
 	m_bNoResistance = kResults.GetInt("NoResistance");
-	m_bNoTechForWonderProject = kResults.GetInt("NoTechForWonderProject");
+	m_bNoTechForWonder = kResults.GetInt("NoTechForWonder");
+	m_bNoTechForProject = kResults.GetInt("NoTechForProject");
 	m_bUpgradeAllTerritory = kResults.GetInt("UpgradeAllTerritory");
 	m_iDefenseBoost = kResults.GetInt("DefenseBoostAllCities");
 	m_iCityCaptureHealGlobal = kResults.GetInt("CityCaptureHealGlobal");
@@ -2407,11 +2409,15 @@ bool CvPolicyEntry::IsNoResistance() const
 	return m_bNoResistance;
 }
 
-bool CvPolicyEntry::IsNoTechForWonderProject() const
+bool CvPolicyEntry::IsNoTechForWonder() const
 {
-	return m_bNoTechForWonderProject;
+	return m_bNoTechForWonder;
 }
 
+bool CvPolicyEntry::IsNoTechForProject() const
+{
+	return m_bNoTechForProject;
+}
 bool CvPolicyEntry::IsUpgradeAllTerritory() const
 {
 	return m_bUpgradeAllTerritory;

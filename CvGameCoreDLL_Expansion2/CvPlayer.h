@@ -796,9 +796,13 @@ public:
 	bool CanNoResistance() const;
 	int GetNoResistance() const;
 	void ChangeNoResistance(int iValue);
-	bool CanNoTechForWonderProject() const;
-	int GetNoTechForWonderProject() const;
-	void ChangeNoTechForWonderProject(int iChange);
+	bool CanNoTechForWonder() const;
+	int GetNoTechForWonder() const;
+	void ChangeNoTechForWonder(int iChange);
+	bool CanNoTechForProject() const;
+	int GetNoTechForProject() const;
+	void ChangeNoTechForProject(int iChange);
+
 
 	bool CanUpgradeAllTerritory() const;
 	int GetUpgradeAllTerritory() const;
@@ -2445,7 +2449,8 @@ protected:
 	int m_iGreatAdmiralsThresholdModifier;
 	int m_iAlwaysWeLoveKindDayInGoldenAge;
 	int m_iNoResistance;
-	int m_iNoTechForWonderProject;
+	int m_iNoTechForWonder;
+	int m_iNoTechForProject;
 	int m_iUpgradeAllTerritory;
 	int m_iCityCaptureHealGlobal;
 	int m_iOriginalCapitalCaptureTech;
