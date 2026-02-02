@@ -228,3 +228,8 @@ create table UnitPromotions_PromotionUpgrade (
     JudgePromotionType text references UnitPromotions(Type),
     NewPromotionType text references UnitPromotions(Type)
 );
+--Have any needed promotions will unlock Promotion
+create table Promotion_PromotionPrereqOrs (
+	PromotionType text references UnitPromotions(Type),
+	PrereqPromotionType text references UnitPromotions(Type)
+);

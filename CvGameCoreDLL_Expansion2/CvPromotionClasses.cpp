@@ -1426,8 +1426,9 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		pResults->Reset();
 	}
 
-	//PromotionPrereqOr1-13
+	//PromotionPrereqOr1-13 & Promotion_PromotionPrereqOrs
 	{
+		m_vPromotionPrereqOrs.clear();
 		for(int i = 1; i <= 13; i++)
 		{
 			CvString szPrereqOri;
@@ -1437,6 +1438,24 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			if(iPrereqOrPromotioni == NO_PROMOTION) continue;
 			m_vPromotionPrereqOrs.push_back(iPrereqOrPromotioni);
 		}
+		std::string sqlKey = "m_vPromotionPrereqOrs";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == NULL)
+		{
+			const char* szSQL = "select UnitPromotions.ID from Promotion_PromotionPrereqOrs inner join UnitPromotions on UnitPromotions.Type = PrereqPromotionType where PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+		while (pResults->Step())
+		{
+			const PromotionTypes iPrereqPromotion = (PromotionTypes)pResults->GetInt(0);
+			CvAssert(iPrereqPromotion < iNumUnitPromotions);
+			m_vPromotionPrereqOrs.push_back(iPrereqPromotion);
+		}
+		pResults->Reset();
 	}
 	//Promotion_PromotionPrereqAnds
 	{
