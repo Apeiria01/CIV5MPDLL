@@ -941,6 +941,7 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 	// Building Locked By Buildings
 	// Read both table Building_LockedBuildingClasses and column MutuallyExclusiveGroup and expect to be more effective
 	{
+		m_piLockedByBuildings.clear();
 		std::string strKey("Building_LockedBuildingClasses");
 		Database::Results* pResults = kUtility.GetResults(strKey);
 		const char* szBuildingClass = kResults.GetText("BuildingClass");
@@ -951,19 +952,22 @@ bool CvBuildingEntry::CacheResults(Database::Results& kResults, CvDatabaseUtilit
 
 		pResults->Bind(1, szBuildingClass);
 		while(pResults->Step()) m_piLockedByBuildings.push_back(pResults->GetInt(0));
+		pResults->Reset();
 	}
+	int iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
+	if (iMutuallyExclusiveGroup != -1)
 	{
 		std::string strKey("Buildings.MutuallyExclusiveGroup");
 		Database::Results* pResults = kUtility.GetResults(strKey);
-		int iGroup = kResults.GetInt("MutuallyExclusiveGroup");
 		if(pResults == NULL)
 		{
 			pResults = kUtility.PrepareResults(strKey, "select ID from Buildings where MutuallyExclusiveGroup != -1 and MutuallyExclusiveGroup = ? and Type != ?");
 		}
 
-		pResults->Bind(1, iGroup);
+		pResults->Bind(1, iMutuallyExclusiveGroup);
 		pResults->Bind(2, szBuildingType);
 		while(pResults->Step()) m_piLockedByBuildings.push_back(pResults->GetInt(0));
+		pResults->Reset();
 	}
 #if defined(MOD_GLOBAL_BUILDING_INSTANT_YIELD)
 	kUtility.SetYields(m_piInstantYield, "Building_InstantYield", "BuildingType", szBuildingType);

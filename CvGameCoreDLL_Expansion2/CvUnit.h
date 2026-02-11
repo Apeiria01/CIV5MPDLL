@@ -2240,7 +2240,6 @@ protected:
 	int m_iFlankAttackModifier;
 	int m_iRangedFlankAttackModifier;
 	int m_iRangedFlankAttackModifierPercent;
-	int m_iMutuallyExclusiveGroup;
 	FAutoVariable<int, CvUnit> m_iExtraOpenDefensePercent;
 	FAutoVariable<int, CvUnit> m_iExtraRoughDefensePercent;
 	FAutoVariable<int, CvUnit> m_iPillageChange;

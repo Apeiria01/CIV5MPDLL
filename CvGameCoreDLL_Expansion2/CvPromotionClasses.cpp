@@ -18,7 +18,6 @@
 CvPromotionEntry::CvPromotionEntry():
 	m_iLayerAnimationPath(ANIMATIONPATH_NONE),
 	m_iPrereqPromotion(NO_PROMOTION),
-	m_iMutuallyExclusiveGroup(0),
 	m_iTechPrereq(NO_TECH),
 	m_iInvisibleType(NO_INVISIBLE),
 	m_iSeeInvisibleType(NO_INVISIBLE),
@@ -463,7 +462,6 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_bHillsDoubleMove = kResults.GetBool("HillsDoubleMove");
 	m_bIgnoreTerrainCost = kResults.GetBool("IgnoreTerrainCost");
 	m_bRiverDoubleMove = kResults.GetBool("RiverDoubleMove");
-	m_iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	m_bIgnoreTerrainDamage = kResults.GetBool("IgnoreTerrainDamage");
 	m_bIgnoreFeatureDamage = kResults.GetBool("IgnoreFeatureDamage");
@@ -1502,6 +1500,23 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			CvAssert(iExclusionPromotion < iNumUnitPromotions);
 			m_vPromotionExclusionAny.push_back(iExclusionPromotion);
 		}
+
+		pResults->Reset();
+	}
+	int iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
+	if (iMutuallyExclusiveGroup != -1)
+	{
+		std::string strKey("UnitPromotions.MutuallyExclusiveGroup");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select ID from UnitPromotions where MutuallyExclusiveGroup != -1 and MutuallyExclusiveGroup = ? and Type != ?");
+		}
+
+		pResults->Bind(1, iMutuallyExclusiveGroup);
+		pResults->Bind(2, szPromotionType);
+		while(pResults->Step()) m_vPromotionExclusionAny.push_back(pResults->GetInt(0));
 
 		pResults->Reset();
 	}
@@ -2883,14 +2898,6 @@ bool CvPromotionEntry::IsIgnoreTerrainCost() const
 {
 	return m_bIgnoreTerrainCost;
 }
-
-
-
-int CvPromotionEntry::GetMutuallyExclusiveGroup() const
-{
-	return m_iMutuallyExclusiveGroup;
-}
-
 
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 /// Accessor: Ignores terrain damage

@@ -25978,31 +25978,6 @@ bool CvUnit::isPromotionValid(PromotionTypes ePromotion) const
 		return false;
 #endif
 
-
-	// Mutually Exclusive promotion
-	if (promotionInfo->GetMutuallyExclusiveGroup() != -1)
-	{
-		int iI;
-		int iNumPromotionInfos = GC.getNumPromotionInfos();
-		for (iI = 0; iI < iNumPromotionInfos; iI++)
-		{
-			const PromotionTypes ePromotionLoop = static_cast<PromotionTypes>(iI);
-
-			CvPromotionEntry* pkLoopPromotion = GC.getPromotionInfo(ePromotionLoop);
-			if (pkLoopPromotion)
-			{
-				// Promotion are in a Mutually Exclusive Group, so only one is allowed
-				if (pkLoopPromotion->GetMutuallyExclusiveGroup() == promotionInfo->GetMutuallyExclusiveGroup() && pkLoopPromotion != promotionInfo)
-				{
-					if (isHasPromotion(ePromotionLoop))
-					{
-						return false;
-					}
-				}
-			}
-		}
-	}
-
 	return true;
 }
 
