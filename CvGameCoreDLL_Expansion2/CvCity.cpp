@@ -916,12 +916,19 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 			CvUnit* iUnit = pPlot->getUnitByIndex(iUnitLoop);
 			if(iUnit->GetBaseCombatStrength(true/*bIgnoreEmbarked*/) > 0 && iUnit->getDomainType() == DOMAIN_LAND)
 			{
-				ChangeJONSCulturePerTurnFromPolicies(GET_PLAYER(getOwner()).GetPlayerPolicies()->GetNumericModifier(POLICYMOD_CULTURE_FROM_GARRISON));
 				if(bGarrisonFreeMaintenance)
 				{
 					kPlayer.changeExtraUnitCost(iUnit->getUnitInfo().GetExtraMaintenanceCost());
 				}
-				if(kPlayer.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0) ChangeNoOccupiedUnhappinessCount(1);
+
+				if (getOwner() == iUnit->getOwner())
+				{
+					int iCulture = kPlayer.GetPlayerPolicies()->GetNumericModifier(POLICYMOD_CULTURE_FROM_GARRISON);
+					if (iCulture != 0) ChangeJONSCulturePerTurnFromPolicies(iCulture);
+
+					int iNoOccupiedUnhappiness = kPlayer.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY);
+					if (iNoOccupiedUnhappiness > 0) ChangeNoOccupiedUnhappinessCount(iNoOccupiedUnhappiness);
+				}
 			}
 		}
 	}

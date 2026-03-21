@@ -20328,15 +20328,18 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 				if (GetBaseCombatStrength(true/*bIgnoreEmbarked*/) > 0 && getDomainType() == DOMAIN_LAND)
 				{
 					CvPlayer& player = GET_PLAYER(getOwner());
-					pOldPlot->getPlotCity()->ChangeJONSCulturePerTurnFromPolicies(-(player.GetPlayerPolicies()->GetNumericModifier(POLICYMOD_CULTURE_FROM_GARRISON)));
 					if (player.IsGarrisonFreeMaintenance())
 					{
 						player.changeExtraUnitCost(getUnitInfo().GetExtraMaintenanceCost());
 					}
-					if(player.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0)
+					if (pOldPlot->getPlotCity()->getOwner() == getOwner())
 					{
-						pOldPlot->getPlotCity()->ChangeNoOccupiedUnhappinessCount(-1);
-					}	
+						int iCulture = player.GetPlayerPolicies()->GetNumericModifier(POLICYMOD_CULTURE_FROM_GARRISON);
+						if (iCulture != 0) pOldPlot->getPlotCity()->ChangeJONSCulturePerTurnFromPolicies(-iCulture);
+
+						int iNoOccupiedUnhappiness = player.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY);
+						if (iNoOccupiedUnhappiness > 0) pOldPlot->getPlotCity()->ChangeNoOccupiedUnhappinessCount(-iNoOccupiedUnhappiness);
+					}
 				}
 			}
 
@@ -20415,14 +20418,17 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 			if (GetBaseCombatStrength(true/*bIgnoreEmbarked*/) > 0 && getDomainType() == DOMAIN_LAND)
 			{
 				CvPlayer& player = GET_PLAYER(getOwner());
-				pNewPlot->getPlotCity()->ChangeJONSCulturePerTurnFromPolicies((player.GetPlayerPolicies()->GetNumericModifier(POLICYMOD_CULTURE_FROM_GARRISON)));
 				if (player.IsGarrisonFreeMaintenance())
 				{
 					player.changeExtraUnitCost(-getUnitInfo().GetExtraMaintenanceCost());
 				}
-				if(player.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY) > 0)
+				if (pNewPlot->getPlotCity()->getOwner() == getOwner())
 				{
-					pNewPlot->getPlotCity()->ChangeNoOccupiedUnhappinessCount(1);
+					int iCulture = player.GetPlayerPolicies()->GetNumericModifier(POLICYMOD_CULTURE_FROM_GARRISON);
+					if (iCulture != 0) pNewPlot->getPlotCity()->ChangeJONSCulturePerTurnFromPolicies(iCulture);
+
+					int iNoOccupiedUnhappiness = player.getPolicyModifiers(POLICYMOD_NO_OCCUPIED_UNHAPPINESS_GARRISONED_CITY);
+					if (iNoOccupiedUnhappiness > 0) pNewPlot->getPlotCity()->ChangeNoOccupiedUnhappinessCount(iNoOccupiedUnhappiness);
 				}
 			}
 		}
