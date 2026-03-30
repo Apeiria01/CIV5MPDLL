@@ -4792,7 +4792,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 		m_iFreeGreatPeoplePerEra = 0;
 	}
 	kStream >> m_iExtraUnitPlayerInstances;
-	kStream >> m_iConquestCasualtiesModifier;
+	MOD_SERIALIZE_READ(159, kStream, m_iConquestCasualtiesModifier, 0);
 	MOD_SERIALIZE_READ(151, kStream, m_iOwnedReligionUnitCultureExtraTurns, 0);
 
 	if (uiVersion >= 6)
@@ -5286,7 +5286,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iFreeSocialPoliciesPerEra;
 	kStream << m_iFreeGreatPeoplePerEra;
 	kStream << m_iExtraUnitPlayerInstances;
-	kStream << m_iConquestCasualtiesModifier;
+	MOD_SERIALIZE_WRITE(kStream, m_iConquestCasualtiesModifier);
 	MOD_SERIALIZE_WRITE(kStream, m_iOwnedReligionUnitCultureExtraTurns);
 	kStream << m_iNumTradeRoutesModifier;
 	kStream << m_iTradeRouteResourceModifier;

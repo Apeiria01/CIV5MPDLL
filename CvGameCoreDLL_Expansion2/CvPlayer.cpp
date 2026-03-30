@@ -28407,7 +28407,7 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_iResearchTotalCostModifierGoldenAge;
 	kStream >> m_iLiberatedInfluence;
 	kStream >> m_iExtraUnitPlayerInstances;
-	kStream >> m_iConquestCasualtiesModifier;
+	MOD_SERIALIZE_READ(159, kStream, m_iConquestCasualtiesModifier, 0);
 	kStream >> m_iWaterTileDamageGlobal;
 	kStream >> m_iWaterTileMovementReduceGlobal;
 	kStream >> m_iWaterTileTurnDamageGlobal;
@@ -29181,7 +29181,7 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_iResearchTotalCostModifierGoldenAge;
 	kStream << m_iLiberatedInfluence;
 	kStream << m_iExtraUnitPlayerInstances;
-	kStream << m_iConquestCasualtiesModifier;
+	MOD_SERIALIZE_WRITE(kStream, m_iConquestCasualtiesModifier);
 	kStream << m_iWaterTileDamageGlobal;
 	kStream << m_iWaterTileMovementReduceGlobal;
 	kStream << m_iWaterTileTurnDamageGlobal;
