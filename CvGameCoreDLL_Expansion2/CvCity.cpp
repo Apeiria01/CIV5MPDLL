@@ -5989,6 +5989,7 @@ int CvCity::GetFaithPurchaseCost(UnitTypes eUnit, bool bIncludeBeliefDiscounts)
 					|| (MOD_TRAIN_ALL_CORE && kPlayer.GetPlayerTraits()->IsTrainedAll())
 					|| kPlayer.GetCanTrainUnitsFromCapturedOriginalCapitals().count(eUnit) > 0
 					|| kPlayer.GetUUFromDualEmpire().count(eUnit) > 0
+					|| kPlayer.GetUUFromVassalage().count(eUnit) > 0
 					|| kPlayer.GetUUFromExtra().count(eUnit) > 0
 					|| kPlayer.CanAllUc()
 				)

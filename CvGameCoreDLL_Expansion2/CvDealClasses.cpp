@@ -913,6 +913,36 @@ bool CvDeal::IsPossibleToTradeItem(PlayerTypes ePlayer, PlayerTypes eToPlayer, T
 
 		return true;
 	}
+	else if (eItem == TRADE_ITEM_FEUDAL_VASSALAGE)
+	{
+		CvPlayer* pSuzerain = NULL;
+		CvPlayer* pVassal = NULL;
+
+		if (GET_PLAYER(ePlayer).GetPlayerTraits()->IsAbleToEstablishVassalage())
+		{
+			pSuzerain = &GET_PLAYER(ePlayer);
+			pVassal = &GET_PLAYER(eToPlayer);
+		}
+		else if (GET_PLAYER(eToPlayer).GetPlayerTraits()->IsAbleToEstablishVassalage())
+		{
+			pSuzerain = &GET_PLAYER(eToPlayer);
+			pVassal = &GET_PLAYER(ePlayer);
+		}
+		else
+		{
+			return false;   
+		}
+		if (pSuzerain->getTeam() == pVassal->getTeam())
+			return false;
+		if (pSuzerain->getTotalPopulation() < pVassal->getTotalPopulation() * 2 ||
+			pSuzerain->getNumCities() < pVassal->getNumCities() * 2 ||
+			pSuzerain->GetMilitaryMight() < pVassal->GetMilitaryMight() * 2 ||
+			pVassal->GetDiplomacyAI()->GetMajorCivApproach(pSuzerain->GetID(), false) == MAJOR_CIV_APPROACH_GUARDED)
+		{
+			return false;
+		}
+		return true;
+	}
 
 	return true;
 }
@@ -1488,6 +1518,28 @@ void CvDeal::AddDualEmpireTreaty(PlayerTypes eFrom)
 		CvAssertMsg(false, "DEAL: Trying to add an invalid Dual Empire Treaty to a deal");
 	}
 }
+void CvDeal::AddFeudalVassalage(PlayerTypes eFrom)
+{
+    CvAssertMsg(eFrom == m_eFromPlayer || eFrom == m_eToPlayer, 
+                "DEAL: Adding deal item for a player that's not actually in this deal! Please send save and changelist.");
+    if (IsPossibleToTradeItem(eFrom, GetOtherPlayer(eFrom), TRADE_ITEM_FEUDAL_VASSALAGE))
+    {
+        CvTradedItem item;
+        item.m_eItemType = TRADE_ITEM_FEUDAL_VASSALAGE;   
+        item.m_eFromPlayer = eFrom;                       
+        item.m_iDuration = -1;                            
+        item.m_iFinalTurn = -1;
+        item.m_iData1 = -1;
+        item.m_iData2 = -1;
+        item.m_iData3 = -1;
+        item.m_bFlag1 = false;
+        m_TradedItems.push_back(item);
+    }
+    else
+    {
+        CvAssertMsg(false, "DEAL: Trying to add an invalid Feudal Vassalage to a deal");
+    }
+}
 
 int CvDeal::GetGoldTrade(PlayerTypes eFrom)
 {
@@ -1766,6 +1818,18 @@ bool CvDeal::IsDualEmpireTreaty(PlayerTypes eFrom)
 	}
 	return false;
 }
+bool CvDeal::IsFeudalVassalage(PlayerTypes eFrom)
+{
+	TradedItemList::iterator it;
+	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
+	{
+		if(it->m_eItemType == TRADE_ITEM_FEUDAL_VASSALAGE && it->m_eFromPlayer == eFrom)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 CvDeal::DealRenewStatus CvDeal::GetItemTradeableState(TradeableItems eTradeItem)
 {
@@ -1784,6 +1848,7 @@ CvDeal::DealRenewStatus CvDeal::GetItemTradeableState(TradeableItems eTradeItem)
 	case TRADE_ITEM_VOTE_COMMITMENT:
 	case TRADE_ITEM_DIPLOMATIC_MARRIAGE:
 	case TRADE_ITEM_DUAL_EMPIRE_TREATY:
+	case TRADE_ITEM_FEUDAL_VASSALAGE:
 		return DEAL_NONRENEWABLE;
 		break;
 
@@ -1981,6 +2046,19 @@ void CvDeal::RemoveDualEmpireTreaty(PlayerTypes eFrom)
 	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
 	{
 		if (it->m_eItemType == TRADE_ITEM_DUAL_EMPIRE_TREATY &&
+			it->m_eFromPlayer == eFrom)
+		{
+			m_TradedItems.erase(it);
+			break;
+		}
+	}
+}
+void CvDeal::RemoveFeudalVassalage(PlayerTypes eFrom)
+{
+	TradedItemList::iterator it;
+	for(it = m_TradedItems.begin(); it != m_TradedItems.end(); ++it)
+	{
+		if (it->m_eItemType == TRADE_ITEM_FEUDAL_VASSALAGE &&
 			it->m_eFromPlayer == eFrom)
 		{
 			m_TradedItems.erase(it);
@@ -2587,6 +2665,45 @@ void CvGameDeals::FinalizeDealValidAndAccepted(PlayerTypes eFromPlayer, PlayerTy
 			GET_PLAYER(eAcceptedFromPlayer).GetDiplomacyAI()->ChangeDualEmpireTreatyCounter(1);
 			GET_PLAYER(eAcceptedToPlayer).GetDiplomacyAI()->ChangeDualEmpireTreatyCounter(1);
 		}
+		else if (it->m_eItemType == TRADE_ITEM_FEUDAL_VASSALAGE)
+		{
+			CvPlayer* pSuzerain = NULL;
+			CvPlayer* pVassal = NULL;
+
+			if (GET_PLAYER(eAcceptedFromPlayer).GetPlayerTraits()->IsAbleToEstablishVassalage())
+			{
+				pSuzerain = &GET_PLAYER(eAcceptedFromPlayer);
+				pVassal = &GET_PLAYER(eAcceptedToPlayer);
+			}
+			else if (GET_PLAYER(eAcceptedToPlayer).GetPlayerTraits()->IsAbleToEstablishVassalage())
+			{
+				pSuzerain = &GET_PLAYER(eAcceptedToPlayer);
+				pVassal = &GET_PLAYER(eAcceptedFromPlayer);
+			}
+
+			if (pSuzerain != NULL && pVassal != NULL)
+			{
+				CvPlayer::GetUCTypesFromPlayer(*pVassal, 
+					&pSuzerain->GetUUFromVassalage(),
+					&pSuzerain->GetUBFromVassalage(),
+					&pSuzerain->GetUIFromVassalage());
+				for (PlayerTypes eMinor = (PlayerTypes)0; eMinor < MAX_MINOR_CIVS; eMinor)
+				{
+					CvPlayer* pMinor = &GET_PLAYER(eMinor);
+					if (pMinor->isAlive() && pMinor->isMinorCiv())
+					{
+						if (pMinor->GetMinorCivAI()->GetAlly() == pVassal->GetID())
+						{
+							pMinor->GetMinorCivAI()->SetAlly(pSuzerain->GetID());
+						}
+					}
+				}
+				pVassal->GetDiplomacyAI()->SetVassalOfPlayer(pSuzerain->GetID(), true);
+				pSuzerain->GetDiplomacyAI()->SetHasVassal(pVassal->GetID(), true);
+			}
+			pVassal->GetDiplomacyAI()->SetVassalOfPlayer(pSuzerain->GetID(), true);
+			pSuzerain->GetDiplomacyAI()->SetHasVassal(pVassal->GetID(), true);
+		}
 		// Open Borders
 		else if(it->m_eItemType == TRADE_ITEM_OPEN_BORDERS)
 		{
@@ -2940,6 +3057,10 @@ bool CvGameDeals::FinalizeDeal(PlayerTypes eFromPlayer, PlayerTypes eToPlayer, b
 					// NOTE: This scope will not be compile. leave it blank
 				}
 				else if (it->m_eItemType == TRADE_ITEM_DUAL_EMPIRE_TREATY)
+				{
+					// NOTE: This scope will not be compile. leave it blank
+				}
+				else if (it->m_eItemType == TRADE_ITEM_FEUDAL_VASSALAGE)
 				{
 					// NOTE: This scope will not be compile. leave it blank
 				}
@@ -4289,6 +4410,9 @@ void CvGameDeals::LogDealFailed(CvDeal* pDeal, bool bNoRenew, bool bNotAccepted,
 				break;
 			case TRADE_ITEM_DUAL_EMPIRE_TREATY:
 				strTemp.Format("***** Dual Empire Treaty *****");
+				break;
+			case TRADE_ITEM_FEUDAL_VASSALAGE:
+				strTemp.Format("***** Feudal Vassalage *****");
 				break;
 			default:
 				strTemp.Format("***** UNKNOWN TRADE!!! *****");

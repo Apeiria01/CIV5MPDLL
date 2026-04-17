@@ -779,6 +779,16 @@
 				treaty!
 			</Text>
 		</Row>
+
+		<Row Tag="TXT_KEY_FEUDAL_TREATY">
+			<Text>Feudal Treaty</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_FEUDAL_TREATY">
+			<Text>{1_CivName:textkey} has granted lands and subjects to {2_CivName:textkey}, formally establishing a feudal relationship. {2_CivName:textkey} becomes the vassal of {1_CivName:textkey}.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_FEUDAL_TREATY_S">
+			<Text>{1_CivName:textkey} and {2_CivName:textkey} have now entered into a Feudal Treaty!</Text>
+		</Row>
 		
 		<Row Tag="TXT_KEY_NUCLEAR_LEVEL_NONE">
 			<Text>Clear Skies</Text>

@@ -8933,6 +8933,31 @@ bool CvGame::testVictory(VictoryTypes eVictory, TeamTypes eTeam, bool* pbEndScor
 			else
 			{
 				bool bFound = false;
+				for (int iPlayerLoop = 0; iPlayerLoop < MAX_PLAYERS; ++iPlayerLoop)
+				{
+					PlayerTypes eLoopPlayer = (PlayerTypes)iPlayerLoop;
+					if (GET_PLAYER(eLoopPlayer).isAlive() && GET_PLAYER(eLoopPlayer).getTeam() == eTeam)
+					{
+						for (int iVassalLoop = 0; iVassalLoop < MAX_PLAYERS; ++iVassalLoop)
+						{
+							PlayerTypes eVassal = (PlayerTypes)iVassalLoop;
+							if (eVassal != eLoopPlayer && GET_PLAYER(eVassal).GetDiplomacyAI()->IsVassalOfPlayer(eLoopPlayer))
+							{
+								int iVassalCityLoop = 0;
+								for (CvCity* pVassalCity = GET_PLAYER(eVassal).firstCity(&iVassalCityLoop); 
+									pVassalCity != NULL; 
+									pVassalCity = GET_PLAYER(eVassal).nextCity(&iVassalCityLoop))
+								{
+									if (pVassalCity->getOriginalOwner() == eVassal)
+									{
+										bFound = true;
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
 
 				for(int iK = 0; iK < MAX_CIV_TEAMS; iK++)
 				{

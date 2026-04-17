@@ -172,6 +172,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_bBonusReligiousBelief(false),
 	m_bAbleToAnnexCityStates(false),
 	m_bAbleToDualEmpire(false),
+	m_bAbleToEstablishVassalage(false),
 	m_bNoDoDeficit(false),
 	m_bCrossesMountainsAfterGreatGeneral(false),
 #if defined(MOD_TRAITS_CROSSES_ICE)
@@ -986,6 +987,10 @@ bool CvTraitEntry::IsAbleToAnnexCityStates() const
 bool CvTraitEntry::IsAbleToDualEmpire() const
 {
 	return m_bAbleToDualEmpire;
+}
+bool CvTraitEntry::IsAbleToEstablishVassalage() const
+{
+	return m_bAbleToEstablishVassalage;
 }
 
 /// Accessor: Never disbanding things in DoDeficit()
@@ -1908,6 +1913,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_bBonusReligiousBelief = kResults.GetBool("BonusReligiousBelief");
 	m_bAbleToAnnexCityStates = kResults.GetBool("AbleToAnnexCityStates");
 	m_bAbleToDualEmpire = kResults.GetBool("AbleToDualEmpire");
+	m_bAbleToEstablishVassalage = kResults.GetBool("AbleToEstablishVassalage");
 	m_bNoDoDeficit = kResults.GetBool("NoDoDeficit");
 	m_bCrossesMountainsAfterGreatGeneral = kResults.GetBool("CrossesMountainsAfterGreatGeneral");
 #if defined(MOD_TRAITS_CROSSES_ICE)
@@ -2932,6 +2938,7 @@ void CvPlayerTraits::InitPlayerTraits()
 				m_bAbleToAnnexCityStates = true;
 			}
 			m_bAbleToDualEmpire = trait->IsAbleToDualEmpire();
+			m_bAbleToEstablishVassalage = trait->IsAbleToEstablishVassalage();
 			m_bNoDoDeficit = trait->IsNoDoDeficit();
 			if(trait->IsCrossesMountainsAfterGreatGeneral())
 			{
@@ -3412,6 +3419,7 @@ void CvPlayerTraits::Reset()
 	m_bBonusReligiousBelief = false;
 	m_bAbleToAnnexCityStates = false;
 	m_bAbleToDualEmpire = false;
+	m_bAbleToEstablishVassalage = false;
 	m_bNoDoDeficit = false;
 	m_bCrossesMountainsAfterGreatGeneral = false;
 #if defined(MOD_TRAITS_CROSSES_ICE)
@@ -4934,6 +4942,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_bAbleToAnnexCityStates;
 	
 	kStream >> m_bAbleToDualEmpire;
+	kStream >> m_bAbleToEstablishVassalage;
 
 	kStream >> m_bNoDoDeficit;
 
@@ -5347,6 +5356,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_bBonusReligiousBelief;
 	kStream << m_bAbleToAnnexCityStates;
 	kStream << m_bAbleToDualEmpire;
+	kStream << m_bAbleToEstablishVassalage;
 
 	kStream << m_bNoDoDeficit;
 	

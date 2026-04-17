@@ -1044,6 +1044,7 @@ void CvLuaPlayer::PushMethods(lua_State* L, int t)
 
 	Method(IsCanDiplomaticMarriage);
 	Method(IsAbleToDualEmpire);
+	Method(IsAbleToEstablishVassalage);
 
 	Method(GetNumNotifications);
 	Method(GetNotificationStr);
@@ -9535,6 +9536,15 @@ int CvLuaPlayer::lIsAbleToDualEmpire(lua_State* L)
 {
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	const bool bValue = pkPlayer->GetPlayerTraits()->IsAbleToDualEmpire();
+
+	lua_pushboolean(L, bValue);
+	return 1;
+}
+//------------------------------------------------------------------------------
+int CvLuaPlayer::lIsAbleToEstablishVassalage(lua_State* L)
+{
+	CvPlayerAI* pkPlayer = GetInstance(L);
+	const bool bValue = pkPlayer->GetPlayerTraits()->IsAbleToEstablishVassalage();
 
 	lua_pushboolean(L, bValue);
 	return 1;

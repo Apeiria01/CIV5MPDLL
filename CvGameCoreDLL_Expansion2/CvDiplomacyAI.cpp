@@ -862,6 +862,11 @@ void CvDiplomacyAI::Reset()
 		m_paiOtherPlayerNumMinorsConquered[iI] = 0;
 		m_paiOtherPlayerNumMajorsAttacked[iI] = 0;
 		m_paiOtherPlayerNumMajorsConquered[iI] = 0;
+		m_eVassalOfPlayer = NO_PLAYER;
+		for(int i = 0; i < MAX_PLAYERS; i++)
+		{
+			m_abHasVassal[i] = false;
+		}
 		
 #if defined(MOD_API_EXTENSIONS)
 		m_paiOtherPlayerWarmongerAmountTimes100[iI] = 0;
@@ -1529,6 +1534,9 @@ void CvDiplomacyAI::Read(FDataStream& kStream)
 
 	ArrayWrapper<char> wrapm_paiOtherPlayerNumMajorsConquered(MAX_MAJOR_CIVS, m_paiOtherPlayerNumMajorsConquered);
 	kStream >> wrapm_paiOtherPlayerNumMajorsConquered;
+	
+    kStream >> m_eVassalOfPlayer;
+    kStream >> m_abHasVassal;
 
 #if defined(MOD_API_EXTENSIONS)
 	ArrayWrapper<int> wrapm_paiOtherPlayerWarmongerAmount(MAX_MAJOR_CIVS, m_paiOtherPlayerWarmongerAmountTimes100);
@@ -1798,6 +1806,9 @@ void CvDiplomacyAI::Write(FDataStream& kStream) const
 	kStream << ArrayWrapper<char>(MAX_MAJOR_CIVS, m_paiOtherPlayerNumMinorsConquered);
 	kStream << ArrayWrapper<char>(MAX_MAJOR_CIVS, m_paiOtherPlayerNumMajorsAttacked);
 	kStream << ArrayWrapper<char>(MAX_MAJOR_CIVS, m_paiOtherPlayerNumMajorsConquered);
+	kStream << m_eVassalOfPlayer;
+    kStream << m_abHasVassal;
+
 
 #if defined(MOD_API_EXTENSIONS)
 	kStream << ArrayWrapper<int>(MAX_MAJOR_CIVS, m_paiOtherPlayerWarmongerAmountTimes100);
@@ -4591,6 +4602,36 @@ int CvDiplomacyAI::GetNumMinorCivApproach(MinorCivApproachTypes eApproach) const
 	}
 
 	return iCount;
+}
+//----------------------------------------------------------------------------
+void CvDiplomacyAI::SetVassalOfPlayer(PlayerTypes eSuzerain, bool bNewValue)
+{
+    if (m_eVassalOfPlayer != eSuzerain)
+    {
+        m_eVassalOfPlayer = bNewValue ? eSuzerain : NO_PLAYER;
+    }
+}
+
+bool CvDiplomacyAI::IsVassalOfPlayer(PlayerTypes eSuzerain) const
+{
+    return (m_eVassalOfPlayer == eSuzerain);
+}
+
+void CvDiplomacyAI::SetHasVassal(PlayerTypes eVassal, bool bNewValue)
+{
+    if (eVassal >= 0 && eVassal < MAX_PLAYERS)
+    {
+        m_abHasVassal[eVassal] = bNewValue;
+    }
+}
+
+bool CvDiplomacyAI::HasVassal(PlayerTypes eVassal) const
+{
+    if (eVassal >= 0 && eVassal < MAX_PLAYERS)
+    {
+        return m_abHasVassal[eVassal];
+    }
+    return false;
 }
 
 /// Does this AI want to connect to a minor with a route

@@ -933,6 +933,7 @@ protected:
 
 	static int lIsCanDiplomaticMarriage(lua_State* L);
 	static int lIsAbleToDualEmpire(lua_State* L);
+	static int lIsAbleToEstablishVassalage(lua_State* L);
 
 	// END Diplomacy Stuff
 
