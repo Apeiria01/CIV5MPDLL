@@ -776,6 +776,16 @@
 			<Text>{1_CivName:textkey}與{2_CivName:textkey}現在達成二元帝國協定了！ </Text>
 		</Row>
 
+		<Row Tag="TXT_KEY_FEUDAL_TREATY">
+			<Text>分封協定</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_FEUDAL_TREATY">
+			<Text>{1_CivName:textkey}將封地與臣民授予{2_CivName:textkey}，雙方正式確立分封關係，{2_CivName:textkey}成為{1_CivName:textkey}的諸侯。</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_FEUDAL_TREATY_S">
+			<Text>{1_CivName:textkey}與{2_CivName:textkey}現在達成了分封協定！</Text>
+		</Row>
+
 		<Row Tag="TXT_KEY_NUCLEAR_LEVEL_NONE">
 			<Text>天朗氣清</Text>
 		</Row>

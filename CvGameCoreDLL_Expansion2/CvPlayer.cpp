@@ -8737,6 +8737,7 @@ bool CvPlayer::canConstruct(BuildingTypes eBuilding, bool bContinue, bool bTestV
 		if (const_cast<CvPlayer*>(this)->GetCanConstructBuildingsFromCapturedOriginalCapitals().count(eBuilding) == 0
 			&& const_cast<CvPlayer*>(this)->GetUBFromDualEmpire().count(eBuilding) == 0
 			&& const_cast<CvPlayer*>(this)->GetUBFromExtra().count(eBuilding) == 0
+			&& const_cast<CvPlayer*>(this)->GetUBFromVassalage().count(eBuilding) == 0
 			&& !this->CanAllUc())
 			return false;
 	}
@@ -10555,6 +10556,7 @@ bool CvPlayer::canBuild(const CvPlot* pPlot, BuildTypes eBuild, bool bTestEra, b
 			{
 				if (const_cast<CvPlayer*>(this)->GetCanBuildImprovementsFromCapturedOriginalCapitals().count(eImprovement) == 0
 					&& const_cast<CvPlayer*>(this)->GetUIFromDualEmpire().count(eImprovement) == 0
+					&& const_cast<CvPlayer*>(this)->GetUIFromVassalage().count(eImprovement) == 0
 					&& const_cast<CvPlayer*>(this)->GetUIFromExtra().count(eImprovement) == 0
 					&& !CanAllUc())
 					return false;
@@ -28896,6 +28898,11 @@ void CvPlayer::Read(FDataStream& kStream)
 	kStream >> m_sUBFromDualEmpire;
 	kStream >> m_sUIFromDualEmpire;
 
+	kStream >> m_sUUFromVassalage;
+	kStream >> m_sUBFromVassalage;
+	kStream >> m_sUIFromVassalage;
+
+
 	kStream >> m_sUUFromExtra;
 	kStream >> m_sUBFromExtra;
 	kStream >> m_sUIFromExtra;
@@ -29593,6 +29600,10 @@ void CvPlayer::Write(FDataStream& kStream) const
 	kStream << m_sUUFromDualEmpire;
 	kStream << m_sUBFromDualEmpire;
 	kStream << m_sUIFromDualEmpire;
+
+	kStream << m_sUUFromVassalage;
+	kStream << m_sUBFromVassalage;
+	kStream << m_sUIFromVassalage;
 
 	kStream << m_sUUFromExtra;
 	kStream << m_sUBFromExtra;
@@ -33707,6 +33718,18 @@ std::tr1::unordered_set<BuildingTypes>& CvPlayer::GetUBFromDualEmpire()
 std::tr1::unordered_set<ImprovementTypes>& CvPlayer::GetUIFromDualEmpire()
 {
 	return m_sUIFromDualEmpire;
+}
+std::tr1::unordered_set<UnitTypes>& CvPlayer::GetUUFromVassalage()
+{
+	return m_sUUFromVassalage;
+}
+std::tr1::unordered_set<BuildingTypes>& CvPlayer::GetUBFromVassalage()
+{
+	return m_sUBFromVassalage;
+}
+std::tr1::unordered_set<ImprovementTypes>& CvPlayer::GetUIFromVassalage()
+{
+	return m_sUIFromVassalage;
 }
 
 std::tr1::unordered_set<UnitTypes>& CvPlayer::GetUUFromExtra()

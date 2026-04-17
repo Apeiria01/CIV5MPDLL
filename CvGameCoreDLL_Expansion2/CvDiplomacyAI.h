@@ -87,6 +87,11 @@ public:
 	void Read(FDataStream& kStream);
 	void Write(FDataStream& kStream) const;
 
+	void SetVassalOfPlayer(PlayerTypes eSuzerain, bool bNewValue);
+    bool IsVassalOfPlayer(PlayerTypes eSuzerain) const;
+    void SetHasVassal(PlayerTypes eVassal, bool bNewValue);
+    bool HasVassal(PlayerTypes eVassal) const;
+
 	void update();
 
 	CvPlayer* GetPlayer();
@@ -1136,6 +1141,9 @@ private:
 	}
 
 	bool IsValidUIDiplomacyTarget(PlayerTypes eTargetPlayer);
+
+	PlayerTypes m_eVassalOfPlayer;          
+    bool m_abHasVassal[MAX_PLAYERS];
 
 	bool IsAtWar(PlayerTypes eOtherPlayer);
 	void DoMakeWarOnPlayer(PlayerTypes eTargetPlayer);

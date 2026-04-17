@@ -2262,6 +2262,10 @@ public:
 	std::tr1::unordered_set<BuildingTypes>& GetUBFromDualEmpire();
 	std::tr1::unordered_set<ImprovementTypes>& GetUIFromDualEmpire();
 
+	std::tr1::unordered_set<UnitTypes>& GetUUFromVassalage();
+	std::tr1::unordered_set<BuildingTypes>& GetUBFromVassalage();
+	std::tr1::unordered_set<ImprovementTypes>& GetUIFromVassalage();
+
 	std::tr1::unordered_set<UnitTypes>& GetUUFromExtra();
 	std::tr1::unordered_set<BuildingTypes>& GetUBFromExtra();
 	std::tr1::unordered_set<ImprovementTypes>& GetUIFromExtra();
@@ -3028,6 +3032,11 @@ protected:
 	std::tr1::unordered_set<UnitTypes> m_sUUFromDualEmpire;
 	std::tr1::unordered_set<BuildingTypes> m_sUBFromDualEmpire;
 	std::tr1::unordered_set<ImprovementTypes> m_sUIFromDualEmpire;
+
+	std::tr1::unordered_set<UnitTypes> m_sUUFromVassalage;
+	std::tr1::unordered_set<BuildingTypes> m_sUBFromVassalage;
+	std::tr1::unordered_set<ImprovementTypes> m_sUIFromVassalage;
+
 
 	std::tr1::unordered_set<UnitTypes> m_sUUFromExtra;
 	std::tr1::unordered_set<BuildingTypes> m_sUBFromExtra;

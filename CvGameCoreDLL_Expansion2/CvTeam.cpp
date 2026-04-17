@@ -1090,6 +1090,24 @@ bool CvTeam::canDeclareWar(TeamTypes eTeam) const
 	{
 		return false;
 	}
+	PlayerTypes eMyPlayer = getLeaderID();  
+    if (eMyPlayer != NO_PLAYER)
+    {
+        CvPlayer* pMe = &GET_PLAYER(eMyPlayer);
+        if (pMe->GetDiplomacyAI()->IsVassalOfPlayer(GET_PLAYER(GET_TEAM(eTeam).getLeaderID()).GetID()))
+        {
+            return false;   
+        }
+    }
+    if (eMyPlayer != NO_PLAYER)
+    {
+        CvPlayer* pMe = &GET_PLAYER(eMyPlayer);
+		CvPlayer* pOtherLeader = &GET_PLAYER(GET_TEAM(eTeam).getLeaderID());
+        if (pOtherLeader != NULL && pMe->GetDiplomacyAI()->HasVassal(pOtherLeader->GetID()))
+        {
+            return false;   
+        }
+    }
 
 #if defined(MOD_EVENTS_WAR_AND_PEACE)
 	if (MOD_EVENTS_WAR_AND_PEACE) {
