@@ -103,6 +103,7 @@ void CvLuaUnit::RegistStaticFunctions() {
 
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetIsBatchMark);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetIsCheat);
+	REGIST_STATIC_FUNCTION(CvLuaUnit::lLoadUnit);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetMaxHitPointsChangeFromRazedCityPop);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetCombatStrengthChangeFromKilledUnits);
 	REGIST_STATIC_FUNCTION(CvLuaUnit::lSetRangedCombatStrengthChangeFromKilledUnits);
@@ -865,6 +866,7 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(SetIsBatchMark);
 	Method(IsCheat);
 	Method(SetIsCheat);
+	Method(LoadUnit);
 	Method(SetGraphicalFortify);
 }
 //------------------------------------------------------------------------------
@@ -6801,6 +6803,16 @@ LUAAPIIMPL(Unit, SetIsBatchMark)
 
 LUAAPIIMPL(Unit, IsCheat)
 LUAAPIIMPL(Unit, SetIsCheat)
+int CvLuaUnit::lLoadUnit(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+	CvUnit* pkOtherUnit = GetInstance(L, 2);
+	if (pkUnit && pkOtherUnit)
+	{
+		pkUnit->loadUnit(*pkOtherUnit);
+	}
+	return 0;
+}
 int CvLuaUnit::lSetGraphicalFortify(lua_State* L)
 {
 	CvUnit* pkUnit = GetInstance(L);

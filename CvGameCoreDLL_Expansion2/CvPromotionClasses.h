@@ -269,6 +269,7 @@ public:
 	int GetMilitaryMightMod() const;
 	int GetExtraMoveTimesXX() const;
 	int GetRangeAttackCostModifier() const;
+	int GetSetUpCostModifier() const;
 	int GetOriginalCapitalDamageFix() const;
 	int GetOriginalCapitalSpecialDamageFix() const;
 	int GetMultipleInitExperence() const;
@@ -308,7 +309,6 @@ public:
 	bool IsHealOutsideFriendly() const;
 	bool IsHillsDoubleMove() const;
 	bool IsRiverDoubleMove() const;
-	int GetMutuallyExclusiveGroup() const;
 	bool IsIgnoreTerrainCost() const;
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	bool IsIgnoreTerrainDamage() const;
@@ -651,6 +651,7 @@ protected:
 	int m_iMilitaryMightMod;
 	int m_iExtraMoveTimesXX;
 	int m_iRangeAttackCostModifier;
+	int m_iSetUpCostModifier;
 	int m_iOriginalCapitalDamageFix;
 	int m_iOriginalCapitalSpecialDamageFix;
 	int m_iMultipleInitExperence;
@@ -777,7 +778,6 @@ protected:
 	int m_iOnCapitalLandDefenseMod;
 	int m_iOutsideCapitalLandDefenseMod;
 #endif
-	int m_iMutuallyExclusiveGroup;
 
 	bool m_bCannotBeChosen;
 	bool m_bLostWithUpgrade;

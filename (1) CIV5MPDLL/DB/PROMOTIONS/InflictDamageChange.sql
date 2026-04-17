@@ -1,10 +1,13 @@
-alter table UnitPromotions add column 'AttackInflictDamageChange' integer not null default 0;
-alter table UnitPromotions add column 'AttackInflictDamageChangeMaxHPPercent' integer not null default 0;
+alter table UnitPromotions add AttackInflictDamageChange integer default 0;
+alter table UnitPromotions add AttackInflictDamageChangeMaxHPPercent integer default 0;
 
-alter table UnitPromotions add column 'DefenseInflictDamageChange' integer not null default 0;
-alter table UnitPromotions add column 'DefenseInflictDamageChangeMaxHPPercent' integer not null default 0;
+alter table UnitPromotions add DefenseInflictDamageChange integer default 0;
+alter table UnitPromotions add DefenseInflictDamageChangeMaxHPPercent integer default 0;
 
-alter table UnitPromotions add column 'SiegeInflictDamageChange' integer not null default 0;
-alter table UnitPromotions add column 'SiegeInflictDamageChangeMaxHPPercent' integer not null default 0;
+alter table UnitPromotions add SiegeInflictDamageChange integer default 0;
+alter table UnitPromotions add SiegeInflictDamageChangeMaxHPPercent integer default 0;
 
-ALTER TABLE UnitPromotions add column 'OutsideFriendlyLandsInflictDamageChange' INTEGER DEFAULT 0;
+alter table UnitPromotions add OutsideFriendlyLandsInflictDamageChange integer default 0;
+
+alter table UnitPromotions add OriginalCapitalDamageFix integer default 0;
+alter table UnitPromotions add OriginalCapitalSpecialDamageFix integer default 0;

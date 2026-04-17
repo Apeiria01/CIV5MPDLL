@@ -112,6 +112,7 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_iTradeMissionGoldModifier(0),
 	m_iFaithCostModifier(0),
 	m_iCulturalPlunderMultiplier(0),
+	m_iConquestCasualtiesModifier(0),
 	m_iStealTechSlowerModifier(0),
 	m_iStealTechFasterModifier(0),
 	m_iCatchSpiesModifier(0),
@@ -208,6 +209,8 @@ CvPolicyEntry::CvPolicyEntry(void):
 	m_bAlwaysWeLoveKindDayInGoldenAge(false),
 	m_bNoResistance(false),
 	m_bUpgradeAllTerritory(false),
+	m_bNoTechForWonder(false),
+	m_bNoTechForProject(false),
 	m_iDefenseBoost(0),
 	m_iCityCaptureHealGlobal(0),
 	m_iOriginalCapitalCaptureTech(0),
@@ -293,6 +296,7 @@ CvPolicyEntry::~CvPolicyEntry(void)
 	SAFE_DELETE_ARRAY(m_piCapitalYieldModifier);
 	SAFE_DELETE_ARRAY(m_piGreatWorkYieldChange);
 	SAFE_DELETE_ARRAY(m_piSpecialistExtraYield);
+	SAFE_DELETE_ARRAY(m_piImprovementCultureChange);
 	SAFE_DELETE_ARRAY(m_pabFreePromotion);
 	SAFE_DELETE_ARRAY(m_paiUnitCombatProductionModifiers);
 	SAFE_DELETE_ARRAY(m_paiUnitCombatFreeExperiences);
@@ -334,10 +338,8 @@ CvPolicyEntry::~CvPolicyEntry(void)
 	SAFE_DELETE_ARRAY(m_piGreatPersonOutputModifierPerGWs);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldModifiers);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldChanges);
-	if(m_pFreeUnitClasses)
-	{
-		delete m_pFreeUnitClasses;
-	}
+	SAFE_DELETE_ARRAY(m_piFlavorValue);
+	SAFE_DELETE_ARRAY(m_pFreeUnitClasses);
 #if defined(MOD_POLICY_NEW_EFFECT_FOR_SP)
 	SAFE_DELETE_ARRAY(m_piBuildSpeedModifier);
 #endif	
@@ -442,6 +444,7 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_iTradeMissionGoldModifier = kResults.GetInt("TradeMissionGoldModifier");
 	m_iFaithCostModifier = kResults.GetInt("FaithCostModifier");
 	m_iCulturalPlunderMultiplier = kResults.GetInt("CulturalPlunderMultiplier");
+	m_iConquestCasualtiesModifier = kResults.GetInt("ConquestCasualtiesModifier");
 	m_iStealTechSlowerModifier = kResults.GetInt("StealTechSlowerModifier");
 	m_iStealTechFasterModifier = kResults.GetInt("StealTechFasterModifier");
 	m_iCatchSpiesModifier = kResults.GetInt("CatchSpiesModifier");
@@ -539,6 +542,8 @@ bool CvPolicyEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility&
 	m_bAlwaysWeLoveKindDayInGoldenAge = kResults.GetInt("AlwaysWeLoveKindDayInGoldenAge");
 	m_bNoResistance = kResults.GetInt("NoResistance");
 	m_bUpgradeAllTerritory = kResults.GetInt("UpgradeAllTerritory");
+	m_bNoTechForWonder = kResults.GetBool("NoTechForWonder");
+	m_bNoTechForProject = kResults.GetBool("NoTechForProject");
 	m_iDefenseBoost = kResults.GetInt("DefenseBoostAllCities");
 	m_iCityCaptureHealGlobal = kResults.GetInt("CityCaptureHealGlobal");
 	m_iOriginalCapitalCaptureTech = kResults.GetInt("OriginalCapitalCaptureTech");
@@ -1879,6 +1884,11 @@ int CvPolicyEntry::GetCulturalPlunderMultiplier() const
 {
 	return m_iCulturalPlunderMultiplier;
 }
+/// How many people should be retained after capturing the city?
+int CvPolicyEntry::GetConquestCasualtiesModifier() const
+{
+	return m_iConquestCasualtiesModifier;
+}
 
 /// How much enemy tech stealing is slowed?
 int CvPolicyEntry::GetStealTechSlowerModifier() const
@@ -2409,6 +2419,16 @@ bool CvPolicyEntry::IsNoResistance() const
 bool CvPolicyEntry::IsUpgradeAllTerritory() const
 {
 	return m_bUpgradeAllTerritory;
+}
+
+bool CvPolicyEntry::IsNoTechForWonder() const
+{
+	return m_bNoTechForWonder;
+}
+
+bool CvPolicyEntry::IsNoTechForProject() const
+{
+	return m_bNoTechForProject;
 }
 
 int CvPolicyEntry::GetDefenseBoost() const

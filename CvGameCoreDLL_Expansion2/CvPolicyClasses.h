@@ -122,6 +122,7 @@ public:
 	int GetTradeMissionGoldModifier() const;
 	int GetFaithCostModifier() const;
 	int GetCulturalPlunderMultiplier() const;
+	int GetConquestCasualtiesModifier() const;
 	int GetStealTechSlowerModifier() const;
 	int GetStealTechFasterModifier() const;
 	int GetCatchSpiesModifier() const;
@@ -308,6 +309,8 @@ public:
 	bool IsAlwaysWeLoveKindDayInGoldenAge() const;
 	bool IsNoResistance() const;
 	bool IsUpgradeAllTerritory() const;
+	bool IsNoTechForWonder() const;
+	bool IsNoTechForProject() const;
 	int GetDefenseBoost() const;
 	int GetCityCaptureHealGlobal() const;
 	int GetOriginalCapitalCaptureTech() const;
@@ -455,6 +458,7 @@ private:
 	int m_iTradeMissionGoldModifier;
 	int m_iFaithCostModifier;
 	int m_iCulturalPlunderMultiplier;
+	int m_iConquestCasualtiesModifier;
 	int m_iStealTechSlowerModifier;
 	int m_iStealTechFasterModifier;
 	int m_iCatchSpiesModifier;
@@ -553,6 +557,8 @@ private:
 	bool m_bAlwaysWeLoveKindDayInGoldenAge;
 	bool m_bNoResistance;
 	bool m_bUpgradeAllTerritory;
+	bool m_bNoTechForWonder;
+	bool m_bNoTechForProject;
 	int m_iDefenseBoost;
 	int m_iCityCaptureHealGlobal;
 	int m_iOriginalCapitalCaptureTech;

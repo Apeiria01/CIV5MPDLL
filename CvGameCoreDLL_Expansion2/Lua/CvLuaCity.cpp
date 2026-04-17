@@ -560,6 +560,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(ChangeBaseYieldRateFromReligion);
 
 	Method(GetYieldPerPopTimes100);
+	Method(GetExtraBaseYieldRateTimes100);
 
 	Method(GetBaseYieldRateModifier);
 	Method(GetYieldRate);
@@ -803,6 +804,7 @@ void CvLuaCity::PushMethods(lua_State* L, int t)
 	Method(GetHurryModifierLocal);
 	Method(GetUnitMaxExperienceLocal);
 	Method(IsSecondCapital);
+	Method(IsAllowSpaceshipLaunch);
 	Method(GetFoodConsumptionPerPopTimes100);
 	Method(GetDefendedAgainstSpreadUntilTurn);
 }
@@ -3911,6 +3913,20 @@ int CvLuaCity::lGetYieldPerPopTimes100(lua_State* L)
 }
 
 //------------------------------------------------------------------------------
+int CvLuaCity::lGetExtraBaseYieldRateTimes100(lua_State* L)
+{
+	CvCity* pkCity = GetInstance(L);
+	const YieldTypes eIndex = (YieldTypes)lua_tointeger(L, 2);
+	int iResult = 0;
+	iResult += pkCity->GetYieldPerPopTimes100(eIndex) * pkCity->getPopulation();
+	iResult += GET_PLAYER(pkCity->getOwner()).GetYieldPerPopChange(eIndex) * pkCity->getPopulation();
+	iResult += pkCity->GetYieldPerPopInEmpireTimes100(eIndex) * GET_PLAYER(pkCity->getOwner()).getTotalPopulation() / 100;
+	iResult += pkCity->GetYieldPerReligionTimes100(eIndex) * pkCity->GetCityReligions()->GetNumReligionsWithFollowers();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+//------------------------------------------------------------------------------
 //int getBaseYieldRateModifier(YieldTypes eIndex, int iExtra = 0);
 int CvLuaCity::lGetBaseYieldRateModifier(lua_State* L)
 {
@@ -5301,6 +5317,8 @@ LUAAPIIMPL(City, GetUnitMaxExperienceLocal);
 #endif
 
 LUAAPIIMPL(City, IsSecondCapital);
+
+LUAAPIIMPL(City, IsAllowSpaceshipLaunch);
 
 int CvLuaCity::lGetFoodConsumptionPerPopTimes100(lua_State* L)
 {

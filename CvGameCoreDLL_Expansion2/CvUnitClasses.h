@@ -97,6 +97,7 @@ public:
 	int GetTrainPopulationConsume() const;
 	int GetNoSpreadTurnPopModifierAfterRemovingHeresy() const;
 	bool IsNoAggressive() const;
+	bool IsForbidRebase() const;
 	bool IsFaithCostIncrease() const;
 	int GetFaithCostIncrease() const;
 
@@ -212,6 +213,7 @@ public:
 	bool IsPuppetPurchaseOverride() const;
 	bool IsUnitTechUpgrade() const;
 	bool GetFreePromotions(int i) const;
+	int GetUnitNameFreePromotion(int iIndex) const;
 
 	// Derived fields (not in XML)
 	int GetCargoSpace() const;  // (from free promotions)
@@ -298,6 +300,7 @@ private:
 	int m_iTrainPopulationConsume;
 	int m_iNoSpreadTurnPopModifierAfterRemovingHeresy;
 	bool m_bNoAggressive;
+	bool m_bForbidRebase;
 	int m_iFaithCostIncrease;
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
@@ -415,6 +418,7 @@ private:
 	CvString* m_paszLateArtDefineTags;
 	CvString* m_paszMiddleArtDefineTags;
 	CvString* m_paszUnitNames;
+	int* m_piFreePromotions;
 	GreatWorkType* m_paeGreatWorks;
 
 	int m_iCombatStrengthChangeAfterKilling = 0;

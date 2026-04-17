@@ -172,6 +172,7 @@ class ICvUnit1;
 #include "CvLuaFormula.h"
 
 #include "CvIndependentPromotionInfo.h"
+#include "CvUnitPurchaseCollections.h"
 
 class CvGlobals
 {
@@ -665,9 +666,7 @@ public:
 	lua::EvaluatorManager* GetLuaEvaluatorManager();
 
 	CvIndependentPromotionInfo* GetIndependentPromotion();
-
-	const std::vector<BuildingTypes>& GetEnableUnitPurchaseBuildings() const;
-	void InitEnableUnitPurchaseBuildings();
+	CvUnitPurchaseCollections* GetUnitPurchaseCollections();
 
 	//
 	// Global Types
@@ -8055,8 +8054,7 @@ protected:
 	lua::EvaluatorManager* m_pLuaEvaluatorManager;
 
 	CvIndependentPromotionInfo* m_pIndependentPromotion;
-
-	std::vector<BuildingTypes> m_vEnableUnitPurchaseBuildings;
+	CvUnitPurchaseCollections* m_pUnitPurchaseCollections;
 
 	//////////////////////////////////////////////////////////////////////////
 	// GLOBAL TYPES

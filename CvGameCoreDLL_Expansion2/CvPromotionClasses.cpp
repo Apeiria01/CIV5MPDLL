@@ -18,7 +18,6 @@
 CvPromotionEntry::CvPromotionEntry():
 	m_iLayerAnimationPath(ANIMATIONPATH_NONE),
 	m_iPrereqPromotion(NO_PROMOTION),
-	m_iMutuallyExclusiveGroup(0),
 	m_iTechPrereq(NO_TECH),
 	m_iInvisibleType(NO_INVISIBLE),
 	m_iSeeInvisibleType(NO_INVISIBLE),
@@ -211,6 +210,7 @@ CvPromotionEntry::CvPromotionEntry():
 	m_iMilitaryMightMod(0),
 	m_iExtraMoveTimesXX(0),
 	m_iRangeAttackCostModifier(0),
+	m_iSetUpCostModifier(0),
 	m_iOriginalCapitalDamageFix(0),
 	m_iOriginalCapitalSpecialDamageFix(0),
 	m_iMultipleInitExperence(0),
@@ -462,7 +462,6 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_bHillsDoubleMove = kResults.GetBool("HillsDoubleMove");
 	m_bIgnoreTerrainCost = kResults.GetBool("IgnoreTerrainCost");
 	m_bRiverDoubleMove = kResults.GetBool("RiverDoubleMove");
-	m_iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 	m_bIgnoreTerrainDamage = kResults.GetBool("IgnoreTerrainDamage");
 	m_bIgnoreFeatureDamage = kResults.GetBool("IgnoreFeatureDamage");
@@ -768,6 +767,7 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_iMilitaryMightMod = kResults.GetInt("MilitaryMightMod");
 	m_iExtraMoveTimesXX = kResults.GetInt("ExtraMoveTimesXX");
 	m_iRangeAttackCostModifier = kResults.GetInt("RangeAttackCostModifier");
+	m_iSetUpCostModifier = kResults.GetInt("SetUpCostModifier");
 	m_iOriginalCapitalDamageFix = kResults.GetInt("OriginalCapitalDamageFix");
 	m_iOriginalCapitalSpecialDamageFix = kResults.GetInt("OriginalCapitalSpecialDamageFix");
 	m_iMultipleInitExperence = kResults.GetInt("MultipleInitExperence");
@@ -1424,8 +1424,9 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 		pResults->Reset();
 	}
 
-	//PromotionPrereqOr1-13
+	//PromotionPrereqOr1-13 & Promotion_PromotionPrereqOrs
 	{
+		m_vPromotionPrereqOrs.clear();
 		for(int i = 1; i <= 13; i++)
 		{
 			CvString szPrereqOri;
@@ -1435,6 +1436,24 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			if(iPrereqOrPromotioni == NO_PROMOTION) continue;
 			m_vPromotionPrereqOrs.push_back(iPrereqOrPromotioni);
 		}
+		std::string sqlKey = "m_vPromotionPrereqOrs";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == NULL)
+		{
+			const char* szSQL = "select UnitPromotions.ID from Promotion_PromotionPrereqOrs inner join UnitPromotions on UnitPromotions.Type = PrereqPromotionType where PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, szSQL);
+		}
+		CvAssert(pResults);
+		if (!pResults) return false;
+
+		pResults->Bind(1, szPromotionType);
+		while (pResults->Step())
+		{
+			const PromotionTypes iPrereqPromotion = (PromotionTypes)pResults->GetInt(0);
+			CvAssert(iPrereqPromotion < iNumUnitPromotions);
+			m_vPromotionPrereqOrs.push_back(iPrereqPromotion);
+		}
+		pResults->Reset();
 	}
 	//Promotion_PromotionPrereqAnds
 	{
@@ -1481,6 +1500,23 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 			CvAssert(iExclusionPromotion < iNumUnitPromotions);
 			m_vPromotionExclusionAny.push_back(iExclusionPromotion);
 		}
+
+		pResults->Reset();
+	}
+	int iMutuallyExclusiveGroup = kResults.GetInt("MutuallyExclusiveGroup");
+	if (iMutuallyExclusiveGroup != -1)
+	{
+		std::string strKey("UnitPromotions.MutuallyExclusiveGroup");
+		Database::Results* pResults = kUtility.GetResults(strKey);
+		
+		if(pResults == NULL)
+		{
+			pResults = kUtility.PrepareResults(strKey, "select ID from UnitPromotions where MutuallyExclusiveGroup != -1 and MutuallyExclusiveGroup = ? and Type != ?");
+		}
+
+		pResults->Bind(1, iMutuallyExclusiveGroup);
+		pResults->Bind(2, szPromotionType);
+		while(pResults->Step()) m_vPromotionExclusionAny.push_back(pResults->GetInt(0));
 
 		pResults->Reset();
 	}
@@ -2663,6 +2699,11 @@ int CvPromotionEntry::GetRangeAttackCostModifier() const
 	return m_iRangeAttackCostModifier;
 }
 
+int CvPromotionEntry::GetSetUpCostModifier() const
+{
+	return m_iSetUpCostModifier;
+}
+
 int CvPromotionEntry::GetOriginalCapitalDamageFix() const
 {
 	return m_iOriginalCapitalDamageFix;
@@ -2857,14 +2898,6 @@ bool CvPromotionEntry::IsIgnoreTerrainCost() const
 {
 	return m_bIgnoreTerrainCost;
 }
-
-
-
-int CvPromotionEntry::GetMutuallyExclusiveGroup() const
-{
-	return m_iMutuallyExclusiveGroup;
-}
-
 
 #if defined(MOD_API_PLOT_BASED_DAMAGE)
 /// Accessor: Ignores terrain damage

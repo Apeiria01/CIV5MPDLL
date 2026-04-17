@@ -1812,8 +1812,9 @@ int CvPlayerEspionage::CalcPerTurn(int iSpyState, CvCity* pCity, int iSpyIndex)
 			PlayerTypes eCityOwner = pCity->getOwner();
 			int iBaseYieldRate = pCity->getYieldRateTimes100(YIELD_SCIENCE, false);
 			iBaseYieldRate *= GC.getESPIONAGE_GATHERING_INTEL_RATE_BASE_PERCENT();
+			iBaseYieldRate /= 100;
 			iBaseYieldRate *= GC.getGame().getGameSpeedInfo().getSpyRatePercent();
-			iBaseYieldRate /= 10000;
+			iBaseYieldRate /= 100;
 			int iCityEspionageModifier = pCity->GetEspionageModifier();
 			int iPlayerEspionageModifier = GET_PLAYER(eCityOwner).GetEspionageModifier();
 			int iTheirPoliciesEspionageModifier = GET_PLAYER(eCityOwner).GetPlayerPolicies()->GetNumericModifier(POLICYMOD_STEAL_TECH_SLOWER_MODIFIER);
