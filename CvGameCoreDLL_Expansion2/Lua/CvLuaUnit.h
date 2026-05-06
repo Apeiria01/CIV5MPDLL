@@ -456,6 +456,12 @@ protected:
 	static int lGetHPHealedIfDefeatEnemyGlobal(lua_State* L);
 	static int lGetNumOriginalCapitalDefenseMod(lua_State* L);
 	static int lGetNumOriginalCapitalAttackMod(lua_State* L);
+	static int lGetGoldAttackBonus(lua_State* L);
+	static int lGetCultureAttackBonus(lua_State* L);
+	static int lGetFaithAttackBonus(lua_State* L);
+	static int lGetGoldDefenseBonus(lua_State* L);
+	static int lGetCultureDefenseBonus(lua_State* L);
+	static int lGetFaithDefenseBonus(lua_State* L);
 	static int lGetBarbarianCombatBonus(lua_State* L);
 	static int lGetNumSpyDefenseMod(lua_State* L);
 	static int lGetNumSpyAttackMod(lua_State* L);

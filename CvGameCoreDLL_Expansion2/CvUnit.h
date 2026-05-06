@@ -1947,6 +1947,31 @@ public:
 
 	void setHealPercentFromAttackDamageFormula(int iValue);
 	const int GetHealPercentFromAttackDamageFormula() const;
+
+	void setGoldAttackBonusFormula(int iValue);
+	const int GetGoldAttackBonusFormula() const;
+
+	void setGoldDefenseBonusFormula(int iValue);
+	const int GetGoldDefenseBonusFormula() const;
+
+	void setCultureAttackBonusFormula(int iValue);
+	const int GetCultureAttackBonusFormula() const;
+
+	void setCultureDefenseBonusFormula(int iValue);
+	const int GetCultureDefenseBonusFormula() const;
+
+	void setFaithAttackBonusFormula(int iValue);
+	const int GetFaithAttackBonusFormula() const;
+
+	void setFaithDefenseBonusFormula(int iValue);
+	const int GetFaithDefenseBonusFormula() const;
+
+	int GetGoldAttackBonus() const;
+	int GetGoldDefenseBonus() const;
+	int GetCultureAttackBonus() const;
+	int GetCultureDefenseBonus() const;
+	int GetFaithAttackBonus() const;
+	int GetFaithDefenseBonus() const;
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	const int GetCrops() const;
@@ -2606,6 +2631,12 @@ protected:
 	int m_eAttackChanceFromAttackDamageFormula;
 	int m_eMovementFromAttackDamageFormula;
 	int m_eHealPercentFromAttackDamageFormula;
+	int m_eGoldAttackBonusFormula;
+	int m_eGoldDefenseBonusFormula;
+	int m_eCultureAttackBonusFormula;
+	int m_eCultureDefenseBonusFormula;
+	int m_eFaithAttackBonusFormula;
+	int m_eFaithDefenseBonusFormula;
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	int m_iCrops;

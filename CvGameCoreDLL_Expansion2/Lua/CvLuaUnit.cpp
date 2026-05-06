@@ -427,6 +427,12 @@ void CvLuaUnit::PushMethods(lua_State* L, int t)
 	Method(GetHPHealedIfDefeatEnemyGlobal);
 	Method(GetNumOriginalCapitalDefenseMod);
 	Method(GetNumOriginalCapitalAttackMod);
+	Method(GetGoldAttackBonus);
+	Method(GetCultureAttackBonus);
+	Method(GetFaithAttackBonus);
+	Method(GetGoldDefenseBonus);
+	Method(GetCultureDefenseBonus);
+	Method(GetFaithDefenseBonus);
 	Method(GetOnCapitalLandAttackMod);
 	Method(GetOutsideCapitalLandAttackMod);
 	Method(GetOnCapitalLandDefenseMod);
@@ -4007,6 +4013,60 @@ int CvLuaUnit::lGetNumOriginalCapitalAttackMod(lua_State* L)
 	return 1;
 }
 #endif
+
+int CvLuaUnit::lGetGoldAttackBonus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetGoldAttackBonus();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetCultureAttackBonus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetCultureAttackBonus();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetFaithAttackBonus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetFaithAttackBonus();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetGoldDefenseBonus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetGoldDefenseBonus();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetCultureDefenseBonus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetCultureDefenseBonus();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
+
+int CvLuaUnit::lGetFaithDefenseBonus(lua_State* L)
+{
+	CvUnit* pkUnit = GetInstance(L);
+
+	const int iResult = pkUnit->GetFaithDefenseBonus();
+	lua_pushinteger(L, iResult);
+	return 1;
+}
 
 
 

@@ -222,6 +222,12 @@ CvPromotionEntry::CvPromotionEntry():
 	m_eAttackChanceFromAttackDamageFormula(NO_LUA_FORMULA),
 	m_eMovementFromAttackDamageFormula(NO_LUA_FORMULA),
 	m_eHealPercentFromAttackDamageFormula(NO_LUA_FORMULA),
+	m_eGoldAttackBonusFormula(NO_LUA_FORMULA),
+	m_eGoldDefenseBonusFormula(NO_LUA_FORMULA),
+	m_eCultureAttackBonusFormula(NO_LUA_FORMULA),
+	m_eCultureDefenseBonusFormula(NO_LUA_FORMULA),
+	m_eFaithAttackBonusFormula(NO_LUA_FORMULA),
+	m_eFaithDefenseBonusFormula(NO_LUA_FORMULA),
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	m_bCrops(false),
@@ -780,6 +786,12 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 	m_eAttackChanceFromAttackDamageFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("AttackChanceFromAttackDamage")));
 	m_eMovementFromAttackDamageFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("MovementFromAttackDamage")));
 	m_eHealPercentFromAttackDamageFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("HealPercentFromAttackDamage")));
+	m_eGoldAttackBonusFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("GoldAttackBonusFormula")));
+	m_eGoldDefenseBonusFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("GoldDefenseBonusFormula")));
+	m_eCultureAttackBonusFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("CultureAttackBonusFormula")));
+	m_eCultureDefenseBonusFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("CultureDefenseBonusFormula")));
+	m_eFaithAttackBonusFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("FaithAttackBonusFormula")));
+	m_eFaithDefenseBonusFormula = (int)static_cast<LuaFormulaTypes>(GC.getInfoTypeForString(kResults.GetText("FaithDefenseBonusFormula")));
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	m_bCrops = kResults.GetBool("IsCrops");
@@ -2788,6 +2800,36 @@ int CvPromotionEntry::GetMovementFromAttackDamageFormula() const
 int CvPromotionEntry::GetHealPercentFromAttackDamageFormula() const
 {
 	return m_eHealPercentFromAttackDamageFormula;
+}
+
+int CvPromotionEntry::GetGoldAttackBonusFormula() const
+{
+	return m_eGoldAttackBonusFormula;
+}
+
+int CvPromotionEntry::GetGoldDefenseBonusFormula() const
+{
+	return m_eGoldDefenseBonusFormula;
+}
+
+int CvPromotionEntry::GetCultureAttackBonusFormula() const
+{
+	return m_eCultureAttackBonusFormula;
+}
+
+int CvPromotionEntry::GetCultureDefenseBonusFormula() const
+{
+	return m_eCultureDefenseBonusFormula;
+}
+
+int CvPromotionEntry::GetFaithAttackBonusFormula() const
+{
+	return m_eFaithAttackBonusFormula;
+}
+
+int CvPromotionEntry::GetFaithDefenseBonusFormula() const
+{
+	return m_eFaithDefenseBonusFormula;
 }
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)

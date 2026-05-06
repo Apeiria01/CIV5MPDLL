@@ -482,6 +482,12 @@ CvUnit::CvUnit() :
 	, m_eAttackChanceFromAttackDamageFormula(NO_LUA_FORMULA)
 	, m_eMovementFromAttackDamageFormula(NO_LUA_FORMULA)
 	, m_eHealPercentFromAttackDamageFormula(NO_LUA_FORMULA)
+	, m_eGoldAttackBonusFormula(NO_LUA_FORMULA)
+	, m_eGoldDefenseBonusFormula(NO_LUA_FORMULA)
+	, m_eCultureAttackBonusFormula(NO_LUA_FORMULA)
+	, m_eCultureDefenseBonusFormula(NO_LUA_FORMULA)
+	, m_eFaithAttackBonusFormula(NO_LUA_FORMULA)
+	, m_eFaithDefenseBonusFormula(NO_LUA_FORMULA)
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	, m_iCrops(0)
@@ -1495,6 +1501,12 @@ void CvUnit::reset(int iID, UnitTypes eUnit, PlayerTypes eOwner, bool bConstruct
 	m_eAttackChanceFromAttackDamageFormula = NO_LUA_FORMULA;
 	m_eMovementFromAttackDamageFormula = NO_LUA_FORMULA;
 	m_eHealPercentFromAttackDamageFormula = NO_LUA_FORMULA;
+	m_eGoldAttackBonusFormula = NO_LUA_FORMULA;
+	m_eGoldDefenseBonusFormula = NO_LUA_FORMULA;
+	m_eCultureAttackBonusFormula = NO_LUA_FORMULA;
+	m_eCultureDefenseBonusFormula = NO_LUA_FORMULA;
+	m_eFaithAttackBonusFormula = NO_LUA_FORMULA;
+	m_eFaithDefenseBonusFormula = NO_LUA_FORMULA;
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	m_iCrops = 0;
@@ -7395,6 +7407,201 @@ void CvUnit::setMovementFromAttackDamageFormula(int iValue)
 const int CvUnit::GetMovementFromAttackDamageFormula() const
 {
 	return m_eMovementFromAttackDamageFormula;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::setGoldAttackBonusFormula(int iValue)
+{
+	if(iValue != NO_LUA_FORMULA && m_eGoldAttackBonusFormula == NO_LUA_FORMULA)
+	{
+		m_eGoldAttackBonusFormula = iValue;
+	}
+}
+
+const int CvUnit::GetGoldAttackBonusFormula() const
+{
+	return m_eGoldAttackBonusFormula;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::setGoldDefenseBonusFormula(int iValue)
+{
+	if(iValue != NO_LUA_FORMULA && m_eGoldDefenseBonusFormula == NO_LUA_FORMULA)
+	{
+		m_eGoldDefenseBonusFormula = iValue;
+	}
+}
+
+const int CvUnit::GetGoldDefenseBonusFormula() const
+{
+	return m_eGoldDefenseBonusFormula;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::setCultureAttackBonusFormula(int iValue)
+{
+	if(iValue != NO_LUA_FORMULA && m_eCultureAttackBonusFormula == NO_LUA_FORMULA)
+	{
+		m_eCultureAttackBonusFormula = iValue;
+	}
+}
+
+const int CvUnit::GetCultureAttackBonusFormula() const
+{
+	return m_eCultureAttackBonusFormula;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::setCultureDefenseBonusFormula(int iValue)
+{
+	if(iValue != NO_LUA_FORMULA && m_eCultureDefenseBonusFormula == NO_LUA_FORMULA)
+	{
+		m_eCultureDefenseBonusFormula = iValue;
+	}
+}
+
+const int CvUnit::GetCultureDefenseBonusFormula() const
+{
+	return m_eCultureDefenseBonusFormula;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::setFaithAttackBonusFormula(int iValue)
+{
+	if(iValue != NO_LUA_FORMULA && m_eFaithAttackBonusFormula == NO_LUA_FORMULA)
+	{
+		m_eFaithAttackBonusFormula = iValue;
+	}
+}
+
+const int CvUnit::GetFaithAttackBonusFormula() const
+{
+	return m_eFaithAttackBonusFormula;
+}
+//	--------------------------------------------------------------------------------
+void CvUnit::setFaithDefenseBonusFormula(int iValue)
+{
+	if(iValue != NO_LUA_FORMULA && m_eFaithDefenseBonusFormula == NO_LUA_FORMULA)
+	{
+		m_eFaithDefenseBonusFormula = iValue;
+	}
+}
+
+const int CvUnit::GetFaithDefenseBonusFormula() const
+{
+	return m_eFaithDefenseBonusFormula;
+}
+
+int CvUnit::GetGoldAttackBonus() const
+{
+	int iGoldAttackBonusFormula = GetGoldAttackBonusFormula();
+	CvPlayer& kPlayer = GET_PLAYER(getOwner());
+	CvTreasury* pTreasury = kPlayer.GetTreasury();
+	int iGold = pTreasury->GetGold();
+	if(iGoldAttackBonusFormula != NO_LUA_FORMULA)
+	{
+		auto* evaluator = GC.GetLuaEvaluatorManager()->GetEvaluator((LuaFormulaTypes)iGoldAttackBonusFormula);
+		if (evaluator != nullptr)
+		{
+			auto result = evaluator->Evaluate<int>(iGold);
+			if(result.ok && result.value != 0)
+			{
+				return result.value;
+			}
+				
+		}
+	}
+	return 0;
+}
+int CvUnit::GetGoldDefenseBonus() const
+{
+	int iGoldDefenseBonusFormula = GetGoldDefenseBonusFormula();
+	CvPlayer& kPlayer = GET_PLAYER(getOwner());
+	CvTreasury* pTreasury = kPlayer.GetTreasury();
+	int iGold = pTreasury->GetGold();
+	if(iGoldDefenseBonusFormula != NO_LUA_FORMULA)
+	{
+		auto* evaluator = GC.GetLuaEvaluatorManager()->GetEvaluator((LuaFormulaTypes)iGoldDefenseBonusFormula);
+		if (evaluator != nullptr)
+		{
+			auto result = evaluator->Evaluate<int>(iGold);
+			if(result.ok && result.value != 0)
+			{
+				return result.value;
+			}
+				
+		}
+	}
+	return 0;
+}
+int CvUnit::GetCultureAttackBonus() const
+{
+	int iCultureAttackBonusFormula = GetCultureAttackBonusFormula();
+	CvPlayer& kPlayer = GET_PLAYER(getOwner());
+	int iCulture = kPlayer.getJONSCulture();
+	if(iCultureAttackBonusFormula != NO_LUA_FORMULA)
+	{
+		auto* evaluator = GC.GetLuaEvaluatorManager()->GetEvaluator((LuaFormulaTypes)iCultureAttackBonusFormula);
+		if (evaluator != nullptr)
+		{
+			auto result = evaluator->Evaluate<int>(iCulture);
+			if(result.ok && result.value != 0)
+			{
+				return result.value;
+			}
+				
+		}
+	}
+	return 0;
+}
+int CvUnit::GetCultureDefenseBonus() const
+{
+	int iCultureDefenseBonusFormula = GetCultureDefenseBonusFormula();
+	CvPlayer& kPlayer = GET_PLAYER(getOwner());
+	int iCulture = kPlayer.getJONSCulture();
+	if(iCultureDefenseBonusFormula != NO_LUA_FORMULA)
+	{
+		auto* evaluator = GC.GetLuaEvaluatorManager()->GetEvaluator((LuaFormulaTypes)iCultureDefenseBonusFormula);
+		if (evaluator != nullptr)
+		{
+			auto result = evaluator->Evaluate<int>(iCulture);
+			if(result.ok && result.value != 0)
+			{
+				return result.value;
+			}
+				
+		}
+	}
+	return 0;
+}
+int CvUnit::GetFaithAttackBonus() const
+{
+	int iFaithAttackBonusFormula = GetFaithAttackBonusFormula();
+	CvPlayer& kPlayer = GET_PLAYER(getOwner());
+	int iFaith = kPlayer.GetFaith();
+	if(iFaithAttackBonusFormula != NO_LUA_FORMULA)
+	{
+		auto* evaluator = GC.GetLuaEvaluatorManager()->GetEvaluator((LuaFormulaTypes)iFaithAttackBonusFormula);
+		if (evaluator != nullptr)		{
+			auto result = evaluator->Evaluate<int>(iFaith);
+			if(result.ok && result.value != 0)			{
+				return result.value;
+			}
+		}
+	}
+	return 0;
+}
+int CvUnit::GetFaithDefenseBonus() const
+{
+	int iFaithDefenseBonusFormula = GetFaithDefenseBonusFormula();
+	CvPlayer& kPlayer = GET_PLAYER(getOwner());
+	int iFaith = kPlayer.GetFaith();
+	if(iFaithDefenseBonusFormula != NO_LUA_FORMULA)
+	{
+		auto* evaluator = GC.GetLuaEvaluatorManager()->GetEvaluator((LuaFormulaTypes)iFaithDefenseBonusFormula);
+		if (evaluator != nullptr)		{
+			auto result = evaluator->Evaluate<int>(iFaith);
+			if(result.ok && result.value != 0)			{
+				return result.value;
+			}
+		}
+	}
+	return 0;
 }
 //	--------------------------------------------------------------------------------
 void CvUnit::setHealPercentFromAttackDamageFormula(int iValue)
@@ -15194,6 +15401,16 @@ int CvUnit::GetMaxAttackStrength(const CvPlot* pFromPlot, const CvPlot* pToPlot,
 		}
 	}
 
+	//Gold/Culture/Faith modifiers for attacking
+	iTempModifier = GetGoldAttackBonus();
+	iModifier += iTempModifier;
+
+	iTempModifier = GetCultureAttackBonus();
+	iModifier += iTempModifier;
+
+	iTempModifier = GetFaithAttackBonus();
+	iModifier += iTempModifier;
+
 	//  same land with  CapitalCity
 	int pArea;
 	int puArea;
@@ -16597,6 +16814,13 @@ int CvUnit::GetMaxRangedCombatStrength(const CvUnit* pOtherUnit, const CvCity* p
 		}
 #endif
 
+		//Gold/Culture/Faith modifier for defending
+		iTempModifier = GetGoldDefenseBonus();
+		iModifier += iTempModifier;
+		iTempModifier = GetCultureDefenseBonus();
+		iModifier += iTempModifier;
+		iTempModifier = GetFaithDefenseBonus();
+		iModifier += iTempModifier;
 
 #if defined(MOD_ROG_CORE)
 		//  same land with  CapitalCity
@@ -26301,6 +26525,12 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		setAttackChanceFromAttackDamageFormula(thisPromotion.GetAttackChanceFromAttackDamageFormula() ? thisPromotion.GetAttackChanceFromAttackDamageFormula() : NO_LUA_FORMULA);
 		setMovementFromAttackDamageFormula(thisPromotion.GetMovementFromAttackDamageFormula() ? thisPromotion.GetMovementFromAttackDamageFormula() : NO_LUA_FORMULA);
 		setHealPercentFromAttackDamageFormula(thisPromotion.GetHealPercentFromAttackDamageFormula() ? thisPromotion.GetHealPercentFromAttackDamageFormula() : NO_LUA_FORMULA);
+		setGoldAttackBonusFormula(thisPromotion.GetGoldAttackBonusFormula() ? thisPromotion.GetGoldAttackBonusFormula() : NO_LUA_FORMULA);
+		setGoldDefenseBonusFormula(thisPromotion.GetGoldDefenseBonusFormula() ? thisPromotion.GetGoldDefenseBonusFormula() : NO_LUA_FORMULA);
+		setCultureAttackBonusFormula(thisPromotion.GetCultureAttackBonusFormula() ? thisPromotion.GetCultureAttackBonusFormula() : NO_LUA_FORMULA);
+		setCultureDefenseBonusFormula(thisPromotion.GetCultureDefenseBonusFormula() ? thisPromotion.GetCultureDefenseBonusFormula() : NO_LUA_FORMULA);
+		setFaithAttackBonusFormula(thisPromotion.GetFaithAttackBonusFormula() ? thisPromotion.GetFaithAttackBonusFormula() : NO_LUA_FORMULA);
+		setFaithDefenseBonusFormula(thisPromotion.GetFaithDefenseBonusFormula() ? thisPromotion.GetFaithDefenseBonusFormula() : NO_LUA_FORMULA);
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 		if(thisPromotion.IsCrops()) ChangeCrops(iChange);
@@ -26917,6 +27147,15 @@ void CvUnit::read(FDataStream& kStream)
 	kStream >> m_eAttackChanceFromAttackDamageFormula;
 	kStream >> m_eMovementFromAttackDamageFormula;
 	kStream >> m_eHealPercentFromAttackDamageFormula;
+	if (uiVersion >= 10)
+	{
+		kStream >> m_eGoldAttackBonusFormula;
+		kStream >> m_eGoldDefenseBonusFormula;
+		kStream >> m_eCultureAttackBonusFormula;
+		kStream >> m_eCultureDefenseBonusFormula;
+		kStream >> m_eFaithAttackBonusFormula;
+		kStream >> m_eFaithDefenseBonusFormula;
+	}
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	kStream >> m_iCrops;
@@ -27250,7 +27489,7 @@ void CvUnit::write(FDataStream& kStream) const
 	VALIDATE_OBJECT
 
 	// Current version number
-	uint uiVersion = 9;
+	uint uiVersion = 10;
 	kStream << uiVersion;
 	MOD_SERIALIZE_INIT_WRITE(kStream);
 
@@ -27330,6 +27569,15 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_eAttackChanceFromAttackDamageFormula;
 	kStream << m_eMovementFromAttackDamageFormula;
 	kStream << m_eHealPercentFromAttackDamageFormula;
+	if (uiVersion >= 10)
+	{
+		kStream << m_eGoldAttackBonusFormula;
+		kStream << m_eGoldDefenseBonusFormula;
+		kStream << m_eCultureAttackBonusFormula;
+		kStream << m_eCultureDefenseBonusFormula;
+		kStream << m_eFaithAttackBonusFormula;
+		kStream << m_eFaithDefenseBonusFormula;
+	}
 #endif
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
 	kStream << m_iCrops;

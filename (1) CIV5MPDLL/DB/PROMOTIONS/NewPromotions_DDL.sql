@@ -84,6 +84,13 @@ alter table UnitPromotions add AttackChanceFromAttackDamage text references LuaF
 alter table UnitPromotions add MovementFromAttackDamage text references LuaFormula(Type);
 alter table UnitPromotions add HealPercentFromAttackDamage text references LuaFormula(Type);
 
+alter table UnitPromotions add GoldAttackBonusFormula text references LuaFormula(Type);
+alter table UnitPromotions add GoldDefenseBonusFormula text references LuaFormula(Type);
+alter table UnitPromotions add CultureAttackBonusFormula text references LuaFormula(Type);
+alter table UnitPromotions add CultureDefenseBonusFormula text references LuaFormula(Type);
+alter table UnitPromotions add FaithAttackBonusFormula text references LuaFormula(Type);
+alter table UnitPromotions add FaithDefenseBonusFormula text references LuaFormula(Type);
+
 alter table UnitPromotions add StrongerDamaged boolean default 0;
 alter table UnitPromotions add FightWellDamaged boolean default 0;
 alter table UnitPromotions add NoResourcePunishment boolean default 0;
