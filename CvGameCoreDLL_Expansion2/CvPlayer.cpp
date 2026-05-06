@@ -13529,6 +13529,11 @@ int CvPlayer::GetHappinessFromNaturalWonders() const
 		iHappiness *= (100 + m_pTraits->GetNaturalWonderHappinessModifier());
 		iHappiness /= 100;
 	}
+	if(m_pTraits->GetNaturalWonderYieldModifierPerEra() > 0)
+	{
+		iHappiness *= (100 + m_pTraits->GetNaturalWonderYieldModifierPerEra() * GetCurrentEra());
+		iHappiness /= 100;
+	}
 
 
 
@@ -13540,6 +13545,12 @@ int CvPlayer::GetHappinessFromNaturalWonders() const
 		if (m_pTraits->GetNaturalWonderYieldModifier() > 0)
 		{
 			iPlotHappiness *= (100 + m_pTraits->GetNaturalWonderYieldModifier());
+			iPlotHappiness /= 100;
+		}
+
+		if (m_pTraits->GetNaturalWonderYieldModifierPerEra() != 0)
+		{
+			iPlotHappiness *= (100 + m_pTraits->GetNaturalWonderYieldModifierPerEra() * GetCurrentEra());
 			iPlotHappiness /= 100;
 		}
 
