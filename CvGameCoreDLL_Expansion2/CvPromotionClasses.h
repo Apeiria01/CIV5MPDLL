@@ -517,6 +517,8 @@ public:
 	int GetOutsideFriendlyLandsInflictDamageChange() const;
 
 	int GetInstantYieldPerReligionFollowerConverted(YieldTypes eIndex) const;
+	int GetExploreYield(YieldTypes eIndex) const;
+	int GetEraPercent() const;
 
 protected:
 	int m_iLayerAnimationPath;
@@ -969,8 +971,10 @@ protected:
 	int m_iHeavyChargeCollateralPercent = 0;
 
 	int m_iOutsideFriendlyLandsInflictDamageChange = 0;
+	int m_iEraPercent = 0;
 
 	std::tr1::array<int, NUM_YIELD_TYPES> m_aiInstantYieldPerReligionFollowerConverted;
+	std::tr1::array<int, NUM_YIELD_TYPES> m_aiExploreYield;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

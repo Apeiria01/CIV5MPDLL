@@ -2106,6 +2106,10 @@ public:
 	int GetInstantYieldPerReligionFollowerConverted(YieldTypes eIndex) const;
 	void ChangeInstantYieldPerReligionFollowerConverted(YieldTypes eIndex, int iChange);
 
+	int GetExploreYield(YieldTypes eIndex) const;
+	void ChangeExploreYield(YieldTypes eIndex, int iChange);
+	int GetEraPercent() const;
+
 	void ChangePromotionBuilds(BuildTypes eIndex,int iChange);
     bool IsPromotionBuilds(BuildTypes eIndex) const;
 
@@ -2672,8 +2676,10 @@ protected:
 
 	int m_iCombatStrengthChangeFromKilledUnits = 0;
 	int m_iRangedCombatStrengthChangeFromKilledUnits = 0;
+    int m_iEraPercent = 0;
 
 	std::tr1::array<int, NUM_YIELD_TYPES> m_aiInstantYieldPerReligionFollowerConverted;
+	std::tr1::array<int, NUM_YIELD_TYPES> m_aiExploreYield;
 
 private:
 

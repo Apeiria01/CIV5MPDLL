@@ -144,6 +144,12 @@ alter table UnitPromotions add MilitaryMightMod integer default 0;
 alter table UnitPromotions add ShowInUnitPanel integer default 1;
 alter table UnitPromotions add ShowInTooltip integer default 1;
 alter table UnitPromotions add ShowInPedia integer default 1;
+create table UnitPromotions_ExploreYield (
+    PromotionType text references UnitPromotions(Type), 
+    YieldType text references Yields(Type),   
+    Yield integer default 0,              
+    EraPercent integer default 0              
+);
 
 -- Allow build from promotion
 create table Promotion_Builds (

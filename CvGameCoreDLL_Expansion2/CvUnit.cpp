@@ -1641,6 +1641,7 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 	m_iHeavyChargeCollateralPercent = 0;
 
 	m_iOutsideFriendlyLandsInflictDamageChange = 0;
+	m_iEraPercent = 0;
 
 #ifdef MOD_BATTLE_CAPTURE_NEW_RULE
 	m_bIsNewCapture = false;
@@ -1651,6 +1652,10 @@ if (MOD_API_UNIT_CANNOT_BE_RANGED_ATTACKED)
 	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
 	{
 		m_aiInstantYieldPerReligionFollowerConverted[i] = 0;
+	}
+	for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+	{
+		m_aiExploreYield[i] = 0;
 	}
 
 	if(!bConstructorCall)
@@ -20440,6 +20445,28 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 			if (canChangeVisibility())
 #if defined(MOD_API_EXTENSIONS)
 				pNewPlot->changeAdjacentSight(eOurTeam, visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true), this); // needs to be here so that the square is considered visible when we move into it...
+				if (pNewPlot->getVisibilityCount(eOurTeam) == 1) {
+				for (int i = 0; i < GC.getNumPromotionInfos(); i++) {
+					PromotionTypes ePromotion = (PromotionTypes)i;
+					if (!isHasPromotion(ePromotion)) continue;
+					CvPromotionEntry* pkPromotion = GC.getPromotionInfo(ePromotion);
+					if (!pkPromotion) continue;
+					int iEra = GET_TEAM(getTeam()).GetCurrentEra();
+					for (int j = 0; j < NUM_YIELD_TYPES; j++) {
+						YieldTypes eYield = (YieldTypes)j;
+						int iYieldBonus = pkPromotion->GetExploreYield(eYield);
+						if (iYieldBonus <= 0) continue;
+						iYieldBonus = iYieldBonus * (100 + iEra * pkPromotion->GetEraPercent()) / 100;
+						GET_PLAYER(getOwner()).doInstantYield(eYield, iYieldBonus);
+						char text[256] = {0};
+						sprintf_s(text, "%s+%d[ENDCOLOR]%s", 
+							GC.getYieldInfo(eYield)->getColorString(), 
+							iYieldBonus, 
+							GC.getYieldInfo(eYield)->getIconString());
+						SHOW_PLOT_POPUP(pNewPlot, getOwner(), text, 0.0f);
+					}
+				}
+			}
 #else
 				pNewPlot->changeAdjacentSight(eOurTeam, visibilityRange(), true, getSeeInvisibleType(), getFacingDirection(true)); // needs to be here so that the square is considered visible when we move into it...
 #endif
@@ -26372,6 +26399,10 @@ void CvUnit::setHasPromotion(PromotionTypes eIndex, bool bNewValue)
 		{
 			ChangeInstantYieldPerReligionFollowerConverted((YieldTypes) i, thisPromotion.GetInstantYieldPerReligionFollowerConverted((YieldTypes) i) * iChange);
 		}
+		for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+		{
+			ChangeExploreYield((YieldTypes) i, thisPromotion.GetExploreYield((YieldTypes) i) * iChange);
+		}
 
 #if defined(MOD_UNITS_MAX_HP)
 		changeMaxHitPointsChange(thisPromotion.GetMaxHitPointsChange() * iChange);
@@ -27187,6 +27218,8 @@ void CvUnit::read(FDataStream& kStream)
 	kStream >> m_iRangedCombatStrengthChangeFromKilledUnits;
 
 	kStream >> m_aiInstantYieldPerReligionFollowerConverted;
+	kStream >> m_aiExploreYield;
+	kStream >> m_iEraPercent;
 	//  Read mission queue
 	UINT uSize;
 	kStream >> uSize;
@@ -27524,6 +27557,8 @@ void CvUnit::write(FDataStream& kStream) const
 	kStream << m_iRangedCombatStrengthChangeFromKilledUnits;
 
 	kStream << m_aiInstantYieldPerReligionFollowerConverted;
+	kStream << m_aiExploreYield;
+	kStream << m_iEraPercent;
 
 	//  Write mission list
 	kStream << m_missionQueue.getLength();
@@ -32322,4 +32357,26 @@ void CvUnit::ChangeInstantYieldPerReligionFollowerConverted(YieldTypes eIndex, i
 	}
 
 	m_aiInstantYieldPerReligionFollowerConverted[eIndex] += iChange;
+}
+int CvUnit::GetExploreYield(YieldTypes eIndex) const
+{
+	if (eIndex < 0 || eIndex >= NUM_YIELD_TYPES)
+	{
+		return 0;
+	}
+
+	return m_aiExploreYield[eIndex];
+}
+void CvUnit::ChangeExploreYield(YieldTypes eIndex, int iChange)
+{
+	if (eIndex < 0 || eIndex >= NUM_YIELD_TYPES)
+	{
+		return;
+	}
+
+	m_aiExploreYield[eIndex] += iChange;
+}
+int CvUnit::GetEraPercent() const
+{
+	return m_iEraPercent;
 }

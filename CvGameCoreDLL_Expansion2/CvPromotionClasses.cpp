@@ -1664,6 +1664,36 @@ bool CvPromotionEntry::CacheResults(Database::Results& kResults, CvDatabaseUtili
 
 		pResults->Reset();
 	}
+	{
+		for (int i = 0; i < NUM_YIELD_TYPES; ++i) {
+			m_aiExploreYield[i] = 0;
+		}
+		
+		std::string sqlKey = "UnitPromotions_ExploreYield";
+		Database::Results* pResults = kUtility.GetResults(sqlKey);
+		if (pResults == nullptr) {
+			const char* sql = "SELECT YieldType, Yield FROM UnitPromotions_ExploreYield WHERE PromotionType = ?";
+			pResults = kUtility.PrepareResults(sqlKey, sql);
+		}
+		
+		CvAssert(pResults);
+		if (pResults == nullptr) {
+			return false;
+		}
+		
+		pResults->Bind(1, szPromotionType);
+		
+		while (pResults->Step()) {
+			const YieldTypes yieldType = (YieldTypes)GC.getInfoTypeForString(pResults->GetText(0));
+			if (yieldType == -1) {
+				continue;
+			}
+			const int yieldValue = pResults->GetInt(1);
+			m_aiExploreYield[yieldType] = yieldValue;
+		}
+		
+		pResults->Reset();
+	}
 
 	kUtility.PopulateArrayByExistence(m_pbPostCombatRandomPromotion,
 		"UnitPromotions",
@@ -3933,6 +3963,18 @@ int CvPromotionEntry::GetInstantYieldPerReligionFollowerConverted(YieldTypes eIn
 		return 0;
 	}
 	return m_aiInstantYieldPerReligionFollowerConverted[eIndex];
+}
+int CvPromotionEntry::GetExploreYield(YieldTypes eIndex) const
+{
+	if (eIndex < 0 || eIndex >= NUM_YIELD_TYPES)
+	{
+		return 0;
+	}
+	return m_aiExploreYield[eIndex];
+}
+int CvPromotionEntry::GetEraPercent() const
+{
+	return m_iEraPercent;
 }
 
 #ifdef MOD_PROMOTION_ADD_ENEMY_PROMOTIONS
