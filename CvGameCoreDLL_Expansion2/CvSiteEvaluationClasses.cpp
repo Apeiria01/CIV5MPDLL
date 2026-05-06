@@ -174,7 +174,7 @@ DONE_bValid:
 	if(!bTestVisible)
 	{
 		// look at same land mass
-		iRange = GC.getMIN_CITY_RANGE();
+		iRange = GC.getMIN_CITY_RANGE() + GC.getMap().getWorldInfo().GetExtraCityDistance();
 
 		for(iDX = -(iRange); iDX <= iRange; iDX++)
 		{

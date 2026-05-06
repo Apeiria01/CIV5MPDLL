@@ -432,6 +432,7 @@ protected:
 	static int lChangeBaseYieldRateFromReligion(lua_State* L);
 
 	static int lGetYieldPerPopTimes100(lua_State* L);
+	static int lGetExtraBaseYieldRateTimes100(lua_State* L);
 
 	static int lGetBaseYieldRateModifier(lua_State* L);
 	static int lGetYieldRate(lua_State* L);
@@ -735,6 +736,8 @@ protected:
 	LUAAPIEXTN(IsSecondCapital, bool);
 	LUAAPIEXTN(GetFoodConsumptionPerPopTimes100, bool);
 	LUAAPIEXTN(GetDefendedAgainstSpreadUntilTurn, int);
+
+	LUAAPIEXTN(IsAllowSpaceshipLaunch, bool);
 };
 
 #endif //CVLUACITY_H

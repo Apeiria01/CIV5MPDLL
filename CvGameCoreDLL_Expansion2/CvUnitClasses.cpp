@@ -81,6 +81,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_iTrainPopulationConsume(0),
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy(0),
 	m_bNoAggressive(false),
+	m_bForbidRebase(false),
 	m_iFaithCostIncrease(false),
 
 #if defined(MOD_TROOPS_AND_CROPS_FOR_SP)
@@ -166,6 +167,7 @@ CvUnitEntry::CvUnitEntry(void) :
 	m_paszLateArtDefineTags(NULL),
 	m_paszMiddleArtDefineTags(NULL),
 	m_paszUnitNames(NULL),
+	m_piFreePromotions(NULL),
 	m_paeGreatWorks(NULL),
 	m_bUnitArtInfoEraVariation(false),
 	m_bUnitArtInfoCulturalVariation(false),
@@ -194,11 +196,18 @@ CvUnitEntry::~CvUnitEntry(void)
 	SAFE_DELETE_ARRAY(m_piProductionTraits);
 	SAFE_DELETE_ARRAY(m_piFlavorValue);
 	SAFE_DELETE_ARRAY(m_piUnitGroupRequired);
+	SAFE_DELETE_ARRAY(m_piProductionModifierBuildings);
+	SAFE_DELETE_ARRAY(m_piYieldFromKills);
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
+#endif
+	SAFE_DELETE_ARRAY(m_piInstantYieldFromTrainings);
 	SAFE_DELETE_ARRAY(m_pbFreePromotions);
 	SAFE_DELETE_ARRAY(m_paszEarlyArtDefineTags);
 	SAFE_DELETE_ARRAY(m_paszLateArtDefineTags);
 	SAFE_DELETE_ARRAY(m_paszMiddleArtDefineTags);
 	SAFE_DELETE_ARRAY(m_paszUnitNames);
+	SAFE_DELETE_ARRAY(m_piFreePromotions);
 	SAFE_DELETE_ARRAY(m_paeGreatWorks);
 	SAFE_DELETE_ARRAY(m_piTechCombatStrength);
 	SAFE_DELETE_ARRAY(m_piTechRangedCombatStrength);
@@ -349,6 +358,7 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 	m_iTrainPopulationConsume = kResults.GetInt("TrainPopulationConsume");
 	m_iNoSpreadTurnPopModifierAfterRemovingHeresy = kResults.GetInt("NoSpreadTurnPopModifierAfterRemovingHeresy");
 	m_bNoAggressive = kResults.GetBool("NoAggressive");
+	m_bForbidRebase = kResults.GetBool("ForbidRebase");
 	
 	if(m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_WRITER", true /*bHideAssert*/)
 	|| m_iUnitClassType == GC.getInfoTypeForString("UNITCLASS_ARTIST", true /*bHideAssert*/)
@@ -434,7 +444,6 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 
 	//Arrays
 	const char* szUnitType = GetType();
-	if(strcmp("UNIT_ASSYRIAN_SCUD_MISSILE", szUnitType) == 0 || strcmp("UNIT_EGYPT_UNIT777", szUnitType) == 0) throw 1;
 
 	kUtility.SetFlavors(m_piFlavorValue, "Unit_Flavors", "UnitType", szUnitType);
 
@@ -515,12 +524,13 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 		{
 			m_paszUnitNames = FNEW(CvString[m_iNumUnitNames], c_eCiv5GameplayDLL, 0);
 			m_paeGreatWorks = FNEW(GreatWorkType[m_iNumUnitNames], c_eCiv5GameplayDLL, 0);
+			m_piFreePromotions = FNEW(int[m_iNumUnitNames], c_eCiv5GameplayDLL, 0);
 
 			std::string strKey = "Units - UniqueNames";
 			Database::Results* pResults = kUtility.GetResults(strKey);
 			if(pResults == NULL)
 			{
-				pResults = kUtility.PrepareResults(strKey, "select UniqueName, GreatWorkType from Unit_UniqueNames where UnitType = ? ORDER BY rowid");
+				pResults = kUtility.PrepareResults(strKey, "select UniqueName, GreatWorkType, FreePromotion from Unit_UniqueNames where UnitType = ? ORDER BY rowid");
 			}
 
 			pResults->Bind(1, szUnitType, -1, false);
@@ -540,6 +550,18 @@ bool CvUnitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& k
 					m_paeGreatWorks[i] = static_cast<GreatWorkType>(GC.getInfoTypeForString(szGreatWorkType, true));
 				}
 
+				const char* szFreePromotion = pResults->GetText(2);
+				int iFreePromotion = NO_PROMOTION;
+				if (szFreePromotion != NULL)
+				{
+					iFreePromotion = GC.getInfoTypeForString(szFreePromotion, true);
+					if (iFreePromotion < 0 || iFreePromotion >= GC.getNumPromotionInfos())
+					{
+						iFreePromotion = NO_PROMOTION;
+						CvAssertMsg(false, "Invalid FreePromotion in Unit_UniqueNames");
+					}
+				}
+				m_piFreePromotions[i] = iFreePromotion;
 				i++;
 			}
 
@@ -924,6 +946,11 @@ int CvUnitEntry::GetNoSpreadTurnPopModifierAfterRemovingHeresy() const
 bool CvUnitEntry::IsNoAggressive() const
 {
 	return m_bNoAggressive;
+}
+
+bool CvUnitEntry::IsForbidRebase() const
+{
+	return m_bForbidRebase;
 }
 
 bool CvUnitEntry::IsFaithCostIncrease() const
@@ -1429,6 +1456,13 @@ bool CvUnitEntry::GetFreePromotions(int i) const
 	CvAssertMsg(i < GC.getNumPromotionInfos(), "Index out of bounds");
 	CvAssertMsg(i > -1, "Index out of bounds");
 	return m_pbFreePromotions ? m_pbFreePromotions[i] : false;
+}
+
+int CvUnitEntry::GetUnitNameFreePromotion(int iIndex) const
+{
+	CvAssertMsg(iIndex < m_iNumUnitNames, "Index out of bounds");
+	CvAssertMsg(iIndex >= 0, "Index out of bounds");
+	return m_piFreePromotions ? m_piFreePromotions[iIndex] : NO_PROMOTION;
 }
 
 /// Project required to train this unit?

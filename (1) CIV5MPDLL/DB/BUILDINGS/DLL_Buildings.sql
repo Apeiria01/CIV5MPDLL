@@ -320,6 +320,7 @@ alter table Buildings add MoveAfterCreated integer default 0;
 alter table Buildings add ExtraUnitPlayerInstances integer default 0;
 alter table Buildings add GoldenAgeUnitCombatModifier int not null default 0;
 alter table Buildings add UnitMaxExperienceLocal integer default 0;
+alter table Buildings add AllowSpaceshipLaunch boolean default 0;
 
 create table Building_DomainFreeExperiencesGlobal (
 	BuildingType text not null references Buildings(Type),
@@ -371,6 +372,11 @@ create table Building_UnitTypePrmoteHealGlobal (
 	BuildingType text not null references Buildings(Type),
 	UnitType text not null references Units(Type),
 	Heal integer not null default 0
+);
+create table Building_UnitClassMaxInstances (
+	BuildingType text not null references Buildings(Type),
+	UnitClassType text not null references UnitClasses(Type),
+	ExtraMax integer default 0
 );
 --******************** New City Defense ********************--
 alter table Buildings add ExtraAttacks integer default 0;

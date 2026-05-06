@@ -157,8 +157,53 @@ CvBeliefEntry::CvBeliefEntry() :
 /// Destructor
 CvBeliefEntry::~CvBeliefEntry()
 {
+	SAFE_DELETE_ARRAY(m_piGreatPersonPoints);
+	SAFE_DELETE_ARRAY(m_piTerrainCityFoodConsumption);
+
+	SAFE_DELETE_ARRAY(m_piYieldPerBirth);
+	SAFE_DELETE_ARRAY(m_piLakePlotYieldChange);
+	SAFE_DELETE_ARRAY(m_piRiverPlotYieldChange);
+
+	SAFE_DELETE_ARRAY(m_paiCityYieldChange);
+	SAFE_DELETE_ARRAY(m_paiHolyCityYieldChange);
+	SAFE_DELETE_ARRAY(m_paiYieldChangePerForeignCity);
+	SAFE_DELETE_ARRAY(m_paiYieldChangePerXForeignFollowers);
+#if defined(MOD_API_UNIFIED_YIELDS)
+	SAFE_DELETE_ARRAY(m_piYieldPerFollowingCity);
+	SAFE_DELETE_ARRAY(m_piYieldPerXFollowers);
+	SAFE_DELETE_ARRAY(m_piHolyCityYieldPerForeignFollowers);
+	SAFE_DELETE_ARRAY(m_piHolyCityYieldPerNativeFollowers);
+	SAFE_DELETE_ARRAY(m_piCityYieldPerOtherReligion);
+	SAFE_DELETE_ARRAY(m_piYieldPerOtherReligionFollower);
+	SAFE_DELETE_ARRAY(m_piCuttingInstantYieldModifier);
+	SAFE_DELETE_ARRAY(m_piCuttingInstantYield);
+#endif
+	SAFE_DELETE_ARRAY(m_piResourceQuantityModifiers);
+
+	SAFE_DELETE_ARRAY(m_paiBuildingClassHappiness);
+	SAFE_DELETE_ARRAY(m_paiBuildingClassTourism);
+
+	SAFE_DELETE_ARRAY(m_piGoldenAgeGreatPersonRateModifier);
+	SAFE_DELETE_ARRAY(m_piCapitalYieldChange);
+	SAFE_DELETE_ARRAY(m_piCoastalCityYieldChange);
+	SAFE_DELETE_ARRAY(m_piGreatWorkYieldChange);
+	SAFE_DELETE_ARRAY(m_piYieldFromKills);
+	SAFE_DELETE_ARRAY(m_piYieldFromBarbarianKills);
+
 	SAFE_DELETE_ARRAY(m_piExtraFlavorValue);
 	SAFE_DELETE_ARRAY(m_piCivilizationFlavorValue);
+
+	SAFE_DELETE_ARRAY(m_piResourceHappiness);
+	SAFE_DELETE_ARRAY(m_piYieldChangeAnySpecialist);
+	SAFE_DELETE_ARRAY(m_piYieldChangeTradeRoute);
+	SAFE_DELETE_ARRAY(m_piYieldChangeNaturalWonder);
+	SAFE_DELETE_ARRAY(m_piYieldChangeWorldWonder);
+	SAFE_DELETE_ARRAY(m_piYieldModifierNaturalWonder);
+	SAFE_DELETE_ARRAY(m_piMaxYieldModifierPerFollower);
+	SAFE_DELETE_ARRAY(m_piYieldModifierPerFollowerTimes100);
+	SAFE_DELETE_ARRAY(m_pbFaithPurchaseUnitEraEnabled);
+    SAFE_DELETE_ARRAY(m_pbBuildingClassEnabled);
+
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiImprovementAdjacentCityYieldChanges);
 	CvDatabaseUtility::SafeDelete2DArray(m_ppiBuildingClassYieldChanges);

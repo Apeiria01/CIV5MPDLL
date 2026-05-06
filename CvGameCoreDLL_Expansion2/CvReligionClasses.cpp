@@ -1056,7 +1056,8 @@ void CvGameReligions::FoundReligion(PlayerTypes ePlayer, ReligionTypes eReligion
 	{
 		CvReligionBeliefs beliefs = GC.getGame().GetGameReligions()->GetReligion(RELIGION_PANTHEON, ePlayer)->m_Beliefs;
 		for (int iI = 0; iI < beliefs.GetNumBeliefs(); iI++) {
-			kReligion.m_Beliefs.AddBelief(beliefs.GetBelief(iI), ePlayer);
+			// !!! DONOT trigger repeatedly
+			kReligion.m_Beliefs.AddBelief(beliefs.GetBelief(iI), NO_PLAYER);
 		}
 	}
 #else

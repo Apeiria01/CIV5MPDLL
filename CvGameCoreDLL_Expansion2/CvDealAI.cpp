@@ -24,9 +24,10 @@
 // For example: AI had 230 Iron exported, and in this deal, it will trade 340 Iron (Iron exported will be 570 if successful).
 // The modification is calculated as: (250 - 230) * 5 + (550 - 250) * (6 + 11) / 2 + (570 - 550) * 12 = 1530
 // In the original game, 340 Iron is worth 510, but SP_SMART_AI_DEAL changes it to 2890.
-int calculateModifiedValueFromResource(int iNumExported, int iNumThisDeal) {
-    const static int step_size = 50;
+// V53: Ally add a 50 extra step
+int calculateModifiedValueFromResource(int iNumExported, int iNumThisDeal, int iExtraStep) {
     const static int start_value = 1;
+	const int step_size = 50 + iExtraStep;
 
     const int interval_Exported = iNumExported / step_size;
 	const int iNumInclude = iNumExported + iNumThisDeal;
@@ -1316,7 +1317,8 @@ int CvDealAI::GetResourceValue(ResourceTypes eResource, int iResourceQuantity, i
 				// SP_SMART_AI_DEAL: when humans buy resources in large quantities, we set prices
 				if(bFromMe && GET_PLAYER(eOtherPlayer).isHuman())
 				{
-					iItemValue += (calculateModifiedValueFromResource(GetPlayer()->getResourceExport(eResource), iResourceQuantity) * iNumTurns * 150 / 100);
+					int iExtraStep = GetPlayer()->GetDiplomacyAI()->IsDoFAccepted(eOtherPlayer) ? 50 : 0;
+					iItemValue += (calculateModifiedValueFromResource(GetPlayer()->getResourceExport(eResource), iResourceQuantity, iExtraStep) * iNumTurns * 150 / 100);
 				}
 				else
 				{
