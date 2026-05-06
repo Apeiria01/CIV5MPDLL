@@ -610,6 +610,9 @@ int CvCitySiteEvaluator::PlotFoundValue(CvPlot* pPlot, CvPlayer* pPlayer, YieldT
 	{
 		rtnValue += iNaturalWonderCount * m_iSpainMultiplier;	
 	}
+	else if (pPlayer->GetPlayerTraits()->GetNaturalWonderYieldModifierPerEra() > 0)	{
+		rtnValue += iNaturalWonderCount * m_iSpainMultiplier;
+	}
 
 	// Custom code for Brazil
 	ImprovementTypes eBrazilImprovement = (ImprovementTypes)GC.getInfoTypeForString("IMPROVEMENT_BRAZILWOOD_CAMP", true);  

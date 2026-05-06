@@ -102,6 +102,7 @@ public:
 	int GetNaturalWonderFirstFinderGold() const;
 	int GetNaturalWonderSubsequentFinderGold() const;
 	int GetNaturalWonderYieldModifier() const;
+	int GetNaturalWonderYieldModifierPerEra() const;
 	int GetNaturalWonderHappinessModifier() const;
 	int GetNearbyImprovementCombatBonus() const;
 	int GetNearbyImprovementBonusRange() const;
@@ -394,6 +395,7 @@ protected:
 	int m_iNaturalWonderFirstFinderGold;
 	int m_iNaturalWonderSubsequentFinderGold;
 	int m_iNaturalWonderYieldModifier;
+	int m_iNaturalWonderYieldModifierPerEra;
 	int m_iNaturalWonderHappinessModifier;
 	int m_iNearbyImprovementCombatBonus;
 	int m_iNearbyImprovementBonusRange;
@@ -842,6 +844,10 @@ public:
 	int GetNaturalWonderYieldModifier() const
 	{
 		return m_iNaturalWonderYieldModifier;
+	};
+	int GetNaturalWonderYieldModifierPerEra() const
+	{
+		return m_iNaturalWonderYieldModifierPerEra;
 	};
 	int GetNaturalWonderHappinessModifier() const
 	{
@@ -1487,6 +1493,7 @@ private:
 	int m_iNaturalWonderFirstFinderGold;
 	int m_iNaturalWonderSubsequentFinderGold;
 	int m_iNaturalWonderYieldModifier;
+	int m_iNaturalWonderYieldModifierPerEra;
 	int m_iNaturalWonderHappinessModifier;
 	int m_iNearbyImprovementCombatBonus;
 	int m_iNearbyImprovementBonusRange;

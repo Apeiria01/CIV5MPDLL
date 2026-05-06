@@ -78,6 +78,7 @@ CvTraitEntry::CvTraitEntry() :
 	m_iNaturalWonderFirstFinderGold(0),
 	m_iNaturalWonderSubsequentFinderGold(0),
 	m_iNaturalWonderYieldModifier(0),
+	m_iNaturalWonderYieldModifierPerEra(0),
 	m_iNaturalWonderHappinessModifier(0),
 	m_iNearbyImprovementCombatBonus(0),
 	m_iNearbyImprovementBonusRange(0),
@@ -545,6 +546,11 @@ int CvTraitEntry::GetNaturalWonderSubsequentFinderGold() const
 int CvTraitEntry::GetNaturalWonderYieldModifier() const
 {
 	return m_iNaturalWonderYieldModifier;
+}
+/// Accessor:: modifier to bonuses for having natural wonders worked or in territory, scaled by current era
+int CvTraitEntry::GetNaturalWonderYieldModifierPerEra() const
+{
+	return m_iNaturalWonderYieldModifierPerEra;
 }
 
 /// Accessor: modifier to happiness received from finding natural wonders
@@ -1726,6 +1732,7 @@ bool CvTraitEntry::CacheResults(Database::Results& kResults, CvDatabaseUtility& 
 	m_iNaturalWonderFirstFinderGold         = kResults.GetInt("NaturalWonderFirstFinderGold");
 	m_iNaturalWonderSubsequentFinderGold    = kResults.GetInt("NaturalWonderSubsequentFinderGold");
 	m_iNaturalWonderYieldModifier           = kResults.GetInt("NaturalWonderYieldModifier");
+	m_iNaturalWonderYieldModifierPerEra      = kResults.GetInt("NaturalWonderYieldModifierPerEra");
 	m_iNaturalWonderHappinessModifier       = kResults.GetInt("NaturalWonderHappinessModifier");
 	m_iNearbyImprovementCombatBonus			= kResults.GetInt("NearbyImprovementCombatBonus");
 	m_iNearbyImprovementBonusRange			= kResults.GetInt("NearbyImprovementBonusRange");
@@ -2757,6 +2764,7 @@ void CvPlayerTraits::InitPlayerTraits()
 			m_iNaturalWonderFirstFinderGold += trait->GetNaturalWonderFirstFinderGold();
 			m_iNaturalWonderSubsequentFinderGold += trait->GetNaturalWonderSubsequentFinderGold();
 			m_iNaturalWonderYieldModifier += trait->GetNaturalWonderYieldModifier();
+			m_iNaturalWonderYieldModifierPerEra += trait->GetNaturalWonderYieldModifierPerEra();
 			m_iNaturalWonderHappinessModifier += trait->GetNaturalWonderHappinessModifier();
 			m_iNearbyImprovementCombatBonus += trait->GetNearbyImprovementCombatBonus();
 			m_iNearbyImprovementBonusRange += trait->GetNearbyImprovementBonusRange();
@@ -3326,6 +3334,7 @@ void CvPlayerTraits::Reset()
 	m_iNaturalWonderFirstFinderGold = 0;
 	m_iNaturalWonderSubsequentFinderGold = 0;
 	m_iNaturalWonderYieldModifier = 0;
+	m_iNaturalWonderYieldModifierPerEra = 0;
 	m_iNaturalWonderHappinessModifier = 0;
 	m_iNearbyImprovementCombatBonus = 0;
 	m_iNearbyImprovementBonusRange = 0;
@@ -4727,6 +4736,7 @@ void CvPlayerTraits::Read(FDataStream& kStream)
 	kStream >> m_iNaturalWonderSubsequentFinderGold;
 
 	kStream >> m_iNaturalWonderYieldModifier;
+	kStream >> m_iNaturalWonderYieldModifierPerEra;
 	kStream >> m_iNaturalWonderHappinessModifier;
 
 	kStream >> m_iNearbyImprovementCombatBonus;
@@ -5260,6 +5270,7 @@ void CvPlayerTraits::Write(FDataStream& kStream)
 	kStream << m_iNaturalWonderFirstFinderGold;
 	kStream << m_iNaturalWonderSubsequentFinderGold;
 	kStream << m_iNaturalWonderYieldModifier;
+	kStream << m_iNaturalWonderYieldModifierPerEra;
 	kStream << m_iNaturalWonderHappinessModifier;
 	kStream << m_iNearbyImprovementCombatBonus;
 	kStream << m_iNearbyImprovementBonusRange;

@@ -8971,6 +8971,7 @@ int CvPlot::calculateNatureYield(YieldTypes eYield, TeamTypes eTeam, bool bIgnor
 #endif
 
 				iMod += GET_PLAYER((PlayerTypes)m_eOwner).GetPlayerTraits()->GetNaturalWonderYieldModifier();
+				iMod += GET_PLAYER((PlayerTypes)m_eOwner).GetPlayerTraits()->GetNaturalWonderYieldModifierPerEra() * GET_PLAYER((PlayerTypes)m_eOwner).GetCurrentEra();
 				if(iMod > 0)
 				{
 					iYieldChange *= (100 + iMod);
